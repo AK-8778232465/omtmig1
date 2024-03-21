@@ -1,0 +1,17 @@
+.login_btn-primary 
+{
+    background: #E25737 0% 0% no-repeat padding-box !important;
+    opacity: 1;
+    border:1px solid #E25737 !important;
+    color: #FFF;
+}
+.login_btn-primary:hover
+{
+	color: #FFF;
+}
+.clent_btn-danger
+{
+    background-color: ##0088CC  !important;
+    border-color: #f68c1e  !important;
+     font-weight:bold;
+}

@@ -1,0 +1,976 @@
+@extends('layouts.app')
+@section('title', config('app.name') . ' | Users')
+@section('content')
+<style>
+        #style-10::-webkit-scrollbar-track
+        {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            background-color: #F5F5F5;
+            border-radius: 10px;
+        }
+
+        #style-10::-webkit-scrollbar
+        {
+            width: 10px;
+            background-color: #F5F5F5;
+        }
+
+        #style-10::-webkit-scrollbar-thumb
+        {
+            background-color: #AAA;
+            border-radius: 10px;
+            background-image: -webkit-linear-gradient(90deg,
+                                                    rgba(0, 0, 0, .2) 25%,
+                                                    transparent 25%,
+                                                    transparent 50%,
+                                                    rgba(0, 0, 0, .2) 50%,
+                                                    rgba(0, 0, 0, .2) 75%,
+                                                    transparent 75%,
+                                                    transparent)
+        }
+
+   .text-center {
+        text-align: center;
+    }
+    /* Style for checkbox */
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+    }
+    .checkbox-container input[type="checkbox"] {
+        margin-right: 10px; /* Adjust spacing between checkbox and text */
+    }
+</style>
+<div class="container-fluid mt-2">
+    {{-- @include('app.settings.index') --}}
+
+{{-- Assigned User Modal --}}
+<div class="modal fade" id="assigneeModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Assignee User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div>
+                <form id="import" class="p-2"  enctype="multipart/form-data">
+                @csrf
+                <div class="form-group row mb-0 pb-0 pl-3 pr-3 align-items-center" style="flex-direction: column;">
+                    <div class="form-group col-lg-6 mb-2 pb-0">
+
+                        <input type="file" id="file" name="file"  data-height="75" height="100px" class="form-controlfile suppdoc dropify" accept=".csv,.xlsx,.ods">
+                    </div>
+
+                    <div class="form-group col-lg-6 mb-2 mt-2 pb-0 text-center" style="margin-top: auto;">
+                        <button type="submit" class="btn btn-sm btn-primary" maxlength="100">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="13" height="14" x="0" y="0" viewBox="0 0 459.904 459.904" style="enable-background:new 0 0 512 512" xml:space="preserve" class="">
+                                <g>
+                                    <path d="M123.465 168.28h46.543v138.07c0 14.008 11.358 25.352 25.352 25.352h69.2c13.993 0 25.352-11.343 25.352-25.352V168.28h46.527c7.708 0 14.637-4.641 17.601-11.764 2.933-7.094 1.301-15.295-4.145-20.741L243.413 29.28c-7.437-7.422-19.485-7.422-26.938 0L110.011 135.775a19.023 19.023 0 0 0-4.13 20.741c2.962 7.109 9.876 11.764 17.584 11.764z" fill="#ffffff" opacity="1" data-original="#ffffff" class=""></path>
+                                    <path d="M437.036 220.029c-12.617 0-22.852 10.237-22.852 22.867v95.615c0 28.643-23.317 51.944-51.961 51.944H97.679c-28.644 0-51.945-23.301-51.945-51.944v-95.615c0-12.63-10.251-22.867-22.867-22.867C10.236 220.029 0 230.266 0 242.897v95.615c0 53.859 43.818 97.679 97.679 97.679h264.544c53.861 0 97.681-43.819 97.681-97.679v-95.615c0-12.631-10.237-22.868-22.868-22.868z" fill="#ffffff" opacity="1" data-original="#ffffff" class=""></path>
+                                </g>
+                            </svg> Upload File
+                        </button>
+                        @if($exportCount > 0)
+                        <a href="{{ route('export') }}" class="btn btn-sm text-white"; style="background-color: #FFA726;">Export Data</a>
+                        @endif
+                    </div>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- End --}}
+    <div class="col-lg-12">
+        <div class="card ">
+            <div class="card-body">
+                <div class="p-0">
+                    <table id="datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Sl No</th>
+                                <th>Emp ID</th>
+                                <th>User Name</th>
+                                <th>Role</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($usersData as $users)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $users->emp_id }}</td>
+                                <td>{{ $users->username }}</td>
+                                <td>{{ isset($users->usertypes->usertype) ? $users->usertypes->usertype : ""}}</td>
+                                <td>{{ $users->email}}</td>
+                                <td class="text-center">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox"  class="custom-control-input" id="customSwitch{{ $users->id }}"  value="{{ $users->id }}" onclick="userStatus(this.value)" @if($users->is_active==1) checked @endif>
+                                        <label class="custom-control-label" for="customSwitch{{ $users->id }}">@if($users->is_active==1) Active @else Inactive @endif</label>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    @role('Super Admin')
+                                    <a href="#"><span class="edit_user ml-2"  data-id="{{ $users->id }}">
+                                        <img class="menuicon tbl_editbtn" src="{{asset('assets/images/edit.svg')}}" >&nbsp;
+                                    </span></a>
+                                    @endrole
+                                    <span class="assignService ml-2" onclick="assignService({{$users->id}})" data-id="{{ $users->id }}">
+                                        <i class="fas fa-user-plus" style="cursor: pointer"></i>&nbsp;
+                                    </span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- AddingUsers --}}
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add user</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" id="usersForm" name="usersForm"  data-parsley-validate>
+                @csrf
+                <input  name="user_id" value="" id="ed_user_id" type="hidden"  />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <label for="example-email-input" class="col-form-label"> User Role <span class="text-danger"> * </span></label>
+                            <Select required class="form-control select_role" name="user_type_id" id="user_type_id">
+                                <option selected disabled value="">Select Role</option>
+                                @forelse($userTypes as $userType)
+                                    <option value="{{$userType->id}}"> {{$userType->usertype}}</option>
+                                @empty
+                                @endforelse
+                            </Select>
+                        </div>
+                        <div class="col-lg-4">
+                            <label for="example-firstname-input" class="col-form-label">Emp ID <span class="text-danger"> * </span></label>
+                            <input required name="emp_id" value="" id="emp_id" type="text" class="form-control" placeholder="Enter Emp ID" />
+                        </div>
+                        <div class="col-lg-4">
+                            <label for="example-firstname-input" class="col-form-label">User Name</label>
+                            <input autocomplete="off"  value="" name="username" id="username" type="text" class="form-control" placeholder="Enter User Name" />
+                        </div>
+                    </div>
+                    <div class="row mt-1">
+                        <div class="col-lg-4">
+                            <label for="example-email-input" class="col-form-label">Email <span class="text-danger"> * </span></label>
+                            <input autocomplete="off" required value="" name="email" id="email" type="email" class="form-control" placeholder="Enter Email" data-parsley-type="email" data-parsley-trigger="keyup" placeholder="Enter a valid e-mail"/>
+                        </div>
+                        <div class="col-lg-4">
+                            <label for="example-email-input" class="col-form-label"> Password </label>
+
+                            <input id="password" name="password" type="text" class="form-control" autocomplete="off" 	placeholder="Enter Password"   data-parsley-minlength="8"
+                            data-parsley-errors-container=".errorspannewpassinput1"
+                            data-parsley-required-message="Please enter your new password."
+                            data-parsley-uppercase="1"
+                            data-parsley-lowercase="1"
+                            data-parsley-number="1"
+                            data-parsley-special="1"
+                            >
+                            <span class="errorspannewpassinput1" ></span>
+                        </div>
+                        <div class="col-lg-4" id="add_reporting_to">
+                            <label for="example-contact-input" class="col-form-label">Reporting To <span class="text-danger"> * </span></label>
+                            <Select class="form-control select_role" name="reporting_to" id="reporting_to">
+
+                            </Select>
+                        </div>
+                        <div class="col-lg-2">
+                            <br>
+                            <div class="mt-3">
+                                <input type="checkbox" class="mx-1"  value="1" id="is_active" name="is_active" />
+                                <label for="" class="">Is Active ?</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" onclick="usersVal();">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+  </div>
+    <div class="modal fade" id="userEditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Edit user</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<form method="post" id="updateuserfrm" name="updateuserfrm"  data-parsley-validate>
+					@csrf
+                    <input  name="user_id" value="" id="user_id_ed" type="hidden"  />
+					<div class="modal-body">
+						<div class="row">
+							<div class="col-lg-4">
+								<label for="example-email-input" class="col-form-label"> User Role <span class="text-danger"> * </span></label>
+                                <Select required class="form-control select_role" name="user_type_id" id="user_type_id_ed">
+                                    <option selected disabled value="">Select Role</option>
+                                        @forelse($userTypes as $userType)
+                                        <option value="{{$userType->id}}"> {{$userType->usertype}}</option>
+                                        @empty
+                                    @endforelse
+                                </Select>
+							</div>
+							<div class="col-lg-4">
+								<label for="example-firstname-input" class="col-form-label">Emp ID <span class="text-danger"> * </span></label>
+								<input required name="emp_id" value="" id="emp_id_ed" type="text" class="form-control"  placeholder="Enter Emp ID" />
+							</div>
+							<div class="col-lg-4">
+								<label for="example-firstname-input" class="col-form-label">User Name</label>
+								<input autocomplete="off"  value="" name="username" id="username_ed" type="text" class="form-control" placeholder="Enter User Name" />
+							</div>
+						</div>
+						<div class="row mt-1">
+                            <div class="col-lg-4">
+                                <label for="example-email-input" class="col-form-label">Email <span class="text-danger"> * </span></label>
+                                <input autocomplete="off" required value="" name="email" id="email_ed" type="email" class="form-control" placeholder="Enter Email" data-parsley-type="email" data-parsley-trigger="keyup" placeholder="Enter a valid e-mail"/>
+                            </div>
+							<div class="col-lg-4">
+								<label for="example-email-input" class="col-form-label"> Password </label>
+
+								<input id="password_ed" name="password" type="password" class="form-control" autocomplete="off" 	placeholder="Enter Password"   data-parsley-minlength="8"
+								data-parsley-errors-container=".errorspannewpassinput1"
+								data-parsley-required-message="Please enter your new password."
+								data-parsley-uppercase="1"
+								data-parsley-lowercase="1"
+								data-parsley-number="1"
+								data-parsley-special="1"
+								>
+								<span class="errorspannewpassinput1" ></span>
+							</div>
+                            <div class="col-lg-4" id="edit_reporting_to">
+                            <label for="example-email-input" class="col-form-label"> Reporting To <span class="text-danger"> * </span></label>
+                            <Select class="form-control select_role" name="reporting_to" id="reporting_to_ed">
+                            </Select>
+                        </div>
+                            <div class="col-lg-2">
+                                <br>
+                                <div class="mt-3">
+                                    <input type="checkbox" class="mx-1"  value="1" id="is_active_ed" name="is_active" />
+                                    <label for="" class="">Is Active ?</label>
+                                </div>
+                            </div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+						<button type="submit" class="btn btn-primary">Update</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+    {{-- Assign Service Modal --}}
+    <div class="modal fade vh-75" id="assignServiceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Project Mapping</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+                <div class="modal-body">
+                    <div class="row d-flex assinged_row">
+                        <div class="col-6">
+                            <div class="scrollbar"  id="style-10" style="height: 400px; overflow-y: auto;">
+                                <table id="available_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">
+                                                <div class="checkbox-container">
+                                                    <input type="checkbox" id="assignAll" class="assignAll">
+                                                    <label for="checkbox"><strong>Available List</strong></label>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Your available services data rows go here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="scrollbar"  id="style-10" style="height: 400px; overflow-y: auto;">
+                                <table id="assigned_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">
+                                                <div class="checkbox-container">
+                                                    <input type="checkbox" id="removeAll" class="removeAll">
+                                                    <strong>Mapped List</strong>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Your assigned services data rows go here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+			</div>
+		</div>
+	</div>
+
+{{-- Js --}}
+<script type="text/javascript">
+    $(function () {
+        $('#add_reporting_to').hide();
+        $('#edit_reporting_to').hide();
+        @if(Session::has('success'))
+        new PNotify({
+        title: 'Success',
+        delay: 500,
+        text:  "{{Session::get('success')}}",
+        type: 'success'
+        });
+
+        @endif
+        @if ($errors->any())
+        var err = "";
+        @foreach ($errors->all() as $error)
+
+            new PNotify({
+            title: 'Error',
+            text: "{{$error}}",
+            delay: 800,
+            type: 'error'
+            });
+            @endforeach
+        @endif
+    });
+
+    function userStatus(value)
+    {
+        window.location.href = '/userStatus/' + value;
+    }
+    $(document).ready(function()
+        {
+            var $tabid=  'tab3';
+            $(".odtabs").not("#tab3").addClass('btn-outline-secondary');
+            $("#tab3").addClass('btn-secondary');
+
+            $('.modal').on('hidden.bs.modal', function() {
+                $(this).find('form')[0].reset();
+                $(this).find('form').parsley().reset();
+            });
+        $("form").parsley();
+            var table = $('#datatable').DataTable({
+                responsive: true,
+                dom: 'l<"toolbar">Bfrtip',
+                buttons: [
+                    'excel'
+                ],
+                initComplete: function(){
+                @role('Super Admin')
+                $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>' +
+                '<button id="assigneeUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#assigneeModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Assignee User</button><br />');
+                @endrole
+            }
+            });
+        });
+        function getUsers(){
+            window.location.href = "/users";
+        }
+        function usersVal(){
+            if ($("#usersForm").parsley()) {
+
+                if ($("#usersForm").parsley().validate()) {
+                    event.preventDefault();
+                    if ($("#usersForm").parsley().isValid()) {
+                        $.ajax({
+                        type: "POST",
+                        cache:false,
+                        async: false,
+                        url: "{{ url('/usersInsert') }}",
+                        data: new FormData($("#usersForm")[0]),
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if(response.msg=="User Already Exists!"){
+
+                                new PNotify({
+                                title: 'Error',
+                                text:  response.msg,
+                                type: 'error'
+                                });
+                                return false;
+                            } else if(response.msg=="Only Image Allowed!"){
+
+                                new PNotify({
+                                title: 'Error',
+                                text:  response.msg,
+                                type: 'error'
+                                });
+                                return false;
+                            }else if(response.msg=="User Added Successfully!"){
+
+                                new PNotify({
+                                title: 'Success',
+                                text:  response.msg,
+                                type: 'success'
+                                });
+                                setTimeout(function(){  location.reload(); }, 1000);
+                            }
+                        },
+                        error:function(response) {
+
+                            var err = "";
+                            $.each(response.responseJSON.errors,function(field_name,error){
+                                err = err+error;
+                            });
+                            new PNotify({
+                                title: 'Error',
+                                text:err,
+                                type: 'error',
+                                delay: 1000
+                            });
+                        }
+                        });
+                    }
+                }
+            }
+        }
+    function usersStatus(value) {
+        window.location.href = '/usersStatus/' + value;
+    }
+
+    $('#updateuserfrm').on('submit', function(event){
+		event.preventDefault();
+        $('#department_ed').prop('disabled', false);
+		if($('#updateuserfrm').parsley().isValid()){
+			var url = '{{ route("updateUsers") }}';
+			var data = $("#updateuserfrm").serialize();
+			$.ajax({
+				type: "post",
+				url: url,
+				data: data,
+				success: function(response) {
+					new PNotify({
+						title: 'Success',
+						text:  response.msg,
+						type: 'success'
+					});
+					setTimeout(function(){  location.reload(); }, 800);
+				},
+				error:function(response) {
+					var err = "";
+					$.each(response.responseJSON.errors,function(field_name,error){
+						err = err +'<br>' + error;
+					});
+					new PNotify({
+						title: 'Error',
+						text:err,
+						type: 'error',
+						delay: 2000
+					});
+				}
+			});
+		}
+	});
+
+    // Edit users
+    $('#datatable').on('click','.edit_user',function () {
+		var id = $(this).data('id');
+		var url = '{{ route("edit_user") }}';
+		$.ajax({
+			type: "post",
+			url: url,
+			data: { id:id , _token: '{{csrf_token()}}'},
+			success: function(response)
+			{
+				var res = response;
+
+                $("#user_id_ed").val(res['id']);
+				$("#username_ed").val(res['username']);
+				$("#emp_id_ed").val(res['emp_id']);
+				$("#email_ed").val(res['email']);
+                $("#contact_no_ed").val(res['contact_no']);
+                $("#password_ed").val(res['password']);
+				$("#user_type_id_ed").val(res['user_type_id']);
+
+
+				if(res['is_active'] == 1) {
+					$( "#is_active_ed" ).attr('checked', 'checked');
+				} else {
+					$("#is_active_ed").removeAttr('checked', 'checked');
+				}
+
+                let role = res['user_type_id'];
+                let reporting_users;
+                if(role == 1 || role == 2) {
+                    $('#edit_reporting_to').hide();
+                } else if (role == 3) {
+                    $('#edit_reporting_to').show();
+                    reporting_users = 'getVps';
+                } else if (role == 5) {
+                    $('#edit_reporting_to').show();
+                    reporting_users = 'getBussinessHeads';
+                } else if (role == 9) {
+                    $('#edit_reporting_to').show();
+                    reporting_users = 'getPM_TL';
+                }
+                $.ajax({
+                    url: "{{ route('getUserList') }}",
+                    type: "POST",
+                    data: {
+                        reviewer_type: reporting_users,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(html) {
+                        $('#reporting_to_ed').html(html);
+                        let reporting_to = res['reporting_to'];
+                        if (reporting_to && $.isNumeric(reporting_to)) {
+                            $("#reporting_to_ed").val(res['reporting_to']);
+                            $('#edit_reporting_to').show();
+                        } else {
+                            $('#edit_reporting_to').hide();
+                        }
+                    },
+                    error: function(error) {
+                        // Handle error if needed
+                    }
+                });
+
+				$("#userEditModal").modal('show');
+			}
+		});
+	});
+
+    // Project Mapping
+
+   $(document).ready(function() {
+        $('#assignAll').on('change', function() {
+            var checkboxes = $('.assign-checkbox');
+            var removeAllCheckbox = $('#removeAll');
+
+            if ($(this).is(':checked')) {
+                $('.assignall_addIcons').hide();
+                $('#assignSelected').show();
+                checkboxes.show();
+                checkboxes.prop('checked', true);
+                removeAllCheckbox.prop('readonly', true);
+            } else {
+                $('.assignall_addIcons').show();
+
+                $('#assignSelected').hide();
+                checkboxes.hide();
+                checkboxes.prop('checked', false);
+                removeAllCheckbox.removeAttr('readonly');
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        $('#removeAll').on('change', function() {
+            var removeCheckboxes = $('.remove-checkbox');
+           var assignAllCheckbox = $('#assignAll');
+            if ($(this).is(':checked')) {
+                $('.removeall_addIcons').hide();
+                $('#removeSelected').show();
+                removeCheckboxes.show();
+                removeCheckboxes.prop('checked', true);
+                assignAllCheckbox.prop('readonly', true);
+            } else {
+                $('.removeall_addIcons').show();
+                $('#removeSelected').hide();
+                removeCheckboxes.hide();
+                removeCheckboxes.prop('checked', false);
+                assignAllCheckbox.removeAttr('readonly');
+            }
+        });
+    });
+
+
+    var available_table, assigned_table;
+
+    function assignService(userID) {
+        $.ajax({
+            url: '{{ route("mappingData") }}',
+            type: 'POST',
+            data: {
+                id: userID,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function (response) {
+
+
+
+                $('#user_id_service').val(userID);
+
+                function renderIconWithText(iconSvg, text, rowID, action, checkbox) {
+                    const checkboxSpan = checkbox === 'assignall' ?
+                            `<span class="assign-checkbox" style="display:none; width: 16px; height: 16px; margin-right: 8px;">
+                                <input type="checkbox" class="checkbox" data-row-id="${rowID}" checked>
+                            </span>`
+                            : (checkbox === 'removeall' ?
+                                `<span class="remove-checkbox" style="display:none; width: 16px; height: 16px; margin-right: 8px;">
+                                    <input type="checkbox" class="checkbox" data-row-id="${rowID}" checked>
+                                </span>`
+                                : '');
+
+                        return `<a href="#" class="action-icon" data-row-id="${rowID}" data-action="${action}">
+                                    <div style="display: flex; align-items: center;">
+                                        <span class="${checkbox}_addIcons" style="width: 16px; height: 16px; margin-right: 8px;">
+                                            ${iconSvg}
+                                        </span>
+                                        ${checkboxSpan}
+                                        <div class="project_codes">
+                                            ${text}
+                                        </div>
+                                    </div>
+                                </a>`;
+                }
+
+                var addIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 512 512"><g><path fill="#4bae4f" fill-rule="evenodd" d="M256 0C114.8 0 0 114.8 0 256s114.8 256 256 256 256-114.8 256-256S397.2 0 256 0z" clip-rule="evenodd" opacity="1"></path><path fill="#ffffff" d="M116 279.6v-47.3c0-4.8 3.9-8.8 8.8-8.8h98.9v-98.8c0-4.8 3.9-8.8 8.8-8.8h47.3c4.8 0 8.7 3.9 8.7 8.8v98.9h98.8c4.8 0 8.8 3.9 8.8 8.8v47.3c0 4.8-3.9 8.7-8.8 8.7h-98.9v98.8c0 4.8-3.9 8.8-8.7 8.8h-47.3c-4.8 0-8.8-3.9-8.8-8.8v-98.9h-98.8c-4.9.1-8.8-3.9-8.8-8.7z" opacity="1"></path></g></svg>';
+                var removeIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 496.158 496.158"><g><path d="M0 248.085C0 111.063 111.069.003 248.075.003c137.013 0 248.083 111.061 248.083 248.082 0 137.002-111.07 248.07-248.083 248.07C111.069 496.155 0 385.087 0 248.085z" fill="#e04f5f"></path><path d="M383.546 206.286H112.612a7.2 7.2 0 0 0-7.199 7.2v69.187a7.2 7.2 0 0 0 7.199 7.199h270.934a7.2 7.2 0 0 0 7.199-7.199v-69.187c0-3.975-3.224-7.2-7.199-7.2z" fill="#ffffff"></path></g></svg>';
+
+                // DataTable for Available Table
+                var available_table = $('#available_table').DataTable({
+                    destroy: true,
+                    searching: false,
+                    ordering: false,
+                    paging:false,
+                    data: response.unassignedService,
+                    dom: 'l<"toolbars">Bfrtip',
+                    buttons: [],
+                    columns: [
+                        { data: 'id', render: (data, type, row) => renderIconWithText(addIconSvg, `${row.project_code} (${row.process_name})`, data, 'add','assignall') },
+                ],
+                    initComplete: function(){
+                        $("div.toolbars").html('<button id="assignSelected" type="button" class="ml-2 btn btn-primary float-right mx-2" style="display:none;">&nbsp;Assign Selected</button><br />');
+                    }
+                });
+
+                // DataTable for Assigned Table
+                var assigned_table = $('#assigned_table').DataTable({
+                    destroy: true,
+                    searching: false,
+                    ordering: false,
+                    paging:false,
+                    data: response.assignedService,
+                    dom: 'l<"tool">Bfrtip',
+                    buttons: [],
+                    columns: [
+                        { data: 'id', render: (data, type, row) => renderIconWithText(removeIconSvg, `${row.project_code} (${row.process_name})`, data, 'remove','removeall') },
+                    ],
+                    initComplete: function(){
+                        $("div.tool").html('<button id="removeSelected" type="button" class="ml-2 btn btn-danger float-right mx-2" style="display:none;">&nbsp;Remove Selected</button><br />');
+                    }
+                });
+
+                // Redraw the DataTables
+                available_table.draw();
+                assigned_table.draw();
+
+        var addIconClickHandler = function () {
+                var $closestTr = $(this).closest('tr');
+                var row = available_table.row($(this).closest('tr')).data();
+                var rowID = $(this).data('row-id');
+
+                $.ajax({
+                    url: '/addMapping',
+                    type: 'POST',
+                    data: {
+                        userID: userID,
+                        rowID: rowID,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (response) {
+                        if (response.data === 'success') {
+                            assigned_table.row.add(row).draw();
+                            available_table.row($closestTr).remove().draw();
+                        } else {
+                            console.error("Failed to remove service. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        console.error("Failed to add service. Please try again.");
+                    }
+                });
+
+        };
+
+        $('#assignSelected').on('click', function() {
+            var checkedRowIDs = [];
+            $('.assign-checkbox input[type="checkbox"]:checked').each(function() {
+                var rowID = $(this).data('row-id');
+                checkedRowIDs.push(rowID);
+            });
+            $.ajax({
+                url: '/addMapping',
+                type: 'POST',
+                data: {
+                    userID: userID,
+                    rowID: checkedRowIDs,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                     $('#assignServiceModal').modal('hide');
+                     new PNotify({
+                        title: 'Success',
+                        text:  'Selected Project Mapped Sucessfully',
+                        type: 'success',
+                        delay: 1000
+                    });
+
+                    $('#assignAll').prop('checked', false);
+
+                    $('#removeAll').prop('readonly', false);
+                },
+                error: function() {
+                    // Handle error
+                    console.error("Failed to send IDs of checked rows to the server.");
+                }
+            });
+        });
+
+        $('#removeSelected').on('click', function() {
+            var checkedRowIDs = [];
+            $('.remove-checkbox input[type="checkbox"]:checked').each(function() {
+                var rowID = $(this).data('row-id');
+                checkedRowIDs.push(rowID);
+            });
+            $.ajax({
+                url: '/removeMapping',
+                type: 'POST',
+                data: {
+                    userID: userID,
+                    rowID: checkedRowIDs,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    $('#assignServiceModal').modal('hide');
+                     new PNotify({
+                        title: 'Success',
+                        text:  'Selected Project Removed Sucessfully',
+                        type: 'success',
+                        delay: 1000
+                    });
+
+                    $('#removeAll').prop('checked', false);
+                    $('#assignAll').prop('readonly', false);
+
+                },
+                error: function() {
+                    // Handle error
+                    console.error("Failed to send IDs of checked rows to the server.");
+                }
+            });
+        });
+
+
+                var removeIconClickHandler = function () {
+                    var $closestTr = $(this).closest('tr');
+                    var row = assigned_table.row($(this).closest('tr')).data();
+                    var rowID = $(this).data('row-id');
+
+                    $.ajax({
+                        url: '/removeMapping',
+                        type: 'POST',
+                        data: {
+                            userID: userID,
+                            rowID: rowID,
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function (response) {
+                            available_table.row.add(row).draw();
+                            assigned_table.row($closestTr).remove().draw();
+                        },
+                        error: function () {
+                            console.error("Failed to remove service. Please try again.");
+                        }
+                    });
+                };
+
+                // Bind the click event with the stored references
+                $('#available_table tbody').on('click', '.action-icon[data-action="add"]', function(event) {
+                    var $actionIcon = $(this);
+                    if ($('.assign-checkbox:visible').length === 0) {
+                        addIconClickHandler.call($actionIcon);
+                    } else {
+
+                    }
+                });
+
+                $('#assigned_table tbody').on('click', '.action-icon[data-action="remove"]', function(event) {
+                    var $actionIcons = $(this);
+                    if ($('.remove-checkbox:visible').length === 0) {
+                        removeIconClickHandler.call($actionIcons);
+                    } else {
+
+                    }
+                });
+
+                // $('#assigned_table tbody').on('click', '.action-icon[data-action="remove"]', removeIconClickHandler);
+
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to fetch assignment data. Please try again.',
+                });
+            }
+        });
+
+        setTimeout(function () {
+            $('#assignServiceModal').modal('show');
+        }, 500);
+    }
+
+
+
+
+    $(document).on('click', '#addUsers', function() {
+        $('#add_reporting_to').hide();
+    });
+
+
+    $(document).on('change', '#user_type_id', function() {
+        let role = $(this).val();
+        let reporting_users;
+        if(role == 1 || role == 2) {
+            $('#add_reporting_to').hide();
+        } else if (role == 3) {
+            $('#add_reporting_to').show();
+            reporting_users = 'getVps';
+        } else if (role == 5) {
+            $('#add_reporting_to').show();
+            reporting_users = 'getBussinessHeads';
+        } else if (role == 9) {
+            $('#add_reporting_to').show();
+            reporting_users = 'getPM_TL';
+        }
+        else if (role ==  6 || role == 7 || role == 8 ) {
+            $('#add_reporting_to').show();
+            reporting_users = 'getSOPC';
+        }
+
+            $.ajax({
+                url: "{{ route('getUserList') }}",
+                type: "POST",
+                data: {
+                    reviewer_type: reporting_users,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(html) {
+                    $('#reporting_to').html(html);
+                },
+                error: function(error) {
+                    // Handle error if needed
+                }
+            });
+
+    });
+
+    $(document).on('change', '#user_type_id_ed', function() {
+        let role = $(this).val();
+        let reporting_users;
+        if(role == 1 || role == 2) {
+            $('#edit_reporting_to').hide();
+        } else if (role == 3) {
+            $('#edit_reporting_to').show();
+            reporting_users = 'getVps';
+        } else if (role == 5) {
+            $('#edit_reporting_to').show();
+            reporting_users = 'getBussinessHeads';
+        } else if (role == 9) {
+            $('#edit_reporting_to').show();
+            reporting_users = 'getPM_TL';
+        }
+
+            $.ajax({
+                url: "{{ route('getUserList') }}",
+                type: "POST",
+                data: {
+                    reviewer_type: reporting_users,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(html) {
+                    $('#reporting_to_ed').html(html);
+                },
+                error: function(error) {
+                    // Handle error if needed
+                }
+            });
+
+    });
+
+
+    $(document).ready(function() {
+        $('.content-loaded').show();
+        $('.frame').addClass('d-none');
+    });
+
+
+    $('#import').on('submit', function(event){
+            event.preventDefault();
+            $('.content-loaded').hide();
+            $('.frame').removeClass('d-none');
+            if($('#import').parsley().isValid()){
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('import') }}",
+                    data: new FormData(this),
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        $('.content-loaded').show();
+                         $('.frame').addClass('d-none');
+                        Swal.fire({
+                            text: "File Uploaded Successfully",
+                            icon: "success",
+                            confirmButtonText: "OK"
+                        }).then((result) => {
+                            if (result.value) {
+                                location.reload();
+                            }
+                        });
+
+                    },
+                    error: function (response) {
+                        $('.content-loaded').show();
+                         $('.frame').addClass('d-none');
+                        Swal.fire({
+                            text: "File Upload Failed",
+                            icon: "error",
+                            confirmButtonText: "OK"
+                        });
+                    }
+                });
+            }
+        });
+
+
+</script>
+@endsection
