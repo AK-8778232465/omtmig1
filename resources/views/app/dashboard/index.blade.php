@@ -190,7 +190,7 @@
                 </form>
                 <div class="p-0">
                     <h5 class="text-center"> Client Wise Details </h5>
-                    <table id="revenueClientTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <table id="revenueClientTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
                                 {{-- <th width="14%">Date</th> --}}
@@ -204,7 +204,7 @@
                 </div>
                 <div class="p-0 process_wise">
                     <h5 class="text-center"> Process Wise Details </h5>
-                    <table id="revenueTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <table id="revenueTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
                                 <th width="14%">Project Code</th>
@@ -500,6 +500,9 @@
             });
 
         }
+        $('#revenueTable').on('draw.dt', function () {
+            $('#revenueTable').removeClass('d-none');
+        });
 
         function orderWiseDetail(fromDate, toDate,projectId,processName){
 
@@ -547,6 +550,9 @@
             });
         }
 
+
+
+
         var clientId;
 
         function revenueClientWise(fromDate, toDate,client_id){
@@ -575,7 +581,7 @@
                             var date = moment(value['Date']).format('MM/DD/YYYY');
                             var row = {
                                 // 'Date': date,
-                                'Client': '<a href="#" id="' + value['id'] + '" class="client-link">' + value['Client Code'] + ' (' + value['Client Name'] + ')</a>',
+                                'Client': value['Client Code'] + ' (' + value['Client Name'] + ')',
                                 'No of orders completed': value['No of orders completed'],
                                 'Total': value['Total'],
                             };
@@ -598,7 +604,9 @@
             });
 
         }
-
+        $('#revenueClientTable').on('draw.dt', function () {
+            $('#revenueClientTable').removeClass('d-none');
+        });
 
 
         });

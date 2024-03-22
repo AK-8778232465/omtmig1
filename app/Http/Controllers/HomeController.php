@@ -245,52 +245,7 @@ class HomeController extends Controller
         }
     }
 
-    // public function revenue_detail(Request $request)
-    // {
 
-    //     $user = Auth::user();
-    //     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
-    //     $fromDate = $request->input('from_date');
-    //     $toDate = $request->input('to_date');
-
-    //     $query = DB::table('stl_item_description')
-    //         ->select(
-    //             'stl_item_description.project_code',
-    //             DB::raw('MAX(oms_order_creations.order_date) as order_date'),
-    //             DB::raw('COUNT(*) as num_orders_completed'),
-    //             DB::raw('SUM(stl_item_description.cost) as total_revenue')
-    //         )
-    //         ->join('oms_order_creations', 'stl_item_description.id', '=', 'oms_order_creations.process_id')
-    //         ->where('stl_item_description.billing_type_id', 1)
-    //         ->where('oms_order_creations.status_id', 5)
-    //         ->whereIn('oms_order_creations.process_id', $processIds)
-    //         ->groupBy('stl_item_description.project_code')
-    //         ->groupBy('oms_order_creations.order_date')
-    //         ->orderBy('stl_item_description.project_code');
-
-    //     if ($fromDate && $toDate) {
-    //         $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
-    //     }
-
-    //     $revenueDetails = $query->get();
-    //     $grandTotalRevenue = $revenueDetails->sum('total_revenue');
-
-
-    //     $output = $revenueDetails->map(function ($revenueDetail, $index) {
-    //         return [
-    //             'Date' => $revenueDetail->order_date,
-    //             'Project ID' => $revenueDetail->project_code,
-    //             'No of orders completed' => $revenueDetail->num_orders_completed,
-    //             'Unit cost' => $revenueDetail->total_revenue / $revenueDetail->num_orders_completed,
-    //             'Total' => $revenueDetail->total_revenue,
-    //         ];
-    //     })->toArray();
-
-    //     $output['Grand Total Revenue'] = $grandTotalRevenue;
-
-    //     return Datatables::of($output)->toJson();
-    // }
 
     public function revenue_detail(Request $request)
     {
@@ -369,8 +324,6 @@ class HomeController extends Controller
 
             return Datatables::of($output)->toJson();
     }
-
-
 
 
     public function revenue_detail_client(Request $request)
@@ -543,6 +496,7 @@ class HomeController extends Controller
             ->join('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
             ->where('stl_item_description.billing_type_id', 1)
             ->where('oms_order_creations.status_id', 5)
+            ->where('oms_order_creations.is_active', 1)
             ->whereIn('oms_order_creations.process_id', $processIds)
             ->groupBy('stl_client.client_name')
             ->groupBy('stl_client.client_no')
