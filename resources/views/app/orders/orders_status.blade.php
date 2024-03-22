@@ -57,13 +57,36 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="col-lg-4 mt-4">
+                            <input  type="checkbox" id="re_assign" name="re_assign"><label style="font-size: 0.8rem !important;" class="mx-2" for="">Re-Assign</label>
+                        </div>
                     </div>
-
             </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Update</button>
+            <div class="modal-footer">
+                        <div class="col-lg-4 mb-4" id="hide_user">
+                            <label class="font-weight-bold text-right">Assign User</label>
+                            <select id="assign_user_ed" name="assign_user" type="text" class="select2dropdown form-control">
+                                <option selected disabled value="">Select Assign User</option>
+                                @foreach ($processors as $process)
+                                    <option value="{{ $process->id }}">{{ $process->username }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-lg-4 mb-4" id="hide_qa">
+                            <label class="font-weight-bold text-right">Assign QA</label>
+                            <select id="assign_qa_ed" name="assign_qa" type="text" class="select2dropdown form-control">
+                                <option selected disabled value="">Select Assign QA</option>
+                                @foreach ($qcers as $qcer)
+                                    <option value="{{ $qcer->id }}">{{ $qcer->username }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-danger mr-2">Close</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                
                 </div>
+
             </form>
         </div>
     </div>
@@ -142,6 +165,7 @@
     </div>
 </div>
 <script type="text/javascript">
+    
     $(function () {
         @if(Session::has('success'))
         new PNotify({
@@ -269,7 +293,7 @@
             datatable.column(8).visible(false);
         }
 
-        if(status == 1) {
+        if(status == 1 ||status == 2) {
             @if(Auth::user()->hasRole('Qcer'))
             $('.status-dropdown').prop('disabled', true);
             @endif
@@ -280,7 +304,7 @@
             $('.status-dropdown').prop('disabled', false);
             @endif
         }
-
+   
         @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
         var allStatusValues = [];
         $('.status-dropdown').each(function() {
@@ -295,7 +319,7 @@
        
 
         if (status == 4 || status == 2) {
-            @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer'))
+            @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
                 $('.status-dropdown').prop('disabled', true);
             @endif
         }
@@ -439,8 +463,10 @@
         $('.frame').addClass('d-none');
     });
 
-     // Edit company
+    // Edit company
      $('#order_datatable').on('click','.edit_order',function () {
+        $('#re_assign').prop('checked', false);
+        $('#hide_user, #hide_qa').hide();
 		var id = $(this).data('id');
 		var url = '{{ route("edit_order") }}';
 		$.ajax({
@@ -458,10 +484,30 @@
                 $("#process_code_ed").val(res['process_id']);
                 $("#property_state_ed").val(res['state_id']);
 				$("#property_county_ed").val(res['county_id']);
+                $("#assign_user_ed").val(res['assignee_user_id']);
+                $("#assign_qa_ed").val(res['assignee_qa_id']);
+       
 				$("#myModalEdit").modal('show');
 			}
 		});
 	});
+
+    $('.btn.btn-danger').click(function(){
+            $('#myModalEdit').modal('hide');
+        });
+   
+    $(document).ready(function() {
+        $('#re_assign').change(function() {
+            if(this.checked) {
+                $('#hide_user, #hide_qa').show();
+                $('#assign_tab').hide();
+            } else {
+                $('#hide_user, #hide_qa').hide();
+                $('#assign_tab').hide();
+                
+            }
+        });
+    }); 
 
     $('#order_datatable').on('click','.delete_order',function () {
 		var id = $(this).data('id');
@@ -552,10 +598,6 @@
 	});
 
 
-    $(document).ready(function() {
-        $('.select2dropdown').select2();
-    });
-
     $(document).on("click", "#assignBtn", function (event) {
         event.preventDefault();
         if ($("#assignmentForm").parsley().isValid()) {
@@ -640,7 +682,25 @@
         });
     });
 
+//HIDE CHANGES
 
+    $(document).ready(function () {
+        $("#hide_user").hide();
+        $("#hide_qa").hide();
+        $("#re_assign").change(function () {
+            if (this.checked) {
+                $("#hide_user").show();
+                $("#hide_qa").show();
+                $('.select2dropdown').select2();
+            } else {
+                $("#hide_user").hide();
+                $("#hide_qa").hide();
+            }
+        });
+        $("#re_assign").show();
+    });
+
+    
 </script>
 
 @endsection
