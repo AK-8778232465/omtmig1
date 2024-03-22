@@ -247,8 +247,7 @@
             </div>
         </div>
         @endif
-
-        @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP', 'PM/TL']))
+        @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP']))
         <div class="card mt-5 tabledetails d-none" id="userwise_table">
             <h4 class="text-center mt-3">Userwise Details</h4>
             <div class="card-body">

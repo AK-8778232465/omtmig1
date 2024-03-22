@@ -244,7 +244,7 @@ class OrderController extends Controller
                     if (Auth::user()->hasRole('Qcer')){
                         $statusMapping = [];
                             $statusMapping = [
-                                1 => 'WIP',
+                                4 => 'Send for QC',
                                 2 => 'Hold',
                                 3 => 'Cancelled',
                                 5 => 'Completed',
@@ -268,7 +268,7 @@ class OrderController extends Controller
                                 4 => 'Send for QC',
                             ];
                     }
-                        
+
                     } else {
                         if (Auth::user()->hasRole('PM/TL')){
                             $statusMapping = [];
@@ -288,9 +288,9 @@ class OrderController extends Controller
                                 5 => 'Completed'
                             ];
                         }
-                       
-                    }         
-                
+
+                    }
+
 
             return '<select style="width:100%" class="status-dropdown form-control" data-row-id="' . $order->id . '">' .
             collect($statusMapping)->map(function ($value, $key) use ($order) {
