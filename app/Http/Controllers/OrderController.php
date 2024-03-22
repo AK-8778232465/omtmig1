@@ -202,42 +202,95 @@ class OrderController extends Controller
             $sql = 'CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")")  like ?';
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
-        ->addColumn('status', function ($order) use ($request) {
-            $statusMapping = [];
-            if($order->qc_enabled) {
-                if($request->status == "All" || $request->status == 5) {
-                    $statusMapping = [
-                        1 => 'WIP',
-                        2 => 'Hold',
-                        3 => 'Cancelled',
-                        4 => 'Send for QC',
-                        5 => 'Completed'
-                    ];
-                } else {
-                    if($order->status_id != 4) {
-                        $statusMapping = [
-                            1 => 'WIP',
-                            2 => 'Hold',
-                            3 => 'Cancelled',
-                            4 => 'Send for QC',
-                        ];
-                    } elseif($order->status_id == 4) {
-                        $statusMapping = [
-                            2 => 'Hold',
-                            3 => 'Cancelled',
-                            4 => 'Send for QC',
-                            5 => 'Completed'
-                        ];
+        // ->addColumn('status', function ($order) use ($request) {
+        //     $statusMapping = [];
+        //     if($order->qc_enabled) {
+        //         if($request->status == "All" || $request->status == 5) {
+        //             $statusMapping = [
+        //                 1 => 'WIP',
+        //                 2 => 'Hold',
+        //                 3 => 'Cancelled',
+        //                 4 => 'Send for QC',
+        //                 5 => 'Completed'
+        //             ];
+        //         } else {
+        //             if($order->status_id != 4) {
+        //                 $statusMapping = [
+        //                     1 => 'WIP',
+        //                     2 => 'Hold',
+        //                     3 => 'Cancelled',
+        //                     4 => 'Send for QC',
+        //                 ];
+        //             } elseif($order->status_id == 4) {
+        //                 $statusMapping = [
+        //                     2 => 'Hold',
+        //                     3 => 'Cancelled',
+        //                     4 => 'Send for QC',
+        //                     5 => 'Completed'
+        //                 ];
+        //             }
+        //         }
+        //     } else {
+        //         $statusMapping = [
+        //             1 => 'WIP',
+        //             2 => 'Hold',
+        //             3 => 'Cancelled',
+        //             5 => 'Completed'
+        //         ];
+        //     }
+
+            ->addColumn('status', function ($order) use ($request) {
+                if($order->assignee_qa_id) {
+                    if (Auth::user()->hasRole('Qcer')){
+                        $statusMapping = [];
+                            $statusMapping = [
+                                1 => 'WIP',
+                                2 => 'Hold',
+                                3 => 'Cancelled',
+                                5 => 'Completed',
+                            ];
                     }
-                }
-            } else {
-                $statusMapping = [
-                    1 => 'WIP',
-                    2 => 'Hold',
-                    3 => 'Cancelled',
-                    5 => 'Completed'
-                ];
-            }
+                    elseif (Auth::user()->hasRole('PM/TL')){
+                        $statusMapping = [];
+                            $statusMapping = [
+                                1 => 'WIP',
+                                2 => 'Hold',
+                                3 => 'Cancelled',
+                                4 => 'Send for QC',
+                                5 => 'Completed',
+                            ];
+                    }else{
+                        $statusMapping = [];
+                            $statusMapping = [
+                                1 => 'WIP',
+                                2 => 'Hold',
+                                3 => 'Cancelled',
+                                4 => 'Send for QC',
+                            ];
+                    }
+                        
+                    } else {
+                        if (Auth::user()->hasRole('PM/TL')){
+                            $statusMapping = [];
+                            $statusMapping = [
+                                1 => 'WIP',
+                                2 => 'Hold',
+                                3 => 'Cancelled',
+                                4 => 'Send for QC',
+                                5 => 'Completed',
+                            ];
+                        }else{
+                            $statusMapping = [];
+                            $statusMapping = [
+                                1 => 'WIP',
+                                2 => 'Hold',
+                                3 => 'Cancelled',
+                                5 => 'Completed'
+                            ];
+                        }
+                       
+                    }         
+                
 
             return '<select style="width:100%" class="status-dropdown form-control" data-row-id="' . $order->id . '">' .
             collect($statusMapping)->map(function ($value, $key) use ($order) {

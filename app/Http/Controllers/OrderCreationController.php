@@ -265,6 +265,9 @@ class OrderCreationController extends Controller
             'process_id' => $input['process_code'],
             'state_id' => $input['property_state'] ?? NULL,
             'county_id' => $input['property_county'] ?? NULL,
+            'assignee_user_id' => $input['assign_user'] ?? NULL,
+            'assignee_qa_id' => $input['assign_qa'] ?? NULL,
+
         ];
 
         $res = OrderCreation::where('id', $input['id'])->update($orderData);
