@@ -26,7 +26,34 @@
         }
     </style>
 
-
+<div class="modal fade vh-75" id="orderDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Order Wise Detail</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="p-0 order_wise">
+                    <h5 class="text-center project_name"></h5>
+                    <table id="orderTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                        <thead class="text-center">
+                            <tr>
+                                <th width="14%">Date</th>
+                                <th width="14%">No of orders completed</th>
+                                <th width="14%">Unit cost</th>
+                                <th width="14%">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container mt-2 mb-1 p-1">
     <section id="minimal-statistics">
         <div class="row">
@@ -216,22 +243,6 @@
                         <tbody class="text-center"></tbody>
                     </table>
                 </div>
-                <div class="p-0 order_wise mt-3 d-none">
-                    <h5 class="text-center"> Order Wise Details</h5>
-                    <img class="menuicon float-right tbl_editbtn" src="{{asset('assets/images/cross.png')}}" style="cursor: pointer;">
-                    <h6 class="text-center project_name"></h6>
-                    <table id="orderTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                        <thead class="text-center">
-                            <tr>
-                                <th width="14%">Date</th>
-                                <th width="14%">No of orders completed</th>
-                                <th width="14%">Unit cost</th>
-                                <th width="14%">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-center"></tbody>
-                    </table>
-                </div>
                 <div class="p-0 d-flex justify-content-center">
                     <table id="totalTable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
                         <thead class="text-center">
@@ -247,7 +258,8 @@
             </div>
         </div>
         @endif
-        @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP']))
+
+        @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP','PM/TL']))
         <div class="card mt-5 tabledetails d-none" id="userwise_table">
             <h4 class="text-center mt-3">Userwise Details</h4>
             <div class="card-body">
@@ -270,6 +282,8 @@
             </div>
         </div>
         @endif
+
+        @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP','PM/TL','Process','Qcer','Process/Qcer','SPOC']))
         <div class="card mt-5 tabledetails d-none" id="datewise_table">
             <h4 class="text-center mt-3">Datewise Details</h4>
             <div class="card-body">
@@ -292,14 +306,12 @@
                 </div>
             </div>
         </div>
-
-
-
-    </div>
+        @endif
 </div>
 
 {{-- Js --}}
 <script>
+
     let datatable = null;
 
     $(document).ready(function () {
@@ -446,16 +458,11 @@
         $(document).on('click', '.project-link', function(event) {
             event.preventDefault(); // Prevent default behavior of the link
             var projectId = $(this).attr('id');
-            var processName = $(this).text().split('(')[1].slice(0, -1);
+            var processName = $(this).text();
             orderWiseDetail(fromDate, toDate,projectId,processName);
         });
 
-        $(document).ready(function () {
-            $('.menuicon').on('click', function () {
-                $('.order_wise').toggleClass('d-none');
-                $('.process_wise').toggleClass('d-none');
-            });
-        });
+
 
         function processwiseDetail(fromDate, toDate,client_id){
 
@@ -504,14 +511,8 @@
         });
 
         function orderWiseDetail(fromDate, toDate,projectId,processName){
-
-
-            $('.order_wise').removeClass('d-none');
-            $('.process_wise').addClass('d-none');
-
+            $('#orderDetailModal').modal('show');
             $('.project_name').text(processName);
-
-
             datatable = $('#orderTable').DataTable({
                 destroy: true,
                 processing: true,
