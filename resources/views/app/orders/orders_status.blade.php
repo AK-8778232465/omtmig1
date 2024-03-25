@@ -105,7 +105,7 @@
             <div class="row justify-content-start m-3 mt-2 mb-4" id="statusButtons">
                 <div class="bg-info shadow-lg p-0 rounded text-white" style="text-decoration: none; font-size:0.7rem">
                     <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer')) d-none @endif">Yet to Assign User<span id="status_6_count"></span></button>
-                    <button id="status_7"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Process')) d-none @endif">Yet to Assign QA<span id="status_7_count"></span></button>
+                    <button id="status_7"  class="btn btn-info status-btn d-none">Yet to Assign QA<span id="status_7_count"></span></button>
                     <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer')) d-none @endif">WIP<span id="status_1_count"></span></button>
                     <button id="status_4" class="btn btn-info status-btn">Send For Qc<span id="status_4_count"></span></button>
                     <button id="status_2" class="btn btn-info status-btn">Hold<span id="status_2_count"></span></button>
@@ -357,7 +357,7 @@
 
     $(document).on('change', 'input.check-all', function() {
         var isChecked = $(this).prop('checked');
-        $('input[type="checkbox"]').prop('checked', isChecked);
+        $('input.check-one').prop('checked', isChecked);
 
         if (isChecked) {
             $('#assign_tab').removeClass('d-none');
@@ -376,8 +376,8 @@
         }
     });
 
-    $(document).on('change', 'input[type="checkbox"]', function() {
-        var anyCheckboxChecked = $('input[type="checkbox"]:checked').length > 0;
+    $(document).on('change', 'input.check-one', function() {
+        var anyCheckboxChecked = $('input.check-one:checked').length > 0;
         if (anyCheckboxChecked) {
             $('#assign_tab').removeClass('d-none');
             task_status = $('#statusButtons').find('.btn-primary').attr('id');
@@ -463,6 +463,7 @@
         $('.frame').addClass('d-none');
     });
 
+ 
     // Edit company
      $('#order_datatable').on('click','.edit_order',function () {
         $('#re_assign').prop('checked', false);
@@ -492,22 +493,32 @@
 		});
 	});
 
+
     $('.btn.btn-danger').click(function(){
             $('#myModalEdit').modal('hide');
         });
    
     $(document).ready(function() {
+        $("#hide_user").hide();
+        $("#hide_qa").hide();
         $('#re_assign').change(function() {
             if(this.checked) {
-                $('#hide_user, #hide_qa').show();
-                $('#assign_tab').hide();
+                $("#hide_user").show();
+                console.log($("#assign_qa_ed").val());
+                if ($("#assign_qa_ed").val() != null || $("#assign_qa_ed").val() != undefined) {
+                    $("#hide_qa").show();
+                } else {
+                    $("#hide_qa").hide();
+                }
+                $('.select2dropdown').select2();        
             } else {
                 $('#hide_user, #hide_qa').hide();
-                $('#assign_tab').hide();
-                
             }
         });
+        $("#re_assign").show();
     }); 
+
+
 
     $('#order_datatable').on('click','.delete_order',function () {
 		var id = $(this).data('id');
@@ -680,24 +691,6 @@
                 });
             }
         });
-    });
-
-//HIDE CHANGES
-
-    $(document).ready(function () {
-        $("#hide_user").hide();
-        $("#hide_qa").hide();
-        $("#re_assign").change(function () {
-            if (this.checked) {
-                $("#hide_user").show();
-                $("#hide_qa").show();
-                $('.select2dropdown').select2();
-            } else {
-                $("#hide_user").hide();
-                $("#hide_qa").hide();
-            }
-        });
-        $("#re_assign").show();
     });
 
     

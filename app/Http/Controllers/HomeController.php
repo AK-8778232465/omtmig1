@@ -130,7 +130,8 @@ class HomeController extends Controller
             }
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
             $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
-            $statusCounts[6] = $yetToAssignUser + $yetToAssignQa;
+            // $statusCounts[6] = $yetToAssignUser + $yetToAssignQa;
+            $statusCounts[6] = $yetToAssignUser;
         } else {
             $statusCounts[6] = [0];
         }
@@ -281,12 +282,9 @@ class HomeController extends Controller
                 ->groupBy('oms_order_creations.order_date')
                 ->orderBy('stl_item_description.project_code');
 
-                if ($fromDate && $toDate) {
-                    $query->where(function($query) use ($fromDate, $toDate) {
-                        $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate])
-                              ->orWhereBetween('oms_order_creations.order_date', [$toDate, $fromDate]); // Add an OR condition for reverse range
-                    });
-                }
+            if ($fromDate && $toDate) {
+                $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
+            }
 
             if (!empty($client_ids) && $client_ids[0] !== 'All') {
                 $query->whereIn('stl_client.id', $client_ids);
@@ -358,11 +356,8 @@ class HomeController extends Controller
 
 
 
-            if ($fromDate && $toDate) {
-            $query->where(function($query) use ($fromDate, $toDate) {
-                $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate])
-                        ->orWhereBetween('oms_order_creations.order_date', [$toDate, $fromDate]); // Add an OR condition for reverse range
-            });
+        if ($fromDate && $toDate) {
+            $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
         }
 
         if (!empty($client_ids) && $client_ids[0] !== 'All') {
@@ -441,10 +436,7 @@ class HomeController extends Controller
             ->orderBy('stl_item_description.project_code');
 
         if ($fromDate && $toDate) {
-            $query->where(function($query) use ($fromDate, $toDate) {
-                $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate])
-                        ->orWhereBetween('oms_order_creations.order_date', [$toDate, $fromDate]); // Add an OR condition for reverse range
-            });
+            $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
         }
 
         if (!empty($client_ids) && $client_ids[0] !== 'All') {
@@ -514,10 +506,7 @@ class HomeController extends Controller
             ->orderBy('stl_item_description.project_code');
 
         if ($fromDate && $toDate) {
-            $query->where(function($query) use ($fromDate, $toDate) {
-                $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate])
-                        ->orWhereBetween('oms_order_creations.order_date', [$toDate, $fromDate]); // Add an OR condition for reverse range
-            });
+            $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
         }
 
         if (!empty($client_ids) && $client_ids[0] !== 'All') {
