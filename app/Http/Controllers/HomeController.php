@@ -317,9 +317,9 @@ class HomeController extends Controller
             }
 
             foreach ($output as &$item) {
-                $item['Total'] = number_format($item['Total'], 5, '.', '');
+                $item['Total'] = number_format($item['Total'], 2, '.', '');
                 $item['Unit cost'] = $item['No of orders completed'] > 0 ? $item['Total'] / $item['No of orders completed'] : 0;
-                $item['Unit cost'] = number_format($item['Unit cost'], 5, '.', ''); // Formatting unit cost to 5 decimal places
+                $item['Unit cost'] = number_format($item['Unit cost'], 2, '.', ''); // Formatting unit cost to 5 decimal places
             }
 
             unset($item);
@@ -394,7 +394,7 @@ class HomeController extends Controller
         }
 
         foreach ($output as &$item) {
-            $item['Total'] = number_format($item['Total'], 5, '.', '');
+            $item['Total'] = number_format($item['Total'], 2, '.', '');
         }
 
         unset($item);
@@ -517,7 +517,7 @@ class HomeController extends Controller
 
         $revenueDetails = $query->get();
 
-        $grandTotalRevenue = number_format((float)$revenueDetails->sum('total_revenue'), 5, '.', '');
+        $grandTotalRevenue = number_format((float)$revenueDetails->sum('total_revenue'), 2, '.', '');
 
         return response()->json(['GrandTotal' => $grandTotalRevenue]);
     }
