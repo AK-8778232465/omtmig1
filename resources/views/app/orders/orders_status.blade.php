@@ -292,12 +292,20 @@
             $('.status-dropdown').prop('disabled', false);
             datatable.column(8).visible(false);
         }
-
-        if(status == 1 ||status == 2) {
-            @if(Auth::user()->hasRole('Qcer'))
+        @if(Auth::user()->hasRole('Qcer'))
+        if(status == 1 || status == 2 || status == 5) {
             $('.status-dropdown').prop('disabled', true);
-            @endif
         }
+
+        var allStatusValues = [];
+        $('.status-dropdown').each(function() {
+            var value = $(this).val();
+            if (value =='1' || value =='5' || value =='2') {
+                    $(this).prop('disabled', true);
+            }
+            allStatusValues.push(value);
+        });
+        @endif
 
         if(status == 5) {
             @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
@@ -316,7 +324,6 @@
         });
         @endif
 
-       
 
         if (status == 4 || status == 2) {
             @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
@@ -373,6 +380,7 @@
         } else {
             $('#assign_tab').addClass('d-none');
             $('#user_id').empty();
+          
         }
     });
 

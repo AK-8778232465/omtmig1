@@ -200,7 +200,9 @@
                             <select id="order_status" name="order_status" type="text" class="form-control" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Status</option>
                                 @foreach ($statusList as $status)
+                                @if($status->id == 1)
                                     <option value="{{ $status->id }}">{{ $status->status }}</option>
+                                @endif
                                 @endforeach
                             </select>
                         </div>

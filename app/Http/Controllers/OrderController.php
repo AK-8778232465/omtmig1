@@ -240,43 +240,50 @@ class OrderController extends Controller
         //     }
 
             ->addColumn('status', function ($order) use ($request) {
-                if($order->assignee_qa_id) {
-                    if (Auth::user()->hasRole('Qcer')){
-                        $statusMapping = [];
-                            $statusMapping = [
-                                4 => 'Send for QC',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                5 => 'Completed',
-                            ];
-                    }
-                    elseif (Auth::user()->hasRole('PM/TL')){
-                        $statusMapping = [];
-                            $statusMapping = [
-                                1 => 'WIP',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                4 => 'Send for QC',
-                                5 => 'Completed',
-                            ];
-                    }else{
-                        $statusMapping = [];
-                            $statusMapping = [
-                                1 => 'WIP',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                4 => 'Send for QC',
-                            ];
-                    }
-                        
-                    } else {
-                        if (Auth::user()->hasRole('PM/TL')){
+                    if($order->assignee_qa_id) {
+                        if (Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL')){
+                            $statusMapping = [];
+                                $statusMapping = [
+                                    1 => 'WIP',
+                                    4 => 'Send for QC',
+                                    2 => 'Hold',
+                                    3 => 'Cancelled',
+                                    5 => 'Completed',
+                                ];
+                        }elseif($order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 ){
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
                                 2 => 'Hold',
                                 3 => 'Cancelled',
                                 4 => 'Send for QC',
+                            ];
+                        }else{
+                            $statusMapping = [];
+                                $statusMapping = [
+                                    1 => 'WIP',
+                                    2 => 'Hold',
+                                    3 => 'Cancelled',
+                                    4 => 'Send for QC',
+                                    5 => 'Completed',
+                                ];
+                        }
+                        
+                    } else {
+                        if (!$order->assignee_qa_id && Auth::user()->hasRole('PM/TL')){
+                            $statusMapping = [];
+                            $statusMapping = [
+                                1 => 'WIP',
+                                2 => 'Hold',
+                                3 => 'Cancelled',
+                                5 => 'Completed',
+                            ];
+                        }elseif((!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 )||(!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 3 )){
+                            $statusMapping = [];
+                            $statusMapping = [
+                                1 => 'WIP',
+                                2 => 'Hold',
+                                3 => 'Cancelled',
                                 5 => 'Completed',
                             ];
                         }else{
@@ -285,7 +292,8 @@ class OrderController extends Controller
                                 1 => 'WIP',
                                 2 => 'Hold',
                                 3 => 'Cancelled',
-                                5 => 'Completed'
+                                4 => 'Send for QC',
+                                5 => 'Completed',
                             ];
                         }
                        
