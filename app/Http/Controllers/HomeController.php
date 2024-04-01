@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use DB;
+use Carbon\Carbon;
 use Hash;
 use Session;
 use App\Models\User;
@@ -402,6 +403,10 @@ class HomeController extends Controller
         return Datatables::of($output)->toJson();
     }
 
+
+
+
+
     public function order_detail(Request $request)
     {
         $user = Auth::user();
@@ -521,6 +526,437 @@ class HomeController extends Controller
 
         return response()->json(['GrandTotal' => $grandTotalRevenue]);
     }
+
+
+
+// FTE
+// public function revenue_detail_process_fte(Request $request)
+// {
+//     $user = Auth::user();
+//     $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+//     $client_ids = $request->input('fteclient_id');
+
+//     $query = DB::table('service_audit')
+//         ->select(
+//             'service_audit.id',
+//             'service_audit.description_id as id',
+//             'service_audit.process_name',
+//             'service_audit.process_name',
+//             'service_audit.cost AS unit_cost',
+//             'service_audit.no_of_resources',
+//             'service_audit.effective_date'
+//         )
+//         ->join('stl_item_description', 'service_audit.description_id', '=', 'stl_item_description.id')
+//         ->where('service_audit.is_active', 1)
+//         ->where('stl_item_description.is_active', 1)
+//         ->where('stl_item_description.billing_type_id', 2)
+//         ->whereIn('service_audit.description_id', $processIds);
+
+//     if (!empty($client_ids) && $client_ids[0] !== 'All') {
+//         $query->whereIn('stl_client.id', $client_ids);
+//     }
+
+//     $auditRecords = $query->orderBy('service_audit.effective_date')->get();
+
+//     // return response()->json($auditRecords, 200);
+
+//     $output = [];
+
+//     foreach ($auditRecords as $key => $auditRecord) {
+//         $projectCode = $auditRecord->process_name;
+//         $process_name = $auditRecord->process_name;
+//         $effective_date = Carbon::parse($auditRecord->effective_date);
+
+//         // Initialize cumulative total for each project
+//         $cumulativeTotal = 0;
+//         $monthlyRevenue = 0;
+
+//         $endDate = isset($auditRecords[$key + 1]) ? Carbon::parse($auditRecords[$key + 1]->effective_date)->subDay() : Carbon::now();
+
+//         $currentDate = $effective_date;
+//         while ($currentDate <= $endDate) {
+//             $daysInEffectiveMonth = $currentDate->daysInMonth;
+//             $daysRemaining = $endDate->diffInDays($currentDate) + 1;
+//             $perDayAmount = $auditRecord->unit_cost / $daysInEffectiveMonth;
+//             $invoiceAmount = $perDayAmount * $auditRecord->no_of_resources;
+
+//             if ($currentDate->day == 1) {
+//                 $monthlyRevenue = 0;
+//             }
+
+//             $monthlyRevenue += $invoiceAmount;
+//             $cumulativeTotal += $invoiceAmount;
+
+//             $output[$projectCode]['id'] = $auditRecord->id;
+//             $output[$projectCode][$process_name][] = [
+//                 'process_name' => $auditRecord->process_name,
+//                 'Unit Cost' => $auditRecord->unit_cost,
+//                 'No of Resources' => $auditRecord->no_of_resources,
+//                 'per_day_amount' => number_format($perDayAmount, 2),
+//                 'invoice_amount' => number_format($invoiceAmount, 2),
+//                 'Eff Date' => $effective_date->format('Y-m-d'),
+//                 'Date' => $currentDate->format('Y-m-d'),
+//                 'days' => $daysRemaining,
+//                 'unit_cost_divided_by' => $daysInEffectiveMonth,
+//                 'Monthly Revenue' => number_format($monthlyRevenue, 2),
+//                 'Revenue Generated Till Date' => number_format($cumulativeTotal, 2)
+//             ];
+//             $output[$projectCode]['total_revenue_generated_till_date'] = number_format($cumulativeTotal, 2);
+
+//             // Move to the next day
+//             $currentDate->addDay();
+//         }
+//     }
+
+//     return Datatables::of($output)->toJson();
+// }
+
+
+
+public function revenue_detail_process_fte(Request $request)
+{
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+
+    $fromDate = $request->input('ftefromDate');
+    $toDate = $request->input('ftetoDate');
+    $client_ids = $request->input('fteclient_id');
+
+    $query = DB::table('stl_item_description')
+        ->select(
+            'stl_item_description.id',
+            'stl_item_description.project_code',
+            'stl_item_description.process_name',
+            'stl_item_description.cost AS unit_cost',
+            'stl_item_description.no_of_resources',
+            'stl_client.client_no',
+            'stl_client.client_name',
+            'stl_item_description.effective_date'
+        )
+        ->join('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->where('stl_item_description.is_active', 1)
+        ->where('stl_client.is_active', 1)
+        ->where('stl_item_description.billing_type_id', 2)
+        ->whereIn('stl_item_description.id', $processIds);
+        // ->where('stl_item_description.no_of_resources', '>', 0);
+
+    if (!empty($client_ids) && $client_ids[0] !== 'All') {
+        $query->whereIn('stl_client.id', $client_ids);
+    }
+
+    $revenueDetails = $query->get();
+
+    $output = [];
+
+    foreach ($revenueDetails as $revenueDetail) {
+        $projectCode = $revenueDetail->project_code;
+        $process_name = $revenueDetail->process_name;
+        $effectiveDate = Carbon::parse($revenueDetail->effective_date);
+
+        // $startDate = empty($fromDate) ? Carbon::parse($revenueDetail->effective_date) : Carbon::parse($fromDate);
+
+        $startDate = empty($fromDate) ? $effectiveDate : Carbon::parse($fromDate);
+        if ($startDate->lt($effectiveDate)) {
+            $startDate = $effectiveDate;
+        }
+        $endDate = empty($toDate) ? Carbon::today() : Carbon::parse($toDate)->endOfDay();
+
+        $cumulativeTotal = 0;
+        $monthlyRevenue = 0; // Track monthly revenue
+        $currentDate = $startDate->copy();
+
+        while ($currentDate <= $endDate) {
+            $daysInEffectiveMonth = $currentDate->daysInMonth;
+            $daysRemaining = $endDate->diffInDays($currentDate) + 1;
+
+            $perDayAmount = $revenueDetail->unit_cost / $daysInEffectiveMonth;
+            $invoiceAmount = $perDayAmount * $revenueDetail->no_of_resources;
+
+            // Check if it's the first day of the month
+            if ($currentDate->day == 1) {
+                $monthlyRevenue = 0;
+            }
+
+            $monthlyRevenue += $invoiceAmount;
+            $cumulativeTotal += $invoiceAmount;
+
+            $output[$projectCode]['id'] = $revenueDetail->id;
+            $output[$projectCode][$projectCode."(".$process_name.")"][] = [
+                'process_name' => $revenueDetail->process_name,
+                'Unit cost' => $revenueDetail->unit_cost,
+                'No of Resources' => $revenueDetail->no_of_resources,
+                'per_day_amount' => number_format($perDayAmount, 2),
+                'invoice_amount' => number_format($invoiceAmount, 2),
+                'client_no' => $revenueDetail->client_no,
+                'Eff Date' => $revenueDetail->effective_date,
+                'Client' => $revenueDetail->client_name,
+                'Date' => $currentDate->format('Y-m-d'),
+                'days' => $daysRemaining,
+                'unit_cost_divided_by' => $daysInEffectiveMonth,
+                'Monthly Revenue' => number_format($monthlyRevenue, 2),
+            ];
+            $output[$projectCode]['total_revenue_generated_till_date'] = number_format($cumulativeTotal, 2);
+            $currentDate->addDay();
+        }
+    }
+    return Datatables::of($output)->toJson();
+    // return response()->json($output);
+}
+
+
+public function revenue_detail_processDetail_fte(Request $request)
+{
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+    $fromDate = $request->input('from_date');
+    $toDate = $request->input('to_date');
+    $process_id =  $request->input('project_id');
+
+    $query = DB::table('service_audit')
+        ->select(
+            'service_audit.id',
+            'service_audit.description_id as id',
+            'service_audit.process_name',
+            'service_audit.unit_type_id',
+            'service_audit.cost AS unit_cost',
+            'service_audit.no_of_resources',
+            'service_audit.effective_date'
+        )
+        ->join('stl_item_description', 'service_audit.description_id', '=', 'stl_item_description.id')
+        ->where('service_audit.is_active', 1)
+        ->where('stl_item_description.is_active', 1)
+        ->where('stl_item_description.billing_type_id', 2)
+        ->whereIn('service_audit.description_id', $processIds);
+
+    if (!empty($process_id)) {
+        $query->where('service_audit.description_id', $process_id);
+    }
+
+    $auditRecords = $query->get();
+
+    // return response()->json($auditRecords, 200);
+
+    $output = [];
+
+    $cumulativeTotal = 0;
+    $monthlyRevenue = 0; // Track monthly revenue
+    $grandTotal = 0;
+
+    foreach ($auditRecords as $key => $auditRecord) {
+        $effective_date = Carbon::parse($auditRecord->effective_date);
+        // Calculate end date based on next effective date or given end date
+        $nextEffectiveDate = isset($auditRecords[$key + 1]) ? Carbon::parse($auditRecords[$key + 1]->effective_date)->subDay() : Carbon::today();
+        $endDate = $nextEffectiveDate;
+        $startDate = empty($fromDate) ? $effective_date : Carbon::parse($fromDate);
+        // $startDate =  $effective_date ;
+        if ($startDate->lt($effective_date)) {
+            $startDate = $effective_date;
+        }
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            $daysInEffectiveMonth = $currentDate->daysInMonth;
+            $daysRemaining = $endDate->diffInDays($currentDate) + 1;
+
+            $perDayAmount = $auditRecord->unit_cost / $daysInEffectiveMonth;
+            $invoiceAmount = $perDayAmount * $auditRecord->no_of_resources;
+
+            if ($currentDate->day == 1) {
+                $monthlyRevenue = 0;
+            }
+
+            $monthlyRevenue += $invoiceAmount;
+            $cumulativeTotal += $invoiceAmount;
+            $grandTotal += $invoiceAmount;
+
+            if (empty($fromDate) || ($currentDate >= Carbon::parse($fromDate) && $currentDate <= Carbon::parse($toDate))) {
+                $output[] = [
+                    'process_name' => $auditRecord->process_name,
+                    'Unit Cost' => $auditRecord->unit_cost,
+                    'No of Resources' => $auditRecord->no_of_resources,
+                    'per_day_amount' => number_format($perDayAmount, 2),
+                    'invoice_amount' => number_format($invoiceAmount, 2),
+                    'Eff Date' => $effective_date->format('Y-m-d'),
+                    'Date' => $currentDate->format('Y-m-d'),
+                    'days' => $daysRemaining,
+                    'unit_cost_divided_by' => $daysInEffectiveMonth,
+                    'Monthly Revenue' => number_format($monthlyRevenue, 2), // Monthly revenue
+                    'Revenue Generated Till Date' => number_format($cumulativeTotal, 2)
+                ];
+                foreach ($output as &$row) {
+                    $row['grand_total'] = number_format($grandTotal, 2);
+                }
+            }
+            // Move to the next day
+            $currentDate->addDay();
+        }
+    }
+
+    // return response()->json($output);
+    return Datatables::of($output)->toJson();
+}
+
+public function revenue_detail_process_total_fte(Request $request)
+{
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+    $fromDate = $request->input('from_date');
+    $toDate = $request->input('to_date');
+    $process_id =  $request->input('project_id');
+
+    $query = DB::table('service_audit')
+        ->select(
+            'service_audit.id',
+            'service_audit.description_id as id',
+            'service_audit.process_name',
+            'service_audit.unit_type_id',
+            'service_audit.cost AS unit_cost',
+            'service_audit.no_of_resources',
+            'service_audit.effective_date'
+        )
+        ->join('stl_item_description', 'service_audit.description_id', '=', 'stl_item_description.id')
+        ->where('service_audit.is_active', 1)
+        ->where('stl_item_description.is_active', 1)
+        ->where('stl_item_description.billing_type_id', 2)
+        ->where('service_audit.description_id', $process_id);
+
+    $auditRecords = $query->get();
+
+    // Initialize grand total
+    $grandTotal = 0;
+
+    $output = [];
+
+    foreach ($auditRecords as $key => $auditRecord) {
+        $effective_date = Carbon::parse($auditRecord->effective_date);
+        // Calculate end date based on next effective date or given end date
+        $nextEffectiveDate = isset($auditRecords[$key + 1]) ? Carbon::parse($auditRecords[$key + 1]->effective_date)->subDay() : Carbon::today();
+        $endDate = $nextEffectiveDate;
+        $startDate = empty($fromDate) ? $effective_date : Carbon::parse($fromDate);
+        if ($startDate->lt($effective_date)) {
+            $startDate = $effective_date;
+        }
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            $daysInEffectiveMonth = $currentDate->daysInMonth;
+            $perDayAmount = $auditRecord->unit_cost / $daysInEffectiveMonth;
+            $invoiceAmount = $perDayAmount * $auditRecord->no_of_resources;
+            if (empty($fromDate) || ($currentDate >= Carbon::parse($fromDate) && $currentDate <= Carbon::parse($toDate))) {
+             $grandTotal += $invoiceAmount;
+            }
+            $currentDate->addDay();
+        }
+        // Add the current total to output array
+        $output[] = [
+            'Total' => number_format($grandTotal, 2),
+        ];
+    }
+
+    $totalSum = array_sum(array_column($output, 'Total'));
+
+    if (count($output) > 1) {
+        $output[] = [
+            'Total Sum' => number_format($totalSum, 2),
+        ];
+    }else{
+        $output[] = [
+            'Total Sum' => number_format($grandTotal, 2),
+        ];
+    }
+
+    return response()->json(['Total' => $output[count($output) - 1]['Total Sum']]);
+}
+
+
+// Not used
+// public function revenue_detail_processDetail_fte(Request $request)
+// {
+//     $user = Auth::user();
+//     $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+//     $fromDate = $request->input('from_date');
+//     $toDate = $request->input('to_date');
+//     $process_id =  $request->input('project_id');
+
+//     $query = DB::table('service_audit')
+//         ->select(
+//             'service_audit.id',
+//             'service_audit.description_id as id',
+//             'service_audit.process_name',
+//             'service_audit.cost AS unit_cost',
+//             'service_audit.no_of_resources',
+//             'service_audit.effective_date'
+//         )
+//         ->join('stl_item_description', 'service_audit.description_id', '=', 'stl_item_description.id')
+//         ->where('service_audit.is_active', 1)
+//         ->where('stl_item_description.is_active', 1)
+//         ->where('stl_item_description.billing_type_id', 2);
+//         // ->whereIn('service_audit.description_id', [35]);
+
+//     if (!empty($process_id)) {
+//         $query->where('service_audit.description_id', $process_id);
+//     }
+
+
+//     $auditRecords = $query->get();
+//     $output = [];
+
+//     foreach ($auditRecords as $key => $auditRecord) {
+
+//         $effective_date = Carbon::parse($auditRecord->effective_date);
+
+//         // Calculate end date based on next effective date or given end date
+//         $nextEffectiveDate = isset($auditRecords[$key + 1]) ? Carbon::parse($auditRecords[$key + 1]->effective_date)->subDay() : Carbon::today();
+//         $endDate = empty($toDate) ? $nextEffectiveDate : Carbon::parse($toDate)->endOfDay();
+
+//         $startDate = empty($fromDate) ? $effective_date : Carbon::parse($fromDate);
+//         if ($startDate->lt($effective_date)) {
+//             $startDate = $effective_date;
+//         }
+
+//         $cumulativeTotal = 0;
+//         $monthlyRevenue = 0; // Track monthly revenue
+//         $currentDate = $startDate->copy();
+
+//         while ($currentDate <= $endDate) {
+//             $daysInEffectiveMonth = $currentDate->daysInMonth;
+//             $daysRemaining = $endDate->diffInDays($currentDate) + 1;
+
+//             $perDayAmount = $auditRecord->unit_cost / $daysInEffectiveMonth;
+//             $invoiceAmount = $perDayAmount * $auditRecord->no_of_resources;
+
+//             if ($currentDate->day == 1) {
+//                 $monthlyRevenue = 0;
+//             }
+
+//             $monthlyRevenue += $invoiceAmount;
+//             $cumulativeTotal += $invoiceAmount;
+
+//             $output[] = [
+//                 'process_name' => $auditRecord->process_name,
+//                 'Unit Cost' => $auditRecord->unit_cost,
+//                 'No of Resources' => $auditRecord->no_of_resources,
+//                 'per_day_amount' => number_format($perDayAmount, 2),
+//                 'invoice_amount' => number_format($invoiceAmount, 2),
+//                 'Eff Date' => $effective_date->format('Y-m-d'),
+//                 'Date' => $currentDate->format('Y-m-d'),
+//                 'days' => $daysRemaining,
+//                 'unit_cost_divided_by' => $daysInEffectiveMonth,
+//                 'Monthly Revenue' => number_format($monthlyRevenue, 2), // Monthly revenue
+//                 'Revenue Generated Till Date' => number_format($cumulativeTotal, 2)
+//             ];
+
+//             // Move to the next day
+//             $currentDate->addDay();
+//         }
+//     }
+
+//     // return response()->json($output);
+//     return Datatables::of($output)->toJson();
+// }
 
 }
 
