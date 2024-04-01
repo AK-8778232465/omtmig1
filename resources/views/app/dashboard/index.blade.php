@@ -25,7 +25,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2) !important;
         }
     </style>
-
+{{-- Order Wise --}}
 <div class="modal fade vh-75" id="orderDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
@@ -54,6 +54,48 @@
         </div>
     </div>
 </div>
+{{-- FTE Projects --}}
+<div class="modal fade vh-75" id="fteDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Process Wise Detail</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="p-0 order_wise">
+                    <h5 class="text-center project_name"></h5>
+                    <div class="p-0 d-flex justify-content-center">
+                        <table id="totalTable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
+                            <thead class="text-center">
+                                <tr>
+                                    <th width="14%">Total Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                <td id="ProcessCountFTE"></td>
+                            </tbody>
+                        </table>
+                    </div>
+                    <table id="fterevenueProject" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                        <thead class="text-center">
+                            <tr>
+                                <th width="14%">Date</th>
+                                <th width="14%">No of Resources</th>
+                                <th width="14%">Unit cost</th>
+                                <th width="14%">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container mt-2 mb-1 p-1">
     <section id="minimal-statistics">
         <div class="row">
@@ -257,6 +299,81 @@
                 </div>
             </div>
         </div>
+
+        <div class="card mt-5 ftetabledetails">
+            <h4 class="text-center mt-3">Revenue Details - FTE</h4>
+            <div class="card-body">
+                <form id="ftedateRangeForm" class="mt-4">
+                    <div class="row justify-content-center">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="fromDate">From Date</label>
+                                <input type="date" class="form-control" id="ftefromDate" name="from_date">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="toDate">To Date</label>
+                                <input type="date" class="form-control" id="ftetoDate" name="to_date">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="client"> Client </label>
+                                <select class="form-control select2-basic-multiple" name="fteclient_id[]" id="fteclient_id" multiple="multiple">
+                                    <option selected value="All">All</option>
+                                    @forelse($clients as $client)
+                                        <option value="{{ $client->id }}">{{ $client->client_no }} ({{ $client->client_name }})</option>
+                                    @empty
+                                    @endforelse
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3 align-self-center">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                        </div>
+                    </div>
+                </form>
+                <div class="p-0 w-100 mx-auto" id="fteClientTable">
+                    <h5 class="text-center"> Project Wise Details </h5>
+                    <table id="fterevenueProjectTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                        <thead class="text-center">
+                            <tr>
+                                <th width="14%">Projects</th>
+                                {{-- <th width="14%">Total Cost</th> --}}
+                            </tr>
+                        </thead>
+                        <tbody class="text-center"></tbody>
+                    </table>
+                </div>
+                <div class="p-0 process_wise d-none">
+                    <h5 class="text-center"> Process Wise Details </h5>
+                    <table id="revenueFTETable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                        <thead class="text-center">
+                            <tr>
+                                <th width="14%">Project Code</th>
+                                <th width="14%">No of orders completed</th>
+                                <th width="14%">Unit cost</th>
+                                <th width="14%">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center"></tbody>
+                    </table>
+                </div>
+                <div class="p-0 d-flex d-none justify-content-center">
+                    <table id="totalFTETable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
+                        <thead class="text-center">
+                            <tr>
+                                <th width="14%">Grand Total Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            <td id="grantCountFTE"></td>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         @endif
 
         @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP','PM/TL']))
@@ -411,7 +528,7 @@
     @endif
 
 
- function getGrandTotal (fromDate, toDate, client_id) {
+ function getGrandTotal(fromDate, toDate, client_id) {
         $.ajax({
             url: "{{ route('getTotalData') }}",
             type: "POST",
@@ -629,6 +746,169 @@
             isClientChanging = false;
         });
     });
+
+    $(document).ready(function() {
+            $('.select2-basic-multiple').select2();
+        });
+
+        $(document).ready(function() {
+        var isClientChanging = false;
+        $(document).on('change', '#client_id_fte', function() {
+            if (isClientChanging) return;
+            isClientChanging = true;
+            var selectedClientOption = $(this).val();
+            $("#client_id_fte").val(selectedClientOption && selectedClientOption.includes('All') ? ['All'] : selectedClientOption);
+            if ($("#client_id_fte").val() !== selectedClientOption) {
+                $("#client_id_fte").trigger('change');
+            }
+            isClientChanging = false;
+        });
+    });
+
+
+    // FTE
+
+var fromDate  = "";
+var toDate = "";
+var client_id  = "";
+
+    $(document).ready(function() {
+
+        $('#ftedateRangeForm').on('submit', function (e) {
+            e.preventDefault();
+            fromDate = $('#ftefromDate').val();
+            toDate = $('#ftetoDate').val();
+            client_id = $('#fteclient_id').val();
+            datatable.ajax.reload();
+            // fterevenueProjectWise(fromDate, toDate,client_id);
+        });
+
+        $(document).on('click', '.project-link-fte', function(event) {
+            event.preventDefault();
+            var project_id = $(this).data('id');
+            var processName = $(this).text();
+            fterevenueProject(fromDate, toDate,processName,project_id);
+            ftetotalProccessWise(fromDate, toDate,project_id);
+        });
+
+
+        function ftetotalProccessWise(fromDate, toDate, project_id) {
+            $.ajax({
+                url: "{{ route('revenue_detail_process_total_fte') }}",
+                type: "POST",
+                data: {
+                    from_date: fromDate,
+                    to_date: toDate,
+                    project_id: project_id,
+                    _token: '{{csrf_token()}}',
+                },
+                dataType: 'json',
+                success: function (response) {
+
+                    let ProcessCountFTE = response.Total;
+                    $('#ProcessCountFTE').text(ProcessCountFTE);
+                }
+            });
+        }
+
+
+        fterevenueProjectWise(fromDate, toDate,client_id);
+
+        function fterevenueProjectWise(fromDate, toDate,client_id){
+
+            var toDate = toDate;
+            var fromDate = fromDate;
+            var client_id = client_id;
+
+            datatable = $('#fterevenueProjectTable').DataTable({
+                destroy: true,
+                processing: true,
+                serverSide: true,
+                searching: true,
+                ajax: {
+                    url: "{{ route('revenue_detail_process_fte') }}",
+                    type: 'POST',
+                    data:  function (d) {
+                        d.ftetoDate = toDate;
+                        d.ftefromDate = fromDate;
+                        d.fteclient_id = client_id;
+                        d._token = '{{csrf_token()}}';
+                    },
+                    dataSrc: function (data) {
+                        var rows = [];
+                        $.each(data.data, function (index, value) {
+                            var project = Object.keys(value)[1];
+                            var project_id = value['id'];
+                            var totalRevenue = value['total_revenue_generated_till_date'];
+                            var row = {
+                                'Project': '<a href="#" class="project-link-fte" data-id="' + project_id + '">' + project + '</a>',
+                                // 'Total': totalRevenue,
+                            };
+                            rows.push(row);
+
+                        });
+                        return rows;
+                    }
+                },
+                columns: [
+                    { data: 'Project', name: 'Project' },
+                    // { data: 'Total', name: 'Total Cost' },
+                ],
+            });
+        }
+            $('#fterevenueProjectTable').on('draw.dt', function () {
+                $('#fteClientTable').removeClass('d-none');
+
+            });
+
+
+          function fterevenueProject(fromDate, toDate,processName,project_id){
+                            $('#fteDetailModal').modal('show');
+                            $('.project_name').text(processName);
+
+                            datatable = $('#fterevenueProject').DataTable({
+                            destroy: true,
+                            processing: true,
+                            serverSide: true,
+                            ajax: {
+                                url: "{{ route('revenue_detail_processDetail_fte') }}",
+                                type: 'POST',
+                                data:  function (d) {
+                                    d._token = '{{ csrf_token() }}';
+                                    d.from_date = fromDate;
+                                    d.to_date = toDate;
+                                    d.project_id = project_id;
+                                },
+                                dataSrc: function (data) {
+                                    var rows = [];
+                                    $.each(data.data, function (index, value) {
+
+                                        var date = moment(value['Date']).format('MM/DD/YYYY');
+                                        var row = {
+                                            'Date':  date,
+                                            'No of Resources': value['No of Resources'],
+                                            'Unit cost': value['Unit Cost'],
+                                            'Total': value['Monthly Revenue']
+                                        };
+                                        rows.push(row);
+                                    });
+                                    return rows;
+                                }
+                            },
+                            columns: [
+                                { data: 'Date', name: 'Date' },
+                                { data: 'No of Resources', name: 'No of Resources' },
+                                { data: 'Unit cost', name: 'Unit cost' },
+                                { data: 'Total', name: 'Total' }
+                            ],
+                        });
+
+                    }
+        });
+
+
+
+
 
 
 </script>
