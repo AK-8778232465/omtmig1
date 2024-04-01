@@ -33,6 +33,12 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('revenue_detail_client', 'revenue_detail_client')->name('revenue_detail_client');
     Route::post('order_detail', 'order_detail')->name('order_detail');
     Route::post('getTotalData', 'getTotalData')->name('getTotalData');
+
+
+    Route::post('revenue_detail_process_fte', 'revenue_detail_process_fte')->name('revenue_detail_process_fte');
+    Route::post('revenue_detail_processDetail_fte', 'revenue_detail_processDetail_fte')->name('revenue_detail_processDetail_fte');
+    Route::post('revenue_detail_process_total_fte', 'revenue_detail_process_total_fte')->name('revenue_detail_process_total_fte');
+
 });
 
 Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPOC'])->controller(SettingController::class)->group(function () {
