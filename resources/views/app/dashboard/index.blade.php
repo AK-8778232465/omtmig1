@@ -1062,31 +1062,6 @@ var client_id  = "";
     
     document.getElementById('fromDate_dcf').value = formattedDate;
 
-       // future date script 
-function isFutureDate(date) {
-    var currentDate = new Date();
-    return date > currentDate;
-}
-
-// Event listener for toDate_dcf
-document.getElementById('toDate_dcf').addEventListener('change', function() {
-    var selectedDate = new Date(this.value);
-    
-    if (isFutureDate(selectedDate)) {
-        alert("You cannot select a future date.");
-        this.valueAsDate = new Date();
-    }
-});
-
-// Event listener for fromDate_dcf
-document.getElementById('fromDate_dcf').addEventListener('change', function() {
-    var selectedDate = new Date(this.value);
-        if (isFutureDate(selectedDate)) {
-        alert("You cannot select a future date.");
-        this.valueAsDate = new Date();
-    }
-});
-
 //date script-end
 
 
