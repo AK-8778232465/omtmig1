@@ -67,7 +67,7 @@
             <div class="modal-body">
                 <div class="p-0 order_wise">
                     <h5 class="text-center project_name"></h5>
-                    <div class="p-0 d-flex justify-content-center">
+                    <div class="p-0 d-flex d-none justify-content-center">
                         <table id="totalTable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
                             <thead class="text-center">
                                 <tr>
@@ -388,13 +388,20 @@
                 <div class="p-0 w-100 mx-auto" id="fteClientTable">
                     <h5 class="text-center"> Project Wise Details </h5>
                     <table id="fterevenueProjectTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                        <thead class="text-center">
-                            <tr>
-                                <th width="14%">Projects</th>
-                                {{-- <th width="14%">Total Cost</th> --}}
-                            </tr>
-                        </thead>
-                        <tbody class="text-center"></tbody>
+                    <thead class="text-center">
+                    <tr>
+                    <th width="14%">Client</th>
+                    <th width="20%">Project Code</th> <!-- Adjusted width for the merged column -->
+                    <th width="14%">Pricing</th>
+                    <th width="14%">FTE Count</th>
+                    <th width="14%">Expected Revenue</th>
+                    <th width="14%">Start Date</th>
+                    <th width="14%">End Date</th>
+                    <th width="14%">Days</th>
+                    <th width="10%">Revenue as Selected Date</th>
+                    </tr>
+                    </thead>
+                    <tbody class="text-center"></tbody>
                     </table>
                 </div>
                 <div class="p-0 process_wise d-none">
@@ -959,51 +966,69 @@ var client_id  = "";
 
         fterevenueProjectWise(fromDate, toDate,client_id);
 
-        function fterevenueProjectWise(fromDate, toDate,client_id){
 
+        function fterevenueProjectWise(fromDate, toDate, client_id) {
             var toDate = toDate;
             var fromDate = fromDate;
             var client_id = client_id;
-
             datatable = $('#fterevenueProjectTable').DataTable({
                 destroy: true,
                 processing: true,
-                serverSide: true,
+                serverSide: false,
                 searching: true,
                 ajax: {
                     url: "{{ route('revenue_detail_process_fte') }}",
                     type: 'POST',
-                    data:  function (d) {
-                        d.ftetoDate = toDate;
-                        d.ftefromDate = fromDate;
-                        d.fteclient_id = client_id;
+                    data: function (d) {
+                        d.to_date = toDate;
+                        d.from_date = fromDate;
+                        d.client_id = client_id;
                         d._token = '{{csrf_token()}}';
                     },
-                    dataSrc: function (data) {
-                        var rows = [];
-                        $.each(data.data, function (index, value) {
-                            var project = Object.keys(value)[1];
-                            var project_id = value['id'];
-                            var totalRevenue = value['total_revenue_generated_till_date'];
-                            var row = {
-                                'Project': '<a href="#" class="project-link-fte" data-id="' + project_id + '">' + project + '</a>',
-                                // 'Total': totalRevenue,
-                            };
-                            rows.push(row);
-
-                        });
-                        return rows;
-                    }
+                    dataSrc: 'data',
                 },
                 columns: [
-                    { data: 'Project', name: 'Project' },
-                    // { data: 'Total', name: 'Total Cost' },
+                    { data: 'client_name', name: 'client_name' },
+                    // { // Merge 'process_name' and 'project_code' into one column
+                    //     data: function (row) {
+                    //         return row.project_code + '  (' + row.process_name + ')';
+                    //     },
+                    //     name: 'project_code',
+                    // },
+
+                    {
+                // Merge 'process_name' and 'project_code' into one column with a link
+                    data: function (row) {
+
+                        return '<a href="#" class="project-link-fte" data-id="' + row.id + '">' + row.project_code + ' (' + row.process_name + ')</a>';
+                    },
+
+                    name: 'project_code',
+                     },
+                    { data: 'unit_cost', name: 'unit_cost' },
+                    { data: 'no_of_resources', name: 'no_of_resources' },
+                    { data: 'expected_revenue', name: 'expected_revenue' },
+                    { data: 'start_date', name: 'start_date' },
+                    { data: 'end_date', name: 'end_date' },
+                    { data: 'days', name: 'days' },
+                    { data: 'revenue_selected', name: 'revenue_selected' },
                 ],
-            });
-        }
+         });
+    }
+
+  $(document).on('click', '.project-link-fte', function(event) {
+            event.preventDefault();
+            var project_id = $(this).data('id');
+            var processName = $(this).text();
+            console.log(project_id);
+            fterevenueProject(fromDate, toDate,processName,project_id);
+            ftetotalProccessWise(fromDate, toDate,project_id);
+        });
+
+
+
             $('#fterevenueProjectTable').on('draw.dt', function () {
                 $('#fteClientTable').removeClass('d-none');
-
             });
 
 
@@ -1052,7 +1077,8 @@ var client_id  = "";
         });
 
 //date script-start
-     document.getElementById('toDate_dcf').valueAsDate = new Date();
+
+    document.getElementById('toDate_dcf').valueAsDate = new Date();
 
     var currentDate = new Date();
         
@@ -1061,6 +1087,31 @@ var client_id  = "";
     var formattedDate = firstDayOfMonth.toISOString().split('T')[0];
     
     document.getElementById('fromDate_dcf').value = formattedDate;
+
+    // future date script 
+function isFutureDate(date) {
+    var currentDate = new Date();
+    return date > currentDate;
+}
+
+// Event listener for toDate_dcf
+document.getElementById('toDate_dcf').addEventListener('change', function() {
+    var selectedDate = new Date(this.value);
+    
+    if (isFutureDate(selectedDate)) {
+        alert("You cannot select a future date.");
+        this.valueAsDate = new Date();
+    }
+});
+
+// Event listener for fromDate_dcf
+document.getElementById('fromDate_dcf').addEventListener('change', function() {
+    var selectedDate = new Date(this.value);
+        if (isFutureDate(selectedDate)) {
+        alert("You cannot select a future date.");
+        this.valueAsDate = new Date();
+    }
+});
 
 //date script-end
 
