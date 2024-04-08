@@ -26,5 +26,10 @@ class Client extends Model
     {
         return $this->belongsTo(County::class, 'county_id', 'id');
     }
+
+    public function processes()
+    {
+        return $this->hasMany(Process::class, 'client_id');
+    }
 }
 

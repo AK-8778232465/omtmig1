@@ -51,4 +51,9 @@ class OrderCreation extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+    public function client()
+    {
+        return $this->hasOneThrough(Client::class, Process::class, 'id', 'id', 'process_id', 'client_id');
+    }
+ 
 }
