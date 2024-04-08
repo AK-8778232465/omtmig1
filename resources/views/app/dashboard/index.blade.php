@@ -98,120 +98,172 @@
 
 <div class="container mt-2 mb-1 p-1">
     <section id="minimal-statistics">
-        <div class="row">
-            <div class="col-lg-4 offset-lg-8  mb-4 p-1">
-                <label for="example-email-input" class="col-form-label"></label>
-                <Select style="width:95%" class="form-control select_role float-end" name="" id="project_id">
-                    <option selected value="All">All Projects</option>
-                    @forelse($processList as $process)
-                    <option value="{{$process->id}}"> {!! $process->project_code.' ('.$process->process_name.')' !!}</option>
-                    @empty
-                    @endforelse
-                </Select>
-            </div>
-        </div>
-        <div class="col-12">
-            <div class="row my-2">
-                 @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
-                    <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/6'">
+                <div class="row justify-content-center mb-0 mt-2 ml-1">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="fromDate_dcf">From Date</label>
+                            <input type="date" class="form-control" id="fromDate_dcf" name="fromDate_dcf">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="toDate_dcf">To Date</label>
+                            <input type="date" class="form-control" id="toDate_dcf" name="toDate_dcf">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="client"> Client </label>
+                            <select class="form-control select2-basic-multiple" name="dcf_client_id[]" id="client_id_dcf" multiple="multiple">
+                                <option selected value="All">All</option>
+                                @forelse($clients as $client)
+                                    <option value="{{ $client->id }}">{{ $client->client_no }} ({{ $client->client_name }})</option>
+                                @empty
+                                @endforelse
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="project">Project</label>
+                        <Select class="form-control select2-basic-multiple" name="dcf_project_id[]" id="project_id_dcf" multiple="multiple">
+                            <option selected value="All">All Projects</option>
+                        </Select>
+                    </div>
+                    <div class="col-1"><label for="project">Billing Type</label>
+                        <Select class="form-control select_role float-end" name="" id="billing_id_dcf">
+                            <option selected value="All">All</option>
+                            <option value="FTE">FTE</option>
+                            <option value="TXN">TXN</option>
+                        </Select>
+                    </div>
+                    <div class="col-1 col-md-1 mt-4">
+                        <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+                <!-- <div class="row ml-1 mt-0 mb-4">
+                    
+                </div> -->
+            <div class="col-12">
+                <div class="row my-2">
+                    @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
+                        <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/6'">
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h3 class="icon-dual-warning mb-0" id="yet_to_assign_cnt">0</h3>
+                                                    <!-- <h3 class="icon-dual-warning mb-0" id="yet_cost">$0.00</h3> -->
+                                                </div>
+                                                <div class="justify-content-between align-items-center mt-2">
+                                                    <span>Yet to Assign</span>
+                                                    <i class="icon-dual-warning font-large-2 float-right" data-feather="book-open"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    @if(!Auth::user()->hasRole('Qcer'))
+                    <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/1'">
                         <div class="card">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
-                                        <div class="media-body text-left">
-                                            <h3 class="icon-dual-warning" id="yet_to_assign_cnt">0</h3>
-                                            <span>Yet to Assign</span>
+                                        <div class="media-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h3 class="icon-dual-pink mb-0" id="wip_cnt">0</h3>
+                                                <!-- <h3 class="icon-dual-pink mb-0" id="wip_cost">$0.00</h3> -->
+                                            </div>
+                                            <div class="justify-content-between align-items-center mt-2">
+                                                <span>WIP</span>
+                                                <i class="icon-dual-pink font-large-2 float-right" data-feather="trending-up"></i>
+                                            </div>
                                         </div>
-                                        <div class="align-self-center">
-                                            <i class="icon-dual-warning font-large-2 float-left" data-feather="book-open"></i>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                @endif
-                @if(!Auth::user()->hasRole('Qcer'))
-                <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/1'">
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-body">
-                                <div class="media d-flex">
-                                    <div class="media-body text-left">
-                                        <h3 class="icon-dual-pink" id="wip_cnt">0</h3>
-                                        <span>WIP</span>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="icon-dual-pink font-large-2 float-right" data-feather="trending-up"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
-                <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/4'">
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-body">
-                                <div class="media d-flex">
-                                    <div class="media-body text-left">
-                                        <h3 class="icon-dual-danger" id="Qu_cnt">0</h3>
-                                        <span>Send For Qc</span>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="icon-dual-danger font-large-2 float-right" data-feather="chevrons-right"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/2'">
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-body">
-                                <div class="media d-flex">
-                                    <div class="media-body text-left">
-                                        <h3 class="icon-dual-purple" id="hold_cnt">0</h3>
-                                        <span>Hold</span>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="icon-dual-purple font-large-2 float-right" data-feather="pause"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                    <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/3'">
+                    @endif
+                    <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/4'">
                         <div class="card">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
-                                        <div class="media-body text-left">
-                                            <h3 class="icon-dual-danger" id="cancelled_cnt">0</h3>
-                                            <span>Cancelled</span>
-                                        </div>
-                                        <div class="align-self-center">
-                                            <i class="icon-dual-danger font-large-2 float-right" data-feather="alert-circle"></i>
+                                        <div class="media-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h3 class="icon-dual-danger mb-0" id="Qu_cnt">0</h3>
+                                                <!-- <h3 class="icon-dual-danger mb-0" id="qu_cost">$0.00</h3> -->
+                                            </div>
+                                            <div class="justify-content-between align-items-center mt-2">
+                                                <span>Send For Qc</span>
+                                                <i class="icon-dual-danger font-large-2 float-right" data-feather="chevrons-right"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/5'">
+                    <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/2'">
                         <div class="card">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
-                                        <div class="media-body text-left">
-                                            <h3 class="icon-dual-success" id="completed_cnt">0</h3>
-                                            <span>Completed</span>
+                                        <div class="media-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h3 class="icon-dual-purple mb-0" id="hold_cnt">0</h3>
+                                                <!-- <h3 class="icon-dual-purple mb-0" id="hold_cost">$0.00</h3> -->
+                                            </div>
+                                            <div class="justify-content-between align-items-center mt-2">
+                                                <span>Hold</span>
+                                                <i class="icon-dual-purple font-large-2 float-right" data-feather="pause"></i>
+                                            </div>
                                         </div>
-                                        <div class="align-self-center">
-                                            <i class="icon-dual-success font-large-2 float-right" data-feather="check"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/3'">
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h3 class="icon-dual-danger mb-0" id="cancelled_cnt">0</h3>
+                                                    <!-- <h3 class="icon-dual-danger mb-0" id="cancelled_cost">$0.00</h3> -->
+                                                </div>
+                                                <div class="justify-content-between align-items-center mt-2">
+                                                    <span>Cancelled</span>
+                                                    <i class="icon-dual-danger font-large-2 float-right" data-feather="alert-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-sm-6 col-12" onclick="window.location.href = '/orders_status/5'">
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h3 class="icon-dual-success mb-0" id="completed_cnt">0</h3>
+                                                    <!-- <h3 class="icon-dual-success mb-0" id="completed_cost">$0.00</h3> -->
+                                                </div>
+                                                <div class="justify-content-between align-items-center mt-2">
+                                                    <span>Completed</span>
+                                                    <i class="icon-dual-success font-large-2 float-right" data-feather="check"></i>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -219,14 +271,13 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
         @if(Auth::user()->hasRole('Business Head'))
         <div class="card mt-5 tabledetails">
             <h4 class="text-center mt-3">Revenue Details - Transaction Billing</h4>
             <div class="card-body">
-                <form id="dateRangeForm" class="mt-4">
+                <!-- <form id="dateRangeForm" class="mt-4">
                     <div class="row justify-content-center">
                         <div class="col-md-3">
                             <div class="form-group">
@@ -256,7 +307,7 @@
                             <button type="submit" class="btn btn-primary">Filter</button>
                         </div>
                     </div>
-                </form>
+                </form> -->
                 <div class="p-0">
                     <h5 class="text-center"> Client Wise Details </h5>
                     <table id="revenueClientTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -303,7 +354,7 @@
         <div class="card mt-5 ftetabledetails">
             <h4 class="text-center mt-3">Revenue Details - FTE</h4>
             <div class="card-body">
-                <form id="ftedateRangeForm" class="mt-4">
+                <!-- <form id="ftedateRangeForm" class="mt-4">
                     <div class="row justify-content-center">
                         <div class="col-md-3">
                             <div class="form-group">
@@ -333,7 +384,7 @@
                             <button type="submit" class="btn btn-primary">Filter</button>
                         </div>
                     </div>
-                </form>
+                </form> -->
                 <div class="p-0 w-100 mx-auto" id="fteClientTable">
                     <h5 class="text-center"> Project Wise Details </h5>
                     <table id="fterevenueProjectTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -429,39 +480,134 @@
 {{-- Js --}}
 <script>
 
+$(document).ready(function() {
+        $('#billing_id_dcf').on('change', function() {
+            var value = $(this).val();
+            if (value === 'All') {
+                $('.ftetabledetails, .tabledetails').show();
+            } else if (value === 'FTE') {
+                $('.ftetabledetails').show();
+                $('.tabledetails').hide();
+            } else if (value === 'TXN') {
+                $('.ftetabledetails').hide();
+                $('.tabledetails').show();
+            }
+        });
+    });
+
+  
+
+    // $(document).ready(function () {
+    //     fetchOrderData('All');
+    //     $("#project_id").select2();
+    //     $("#project_id_dcf").select2();
+    //     $("#client_id_dcf").select2();
+    // });
+
+
+    // function fetchOrderData(projectId) {
+    //     $.ajax({
+    //         url: "{{ route('dashboard_count') }}",
+    //         type: "POST",
+    //         data: {
+    //             project_id: projectId,
+    //             _token: '{{csrf_token()}}'
+    //         },
+    //         dataType: 'json',
+    //         success: function (response) {
+    //             let statusCounts = response.StatusCounts;
+    //             $('#yet_to_assign_cnt').text(statusCounts[6] || 0);
+    //             $('#wip_cnt').text(statusCounts[1] || 0);
+    //             $('#hold_cnt').text(statusCounts[2] || 0);
+    //             $('#Qu_cnt').text(statusCounts[4] || 0);
+    //             $('#cancelled_cnt').text(statusCounts[3] || 0); 
+    //             $('#completed_cnt').text(statusCounts[5] || 0);
+    //         }
+    //     });
+    // }
+
+     
+
+
     let datatable = null;
 
     $(document).ready(function () {
         fetchOrderData('All');
+        fetchProData('All');
         $("#project_id").select2();
-    });
-
-    function fetchOrderData(projectId) {
-        $.ajax({
-            url: "{{ route('dashboard_count') }}",
-            type: "POST",
-            data: {
-                project_id: projectId,
-                _token: '{{csrf_token()}}'
-            },
-            dataType: 'json',
-            success: function (response) {
-                let statusCounts = response.StatusCounts;
-                $('#yet_to_assign_cnt').text(statusCounts[6] || 0);
-                $('#wip_cnt').text(statusCounts[1] || 0);
-                $('#hold_cnt').text(statusCounts[2] || 0);
-                $('#Qu_cnt').text(statusCounts[4] || 0);
-                $('#cancelled_cnt').text(statusCounts[3] || 0);
-                $('#completed_cnt').text(statusCounts[5] || 0);
-            }
+        $("#project_id_dcf").select2();
+        $("#client_id_dcf").select2();
+        $("#billing_id_dcf").select2();
+        
+        $("#filterButton").on('click', function() {
+            let projectId = $("#project_id_dcf").val();
+            let clientId = $("#client_id_dcf").val();
+            let fromDate = $("#fromDate_dcf").val();
+            let toDate = $("#toDate_dcf").val();
+            
+            fetchOrderData(projectId, clientId, fromDate, toDate);
+            getGrandTotal(fromDate, toDate, client_id);
         });
-    }
 
-    $(document).on('change', '#project_id', function() {
-        fetchOrderData($(this).val());
-        datatable.settings()[0].ajax.data.project_id = $(this).val();
-        datatable.ajax.reload();
+    $('#client_id_dcf').on('change', function () {
+        let getproject_id = $("#client_id_dcf").val();
+        $("#project_id_dcf").html('All');
+        fetchProData(getproject_id);
     });
+   
+
+});
+
+function fetchOrderData(projectId, clientId, fromDate, toDate) {
+    $.ajax({
+        url: "{{ route('dashboard_count') }}",
+        type: "POST",
+        data: {
+            project_id: projectId,
+            client_id: clientId,
+            from_date: fromDate,
+            to_date: toDate,
+            _token: '{{csrf_token()}}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            let statusCounts = response.StatusCounts;
+            $('#yet_to_assign_cnt').text(statusCounts[6] || 0);
+            $('#wip_cnt').text(statusCounts[1] || 0);
+            $('#hold_cnt').text(statusCounts[2] || 0);
+            $('#Qu_cnt').text(statusCounts[4] || 0);
+            $('#cancelled_cnt').text(statusCounts[3] || 0);
+            $('#completed_cnt').text(statusCounts[5] || 0);
+        }
+    });
+}
+
+// $(document).on('change', '#project_id_dcf', function() {
+//         fetchOrderData($(this).val());
+//         datatable.settings()[0].ajax.data.project_id = $(this).val();
+//         datatable.ajax.reload();
+//     });
+
+function fetchProData(client_id) {
+    $.ajax({
+        url: "{{ url('dashboard_dropdown') }}",
+        type: "POST",
+        data: {
+            client_id: client_id,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            $('#project_id_dcf').html('<option value="All">All Projects</option>');
+            $.each(response, function (index, item) {
+                $("#project_id_dcf").append('<option value="' + item.id + '">(' + item.project_code + ') - ' + item.process_name + '</option>');
+            });
+        }
+    });
+}
+
+
+
 
     $(document).ready(function () {
         datatable = $('#datewise_datatable').DataTable({
@@ -556,11 +702,11 @@
         var toDate = '';
         var client_id = '';
 
-        $('#dateRangeForm').on('submit', function (e) {
+        $('#filterButton').on('click', function (e) {
             e.preventDefault();
-            fromDate = $('#fromDate').val();
-            toDate = $('#toDate').val();
-            client_id = $('#client_id').val();
+            fromDate = $('#fromDate_dcf').val();
+            toDate = $('#toDate_dcf').val();
+            client_id = $('#client_id_dcf').val();
             datatable.ajax.reload();
             getGrandTotal(fromDate, toDate,client_id);
             revenueClientWise(fromDate, toDate,client_id);
@@ -692,7 +838,6 @@
                         d._token = '{{csrf_token()}}';
                     },
                     dataSrc: function (data) {
-                        console.log(data);
                         var rows = [];
                         $.each(data.data, function (index, value) {
                             var date = moment(value['Date']).format('MM/DD/YYYY');
@@ -735,31 +880,31 @@
 
         $(document).ready(function() {
         var isClientChanging = false;
-        $(document).on('change', '#client_id', function() {
+        $(document).on('change', '#client_id_dcf', function() {
             if (isClientChanging) return;
             isClientChanging = true;
             var selectedClientOption = $(this).val();
-            $("#client_id").val(selectedClientOption && selectedClientOption.includes('All') ? ['All'] : selectedClientOption);
-            if ($("#client_id").val() !== selectedClientOption) {
-                $("#client_id").trigger('change');
+            $("#client_id_dcf").val(selectedClientOption && selectedClientOption.includes('All') ? ['All'] : selectedClientOption);
+            if ($("#client_id_dcf").val() !== selectedClientOption) {
+                $("#client_id_dcf").trigger('change');
             }
             isClientChanging = false;
         });
     });
 
-    $(document).ready(function() {
-            $('.select2-basic-multiple').select2();
-        });
+    // $(document).ready(function() {
+    //         $('.select2-basic-multiple').select2();
+    //     });
 
         $(document).ready(function() {
         var isClientChanging = false;
-        $(document).on('change', '#client_id_fte', function() {
+        $(document).on('change', '#client_id_dcf', function() {
             if (isClientChanging) return;
             isClientChanging = true;
             var selectedClientOption = $(this).val();
-            $("#client_id_fte").val(selectedClientOption && selectedClientOption.includes('All') ? ['All'] : selectedClientOption);
-            if ($("#client_id_fte").val() !== selectedClientOption) {
-                $("#client_id_fte").trigger('change');
+            $("#client_id_dcf").val(selectedClientOption && selectedClientOption.includes('All') ? ['All'] : selectedClientOption);
+            if ($("#client_id_dcf").val() !== selectedClientOption) {
+                $("#client_id_dcf").trigger('change');
             }
             isClientChanging = false;
         });
@@ -774,13 +919,13 @@ var client_id  = "";
 
     $(document).ready(function() {
 
-        $('#ftedateRangeForm').on('submit', function (e) {
+        $('#filterButton').on('click', function (e) {
             e.preventDefault();
-            fromDate = $('#ftefromDate').val();
-            toDate = $('#ftetoDate').val();
-            client_id = $('#fteclient_id').val();
+            fromDate = $('#fromDate_dcf').val();
+            toDate = $('#toDate_dcf').val();
+            client_id = $('#client_id_dcf').val();
             datatable.ajax.reload();
-            // fterevenueProjectWise(fromDate, toDate,client_id);
+            fterevenueProjectWise(fromDate, toDate,client_id);
         });
 
         $(document).on('click', '.project-link-fte', function(event) {
@@ -905,6 +1050,19 @@ var client_id  = "";
 
                     }
         });
+
+//date script-start
+     document.getElementById('toDate_dcf').valueAsDate = new Date();
+
+    var currentDate = new Date();
+        
+    var firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
+    
+    var formattedDate = firstDayOfMonth.toISOString().split('T')[0];
+    
+    document.getElementById('fromDate_dcf').value = formattedDate;
+
+//date script-end
 
 
 

@@ -16,4 +16,6 @@ class Process extends Model
         return $this->belongsTo(Client::class, 'clients_id');
     }
 
+  
+
 }

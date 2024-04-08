@@ -26,7 +26,7 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('profile_Update', 'profileupdate')->name('profile_Update');
     Route::post('getCounty', 'getCounty')->name('getCounty');
     Route::any('getOrderData', 'getOrderData')->name('getOrderData');
-    Route::post('dashboard_count', 'dashboard_count')->name('dashboard_count');
+    Route::any('dashboard_count', 'dashboard_count')->name('dashboard_count');
     Route::post('dashboard_datewise_count', 'dashboard_datewise_count')->name('dashboard_datewise_count');
     Route::post('dashboard_userwise_count', 'dashboard_userwise_count')->name('dashboard_userwise_count');
     Route::post('revenue_detail', 'revenue_detail')->name('revenue_detail');
@@ -38,6 +38,9 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('revenue_detail_process_fte', 'revenue_detail_process_fte')->name('revenue_detail_process_fte');
     Route::post('revenue_detail_processDetail_fte', 'revenue_detail_processDetail_fte')->name('revenue_detail_processDetail_fte');
     Route::post('revenue_detail_process_total_fte', 'revenue_detail_process_total_fte')->name('revenue_detail_process_total_fte');
+
+    Route::post('dashboard_dropdown', 'dashboard_dropdown')->name('dashboard_dropdown');
+
 
 });
 
