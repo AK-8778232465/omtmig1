@@ -129,6 +129,7 @@
                             <option selected value="All">All Projects</option>
                         </Select>
                     </div>
+                    @if(Auth::user()->hasRole('Business Head'))
                     <div class="col-1"><label for="project">Billing Type</label>
                         <Select class="form-control select_role float-end" name="" id="billing_id_dcf">
                             <option selected value="All">All</option>
@@ -136,6 +137,7 @@
                             <option value="TXN">TXN</option>
                         </Select>
                     </div>
+                    @endif
                     <div class="col-1 col-md-1 mt-4">
                         <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
                     </div>
