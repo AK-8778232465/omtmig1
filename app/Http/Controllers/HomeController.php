@@ -10,10 +10,12 @@ use App\Models\User;
 use App\Models\Service;
 use App\Models\Order;
 use App\Models\Client;
+use App\Models\Process;
 use App\Models\County;
 use App\Models\OrderCreation;
 use App\Models\State;
 use App\Models\Status;
+use App\Models\stl_item_description;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -66,6 +68,7 @@ class HomeController extends Controller
         return view('app.dashboard.index', compact('processList','clients'));
     }
 
+
     public function profileupdate(Request $request)
     {
         $request->validate([
@@ -91,15 +94,54 @@ class HomeController extends Controller
         return response()->json($getCounty);
     }
 
+    public function dashboard_dropdown(Request $request)
+    {
+        $client_id = null;
+    
+        $getclient_id = $request->client_id;
+    
+        if (!is_array($getclient_id)) {
+            $getclient_id = [$getclient_id];
+        }
+    
+        if (in_array('All', $getclient_id)) {
+            $getProject = DB::table('stl_item_description')
+                            ->select('id', 'client_id', 'process_name', 'project_code')
+                            ->get();
+        } else {
+            $getProject = DB::table('stl_item_description')
+                            ->select('id', 'client_id', 'process_name', 'project_code')
+                            ->whereIn('client_id', $getclient_id)
+                            ->get();
+        }
+        
+        return response()->json($getProject);
+    }
+    
+
+
+
     public function dashboard_count(Request $request)
     {
+ 
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
         $statusCountsQuery = OrderCreation::query();
-        if ($request->project_id != 'All') {
-            $statusCountsQuery->whereIn('process_id', $processIds)->where('process_id', $request->project_id);
+
+        if(($request->project_id == 'All' || $request->project_id[0] == 'All') && $request->client_id[0] != 'All') {
+                $statusCountsQuery = OrderCreation::with('process', 'client')
+                ->whereIn('process_id', $processIds)
+                ->whereBetween('order_date', [$request->from_date, $request->to_date])
+                ->whereHas('process', function ($query) use ($request) {
+                    $query->whereIn('client_id', $request->client_id);
+                });               
         } else {
-            $statusCountsQuery = $statusCountsQuery->whereIn('process_id', $processIds);
+            if ($request->project_id != 'All' && $request->project_id[0] != 'All') {
+                    $statusCountsQuery->whereIn('process_id', $processIds)->whereIn('process_id', $request->project_id)->whereBetween('order_date', [$request->from_date, $request->to_date]);
+                }else{
+                    $statusCountsQuery = $statusCountsQuery->whereIn('process_id', $processIds)->whereBetween('order_date', [$request->from_date, $request->to_date]);
+                }
         }
 
         if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
@@ -120,26 +162,29 @@ class HomeController extends Controller
             ->where('is_active', 1)
             ->pluck('count', 'status_id');
 
-        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
-            $yetToAssignUser = $yetToAssignQa = 0;
-            if ($request->project_id != 'All') {
-                $yetToAssignUser = OrderCreation::where('assignee_user_id', null)->where('status_id', 1)->where('is_active', 1)->where('process_id', $request->project_id)->count();
-                $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)->where('status_id', 4)->where('is_active', 1)->where('process_id', $request->project_id)->count();
+            if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+                $yetToAssignUser = $yetToAssignQa = 0;
+                if ($request->project_id != 'All' && $request->project_id[0] != 'All') {
+                    $yetToAssignUser = OrderCreation::where('assignee_user_id', null)->where('status_id', 1)->where('is_active', 1)->whereIn('process_id', $request->project_id)->whereBetween('order_date', [$request->from_date, $request->to_date])->count();
+                    $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)->where('status_id', 4)->where('is_active', 1)->whereIn('process_id', $request->project_id)->whereBetween('order_date', [$request->from_date, $request->to_date])->count();
+                } else {
+                    $yetToAssignUser = OrderCreation::where('assignee_user_id', null)->where('status_id', 1)->where('is_active', 1)->whereIn('process_id', $processIds) ->whereBetween('order_date', [$request->from_date, $request->to_date])->count();
+                    $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)->where('status_id', 4)->where('is_active', 1)->whereIn('process_id', $processIds) ->whereBetween('order_date', [$request->from_date, $request->to_date])->count();
+                }
+
+                $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
+                // $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
+                $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0);
+                // $statusCounts[6] = $yetToAssignUser + $yetToAssignQa;
+                $statusCounts[6] = $yetToAssignUser;
             } else {
-                $yetToAssignUser = OrderCreation::where('assignee_user_id', null)->where('status_id', 1)->where('is_active', 1)->whereIn('process_id', $processIds)->count();
-                $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)->where('status_id', 4)->where('is_active', 1)->whereIn('process_id', $processIds)->count();
+                $statusCounts[6] = [0];
             }
-            $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
-            // $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
-            $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0);
-            // $statusCounts[6] = $yetToAssignUser + $yetToAssignQa;
-            $statusCounts[6] = $yetToAssignUser;
-        } else {
-            $statusCounts[6] = [0];
-        }
+    
 
         return response()->json(['StatusCounts' => $statusCounts]);
     }
+
 
     public function dashboard_datewise_count(Request $request)
     {
@@ -529,91 +574,6 @@ class HomeController extends Controller
 
 
 
-// FTE
-// public function revenue_detail_process_fte(Request $request)
-// {
-//     $user = Auth::user();
-//     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
-//     $client_ids = $request->input('fteclient_id');
-
-//     $query = DB::table('service_audit')
-//         ->select(
-//             'service_audit.id',
-//             'service_audit.description_id as id',
-//             'service_audit.process_name',
-//             'service_audit.process_name',
-//             'service_audit.cost AS unit_cost',
-//             'service_audit.no_of_resources',
-//             'service_audit.effective_date'
-//         )
-//         ->join('stl_item_description', 'service_audit.description_id', '=', 'stl_item_description.id')
-//         ->where('service_audit.is_active', 1)
-//         ->where('stl_item_description.is_active', 1)
-//         ->where('stl_item_description.billing_type_id', 2)
-//         ->whereIn('service_audit.description_id', $processIds);
-
-//     if (!empty($client_ids) && $client_ids[0] !== 'All') {
-//         $query->whereIn('stl_client.id', $client_ids);
-//     }
-
-//     $auditRecords = $query->orderBy('service_audit.effective_date')->get();
-
-//     // return response()->json($auditRecords, 200);
-
-//     $output = [];
-
-//     foreach ($auditRecords as $key => $auditRecord) {
-//         $projectCode = $auditRecord->process_name;
-//         $process_name = $auditRecord->process_name;
-//         $effective_date = Carbon::parse($auditRecord->effective_date);
-
-//         // Initialize cumulative total for each project
-//         $cumulativeTotal = 0;
-//         $monthlyRevenue = 0;
-
-//         $endDate = isset($auditRecords[$key + 1]) ? Carbon::parse($auditRecords[$key + 1]->effective_date)->subDay() : Carbon::now();
-
-//         $currentDate = $effective_date;
-//         while ($currentDate <= $endDate) {
-//             $daysInEffectiveMonth = $currentDate->daysInMonth;
-//             $daysRemaining = $endDate->diffInDays($currentDate) + 1;
-//             $perDayAmount = $auditRecord->unit_cost / $daysInEffectiveMonth;
-//             $invoiceAmount = $perDayAmount * $auditRecord->no_of_resources;
-
-//             if ($currentDate->day == 1) {
-//                 $monthlyRevenue = 0;
-//             }
-
-//             $monthlyRevenue += $invoiceAmount;
-//             $cumulativeTotal += $invoiceAmount;
-
-//             $output[$projectCode]['id'] = $auditRecord->id;
-//             $output[$projectCode][$process_name][] = [
-//                 'process_name' => $auditRecord->process_name,
-//                 'Unit Cost' => $auditRecord->unit_cost,
-//                 'No of Resources' => $auditRecord->no_of_resources,
-//                 'per_day_amount' => number_format($perDayAmount, 2),
-//                 'invoice_amount' => number_format($invoiceAmount, 2),
-//                 'Eff Date' => $effective_date->format('Y-m-d'),
-//                 'Date' => $currentDate->format('Y-m-d'),
-//                 'days' => $daysRemaining,
-//                 'unit_cost_divided_by' => $daysInEffectiveMonth,
-//                 'Monthly Revenue' => number_format($monthlyRevenue, 2),
-//                 'Revenue Generated Till Date' => number_format($cumulativeTotal, 2)
-//             ];
-//             $output[$projectCode]['total_revenue_generated_till_date'] = number_format($cumulativeTotal, 2);
-
-//             // Move to the next day
-//             $currentDate->addDay();
-//         }
-//     }
-
-//     return Datatables::of($output)->toJson();
-// }
-
-
-
 public function revenue_detail_process_fte(Request $request)
 {
     $user = Auth::user();
@@ -704,6 +664,7 @@ public function revenue_detail_process_fte(Request $request)
     return Datatables::of($output)->toJson();
     // return response()->json($output);
 }
+
 
 
 public function revenue_detail_processDetail_fte(Request $request)
@@ -870,93 +831,6 @@ public function revenue_detail_process_total_fte(Request $request)
     return response()->json(['Total' => $output[count($output) - 1]['Total Sum']]);
 }
 
-
-// Not used
-// public function revenue_detail_processDetail_fte(Request $request)
-// {
-//     $user = Auth::user();
-//     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
-//     $fromDate = $request->input('from_date');
-//     $toDate = $request->input('to_date');
-//     $process_id =  $request->input('project_id');
-
-//     $query = DB::table('service_audit')
-//         ->select(
-//             'service_audit.id',
-//             'service_audit.description_id as id',
-//             'service_audit.process_name',
-//             'service_audit.cost AS unit_cost',
-//             'service_audit.no_of_resources',
-//             'service_audit.effective_date'
-//         )
-//         ->join('stl_item_description', 'service_audit.description_id', '=', 'stl_item_description.id')
-//         ->where('service_audit.is_active', 1)
-//         ->where('stl_item_description.is_active', 1)
-//         ->where('stl_item_description.billing_type_id', 2);
-//         // ->whereIn('service_audit.description_id', [35]);
-
-//     if (!empty($process_id)) {
-//         $query->where('service_audit.description_id', $process_id);
-//     }
-
-
-//     $auditRecords = $query->get();
-//     $output = [];
-
-//     foreach ($auditRecords as $key => $auditRecord) {
-
-//         $effective_date = Carbon::parse($auditRecord->effective_date);
-
-//         // Calculate end date based on next effective date or given end date
-//         $nextEffectiveDate = isset($auditRecords[$key + 1]) ? Carbon::parse($auditRecords[$key + 1]->effective_date)->subDay() : Carbon::today();
-//         $endDate = empty($toDate) ? $nextEffectiveDate : Carbon::parse($toDate)->endOfDay();
-
-//         $startDate = empty($fromDate) ? $effective_date : Carbon::parse($fromDate);
-//         if ($startDate->lt($effective_date)) {
-//             $startDate = $effective_date;
-//         }
-
-//         $cumulativeTotal = 0;
-//         $monthlyRevenue = 0; // Track monthly revenue
-//         $currentDate = $startDate->copy();
-
-//         while ($currentDate <= $endDate) {
-//             $daysInEffectiveMonth = $currentDate->daysInMonth;
-//             $daysRemaining = $endDate->diffInDays($currentDate) + 1;
-
-//             $perDayAmount = $auditRecord->unit_cost / $daysInEffectiveMonth;
-//             $invoiceAmount = $perDayAmount * $auditRecord->no_of_resources;
-
-//             if ($currentDate->day == 1) {
-//                 $monthlyRevenue = 0;
-//             }
-
-//             $monthlyRevenue += $invoiceAmount;
-//             $cumulativeTotal += $invoiceAmount;
-
-//             $output[] = [
-//                 'process_name' => $auditRecord->process_name,
-//                 'Unit Cost' => $auditRecord->unit_cost,
-//                 'No of Resources' => $auditRecord->no_of_resources,
-//                 'per_day_amount' => number_format($perDayAmount, 2),
-//                 'invoice_amount' => number_format($invoiceAmount, 2),
-//                 'Eff Date' => $effective_date->format('Y-m-d'),
-//                 'Date' => $currentDate->format('Y-m-d'),
-//                 'days' => $daysRemaining,
-//                 'unit_cost_divided_by' => $daysInEffectiveMonth,
-//                 'Monthly Revenue' => number_format($monthlyRevenue, 2), // Monthly revenue
-//                 'Revenue Generated Till Date' => number_format($cumulativeTotal, 2)
-//             ];
-
-//             // Move to the next day
-//             $currentDate->addDay();
-//         }
-//     }
-
-//     // return response()->json($output);
-//     return Datatables::of($output)->toJson();
-// }
 
 }
 
