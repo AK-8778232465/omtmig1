@@ -4,6 +4,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderCreationController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\OrderFormController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -74,6 +75,11 @@ Route::middleware('auth:web')->controller(OrderController::class)->group(functio
     Route::any('/edit_order', 'edit_order')->name('edit_order');
     Route::any('/delete_order', 'delete_order')->name('delete_order');
     Route::post('update_order_status', 'update_order_status')->name('update_order_status');
+});
+
+Route::middleware('auth:web')->controller(OrderFormController::class)->group(function () {
+    Route::any('orderform/{order_id?}', 'index')->name('orderform');
+    Route::post('orderform_submit', 'orderSubmit')->name('orderform_submit');
 });
 
 
