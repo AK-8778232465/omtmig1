@@ -309,7 +309,10 @@ class OrderController extends Controller
         ->addColumn('order_date', function ($order) {
             return $order->order_date ? date('m/d/Y', strtotime($order->order_date)) : '';
         })
-        ->rawColumns(['checkbox', 'action', 'status'])
+        ->addColumn('order_id', function ($order) {
+            return '<span class="px-2 py-1 rounded text-white goto-order ml-2" id="goto_' . ($order->id ?? '') . '">'.$order->order_id.'</span>';
+        })
+        ->rawColumns(['checkbox', 'action', 'status', 'order_id'])
         ->toJson();
     }
 
