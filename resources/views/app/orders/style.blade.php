@@ -153,4 +153,13 @@
         background-color: #3f4bfd;
         cursor: pointer;
     }
+
+    .goto-order {
+        background-color: #7680ff;
+    }
+
+    .goto-order:hover {
+        background-color: #3f4bfd;
+        cursor: pointer;
+    }
 </style>
