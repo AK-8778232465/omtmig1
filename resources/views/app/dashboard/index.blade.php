@@ -289,7 +289,7 @@
                     </div>
                 </div>
 <!-- // -->
-<div id="rightContent" style="display: none;">
+<div id="rightContent">
 <div class="col-12">
     <div class="row my-2">
         @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
@@ -529,7 +529,7 @@
                         <th width="10%">Revenue as Selected Date</th>
                     </tr>
                     </thead>
-                    <tbody class="text-center"></tbody>
+                    <tbody></tbody>
                     </table>
                 </div>
                 <div class="p-0 process_wise d-none">
@@ -1234,7 +1234,7 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
             dataSrc: 'data',
         },
         columns: [
-            { data: 'client_name', name: 'client_name' },
+            { data: 'client_name', name: 'client_name', className: "text-left" },
             // { // Merge 'process_name' and 'project_code' into one column
             //     data: function (row) {
             //         return row.project_code + '  (' + row.process_name + ')';
@@ -1249,15 +1249,15 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
                 return '<a href="#" class="project-link-fte" data-id="' + row.id + '">' + row.project_code + ' (' + row.process_name + ')</a>';
             },
 
-            name: 'project_code',
+            name: 'project_code', className: "text-left"
                 },
-            { data: 'unit_cost', name: 'unit_cost' },
-            { data: 'no_of_resources', name: 'no_of_resources' },
-            { data: 'expected_revenue', name: 'expected_revenue' },
-            { data: 'start_date', name: 'start_date' },
-            { data: 'end_date', name: 'end_date' },
-            { data: 'days', name: 'days' },
-            { data: 'revenue_selected', name: 'revenue_selected' },
+            { data: 'unit_cost', name: 'unit_cost', className: "text-center" },
+            { data: 'no_of_resources', name: 'no_of_resources', className: "text-center" },
+            { data: 'expected_revenue', name: 'expected_revenue', className: "text-center" },
+            { data: 'start_date', name: 'start_date', className: "text-center" },
+            { data: 'end_date', name: 'end_date', className: "text-center" },
+            { data: 'days', name: 'days', className: "text-center" },
+            { data: 'revenue_selected', name: 'revenue_selected', className: "text-center" },
         ],
     });
     }
