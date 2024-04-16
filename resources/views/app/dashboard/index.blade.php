@@ -165,6 +165,7 @@
 <div class="container mt-2 mb-1 p-1">
     <section id="minimal-statistics">
         <!-- // -->
+        @if(Auth::user()->hasRole('Business Head'))
         <div class="switch-container d-flex justify-content-end">
                 <span class="label-left">Revenue</span>
                 <input type="checkbox" id="toggleSwitch" class="toggle-switch">
@@ -173,6 +174,7 @@
                 </label>
                 <span class="label-right">Production</span>
             </div>
+        @endif
         <!-- // -->
                 <div class="row justify-content-start mb-0 mt-2 ml-2">
                     <div class="col-md-3">
