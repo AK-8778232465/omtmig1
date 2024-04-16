@@ -1,7 +1,6 @@
 @extends('layouts.app')
 @section('title', config('app.name') . ' | Orders')
 @section('content')
-
 @include('app.orders.style')
 
 {{-- Edit Model Order --}}
@@ -84,7 +83,7 @@
                         <button type="button" class="btn btn-danger mr-2">Close</button>
                         <button type="submit" class="btn btn-primary">Update</button>
                     </div>
-                
+
                 </div>
 
             </form>
@@ -165,7 +164,7 @@
     </div>
 </div>
 <script type="text/javascript">
-    
+
     $(function () {
         @if(Session::has('success'))
         new PNotify({
@@ -191,14 +190,18 @@
     });
 
     let datatable = null;
-
+    let sessionfilter = false;
     $(function () {
         let defaultStatus = null;
         var currentURI = window.location.href;
         var match = currentURI.match(/\/orders_status\/(\d+)/);
         if (match) {
             var statusID = match[1];
-            defaultStatus = statusID
+            defaultStatus = statusID;
+            @if(Session::has('dashboardfilters') && Session::get('dashboardfilters') == true)
+                sessionfilter = true;
+                $('#statusButtons').hide();
+            @endif
         } else {
             defaultStatus = @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) 1 @else 6 @endif;
         }
@@ -213,8 +216,9 @@
                 type: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    status: defaultStatus
-                }
+                    status: defaultStatus,
+                    sessionfilter : sessionfilter
+                } 
             },
             "columns": [
                 { "data": "order_id", "name": "order_id" },
@@ -312,7 +316,7 @@
             $('.status-dropdown').prop('disabled', false);
             @endif
         }
-   
+
         @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
         var allStatusValues = [];
         $('.status-dropdown').each(function() {
@@ -380,7 +384,7 @@
         } else {
             $('#assign_tab').addClass('d-none');
             $('#user_id').empty();
-          
+
         }
     });
 
@@ -471,7 +475,7 @@
         $('.frame').addClass('d-none');
     });
 
- 
+
     // Edit company
      $('#order_datatable').on('click','.edit_order',function () {
         $('#re_assign').prop('checked', false);
@@ -495,7 +499,7 @@
 				$("#property_county_ed").val(res['county_id']);
                 $("#assign_user_ed").val(res['assignee_user_id']);
                 $("#assign_qa_ed").val(res['assignee_qa_id']);
-       
+
 				$("#myModalEdit").modal('show');
 			}
 		});
@@ -505,7 +509,7 @@
     $('.btn.btn-danger').click(function(){
             $('#myModalEdit').modal('hide');
         });
-   
+
     $(document).ready(function() {
         $("#hide_user").hide();
         $("#hide_qa").hide();
@@ -518,13 +522,13 @@
                 } else {
                     $("#hide_qa").hide();
                 }
-                $('.select2dropdown').select2();        
+                $('.select2dropdown').select2();
             } else {
                 $('#hide_user, #hide_qa').hide();
             }
         });
         $("#re_assign").show();
-    }); 
+    });
 
 
 
@@ -708,7 +712,7 @@
         window.location.href = "{{url('orderform/')}}/" + order_id;
     });
 
-    
+
 </script>
 
 @endsection

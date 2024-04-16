@@ -41,6 +41,7 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('revenue_detail_process_total_fte', 'revenue_detail_process_total_fte')->name('revenue_detail_process_total_fte');
 
     Route::post('dashboard_dropdown', 'dashboard_dropdown')->name('dashboard_dropdown');
+    Route::post('revenue_detail_client_fte', 'revenue_detail_client_fte')->name('revenue_detail_client_fte');
 
 
 });
@@ -75,6 +76,7 @@ Route::middleware('auth:web')->controller(OrderController::class)->group(functio
     Route::any('/edit_order', 'edit_order')->name('edit_order');
     Route::any('/delete_order', 'delete_order')->name('delete_order');
     Route::post('update_order_status', 'update_order_status')->name('update_order_status');
+    Route::post('redirectwithfilter', 'redirectwithfilter')->name('redirectwithfilter');
 });
 
 Route::middleware('auth:web')->controller(OrderFormController::class)->group(function () {

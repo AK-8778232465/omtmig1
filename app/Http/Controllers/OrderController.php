@@ -45,6 +45,7 @@ class OrderController extends Controller
                 });
             }
         }
+        
 
         $statusCounts = $statusCountsQuery->groupBy('status_id')
             ->selectRaw('count(*) as count, status_id')
@@ -171,6 +172,23 @@ class OrderController extends Controller
                 }
             }
 
+            if(isset($request->sessionfilter) && $request->sessionfilter == 'true') {
+                $fromDate = Session::get('fromDate');
+                $toDate = Session::get('toDate');
+                $projectIds = Session::get('projectId');
+                $clientIds = Session::get('clientId');
+
+                $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
+
+                if ($projectIds[0] != 'All') {
+                    $query->whereIn('oms_order_creations.process_id', $projectIds);
+                }
+
+                if ($clientIds[0] != 'All') {
+                    $query->whereIn('stl_item_description.client_id', $clientIds);
+                }
+            }
+
         return DataTables::of($query)
         ->addColumn('checkbox', function ($order) use ($user){
             if(in_array($user->user_type_id, [6, 7, 8])) {
@@ -202,44 +220,7 @@ class OrderController extends Controller
             $sql = 'CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")")  like ?';
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
-        // ->addColumn('status', function ($order) use ($request) {
-        //     $statusMapping = [];
-        //     if($order->qc_enabled) {
-        //         if($request->status == "All" || $request->status == 5) {
-        //             $statusMapping = [
-        //                 1 => 'WIP',
-        //                 2 => 'Hold',
-        //                 3 => 'Cancelled',
-        //                 4 => 'Send for QC',
-        //                 5 => 'Completed'
-        //             ];
-        //         } else {
-        //             if($order->status_id != 4) {
-        //                 $statusMapping = [
-        //                     1 => 'WIP',
-        //                     2 => 'Hold',
-        //                     3 => 'Cancelled',
-        //                     4 => 'Send for QC',
-        //                 ];
-        //             } elseif($order->status_id == 4) {
-        //                 $statusMapping = [
-        //                     2 => 'Hold',
-        //                     3 => 'Cancelled',
-        //                     4 => 'Send for QC',
-        //                     5 => 'Completed'
-        //                 ];
-        //             }
-        //         }
-        //     } else {
-        //         $statusMapping = [
-        //             1 => 'WIP',
-        //             2 => 'Hold',
-        //             3 => 'Cancelled',
-        //             5 => 'Completed'
-        //         ];
-        //     }
-
-            ->addColumn('status', function ($order) use ($request) {
+        ->addColumn('status', function ($order) use ($request) {
                     if($order->assignee_qa_id) {
                         if (Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL')){
                             $statusMapping = [];
@@ -268,7 +249,7 @@ class OrderController extends Controller
                                     5 => 'Completed',
                                 ];
                         }
-                        
+
                     } else {
                         if (!$order->assignee_qa_id && Auth::user()->hasRole('PM/TL')){
                             $statusMapping = [];
@@ -296,9 +277,9 @@ class OrderController extends Controller
                                 5 => 'Completed',
                             ];
                         }
-                       
-                    }         
-                
+
+                    }
+
 
             return '<select style="width:100%" class="status-dropdown form-control" data-row-id="' . $order->id . '">' .
             collect($statusMapping)->map(function ($value, $key) use ($order) {
@@ -393,5 +374,23 @@ class OrderController extends Controller
         OrderCreation::where('id', $input['rowId'])->update(['status_id' => $input['selectedStatus']]);
 
         return response()->json(['data' => 'success', 'msg' => 'Status Updated Successfully']);
+    }
+
+    public function redirectwithfilter(Request $request)
+    {
+        $projectId = $request->input('projectId');
+        $clientId = $request->input('clientId');
+        $fromDate = $request->input('fromDate');
+        $toDate = $request->input('toDate');
+
+        session()->forget(['projectId', 'clientId', 'fromDate', 'toDate', 'dashboardfilters']);
+        // Store values in session
+        session(['projectId' => $projectId ?? '']);
+        session(['clientId' => $clientId ?? '']);
+        session(['fromDate' => $fromDate ?? '']);
+        session(['toDate' => $toDate ?? '']);
+        session(['dashboardfilters' => true]);
+
+        return response()->json(['success' => 'Filter values stored in session.']);
     }
 }
