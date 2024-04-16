@@ -201,7 +201,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-lg-2" style="display:none" id="project_hide">
+                    <div class="col-lg-2" id="project_hide">
                         <label for="project">Project</label>
                         <Select class="form-control select2-basic-multiple" style="width:100%" name="dcf_project_id[]" id="project_id_dcf" multiple="multiple">
                             <option selected value="All">All Projects</option>
@@ -233,7 +233,7 @@
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <h4 class="icon-dual-info mb-0">Transactional</h4>
                                                         <div class="row">
-                                                            <div class="col mt-2" style="padding-right: 0px;"><i class="icon-dual-warning font-large-2 float-right" data-feather="dollar-sign"></i></div>
+                                                            <div class="col mt-2" style="padding-right: 0px;"><i class="icon-dual-warning font-large-2 float-right" style="width: 20px;" data-feather="dollar-sign"></i></div>
                                                             <div class="col" style="padding-left: 0px;"><h4 class="icon-dual-warning mb-0" id="transaction_cost">0.00</h4></div>
                                                         </div>
                                                     </div>
@@ -255,7 +255,7 @@
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <h4 class="icon-dual-info mb-0">FTE</h4>
                                                     <div class="row">
-                                                        <div class="col mt-2" style="padding-right: 0px;"><i class="icon-dual-pink font-large-2 float-right" data-feather="dollar-sign"></i></div>
+                                                        <div class="col mt-2" style="padding-right: 0px;"><i class="icon-dual-pink font-large-2 float-right" style="width: 20px;" data-feather="dollar-sign"></i></div>
                                                         <div class="col" style="padding-left: 0px;"><h4 class="icon-dual-pink mb-0" id="fte_cost">0.00</h4></div>
                                                     </div>
                                                 </div>
@@ -277,7 +277,7 @@
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <h4 class="icon-dual-info mb-0">Total</h4>
                                                     <div class="row">
-                                                        <div class="col mt-2" style="padding-right: 0px;"><i class="icon-dual-danger font-large-2 float-right" data-feather="dollar-sign"></i></div>
+                                                        <div class="col mt-2" style="padding-right: 0px;"><i class="icon-dual-danger font-large-2 float-right" style="width: 20px;" data-feather="dollar-sign"></i></div>
                                                         <div class="col" style="padding-left: 0px;"><h4 class="icon-dual-danger mb-0" id="total_cost">0.00</h4></div>
                                                     </div>
                                                 </div>
@@ -502,8 +502,8 @@
                     <table id="fterevenueClientTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead class="text-center">
                     <tr>
-                    <th width="14%">Client</th>
-                    <th width="10%">Total Cost</th>
+                    <th class="text-center w-50">Client</th>
+                    <th class="text-center w-50">Total Cost</th>
                     </tr>
                     </thead>
                     <tbody class="text-center"></tbody>
@@ -519,13 +519,13 @@
                     <tr>
                         <th width="10%">Client</th>
                         <th width="15%">Project Code</th>
-                        <th width="14%">Pricing</th>
+                        <th width="8%">Pricing</th>
                         <th width="10%">FTE Count</th>
                         <th width="14%">Expected Revenue</th>
                         <th width="10%">Start Date</th>
                         <th width="12%">End Date</th>
                         <th width="5%">Days</th>
-                        <th width="10%">Revenue as Selected Date</th>
+                        <th width="16%">Revenue as Selected Date</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
@@ -1186,7 +1186,7 @@ $(document).ready(function() {
                     dataSrc: 'data',
                 },
                 columns: [
-                    { data: 'client_name', name: 'client_name', className: "text-left"  },
+                    { data: 'client_name', name: 'client_name', className: "text-center"  },
     
                     { data: 'revenue_selected', name: 'revenue_selected', className: "text-center" },
                 ],
@@ -1384,7 +1384,20 @@ document.addEventListener('DOMContentLoaded', function() {
             datewiseIdDcf.style.display = 'block';
             transIdDcf.style.display = 'none';
             fteIdDcf.style.display = 'none';
-        } else {
+        }
+        // else if(toggleSwitch.checked && Auth::user()->hasRole('') ) {
+        //     // If the switch is unchecked (Production side), hide the right content and project content
+        //     // and show the left content and billing content
+        //     leftContent.style.display = 'block';
+        //     projectIdDcf.style.display = 'none';
+        //     rightContent.style.display = 'none';
+        //     billingIdDcf.style.display = 'block';
+        //     userwiseIdDcf.style.display = 'none';
+        //     datewiseIdDcf.style.display = 'none';
+        //     transIdDcf.style.display = 'block';
+        //     fteIdDcf.style.display = 'block';
+        // }
+         else {
             // If the switch is unchecked (Production side), hide the right content and project content
             // and show the left content and billing content
             leftContent.style.display = 'block';
