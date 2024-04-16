@@ -396,12 +396,12 @@ class HomeController extends Controller
 
     // Apply client_id condition
     if (!empty($client_id) && $client_id[0] !== 'All') {
-        $statusCountsQuery->where('stl_client.id', $client_id);
+        $statusCountsQuery->whereIn('stl_client.id', $client_id);
     }
 
     // Apply project_id condition
     if (!empty($project_id) && $project_id[0] !== 'All') {
-        $statusCountsQuery->where('oms_order_creations.process_id', $project_id);
+        $statusCountsQuery->whereIn('oms_order_creations.process_id', $project_id);
     }
 
     // Apply date filtering
