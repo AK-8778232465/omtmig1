@@ -232,11 +232,13 @@
                                                 <div class="media-body">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <h4 class="icon-dual-info mb-0">Transactional</h4>
-                                                        <h4 class="icon-dual-warning mb-0" id="transaction_cost">0.00</h4>
+                                                        <div class="row">
+                                                            <div class="col mt-2" style="padding-right: 0px;"><i class="icon-dual-warning font-large-2 float-right" data-feather="dollar-sign"></i></div>
+                                                            <div class="col" style="padding-left: 0px;"><h4 class="icon-dual-warning mb-0" id="transaction_cost">0.00</h4></div>
+                                                        </div>
                                                     </div>
                                                     <div class="justify-content-between align-items-center mt-2">
                                                         <span class="font-weight-bold">Revenue</span>
-                                                        <i class="icon-dual-warning font-large-2 float-right" data-feather="dollar-sign"></i>
                                                     </div>
                                                 </div>
                                             </div>
@@ -245,18 +247,20 @@
                                 </div>
                             </div>
                         <div class="col-xl-4 col-sm-6 col-12">
-                            <div class="card">
+                            <div class="h-100 card">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="media-body">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <h4 class="icon-dual-info mb-0">FTE</h4>
-                                                    <h4 class="icon-dual-pink mb-0" id="fte_cost">0.00</h4>
+                                                    <div class="row">
+                                                        <div class="col mt-2" style="padding-right: 0px;"><i class="icon-dual-pink font-large-2 float-right" data-feather="dollar-sign"></i></div>
+                                                        <div class="col" style="padding-left: 0px;"><h4 class="icon-dual-pink mb-0" id="fte_cost">0.00</h4></div>
+                                                    </div>
                                                 </div>
                                                 <div class="justify-content-between align-items-center mt-2">
                                                     <span class="font-weight-bold">Revenue</span>
-                                                    <i class="icon-dual-pink font-large-2 float-right" data-feather="dollar-sign"></i>
                                                 </div>
                                             </div>
                                         </div>
@@ -265,18 +269,20 @@
                             </div>
                         </div>
                         <div class="col-xl-4 col-sm-6 col-12">
-                            <div class="card">
+                            <div class="h-100 card">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="media-body">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <h4 class="icon-dual-info mb-0">Total</h4>
-                                                    <h4 class="icon-dual-danger mb-0" id="total_cost">0.00</h4>
+                                                    <div class="row">
+                                                        <div class="col mt-2" style="padding-right: 0px;"><i class="icon-dual-danger font-large-2 float-right" data-feather="dollar-sign"></i></div>
+                                                        <div class="col" style="padding-left: 0px;"><h4 class="icon-dual-danger mb-0" id="total_cost">0.00</h4></div>
+                                                    </div>
                                                 </div>
-                                                <div class="justify-content-between align-items-center mt-2">
+                                                <div class="justify-content-between align-items-center">
                                                     <span class="font-weight-bold">Revenue</span>
-                                                    <i class="icon-dual-danger font-large-2 float-right" data-feather="dollar-sign"></i>
                                                 </div>
                                             </div>
                                         </div>
@@ -417,17 +423,13 @@
                 </div>
             </div>
             <div class="col-xl-4 col-sm-6 col-12">
-
-            </div>
-            <div class="col-xl-4 col-sm-6 col-12">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="icon-dual-pink mb-0" id="status_All_count">0</h3>
-                                    <!-- <h3 class="icon-dual-success mb-0" id="completed_cost">$0.00</h3> -->
+                                    <h3 class="icon-dual-pink mb-0" id="all_count">0</h3>
                                 </div>
                                 <div class="justify-content-between align-items-center mt-2">
                                     <span>All</span>
@@ -437,9 +439,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-4 col-sm-6 col-12">
-
             </div>
         </div>
     </div>
@@ -515,7 +514,7 @@
             <div class="card-body">
                 <div class="p-0 w-100 mx-auto" id="fteProjectTable">
                     <h5 class="text-center"> Project Wise Details </h5>
-                    <table id="fterevenueProjectTable" class="table table-bordered nowrap mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <table id="fterevenueProjectTable" class="table table-bordered mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead class="text-center">
                     <tr>
                         <th width="10%">Client</th>
@@ -747,7 +746,7 @@ function fetchOrderData(projectId, clientId, fromDate, toDate) {
                     totalValue += statusCounts[key];
                 }
             }
-            $('#status_All_count').text(totalValue);
+            $('#all_count').text(totalValue);
             $('#yet_to_assign_cnt').text(statusCounts[6] || 0);
             $('#wip_cnt').text(statusCounts[1] || 0);
             $('#hold_cnt').text(statusCounts[2] || 0);
