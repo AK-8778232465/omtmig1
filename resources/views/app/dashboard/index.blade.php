@@ -405,7 +405,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders('All')">
+            <div class="col-xl-4 col-sm-6 col-12">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -555,7 +555,7 @@
                     <table id="userwise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
-                                <th width="16%" class="text-center">Users</th>
+                                <th width="16%">Users</th>
                                 <th width="14%">WIP</th>
                                 <th width="14%">Send For Qc</th>
                                 <th width="14%">Hold</th>

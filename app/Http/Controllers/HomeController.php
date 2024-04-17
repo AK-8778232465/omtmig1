@@ -816,6 +816,14 @@ public function revenue_detail_process_fte(Request $request){
         $query->whereIn('sc.id', $client_ids);
     }
 
+    if (!empty($fromDate) && !empty($toDate)) {
+        $query->where('sa.effective_date', '>=', $fromDate)->where('sa.effective_date', '<=', $toDate);
+    } elseif (!empty($fromDate)) {
+        $query->where('sa.effective_date', '>=', $fromDate);
+    } elseif (!empty($toDate)) {
+        $query->where('sa.effective_date', '<=', $toDate);
+    }
+
     $auditRecords = $query->get();
     $output = [];
 
@@ -1075,6 +1083,14 @@ public function revenue_detail_client_fte(Request $request){
 
     if (!empty($client_ids) && $client_ids[0] !== 'All') {
         $query->whereIn('sc.id', $client_ids);
+    }
+
+    if (!empty($fromDate) && !empty($toDate)) {
+        $query->where('sa.effective_date', '>=', $fromDate)->where('sa.effective_date', '<=', $toDate);
+    } elseif (!empty($fromDate)) {
+        $query->where('sa.effective_date', '>=', $fromDate);
+    } elseif (!empty($toDate)) {
+        $query->where('sa.effective_date', '<=', $toDate);
     }
 
     $auditRecords = $query->get();
