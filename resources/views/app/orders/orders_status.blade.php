@@ -194,7 +194,7 @@
     $(function () {
         let defaultStatus = null;
         var currentURI = window.location.href;
-        var match = currentURI.match(/\/orders_status\/(\d+)/);
+        var match = currentURI.match(/\/orders_status\/(\d+|All)/);
         if (match) {
             var statusID = match[1];
             defaultStatus = statusID;

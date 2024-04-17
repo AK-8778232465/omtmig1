@@ -405,7 +405,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-4 col-sm-6 col-12">
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders('All')">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -496,23 +496,22 @@
             </div>
         </div>
 
-        <div class="card mt-5 ftetabledetails" id="fte_hide">
-            <h4 class="text-center mt-3">Revenue Details - FTE</h4>
-            <div class="card-body">
-                <div class="p-0 w-100 mx-auto" id="fteClientTable">
-                    <h5 class="text-center"> Client Wise Details </h5>
-                    <table id="fterevenueClientTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                    <thead class="text-center">
-                    <tr>
-                        <th width="10%">Client</th>
-                        <th width="16%">Total Revenue</th>
+        <div class="card-body" id="fteClient">
+            <div class="p-0 w-75 mx-auto" id="fteClientTable">
+                <h4 class="text-center mt-3">Revenue Details - FTE Billing</h4><br>
+                <h5 class="text-center"> Client Wise Details </h5>
+                <table id="fterevenueClientTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                <thead class="text-center">
+                <tr>
+                    <th width="14%">Client</th>
+                    <th width="14%">Total Revenue</th>
 
-                    </tr>
-                    </thead>
-                    <tbody class="text-center"></tbody>
-                    </table>
-                </div>
+                </tr>
+                </thead>
+                <tbody class="text-center"></tbody>
+                </table>
             </div>
+        </div>
 
             <div class="card-body" id="fteProject">
                 <div class="p-0 w-100 mx-auto" id="fteProjectTable">
@@ -1371,6 +1370,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const projectIdDcf = document.getElementById('project_hide');
     const billingIdDcf = document.getElementById('billing_hide');
     const fteProjectIdDcf = document.getElementById('fteProject');
+    const fteClientIdDcf = document.getElementById('fteClient');
 
     const userwiseIdDcf = document.getElementById('userwise_table');
     const datewiseIdDcf = document.getElementById('datewise_table');
@@ -1391,6 +1391,7 @@ document.addEventListener('DOMContentLoaded', function() {
             transIdDcf.style.display = 'none';
             fteIdDcf.style.display = 'none';
             fteProjectIdDcf.style.display = 'none';
+            fteClientIdDcf.style.display = 'none';
 
         } else {
             // If the switch is unchecked (Production side), hide the right content and project content
@@ -1404,6 +1405,8 @@ document.addEventListener('DOMContentLoaded', function() {
             transIdDcf.style.display = 'block';
              fteIdDcf.style.display = 'block';
               fteProjectIdDcf.style.display = 'block';
+              fteClientIdDcf.style.display = 'block';
+              
         }
     }
 

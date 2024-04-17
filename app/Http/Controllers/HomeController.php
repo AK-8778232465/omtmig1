@@ -189,12 +189,13 @@ class HomeController extends Controller
         $yetToAssignUser = 0;
         $yetToAssignQa = 0;
 
+        $statusCountsQuery1 = $statusCountsQuery;
+
         if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 7, 8, 9])) {
             // Handle additional query based on project_id and client_id
             if (in_array('All', $project_id) && !in_array('All', $client_id)) {
                 // Case: Project_id is 'All' and client_id is not 'All'
-                $yetToAssignUser = OrderCreation::with('process', 'client')
-                    ->where('assignee_user_id', null)
+                $yetToAssignUser = $statusCountsQuery->where('assignee_user_id', null)
                     ->where('status_id', 1)
                     ->where('is_active', 1)
                     ->whereBetween('order_date', [$from_date, $to_date])
@@ -204,21 +205,21 @@ class HomeController extends Controller
                     ->count();
             } elseif (!in_array('All', $project_id) && in_array('All', $client_id)) {
                 // Case: project_id is specified and client_id is not 'All'
-                $yetToAssignUser = OrderCreation::where('assignee_user_id', null)
+                $yetToAssignUser = $statusCountsQuery->('assignee_user_id', null)
                     ->where('status_id', 1)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $project_id)
                     ->whereBetween('order_date', [$from_date, $to_date])
                     ->count();
 
-                $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)
+                $yetToAssignQa = $statusCountsQuery1->('assignee_qa_id', null)
                     ->where('status_id', 4)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $project_id)
                     ->whereBetween('order_date', [$from_date, $to_date])
                     ->count();
             }elseif(!in_array('All', $project_id) && !in_array('All', $client_id)){
-                $yetToAssignUser = OrderCreation::with('process', 'client')
+                $yetToAssignUser = $statusCountsQuery->('process', 'client')
                 ->where('assignee_user_id', null)
                 ->where('status_id', 1)
                 ->where('is_active', 1)
@@ -230,14 +231,14 @@ class HomeController extends Controller
                 ->count();
             } else {
                 // Case: project_id is 'All' and client_id is 'All'
-                $yetToAssignUser = OrderCreation::where('assignee_user_id', null)
+                $yetToAssignUser = $statusCountsQuery->('assignee_user_id', null)
                     ->where('status_id', 1)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $processIds)
                     ->whereBetween('order_date', [$from_date, $to_date])
                     ->count();
 
-                $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)
+                $yetToAssignQa = $statusCountsQuery1->('assignee_qa_id', null)
                     ->where('status_id', 4)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $processIds)
