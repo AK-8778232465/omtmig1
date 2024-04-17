@@ -496,20 +496,23 @@
             </div>
         </div>
 
-        <div class="p-0 w-75 mx-auto" id="fteClientTable">
-            <h4 class="text-center mt-3">Revenue Details - FTE Billing</h4><br>
-            <h5 class="text-center"> Client Wise Details </h5>
-            <table id="fterevenueClientTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-            <thead class="text-center">
-            <tr>
-                <th width="14%">Client</th>
-                <th width="14%">Total Revenue</th>
+        <div class="card mt-5 ftetabledetails" id="fte_hide">
+            <h4 class="text-center mt-3">Revenue Details - FTE</h4>
+            <div class="card-body">
+                <div class="p-0 w-100 mx-auto" id="fteClientTable">
+                    <h5 class="text-center"> Client Wise Details </h5>
+                    <table id="fterevenueClientTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <thead class="text-center">
+                    <tr>
+                        <th width="10%">Client</th>
+                        <th width="16%">Total Revenue</th>
 
-            </tr>
-            </thead>
-            <tbody class="text-center"></tbody>
-            </table>
-        </div>
+                    </tr>
+                    </thead>
+                    <tbody class="text-center"></tbody>
+                    </table>
+                </div>
+            </div>
 
             <div class="card-body" id="fteProject">
                 <div class="p-0 w-100 mx-auto" id="fteProjectTable">
