@@ -97,13 +97,13 @@ class HomeController extends Controller
     public function dashboard_dropdown(Request $request)
     {
         $client_id = null;
-    
+
         $getclient_id = $request->client_id;
-    
+
         if (!is_array($getclient_id)) {
             $getclient_id = [$getclient_id];
         }
-    
+
         if (in_array('All', $getclient_id)) {
             $getProject = DB::table('stl_item_description')
                             ->select('id', 'client_id', 'process_name', 'project_code')
@@ -114,16 +114,16 @@ class HomeController extends Controller
                             ->whereIn('client_id', $getclient_id)
                             ->get();
         }
-        
+
         return response()->json($getProject);
     }
-    
+
 
     public function dashboard_count(Request $request)
     {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
-        
+
         // Define default request data values
         $from_date = $request->input('from_date');
         $to_date = $request->input('to_date');
@@ -131,7 +131,7 @@ class HomeController extends Controller
         $client_id = $request->input('client_id', ['All']); // Default to 'All'
 
 
-       
+
         // Ensure project_id and client_id are arrays
         if (!is_array($project_id)) {
             $project_id = explode(',', $project_id); // Convert string to array
@@ -142,8 +142,8 @@ class HomeController extends Controller
         }
 
         $statusCountsQuery = OrderCreation::query();
-        
-        // Handle project_id and client_id cases 
+
+        // Handle project_id and client_id cases
         if (in_array('All', $project_id) && !in_array('All', $client_id)) {
             // Case: Project_id is 'All' and client_id is not 'All'
             $statusCountsQuery->with('process', 'client')
@@ -165,7 +165,7 @@ class HomeController extends Controller
                     // return response()->json($statusCountsQuery->get());
             }
         }
-    
+
         // Handle different user types
         if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             if ($user->user_type_id == 6) {
@@ -179,7 +179,7 @@ class HomeController extends Controller
                 });
             }
         }
-    
+
         // Calculate status counts
         $statusCounts = $statusCountsQuery->groupBy('status_id')
             ->selectRaw('count(*) as count, status_id')
@@ -188,7 +188,7 @@ class HomeController extends Controller
         // Additional conditions based on user type
         $yetToAssignUser = 0;
         $yetToAssignQa = 0;
-    
+
         if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 7, 8, 9])) {
             // Handle additional query based on project_id and client_id
             if (in_array('All', $project_id) && !in_array('All', $client_id)) {
@@ -210,7 +210,7 @@ class HomeController extends Controller
                     ->whereIn('process_id', $project_id)
                     ->whereBetween('order_date', [$from_date, $to_date])
                     ->count();
-    
+
                 $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)
                     ->where('status_id', 4)
                     ->where('is_active', 1)
@@ -236,7 +236,7 @@ class HomeController extends Controller
                     ->whereIn('process_id', $processIds)
                     ->whereBetween('order_date', [$from_date, $to_date])
                     ->count();
-    
+
                 $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)
                     ->where('status_id', 4)
                     ->where('is_active', 1)
@@ -244,131 +244,19 @@ class HomeController extends Controller
                     ->whereBetween('order_date', [$from_date, $to_date])
                     ->count();
             }
-    
+
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
             $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0);
             $statusCounts[6] = $yetToAssignUser;
         } else {
             $statusCounts[6] = [0];
         }
-        
+
         return response()->json([
             'StatusCounts' => $statusCounts,
         ]);
     }
-    
 
-// public function dashboard_count(Request $request)
-// {
-//     $user = Auth::user();
-//     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
-//     $requestData = [
-//         'from_date' => $request->from_date,
-//         'to_date' => $request->to_date,
-//         'project_id' => $request->project_id,
-//         'client_id' => $request->client_id
-//     ];
-    
-//     $statusCountsQuery = OrderCreation::query();
-
-//     if(($request->project_id == 'All' || $request->project_id[0] == 'All') && $request->client_id[0] != 'All') {
-//         $statusCountsQuery = OrderCreation::with('process', 'client')
-//             ->whereIn('process_id', $processIds)
-//             ->whereBetween('order_date', [$request->from_date, $request->to_date])
-//             ->whereHas('process', function ($query) use ($request) {
-//                 $query->whereIn('client_id', $request->client_id);
-//             });
-//     } else {
-//         if ($request->project_id != 'All' && $request->project_id[0] != 'All') {
-//             $statusCountsQuery->whereIn('process_id', $processIds)->whereIn('process_id', $request->project_id)->whereBetween('order_date', [$request->from_date, $request->to_date]);
-//         } else {
-//             $statusCountsQuery = $statusCountsQuery->whereIn('process_id', $processIds)->whereBetween('order_date', [$request->from_date, $request->to_date]);
-//         }
-//     }
-
-//     if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
-//         if($user->user_type_id == 6) {
-//             $statusCountsQuery->where('assignee_user_id', $user->id);
-//         } elseif($user->user_type_id == 7) {
-//             $statusCountsQuery->where('assignee_qa_id', $user->id);
-//         } elseif($user->user_type_id == 8) {
-//             $statusCountsQuery->where(function ($query) use($user){
-//                 $query->where('assignee_user_id', $user->id)
-//                     ->orWhere('assignee_qa_id', $user->id);
-//             });
-//         }
-//     }
-
-//     $statusCounts = $statusCountsQuery->groupBy('status_id')
-//         ->selectRaw('count(*) as count, status_id')
-//         ->where('is_active', 1)
-//         ->pluck('count', 'status_id');
-    
-//     // $statusCounts = $statusCountsQuery->groupBy('status_id')->groupBy('process_id')
-//     //     ->selectRaw('count(*) as count, status_id, process_id')
-//     //     ->where('is_active', 1)
-//     //     ->pluck('count', 'status_id', 'process_id');
-
-//     if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
-//         $yetToAssignUser = $yetToAssignQa = 0;
-//         if (($request->project_id == 'All' || $request->project_id[0] == 'All') && $request->client_id[0] != 'All') {                        
-//             // Query for when project_id is 'All' and client_id is not 'All'
-//             $yetToAssignUser = OrderCreation::with('process', 'client')
-//                 ->where('assignee_user_id', null)
-//                 ->where('status_id', 1)
-//                 ->where('is_active', 1)
-//                 ->whereBetween('order_date', [$request->from_date, $request->to_date])
-//                 ->whereHas('process', function ($query) use ($request) {
-//                     $query->whereIn('client_id', [$request->client_id]);
-//                 })
-//                 ->count();
-//         } elseif (($request->project_id != 'All' || $request->project_id[0] != 'All') && $request->client_id[0] != 'All') {
-//             // Query for when project_id is not 'All'
-//             $yetToAssignUser = OrderCreation::where('assignee_user_id', null)
-//                 ->where('status_id', 1)
-//                 ->where('is_active', 1)
-//                 ->where('process_id', $request->project_id)
-//                 ->whereBetween('order_date', [$request->from_date, $request->to_date])
-//                 ->count();
-    
-//             $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)
-//                 ->where('status_id', 4)
-//                 ->where('is_active', 1)
-//                 ->where('process_id', $request->project_id)
-//                 ->whereBetween('order_date', [$request->from_date, $request->to_date])
-//                 ->count();
-//         } else {
-//             // Query for when project_id is 'All' and client_id is 'All'
-//             $yetToAssignUser = OrderCreation::where('assignee_user_id', null)
-//                 ->where('status_id', 1)
-//                 ->where('is_active', 1)
-//                 ->whereIn('process_id', $processIds)
-//                 ->whereBetween('order_date', [$request->from_date, $request->to_date])
-//                 ->count();
-    
-//             $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)
-//                 ->where('status_id', 4)
-//                 ->where('is_active', 1)
-//                 ->whereIn('process_id', $processIds)
-//                 ->whereBetween('order_date', [$request->from_date, $request->to_date])
-//                 ->count();
-//         }
-    
-//         $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
-//         $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0);
-//         $statusCounts[6] = $yetToAssignUser;
-//     } else {
-//         $statusCounts[6] = [0];
-//     }
-    
-//     return response()->json([
-//         'StatusCounts' => $statusCounts,
-//         'StatusCountsQuery' => $requestData,
-//     ]);
-// }
-
-    
 
 
 
@@ -387,7 +275,7 @@ class HomeController extends Controller
         ->select('stl_client.client_name', 'stl_item_description.process_name', 'oms_order_creations.process_id', 'stl_item_description.project_code')
         ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
         ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
-        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 1 THEN 1 END) AS WIP')
+        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NOT NULL THEN 1 END) AS WIP')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 2 THEN 2 END) AS Hold')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 3 THEN 3 END) AS Cancelled')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 4 THEN 4 END) AS Send_for_QC')
@@ -443,49 +331,58 @@ class HomeController extends Controller
     return response()->json(['data' => $output]);
 }
 
-    public function dashboard_userwise_count(Request $request)
-    {
-        $user = Auth::user();
-        $processIds = $this->getProcessIdsBasedOnUserRole($user);
+public function dashboard_userwise_count(Request $request)
+{
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+    $fromDate = $request->input('from_date');
+    $toDate = $request->input('to_date');
+    $client_id = $request->input('client_id');
+    $project_id = $request->input('project_id');
 
-        $statusCountsQuery = OrderCreation::query();
-        $statusCountsQuery->whereNotNull('assignee_user_id');
+    $statusCountsQuery = OrderCreation::query();
 
-        if ($request->project_id != 'All') {
-            $statusCountsQuery->whereIn('process_id', $processIds)->where('process_id', $request->project_id);
-        } else {
-            $statusCountsQuery->whereIn('process_id', $processIds);
-        }
+    $statusCountsQuery
+    ->whereNotNull('assignee_user_id')
+    ->whereBetween('order_date', [$fromDate, $toDate])
+    ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
+    ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->selectRaw('
+            CONCAT(oms_users.emp_id, " (", oms_users.username, ")") as userinfo,
+            SUM(CASE WHEN status_id = 1 THEN 1 ELSE 0 END) as `status_1`,
+            SUM(CASE WHEN status_id = 2 THEN 1 ELSE 0 END) as `status_2`,
+            SUM(CASE WHEN status_id = 3 THEN 1 ELSE 0 END) as `status_3`,
+            SUM(CASE WHEN status_id = 4 THEN 1 ELSE 0 END) as `status_4`,
+            SUM(CASE WHEN status_id = 5 THEN 1 ELSE 0 END) as `status_5`,
+            COUNT(*) as `status_6`
+        ')
+        ->where('oms_order_creations.is_active', 1)
+        ->groupBy('oms_order_creations.assignee_user_id');
 
-        $statusCountsQuery->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
-            ->selectRaw('
-                CONCAT(oms_users.emp_id, " (", oms_users.username, ")") as userinfo,
-                SUM(CASE WHEN status_id = 1 THEN 1 ELSE 0 END) as `status_1`,
-                SUM(CASE WHEN status_id = 2 THEN 1 ELSE 0 END) as `status_2`,
-                SUM(CASE WHEN status_id = 3 THEN 1 ELSE 0 END) as `status_3`,
-                SUM(CASE WHEN status_id = 4 THEN 1 ELSE 0 END) as `status_4`,
-                SUM(CASE WHEN status_id = 5 THEN 1 ELSE 0 END) as `status_5`,
-                COUNT(*) as `status_6`
-            ')
-            ->where('oms_order_creations.is_active', 1)
-            ->groupBy('oms_order_creations.assignee_user_id');
-
-        $statusCounts = $statusCountsQuery->get();
-
-        $dataForDataTables = $statusCounts->map(function ($count) {
-            return [
-                'userinfo' => $count->userinfo,
-                'status_1' => $count->status_1,
-                'status_2' => $count->status_2,
-                'status_3' => $count->status_3,
-                'status_4' => $count->status_4,
-                'status_5' => $count->status_5,
-                'status_6' => $count->status_6,
-            ];
-        });
-
-        return Datatables::of($dataForDataTables)->toJson();
+    if (!empty($project_id) && $project_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('process_id', $project_id);
     }
+
+    if (!empty($client_id) && $client_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+    }
+
+    $statusCounts = $statusCountsQuery->get();
+
+    $dataForDataTables = $statusCounts->map(function ($count) {
+        return [
+            'userinfo' => $count->userinfo,
+            'status_1' => $count->status_1,
+            'status_2' => $count->status_2,
+            'status_3' => $count->status_3,
+            'status_4' => $count->status_4,
+            'status_5' => $count->status_5,
+            'status_6' => $count->status_6,
+        ];
+    });
+
+    return Datatables::of($dataForDataTables)->toJson();
+}
 
     private function getProcessIdsBasedOnUserRole($user)
     {
@@ -869,15 +766,21 @@ class HomeController extends Controller
 
 // Manikandan
 
+
+
+
+
+
+
 public function revenue_detail_process_fte(Request $request){
- 
+
     $user = Auth::user();
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
     $fromDate = $request->input('from_date');
     $toDate = $request->input('to_date');
     $client_ids = $request->input('client_id');
     $project_id = $request->input('project_id');
- 
+
     $query = DB::table('service_audit AS sa')
         ->select(
             'sa.description_id AS service_id',
@@ -908,43 +811,43 @@ public function revenue_detail_process_fte(Request $request){
         ->where('sid.billing_type_id', 2)
         ->whereIn('sa.description_id', $processIds)
         ->orderBy('sa.effective_date');
- 
+
     if (!empty($client_ids) && $client_ids[0] !== 'All') {
         $query->whereIn('sc.id', $client_ids);
     }
- 
+
     $auditRecords = $query->get();
     $output = [];
- 
+
     foreach ($auditRecords as $key => $auditRecord) {
         // Determine start date
         $start_date = Carbon::parse($fromDate);
         if ($start_date->lessThan($auditRecord->start_date)) {
             $start_date = Carbon::parse($auditRecord->start_date);
         }
- 
+
         // Determine end date
         $end_date = ($auditRecord->end_date === $toDate) ? Carbon::parse($auditRecord->end_date) : Carbon::parse($toDate);
- 
+
         // Adjust end date if it's today
         if ($end_date->isToday()) {
             $end_date = Carbon::today();
         }
- 
+
         $unit_cost = $auditRecord->unit_cost;
         $no_of_resources = $auditRecord->no_of_resources;
- 
+
         // Calculate the difference in days between start_date and end_date
         $days = $end_date->diffInDays($start_date);
- 
+
         // If it's not the last record, add 1 day to $days
         if ($key < count($auditRecords) - 1) {
             $days++;
         }
- 
+
         // Calculate revenue based on days
         $revenue_selected = ($days / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
- 
+
         $output[] = [
             'id' => $auditRecord->service_id,
             'process_name' => $auditRecord->process_name,
@@ -959,8 +862,8 @@ public function revenue_detail_process_fte(Request $request){
             'revenue_selected' => number_format($revenue_selected, 2, '.'),
         ];
     }
- 
- 
+
+
     return response()->json(['data' => $output]);
 }
 
@@ -1133,13 +1036,12 @@ public function revenue_detail_process_total_fte(Request $request)
 public function revenue_detail_client_fte(Request $request){
 
     $user = Auth::user();
-
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
     $fromDate = $request->input('from_date');
-
     $toDate = $request->input('to_date');
     $client_ids = $request->input('client_id');
+    $project_id = $request->input('project_id');
+
     $query = DB::table('service_audit AS sa')
         ->select(
             'sa.description_id AS service_id',
@@ -1150,49 +1052,48 @@ public function revenue_detail_client_fte(Request $request){
             'sa.cost AS unit_cost',
             'sa.no_of_resources',
             'sa.effective_date AS start_date',
-            DB::raw('IFNULL((SELECT MIN(effective_date) FROM service_audit WHERE description_id = sa.description_id AND process_name = sa.process_name AND effective_date > sa.effective_date), CURDATE()) AS end_date'),
-            DB::raw('DATEDIFF(IFNULL((SELECT MIN(effective_date) FROM service_audit WHERE description_id = sa.description_id AND process_name = sa.process_name AND effective_date > sa.effective_date), CURDATE()), sa.effective_date) AS days')
+            DB::raw('IFNULL((
+                SELECT MIN(effective_date)
+                FROM service_audit
+                WHERE description_id = sa.description_id
+                    AND process_name = sa.process_name
+                    AND effective_date > sa.effective_date), CURDATE()) AS end_date'),
+            DB::raw('DATEDIFF(IFNULL((
+                SELECT MIN(effective_date)
+                FROM service_audit
+                WHERE description_id = sa.description_id
+                    AND process_name = sa.process_name
+                    AND effective_date > sa.effective_date), CURDATE()), sa.effective_date) AS days')
         )
         ->join('stl_item_description AS sid', 'sa.description_id', '=', 'sid.id')
         ->join('stl_client AS sc', 'sid.client_id', '=', 'sc.id')
         ->where('sa.is_active', 1)
         ->where('sid.is_active', 1)
-
         ->where('sid.billing_type_id', 2)
         ->whereIn('sa.description_id', $processIds)
         ->orderBy('sa.effective_date');
 
-        if (!empty($client_ids) && $client_ids[0] !== 'All') {
-            $query->whereIn('sc.id', $client_ids);
-        }
-
-
+    if (!empty($client_ids) && $client_ids[0] !== 'All') {
+        $query->whereIn('sc.id', $client_ids);
+    }
 
     $auditRecords = $query->get();
-
     $output = [];
-    $clientsRevenue = [];
 
     foreach ($auditRecords as $key => $auditRecord) {
 
-        $revenue_selected = 0;
-
-        $start_date = Carbon::parse($auditRecord->start_date);
-
-        $end_date = Carbon::parse($auditRecord->end_date);
-
-
-        $multipleRecords = DB::table('service_audit')
-                            ->where('description_id', $auditRecord->id)
-                            ->where('process_name', $auditRecord->process_name)
-                            ->where('no_of_resources', '!=', $auditRecord->no_of_resources)
-                            ->count() > 0;
+        $start_date = Carbon::parse($fromDate);
+        if ($start_date->lessThan($auditRecord->start_date)) {
+            $start_date = Carbon::parse($auditRecord->start_date);
+        }
 
 
-        if ($multipleRecords && !$end_date->isToday() && $key < count($auditRecords) - 1) {
-            $end_date->subDay();  }
-        if ($multipleRecords && $end_date->isToday() && $key < count($auditRecords) - 1) {
-            $days = days+1;  }
+        $end_date = ($auditRecord->end_date === $toDate) ? Carbon::parse($auditRecord->end_date) : Carbon::parse($toDate);
+
+
+        if ($end_date->isToday()) {
+            $end_date = Carbon::today();
+        }
 
         $unit_cost = $auditRecord->unit_cost;
         $no_of_resources = $auditRecord->no_of_resources;
@@ -1201,43 +1102,54 @@ public function revenue_detail_client_fte(Request $request){
         $days = $end_date->diffInDays($start_date);
 
 
-        if ($key === count($auditRecords) - 1) {
-            $days++;
-        }
-
-
         if ($key < count($auditRecords) - 1) {
             $days++;
         }
 
-        if ($start_date->month === $end_date->month) {
 
-            $revenue_selected = ($days / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
-        } else {
+        $revenue_selected = ($days / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
 
-            $revenue_selected += (($start_date->daysInMonth - $start_date->day + 1) / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
-            $revenue_selected += (($end_date->day) / $end_date->daysInMonth) * $unit_cost * $no_of_resources;
-        }
-
-        if (!isset($clientsRevenue[$auditRecord->client_name])) {
-            $clientsRevenue[$auditRecord->client_name] = 0;
-        }
-
-        $clientsRevenue[$auditRecord->client_name] += $revenue_selected;
-    }
-
-
-    foreach ($clientsRevenue as $clientName => $revenue) {
         $output[] = [
-            'client_name' => $clientName,
-            'revenue_selected' => number_format($revenue, 2, '.'),
+            'id' => $auditRecord->service_id,
+            'process_name' => $auditRecord->process_name,
+            'project_code' => $auditRecord->project_code,
+            'unit_cost' => $unit_cost,
+            'no_of_resources' => $no_of_resources,
+            'expected_revenue' => $no_of_resources * $unit_cost,
+            'client_name' => $auditRecord->client_name,
+            'start_date' => $start_date->format('m-d-Y'),
+            'end_date' => $end_date->format('m-d-Y'),
+            'days' => $days,
+            'revenue_selected' => number_format($revenue_selected, 2, '.'),
         ];
     }
 
-    return response()->json(['data' => $output]);
+        $groupedOutput = [];
+        foreach ($output as $record) {
+    $clientName = $record['client_name'];
+    $totalRevenue = str_replace(',', '', $record['revenue_selected']);
+
+    if (!isset($groupedOutput[$clientName])) {
+        $groupedOutput[$clientName] = [
+            'total_revenue' => 0,
+            'revenues_selected' => [],
+        ];
+    }
+
+    $groupedOutput[$clientName]['total_revenue'] += floatval($totalRevenue);
+    $groupedOutput[$clientName]['revenues_selected'][] = floatval($totalRevenue);
 }
 
+$finalOutput = [];
+
+foreach ($groupedOutput as $clientName => $data) {
+    $finalOutput[] = [
+        'client_name' => $clientName,
+        'total_revenue_selected' => number_format($data['total_revenue'], 2, '.'),
+    ];
 }
 
+    return response()->json(['data' => $finalOutput]);
 
-
+}
+}

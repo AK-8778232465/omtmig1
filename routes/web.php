@@ -35,6 +35,7 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('order_detail', 'order_detail')->name('order_detail');
     Route::post('getTotalData', 'getTotalData')->name('getTotalData');
 
+    Route::post('getTotalDataFte', 'getTotalDataFte')->name('getTotalDataFte');
 
     Route::post('revenue_detail_process_fte', 'revenue_detail_process_fte')->name('revenue_detail_process_fte');
     Route::post('revenue_detail_processDetail_fte', 'revenue_detail_processDetail_fte')->name('revenue_detail_processDetail_fte');

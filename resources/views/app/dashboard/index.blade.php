@@ -13,6 +13,11 @@
             font-style: normal;
         }
 
+        .custom-card-bg {
+            background-color: #e0dddd85; /* Light grey color */
+        }
+
+
     .card{
         /* border: 1px solid #f5eea7 !important; */
         transition: box-shadow 0.3s !important;
@@ -64,7 +69,7 @@
 
         /* Change the background color when the switch is checked */
         .toggle-switch:checked + .toggle-label {
-             background-color: #4caf50; 
+             background-color: #4caf50;
         }
 
         /* Move the slider when the switch is checked */
@@ -224,7 +229,7 @@
                 <div class="col-12">
                     <div class="row my-2">
                         @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head'))
-                            <div class="col-xl-4 col-sm-6 col-12">  
+                            <div class="col-xl-4 col-sm-6 col-12">
                             <div class="h-100 card">
                                     <div class="card-content">
                                         <div class="card-body">
@@ -293,25 +298,25 @@
                         @endif
                         </div>
                     </div>
-                </div>
+            </div>
 <!-- // -->
 <div id="rightContent">
 <div class="col-12">
     <div class="row my-2">
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)">
+        @if(!Auth::user()->hasRole('Qcer'))
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-warning mb-0" id="yet_to_assign_cnt">0</h3>
-                                        <!-- <h3 class="icon-dual-warning mb-0" id="yet_cost">$0.00</h3> -->
+                                        <h3 class="icon-dual-pink mb-0" id="wip_cnt">0</h3>
+                                        <!-- <h3 class="icon-dual-pink mb-0" id="wip_cost">$0.00</h3> -->
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
-                                        <span>Yet to Assign</span>
-                                        <i class="icon-dual-warning font-large-2 float-right" data-feather="book-open"></i>
+                                        <span>WIP</span>
+                                        <i class="icon-dual-pink font-large-2 float-right" data-feather="trending-up"></i>
                                     </div>
                                 </div>
                             </div>
@@ -319,28 +324,6 @@
                     </div>
                 </div>
             </div>
-        @endif
-        @if(!Auth::user()->hasRole('Qcer'))
-        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)">
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="media-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="icon-dual-pink mb-0" id="wip_cnt">0</h3>
-                                    <!-- <h3 class="icon-dual-pink mb-0" id="wip_cost">$0.00</h3> -->
-                                </div>
-                                <div class="justify-content-between align-items-center mt-2">
-                                    <span>WIP</span>
-                                    <i class="icon-dual-pink font-large-2 float-right" data-feather="trending-up"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
         @endif
         <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(4)">
             <div class="card">
@@ -422,7 +405,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-4 col-sm-6 col-12">
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders('All')">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -441,13 +424,34 @@
                 </div>
             </div>
         </div>
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
+        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)">
+            <div class="card custom-card-bg">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h3 class="icon-dual-info mb-0 text-dark" id="yet_to_assign_cnt">0</h3>
+                                    <!-- <h3 class="icon-dual-warning mb-0" id="yet_cost">$0.00</h3> -->
+                                </div>
+                                <div class="justify-content-between align-items-center mt-2 text-dark">
+                                    <span>Yet to Assign</span>
+                                    <i class="icon-dual-info font-large-2 float-right text-dark" data-feather="book-open"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
     </div>
 </div>
 </section>
-
         @if(Auth::user()->hasRole('Business Head'))
         <div class="card mt-5 tabledetails" id="Trans_hide">
-            <h4 class="text-center mt-3">Revenue Details - Transaction Billing</h4>
+            <h4 class="text-center mt-3">Revenue Details - Transactional Billing</h4>
             <div class="card-body">
                 <div class="p-0">
                     <h5 class="text-center"> Client Wise Details </h5>
@@ -455,7 +459,7 @@
                         <thead class="text-center">
                             <tr>
                                 {{-- <th width="14%">Date</th> --}}
-                                <th width="14%">Client</th>
+                                <th width="14%" class="text-left">Client</th>
                                 <th width="14%">No of orders completed</th>
                                 <th width="14%">Total</th>
                             </tr>
@@ -468,7 +472,7 @@
                     <table id="revenueTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
-                                <th width="14%">Project Code</th>
+                                <th width="14%" class="text-left">Project Code</th>
                                 <th width="14%">No of orders completed</th>
                                 <th width="14%">Unit cost</th>
                                 <th width="14%">Total</th>
@@ -492,29 +496,25 @@
             </div>
         </div>
 
+        <div class="p-0 w-75 mx-auto" id="fteClientTable">
+            <h4 class="text-center mt-3">Revenue Details - FTE Billing</h4><br>
+            <h5 class="text-center"> Client Wise Details </h5>
+            <table id="fterevenueClientTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+            <thead class="text-center">
+            <tr>
+                <th width="14%">Client</th>
+                <th width="14%">Total Revenue</th>
 
+            </tr>
+            </thead>
+            <tbody class="text-center"></tbody>
+            </table>
+        </div>
 
-        <div class="card mt-5 ftetabledetails" id="fte_hide">
-            <h4 class="text-center mt-3">Revenue Details - FTE</h4>
-            <div class="card-body">
-                <div class="p-0 w-100 mx-auto" id="fteClientTable">
-                    <h5 class="text-center"> Client Wise Details </h5>
-                    <table id="fterevenueClientTable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                    <thead class="text-center">
-                    <tr>
-                    <th class="text-center w-50">Client</th>
-                    <th class="text-center w-50">Total Cost</th>
-                    </tr>
-                    </thead>
-                    <tbody class="text-center"></tbody>
-                    </table>
-                </div>
-            </div>
- 
-            <div class="card-body">
+            <div class="card-body" id="fteProject">
                 <div class="p-0 w-100 mx-auto" id="fteProjectTable">
-                    <h5 class="text-center"> Project Wise Details </h5>
-                    <table id="fterevenueProjectTable" class="table table-bordered mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <h5 class="text-center"> Process Wise Details </h5>
+                    <table id="fterevenueProjectTable" class="table table-bordered mt-0 nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead class="text-center">
                     <tr>
                         <th width="10%">Client</th>
@@ -531,21 +531,7 @@
                     <tbody></tbody>
                     </table>
                 </div>
-                <div class="p-0 process_wise d-none">
-                    <h5 class="text-center"> Process Wise Details </h5>
-                    <table id="revenueFTETable" class="table table-bordered nowrap mt-0" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                        <thead class="text-center">
-                            <tr>
-                                <th width="14%">Project Code</th>
-                                <th width="14%">No of orders completed</th>
-                                <th width="14%">Unit cost</th>
-                                <th width="14%">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-center"></tbody>
-                    </table>
-                </div>
-                <div class="p-0 d-flex d-none justify-content-center">
+                <div class="p-0 d-flex justify-content-center">
                     <table id="totalFTETable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
                         <thead class="text-center">
                             <tr>
@@ -553,7 +539,7 @@
                             </tr>
                         </thead>
                         <tbody class="text-center">
-                            <td id="grantCountFTE"></td>
+                            <td id='fte_costs'></td>
                         </tbody>
                     </table>
                 </div>
@@ -665,7 +651,6 @@ $(document).ready(function() {
         clientId = $("#client_id_dcf").val();
         fromDate = $("#fromDate_dcf").val();
         toDate = $("#toDate_dcf").val();
-
         $.ajax({
             url: "{{ route('redirectwithfilter') }}",
             method: 'POST',
@@ -712,6 +697,7 @@ $(document).ready(function() {
             fetchOrderData(projectId, clientId, fromDate, toDate);
             getGrandTotal(fromDate, toDate, client_id);
             datewise_datatable(fromDate, toDate, client_id, projectId)
+            userwise_datatable(fromDate, toDate, client_id, projectId);
         });
 
         fetchOrderData(projectId, clientId, fromDate, toDate);
@@ -742,7 +728,7 @@ function fetchOrderData(projectId, clientId, fromDate, toDate) {
             let statusCounts = response.StatusCounts;
             let totalValue = 0;
             for (const key in statusCounts) {
-                if (statusCounts.hasOwnProperty(key)) {
+                if (statusCounts.hasOwnProperty(key) && key !== '6') {
                     totalValue += statusCounts[key];
                 }
             }
@@ -835,7 +821,13 @@ $('#datewise_datatable').on('draw.dt', function() {
 
 
     @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP', 'Business Head', 'PM/TL']))
-    $(document).ready(function () {
+    function userwise_datatable(fromDate, toDate, client_id, projectId){
+        fromDate = $('#fromDate_dcf').val();
+        toDate = $('#toDate_dcf').val();
+        client_id = $('#client_id_dcf').val();
+        project_id = $('#project_id_dcf').val();
+
+
         datatable = $('#userwise_datatable').DataTable({
             destroy: true,
             processing: true,
@@ -843,10 +835,14 @@ $('#datewise_datatable').on('draw.dt', function() {
             ajax: {
                 url: "{{ route('dashboard_userwise_count') }}",
                 type: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    project_id: 'All',
-                }
+                data: function(d) {
+                        d.to_date = toDate;
+                        d.from_date = fromDate;
+                        d.client_id = client_id;
+                        d.project_id = project_id;
+                        d._token = '{{csrf_token()}}';
+                    },
+                dataSrc: 'data'
             },
             columns: [
                 { data: 'userinfo', name: 'userinfo', class: 'text-left' },
@@ -858,7 +854,8 @@ $('#datewise_datatable').on('draw.dt', function() {
                 { data: 'status_6', name: 'status_6' },
             ],
         });
-    });
+    }
+
 
     $('#userwise_datatable').on('draw.dt', function () {
         $('#userwise_table').removeClass('d-none');
@@ -880,6 +877,7 @@ $('#datewise_datatable').on('draw.dt', function() {
             success: function (response) {
                 let GrandTotal = response.GrandTotal;
                 $('#grantCount').text(GrandTotal || 0.00000);
+                $('#fte_costs').text(GrandTotal || 0.00000);
                 $('#transaction_cost').text(GrandTotal || 0.00000);
                 updateTotalCost()
             }
@@ -889,6 +887,7 @@ $('#datewise_datatable').on('draw.dt', function() {
     function updateTotalCost() {
     // Get the values from #fte_cost and #transaction_cost
     var fteCost = parseFloat($('#fte_cost').text()) || 0;
+    var fteCost = parseFloat($('#fte_costs').text()) || 0;
     var transactionCost = parseFloat($('#transaction_cost').text()) || 0;
 
     // Calculate the total sum
@@ -1121,7 +1120,7 @@ var client_id  = "";
 
 
 $(document).ready(function() {
-   
+
     $('#filterButton').on('click', function (e) {
         e.preventDefault();
         fromDate = $('#fromDate_dcf').val();
@@ -1163,7 +1162,7 @@ $(document).ready(function() {
     fterevenueClientWise(fromDate, toDate,client_id);
 
 
-        function fterevenueClientWise(fromDate, toDate, client_id) {
+    function fterevenueClientWise(fromDate, toDate, client_id) {
             fromDate = $('#fromDate_dcf').val();
             toDate = $('#toDate_dcf').val();
             client_id = $('#client_id_dcf').val();
@@ -1186,26 +1185,26 @@ $(document).ready(function() {
                     dataSrc: 'data',
                 },
                 columns: [
-                    { data: 'client_name', name: 'client_name', className: "text-center"  },
-    
-                    { data: 'revenue_selected', name: 'revenue_selected', className: "text-center" },
+                    { data: 'client_name', name: 'client_name', className: "text-left" },
+                    { data: 'total_revenue_selected', name: 'total_revenue_selected', className: "text-center" },
                 ],
             });
-             // Calculate and display the total of 'revenue_selected' when the table is redrawn
+
              datatable.on('draw', function () {
                 setTimeout(function () {
                     var total = 0;
-                    // Iterate through the rows to calculate the sum of 'revenue_selected'
+
                     datatable.rows().every(function (rowIdx, tableLoop, rowLoop) {
                         var data = this.data();
-                        var revenueSelected = data.revenue_selected.replace(/,/g, '');
+                        var revenueSelected = data.total_revenue_selected.replace(/,/g, '');
                         total += parseFloat(revenueSelected);
                     });
-                   
-                    // Update the content of the element with ID 'fte_cost'
+
+
                     $('#fte_cost').text(total.toFixed(2));
+                    $('#fte_costs').text(total.toFixed(2));
                     updateTotalCost();
-                }, 1000); // 1 second delay (1000 milliseconds)
+                }, 1000);
             });
     }
 
@@ -1321,6 +1320,8 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
                     }
         });
 
+
+
 //date script-start
 
     document.getElementById('toDate_dcf').valueAsDate = new Date();
@@ -1366,10 +1367,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const rightContent = document.getElementById('rightContent');
     const projectIdDcf = document.getElementById('project_hide');
     const billingIdDcf = document.getElementById('billing_hide');
+    const fteProjectIdDcf = document.getElementById('fteProject');
+
     const userwiseIdDcf = document.getElementById('userwise_table');
     const datewiseIdDcf = document.getElementById('datewise_table');
     const transIdDcf = document.getElementById('Trans_hide');
-    const fteIdDcf = document.getElementById('fte_hide');
+    const fteIdDcf = document.getElementById('fteClientTable');
 
     // Function to update the visibility based on the toggle switch state
     function updateVisibility() {
@@ -1384,20 +1387,9 @@ document.addEventListener('DOMContentLoaded', function() {
             datewiseIdDcf.style.display = 'block';
             transIdDcf.style.display = 'none';
             fteIdDcf.style.display = 'none';
-        }
-        // else if(toggleSwitch.checked && Auth::user()->hasRole('') ) {
-        //     // If the switch is unchecked (Production side), hide the right content and project content
-        //     // and show the left content and billing content
-        //     leftContent.style.display = 'block';
-        //     projectIdDcf.style.display = 'none';
-        //     rightContent.style.display = 'none';
-        //     billingIdDcf.style.display = 'block';
-        //     userwiseIdDcf.style.display = 'none';
-        //     datewiseIdDcf.style.display = 'none';
-        //     transIdDcf.style.display = 'block';
-        //     fteIdDcf.style.display = 'block';
-        // }
-         else {
+            fteProjectIdDcf.style.display = 'none';
+
+        } else {
             // If the switch is unchecked (Production side), hide the right content and project content
             // and show the left content and billing content
             leftContent.style.display = 'block';
@@ -1407,7 +1399,8 @@ document.addEventListener('DOMContentLoaded', function() {
             userwiseIdDcf.style.display = 'none';
             datewiseIdDcf.style.display = 'none';
             transIdDcf.style.display = 'block';
-            fteIdDcf.style.display = 'block';
+             fteIdDcf.style.display = 'block';
+              fteProjectIdDcf.style.display = 'block';
         }
     }
 
@@ -1422,7 +1415,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 $(document).ready(function () {
-    $("#filterButton").click();  
+    $("#filterButton").click();
 });
 
 
