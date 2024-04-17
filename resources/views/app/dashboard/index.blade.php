@@ -513,38 +513,37 @@
             </div>
         </div>
 
-            <div class="card-body" id="fteProject">
-                <div class="p-0 w-100 mx-auto" id="fteProjectTable">
-                    <h5 class="text-center"> Process Wise Details </h5>
-                    <table id="fterevenueProjectTable" class="table table-bordered mt-0 nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+        <div class="card-body" id="fteProject">
+            <div class="p-0 w-100 mx-auto" id="fteProjectTable">
+                <h5 class="text-center"> Process Wise Details </h5>
+                <table id="fterevenueProjectTable" class="table table-bordered mt-0 nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                <thead class="text-center">
+                <tr>
+                    <th width="10%">Client</th>
+                    <th width="15%">Project Code</th>
+                    <th width="8%">Pricing</th>
+                    <th width="10%">FTE Count</th>
+                    <th width="14%">Expected Revenue</th>
+                    <th width="10%">Start Date</th>
+                    <th width="12%">End Date</th>
+                    <th width="5%">Days</th>
+                    <th width="16%">Revenue as Selected Date</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+                </table>
+            </div>
+            <div class="p-0 d-flex justify-content-center">
+                <table id="totalFTETable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
                     <thead class="text-center">
-                    <tr>
-                        <th width="10%">Client</th>
-                        <th width="15%">Project Code</th>
-                        <th width="8%">Pricing</th>
-                        <th width="10%">FTE Count</th>
-                        <th width="14%">Expected Revenue</th>
-                        <th width="10%">Start Date</th>
-                        <th width="12%">End Date</th>
-                        <th width="5%">Days</th>
-                        <th width="16%">Revenue as Selected Date</th>
-                    </tr>
+                        <tr>
+                            <th width="14%">Grand Total Revenue</th>
+                        </tr>
                     </thead>
-                    <tbody></tbody>
-                    </table>
-                </div>
-                <div class="p-0 d-flex justify-content-center">
-                    <table id="totalFTETable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
-                        <thead class="text-center">
-                            <tr>
-                                <th width="14%">Grand Total Revenue</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-center">
-                            <td id='fte_costs'></td>
-                        </tbody>
-                    </table>
-                </div>
+                    <tbody class="text-center">
+                        <td id='fte_costs'></td>
+                    </tbody>
+                </table>
             </div>
         </div>
         @endif
