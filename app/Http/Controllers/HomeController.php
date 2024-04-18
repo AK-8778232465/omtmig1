@@ -822,6 +822,14 @@ public function revenue_detail_process_fte(Request $request){
         $query->whereIn('sc.id', $client_ids);
     }
 
+    if (!empty($fromDate) && !empty($toDate)) {
+        $query->where('sa.effective_date', '>=', $fromDate)->where('sa.effective_date', '<=', $toDate);
+    } elseif (!empty($fromDate)) {
+        $query->where('sa.effective_date', '>=', $fromDate);
+    } elseif (!empty($toDate)) {
+        $query->where('sa.effective_date', '<=', $toDate);
+    }
+
     $auditRecords = $query->get();
     $output = [];
 
@@ -847,7 +855,7 @@ public function revenue_detail_process_fte(Request $request){
         $days = $end_date->diffInDays($start_date);
 
         // If it's not the last record, add 1 day to $days
-        if ($key <= count($auditRecords) - 1) {
+        if ($key < count($auditRecords) - 1) {
             $days++;
         }
 
@@ -1083,6 +1091,14 @@ public function revenue_detail_client_fte(Request $request){
         $query->whereIn('sc.id', $client_ids);
     }
 
+    if (!empty($fromDate) && !empty($toDate)) {
+        $query->where('sa.effective_date', '>=', $fromDate)->where('sa.effective_date', '<=', $toDate);
+    } elseif (!empty($fromDate)) {
+        $query->where('sa.effective_date', '>=', $fromDate);
+    } elseif (!empty($toDate)) {
+        $query->where('sa.effective_date', '<=', $toDate);
+    }
+
     $auditRecords = $query->get();
     $output = [];
 
@@ -1108,7 +1124,7 @@ public function revenue_detail_client_fte(Request $request){
         $days = $end_date->diffInDays($start_date);
 
 
-        if ($key <= count($auditRecords) - 1) {
+        if ($key < count($auditRecords) - 1) {
             $days++;
         }
 
