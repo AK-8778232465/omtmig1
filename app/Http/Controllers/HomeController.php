@@ -719,7 +719,7 @@ public function revenue_detail_process_fte(Request $request){
       ->where('sid.is_active', 1)
       ->where('sid.billing_type_id', 2)
       ->whereIn('sa.description_id', $processIds)
-      ->where('sa.effective_date', '>=', $fromDate->format('Y-m-d'))
+    //   ->where('sa.effective_date', '>=', $fromDate->format('Y-m-d'))
     ->where('sa.effective_date', '<=', $toDate->format('Y-m-d'));
 
     if (!empty($client_ids) && $client_ids[0] !== 'All') {
@@ -1016,7 +1016,7 @@ public function revenue_detail_client_fte(Request $request){
     ->where('sid.is_active', 1)
     ->where('sid.billing_type_id', 2)
     ->whereIn('sa.description_id', $processIds)
-    ->where('sa.effective_date', '>=', $fromDate->format('Y-m-d'))
+    // ->where('sa.effective_date', '>=', $fromDate->format('Y-m-d'))
     ->where('sa.effective_date', '<=', $toDate->format('Y-m-d'));
 
     if (!empty($client_ids) && $client_ids[0] !== 'All') {
