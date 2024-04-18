@@ -733,8 +733,13 @@ public function revenue_detail_process_fte(Request $request){
     foreach ($auditRecords as $key => $auditRecord) {
 
       $revenue_selected = 0;
-      $start_date = Carbon::parse($auditRecord->start_date);
+
       $end_date = Carbon::parse($auditRecord->end_date);
+      $start_date = Carbon::parse($auditRecord->start_date);
+
+      if ($start_date->lt($fromDate)) {
+            $start_date = $fromDate;
+        }
 
       // Check if there are multiple records for the same client and process_name
       $multipleRecords = DB::table('service_audit')
@@ -757,17 +762,13 @@ public function revenue_detail_process_fte(Request $request){
                 } else {
                     $end_date = $toDate;
                 }
-        }else{
-            $end_date = $toDate;
         }
-
-
 
       $unit_cost = $auditRecord->unit_cost;
       $no_of_resources = $auditRecord->no_of_resources;
 
       // Calculate the difference in days between start_date and end_date
-      $days = $end_date->diffInDays($auditRecord->start_date);
+      $days = $end_date->diffInDays($start_date);
 
       // Check if it's the last record
       if ($key === count($auditRecords) - 1) {
@@ -803,10 +804,6 @@ public function revenue_detail_process_fte(Request $request){
             'revenue_selected' => number_format($revenue_selected, 2, '.'),
         ];
     }
-
-
-
-
     return response()->json(['data' => $output]);
 }
 
@@ -982,12 +979,13 @@ public function revenue_detail_client_fte(Request $request){
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
     $fromDate = Carbon::parse($request->input('from_date'));
     $toDate = Carbon::parse($request->input('to_date'));
+
     $client_ids = $request->input('client_id');
     $project_id = $request->input('project_id');
 
     $query = DB::table('service_audit AS sa')
 
-    ->select(
+      ->select(
         'sa.description_id AS service_id',
         'sa.description_id as id',
         'sa.process_name',
@@ -1000,23 +998,24 @@ public function revenue_detail_client_fte(Request $request){
             SELECT MIN(effective_date)
             FROM service_audit
             WHERE description_id = sa.description_id
-            AND process_name = sa.process_name
-            AND effective_date > sa.effective_date), CURDATE()) AS end_date'),
+              AND process_name = sa.process_name
+              AND effective_date > sa.effective_date), CURDATE()) AS end_date'),
         DB::raw('DATEDIFF(IFNULL((
             SELECT MIN(effective_date)
             FROM service_audit
             WHERE description_id = sa.description_id
-            AND process_name = sa.process_name
-            AND effective_date > sa.effective_date), CURDATE()), sa.effective_date) AS days')
-    )
+              AND process_name = sa.process_name
+              AND effective_date > sa.effective_date), CURDATE()), sa.effective_date) AS days')
+      )
 
-    ->join('stl_item_description AS sid', 'sa.description_id', '=', 'sid.id')
-    ->join('stl_client AS sc', 'sid.client_id', '=', 'sc.id')
-    ->where('sa.is_active', 1)
-    ->where('sid.is_active', 1)
-    ->where('sid.billing_type_id', 2)
-    ->whereIn('sa.description_id', $processIds)
-    // ->where('sa.effective_date', '>=', $fromDate->format('Y-m-d'))
+      ->join('stl_item_description AS sid', 'sa.description_id', '=', 'sid.id')
+      ->join('stl_client AS sc', 'sid.client_id', '=', 'sc.id')
+
+      ->where('sa.is_active', 1)
+      ->where('sid.is_active', 1)
+      ->where('sid.billing_type_id', 2)
+      ->whereIn('sa.description_id', $processIds)
+    //   ->where('sa.effective_date', '>=', $fromDate->format('Y-m-d'))
     ->where('sa.effective_date', '<=', $toDate->format('Y-m-d'));
 
     if (!empty($client_ids) && $client_ids[0] !== 'All') {
@@ -1024,52 +1023,65 @@ public function revenue_detail_client_fte(Request $request){
     }
 
     $auditRecords = $query->get();
+
     $output = [];
     $prevRecord = null;
     foreach ($auditRecords as $key => $auditRecord) {
+
       $revenue_selected = 0;
-      $start_date = Carbon::parse($auditRecord->start_date);
+
       $end_date = Carbon::parse($auditRecord->end_date);
+      $start_date = Carbon::parse($auditRecord->start_date);
 
+      if ($start_date->lt($fromDate)) {
+            $start_date = $fromDate;
+        }
+
+      // Check if there are multiple records for the same client and process_name
       $multipleRecords = DB::table('service_audit')
-        ->where('description_id', $auditRecord->id)
-        ->where('process_name', $auditRecord->process_name)
-        ->where('no_of_resources', '!=', $auditRecord->no_of_resources)
-        ->count() > 0;
+          ->where('description_id', $auditRecord->id)
+          ->where('process_name', $auditRecord->process_name)
+          ->where('no_of_resources', '!=', $auditRecord->no_of_resources)
+          ->count() > 0;
 
+      // Adjust end date based on the condition
         if ($multipleRecords) {
-            if ($prevRecord && $prevRecord->no_of_resources != $auditRecord->no_of_resources)
-            {
+
+            if ($prevRecord && $prevRecord->no_of_resources != $auditRecord->no_of_resources) {
                 $end_date = $start_date->subDay();
-            }
-            else if ($key < count($auditRecords) - 1) {
+                }
+                else if ($key < count($auditRecords) - 1) {
 
-                $calculatedEndDate = $end_date->subDay(); // One day before if multiple records
-                $endDateToUse = $calculatedEndDate->lt($toDate) ? $calculatedEndDate : $toDate;
-                $end_date = $endDateToUse;
-            }
-            else
-            {
-                $end_date = $toDate;
-            }
+                    $calculatedEndDate = $end_date->subDay(); // One day before if multiple records
+                    $endDateToUse = $calculatedEndDate->lt($toDate) ? $calculatedEndDate : $toDate;
+                    $end_date = $endDateToUse;
+                } else {
+                    $end_date = $toDate;
+                }
         }
 
+      $unit_cost = $auditRecord->unit_cost;
+      $no_of_resources = $auditRecord->no_of_resources;
 
+      // Calculate the difference in days between start_date and end_date
+      $days = $end_date->diffInDays($start_date);
 
-        $unit_cost = $auditRecord->unit_cost;
-        $no_of_resources = $auditRecord->no_of_resources;
+      // Check if it's the last record
+      if ($key === count($auditRecords) - 1) {
+        $days++; // Add 1 day to $days for the last record
+      }
 
-        $days = $end_date->diffInDays($auditRecord->start_date);
+      // If it's not the last record, add 1 day to $days
+      if ($key < count($auditRecords) - 1) {
+        $days++;
+      }
 
-        if ($key === count($auditRecords) - 1) {
-            $days++;
-        }
-        if ($key < count($auditRecords) - 1) {
-            $days++;
-        }
-        if ($start_date->month === $end_date->month) {
-            $revenue_selected = ($days / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
+      if ($start_date->month === $end_date->month) {
+        // If start and end date are in the same month
+        $revenue_selected = ($days / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
+
         } else {
+            // If start and end date are in different months
             $revenue_selected += (($start_date->daysInMonth - $start_date->day + 1) / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
             $revenue_selected += (($end_date->day) / $end_date->daysInMonth) * $unit_cost * $no_of_resources;
         }
