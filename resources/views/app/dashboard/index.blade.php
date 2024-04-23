@@ -95,6 +95,10 @@
             margin-left: 10px;
         }
 
+        .dollar-sign::before {
+         content: "$";
+        }
+
     </style>
 {{-- Order Wise --}}
 <div class="modal fade vh-75" id="orderDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -489,13 +493,14 @@
                             </tr>
                         </thead>
                         <tbody class="text-center">
-                            <td id="grantCount"></td>
+                            <td id="grantCount" class="dollar-sign"></td>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
+<div class="card mt-5 tabledetails"  id="ftetabledetails">
         <div class="card-body" id="fteClient">
             <div class="p-0 w-75 mx-auto" id="fteClientTable">
                 <h4 class="text-center mt-3">Revenue Details - FTE Billing</h4><br>
@@ -541,11 +546,12 @@
                         </tr>
                     </thead>
                     <tbody class="text-center">
-                        <td id='fte_costs'></td>
+                        <td id='fte_costs' class="dollar-sign"></td>
                     </tbody>
                 </table>
             </div>
         </div>
+</div>
         @endif
 
         @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP','PM/TL','Business Head']))
@@ -605,12 +611,12 @@ $(document).ready(function() {
         $('#billing_id_dcf').on('change', function() {
             var value = $(this).val();
             if (value === 'All') {
-                $('.ftetabledetails, #Trans_hide').show();
+                $('#ftetabledetails, #Trans_hide').show();
             } else if (value === 'FTE') {
-                $('.ftetabledetails').show();
+                $('#ftetabledetails').show();
                 $('#Trans_hide').hide();
             } else if (value === 'TXN') {
-                $('.ftetabledetails').hide();
+                $('#ftetabledetails').hide();
                 $('#Trans_hide').show();
             }
         });
@@ -886,16 +892,29 @@ $('#datewise_datatable').on('draw.dt', function() {
     }
 
     function updateTotalCost() {
-    // Get the values from #fte_cost and #transaction_cost
-    var fteCost = parseFloat($('#fte_cost').text()) || 0;
-    var fteCost = parseFloat($('#fte_costs').text()) || 0;
-    var transactionCost = parseFloat($('#transaction_cost').text()) || 0;
-
-    // Calculate the total sum
+    var fteCost = parseFloat($('#fte_cost').text().replace(/,/g, '')) || 0;
+    var transactionCost = parseFloat($('#transaction_cost').text().replace(/,/g, '')) || 0;
     var totalCost = fteCost + transactionCost;
 
-    // Update the content of the element with ID #total_cost
-    $('#total_cost').text(totalCost.toFixed(2));
+    let formattedFteCost = fteCost.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+    let formattedTransactionCost = transactionCost.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+    let formattedTotalCost = totalCost.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+    $('#fte_cost').text(formattedFteCost); // Formatting fteCost
+    $('#fte_costs').text(formattedFteCost); // Displaying formatted fteCost
+    $('#transaction_cost').text(formattedTransactionCost); // Formatting and displaying transactionCost
+    $('#total_cost').text(formattedTotalCost);
 }
 
 
@@ -1405,7 +1424,7 @@ document.addEventListener('DOMContentLoaded', function() {
              fteIdDcf.style.display = 'block';
               fteProjectIdDcf.style.display = 'block';
               fteClientIdDcf.style.display = 'block';
-              
+
         }
     }
 

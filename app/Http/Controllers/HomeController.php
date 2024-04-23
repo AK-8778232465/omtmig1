@@ -771,88 +771,83 @@ public function dashboard_userwise_count(Request $request)
 // }
 
 // Manikandan
-
-
-
-
-
-
-
-public function revenue_detail_process_fte(Request $request){
+public function revenue_detail_process_fte(Request $request) {
 
     $user = Auth::user();
+
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-    $fromDate = $request->input('from_date');
-    $toDate = $request->input('to_date');
+
+    $fromDate = Carbon::parse($request->input('from_date'));
+    $toDate = Carbon::parse($request->input('to_date'));
     $client_ids = $request->input('client_id');
     $project_id = $request->input('project_id');
 
+    if ($fromDate->lte($toDate)) {
+
     $query = DB::table('service_audit AS sa')
-        ->select(
-            'sa.description_id AS service_id',
-            'sa.description_id as id',
-            'sa.process_name',
-            'sid.project_code',
-            'sc.client_name',
-            'sa.cost AS unit_cost',
-            'sa.no_of_resources',
-            'sa.effective_date AS start_date',
-            DB::raw('IFNULL((
-                SELECT MIN(effective_date)
-                FROM service_audit
-                WHERE description_id = sa.description_id
-                    AND process_name = sa.process_name
-                    AND effective_date > sa.effective_date), CURDATE()) AS end_date'),
-            DB::raw('DATEDIFF(IFNULL((
-                SELECT MIN(effective_date)
-                FROM service_audit
-                WHERE description_id = sa.description_id
-                    AND process_name = sa.process_name
-                    AND effective_date > sa.effective_date), CURDATE()), sa.effective_date) AS days')
-        )
-        ->join('stl_item_description AS sid', 'sa.description_id', '=', 'sid.id')
-        ->join('stl_client AS sc', 'sid.client_id', '=', 'sc.id')
-        ->where('sa.is_active', 1)
-        ->where('sid.is_active', 1)
-        ->where('sid.billing_type_id', 2)
-        ->whereIn('sa.description_id', $processIds)
-        ->orderBy('sa.effective_date');
+
+      ->select(
+        'sa.description_id AS service_id',
+        'sa.description_id as id',
+        'sa.process_name',
+        'sid.project_code',
+        'sc.client_name',
+        'sa.cost AS unit_cost',
+        'sa.no_of_resources',
+        'sa.effective_date AS start_date',
+        DB::raw('IFNULL((
+            SELECT MIN(effective_date)
+            FROM service_audit
+            WHERE description_id = sa.description_id
+              AND process_name = sa.process_name
+              AND effective_date > sa.effective_date), NULL) AS end_date')
+      )
+
+      ->join('stl_item_description AS sid', 'sa.description_id', '=', 'sid.id')
+      ->join('stl_client AS sc', 'sid.client_id', '=', 'sc.id')
+
+      ->where('sa.is_active', 1)
+      ->where('sid.is_active', 1)
+      ->where('sid.billing_type_id', 2)
+      ->whereIn('sa.description_id', $processIds)
+    ->where('sa.effective_date', '<=', $toDate->format('Y-m-d'));
 
     if (!empty($client_ids) && $client_ids[0] !== 'All') {
         $query->whereIn('sc.id', $client_ids);
     }
 
     $auditRecords = $query->get();
+
     $output = [];
-
     foreach ($auditRecords as $key => $auditRecord) {
-        // Determine start date
-        $start_date = Carbon::parse($fromDate);
-        if ($start_date->lessThan($auditRecord->start_date)) {
-            $start_date = Carbon::parse($auditRecord->start_date);
-        }
 
-        // Determine end date
-        $end_date = ($auditRecord->end_date === $toDate) ? Carbon::parse($auditRecord->end_date) : Carbon::parse($toDate);
+    $revenue_selected = 0;
+    $start_date = $fromDate->greaterThan(Carbon::parse($auditRecord->start_date)) ? $fromDate : Carbon::parse($auditRecord->start_date);
+    $end_date = $toDate->lessThan(Carbon::parse($auditRecord->end_date)) ? $toDate : Carbon::parse($auditRecord->end_date)->subDay() ;
 
-        // Adjust end date if it's today
-        if ($end_date->isToday()) {
-            $end_date = Carbon::today();
-        }
+    if ($end_date->lt($start_date)) {
+        continue;
+    }
 
-        $unit_cost = $auditRecord->unit_cost;
-        $no_of_resources = $auditRecord->no_of_resources;
+      $unit_cost = $auditRecord->unit_cost;
+      $no_of_resources = $auditRecord->no_of_resources;
 
-        // Calculate the difference in days between start_date and end_date
-        $days = $end_date->diffInDays($start_date);
+      $days = $end_date->diffInDays($start_date);
 
-        // If it's not the last record, add 1 day to $days
-        if ($key <= count($auditRecords) - 1) {
-            $days++;
-        }
 
-        // Calculate revenue based on days
+      if (($key === count($auditRecords) - 1)||($key < count($auditRecords) - 1)) {
+        $days++;
+      }
+
+      if ($start_date->month === $end_date->month) {
+
         $revenue_selected = ($days / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
+
+        } else {
+
+            $revenue_selected += (($start_date->daysInMonth - $start_date->day + 1) / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
+            $revenue_selected += (($end_date->day) / $end_date->daysInMonth) * $unit_cost * $no_of_resources;
+        }
 
         $output[] = [
             'id' => $auditRecord->service_id,
@@ -867,12 +862,15 @@ public function revenue_detail_process_fte(Request $request){
             'days' => $days,
             'revenue_selected' => number_format($revenue_selected, 2, '.'),
         ];
+
+    }
+    return response()->json(['data' => $output]);
+    }
+    else {
+        return response()->json(['data' => []]);
     }
 
-
-    return response()->json(['data' => $output]);
 }
-
 
 
 public function revenue_detail_processDetail_fte(Request $request)
@@ -1042,14 +1040,19 @@ public function revenue_detail_process_total_fte(Request $request)
 public function revenue_detail_client_fte(Request $request){
 
     $user = Auth::user();
+
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-    $fromDate = $request->input('from_date');
-    $toDate = $request->input('to_date');
+
+    $fromDate = Carbon::parse($request->input('from_date'));
+    $toDate = Carbon::parse($request->input('to_date'));
     $client_ids = $request->input('client_id');
     $project_id = $request->input('project_id');
 
-    $query = DB::table('service_audit AS sa')
-        ->select(
+    if ($fromDate->lte($toDate)) {
+
+        $query = DB::table('service_audit AS sa')
+
+          ->select(
             'sa.description_id AS service_id',
             'sa.description_id as id',
             'sa.process_name',
@@ -1062,100 +1065,92 @@ public function revenue_detail_client_fte(Request $request){
                 SELECT MIN(effective_date)
                 FROM service_audit
                 WHERE description_id = sa.description_id
-                    AND process_name = sa.process_name
-                    AND effective_date > sa.effective_date), CURDATE()) AS end_date'),
-            DB::raw('DATEDIFF(IFNULL((
-                SELECT MIN(effective_date)
-                FROM service_audit
-                WHERE description_id = sa.description_id
-                    AND process_name = sa.process_name
-                    AND effective_date > sa.effective_date), CURDATE()), sa.effective_date) AS days')
-        )
-        ->join('stl_item_description AS sid', 'sa.description_id', '=', 'sid.id')
-        ->join('stl_client AS sc', 'sid.client_id', '=', 'sc.id')
-        ->where('sa.is_active', 1)
-        ->where('sid.is_active', 1)
-        ->where('sid.billing_type_id', 2)
-        ->whereIn('sa.description_id', $processIds)
-        ->orderBy('sa.effective_date');
+                  AND process_name = sa.process_name
+                  AND effective_date > sa.effective_date), NULL) AS end_date')
+          )
 
-    if (!empty($client_ids) && $client_ids[0] !== 'All') {
-        $query->whereIn('sc.id', $client_ids);
-    }
+          ->join('stl_item_description AS sid', 'sa.description_id', '=', 'sid.id')
+          ->join('stl_client AS sc', 'sid.client_id', '=', 'sc.id')
 
-    $auditRecords = $query->get();
-    $output = [];
+          ->where('sa.is_active', 1)
+          ->where('sid.is_active', 1)
+          ->where('sid.billing_type_id', 2)
+          ->whereIn('sa.description_id', $processIds)
+        ->where('sa.effective_date', '<=', $toDate->format('Y-m-d'));
 
-    foreach ($auditRecords as $key => $auditRecord) {
-
-        $start_date = Carbon::parse($fromDate);
-        if ($start_date->lessThan($auditRecord->start_date)) {
-            $start_date = Carbon::parse($auditRecord->start_date);
+        if (!empty($client_ids) && $client_ids[0] !== 'All') {
+            $query->whereIn('sc.id', $client_ids);
         }
 
+        $auditRecords = $query->get();
 
-        $end_date = ($auditRecord->end_date === $toDate) ? Carbon::parse($auditRecord->end_date) : Carbon::parse($toDate);
+        $output = [];
+        foreach ($auditRecords as $key => $auditRecord) {
 
+        $revenue_selected = 0;
+        $start_date = $fromDate->greaterThan(Carbon::parse($auditRecord->start_date)) ? $fromDate : Carbon::parse($auditRecord->start_date);
+        $end_date = $toDate->lessThan(Carbon::parse($auditRecord->end_date)) ? $toDate : Carbon::parse($auditRecord->end_date)->subDay() ;
 
-        if ($end_date->isToday()) {
-            $end_date = Carbon::today();
+        if ($end_date->lt($start_date)) {
+            continue;
         }
 
-        $unit_cost = $auditRecord->unit_cost;
-        $no_of_resources = $auditRecord->no_of_resources;
+          $unit_cost = $auditRecord->unit_cost;
+          $no_of_resources = $auditRecord->no_of_resources;
+
+          $days = $end_date->diffInDays($start_date);
 
 
-        $days = $end_date->diffInDays($start_date);
-
-
-        if ($key <= count($auditRecords) - 1) {
+          if (($key === count($auditRecords) - 1)||($key < count($auditRecords) - 1)) {
             $days++;
+          }
+
+          if ($start_date->month === $end_date->month) {
+
+            $revenue_selected = ($days / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
+
+            } else {
+
+                $revenue_selected += (($start_date->daysInMonth - $start_date->day + 1) / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
+                $revenue_selected += (($end_date->day) / $end_date->daysInMonth) * $unit_cost * $no_of_resources;
+            }
+
+            $output[] = [
+                'id' => $auditRecord->service_id,
+                'process_name' => $auditRecord->process_name,
+                'project_code' => $auditRecord->project_code,
+                'unit_cost' => $unit_cost,
+                'no_of_resources' => $no_of_resources,
+                'expected_revenue' => $no_of_resources * $unit_cost,
+                'client_name' => $auditRecord->client_name,
+                'start_date' => $start_date->format('m-d-Y'),
+                'end_date' => $end_date->format('m-d-Y'),
+                'days' => $days,
+                'revenue_selected' => number_format($revenue_selected, 2, '.'),
+            ];
+
         }
-
-
-        $revenue_selected = ($days / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
-
-        $output[] = [
-            'id' => $auditRecord->service_id,
-            'process_name' => $auditRecord->process_name,
-            'project_code' => $auditRecord->project_code,
-            'unit_cost' => $unit_cost,
-            'no_of_resources' => $no_of_resources,
-            'expected_revenue' => $no_of_resources * $unit_cost,
-            'client_name' => $auditRecord->client_name,
-            'start_date' => $start_date->format('m-d-Y'),
-            'end_date' => $end_date->format('m-d-Y'),
-            'days' => $days,
-            'revenue_selected' => number_format($revenue_selected, 2, '.'),
-        ];
-    }
-
         $groupedOutput = [];
         foreach ($output as $record) {
-    $clientName = $record['client_name'];
-    $totalRevenue = str_replace(',', '', $record['revenue_selected']);
+            $clientName = $record['client_name'];
+            if (!array_key_exists($clientName, $groupedOutput)) {
+                $groupedOutput[$clientName] = 0;
+            }
+            $groupedOutput[$clientName] += floatval(str_replace(',', '', $record['revenue_selected']));
+        }
 
-    if (!isset($groupedOutput[$clientName])) {
-        $groupedOutput[$clientName] = [
-            'total_revenue' => 0,
-            'revenues_selected' => [],
-        ];
+        $finalOutput = [];
+        foreach ($groupedOutput as $clientName => $totalRevenue) {
+            $finalOutput[] = [
+                'client_name' => $clientName,
+                'total_revenue_selected' => number_format($totalRevenue, 2, '.'),
+            ];
+        }
+        return response()->json(['data' => $finalOutput]);
+        }
+        else {
+            return response()->json(['data' => []]);
+        }
+
     }
-
-    $groupedOutput[$clientName]['total_revenue'] += floatval($totalRevenue);
-    $groupedOutput[$clientName]['revenues_selected'][] = floatval($totalRevenue);
-}
-
-$finalOutput = [];
-
-foreach ($groupedOutput as $clientName => $data) {
-    $finalOutput[] = [
-        'client_name' => $clientName,
-        'total_revenue_selected' => number_format($data['total_revenue'], 2, '.'),
-    ];
-}
-
-    return response()->json(['data' => $finalOutput]);
-
-}
 }

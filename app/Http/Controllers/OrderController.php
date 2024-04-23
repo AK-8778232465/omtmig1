@@ -45,7 +45,7 @@ class OrderController extends Controller
                 });
             }
         }
-        
+
 
         $statusCounts = $statusCountsQuery->groupBy('status_id')
             ->selectRaw('count(*) as count, status_id')
@@ -202,6 +202,10 @@ class OrderController extends Controller
         })
         ->filterColumn('project_code', function($order, $keyword) {
             $sql = "stl_item_description.project_code  like ?";
+            $order->whereRaw($sql, ["%{$keyword}%"]);
+        })
+        ->filterColumn('order_id', function($order, $keyword) {
+            $sql = "oms_order_creations.order_id  like ?";
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
         ->filterColumn('short_code', function($order, $keyword) {
