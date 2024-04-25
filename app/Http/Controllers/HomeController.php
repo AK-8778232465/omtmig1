@@ -219,7 +219,7 @@ class HomeController extends Controller
                     ->whereBetween('order_date', [$from_date, $to_date])
                     ->count();
             }elseif(!in_array('All', $project_id) && !in_array('All', $client_id)){
-                $yetToAssignUser = $statusCountsQuery1->where('process', 'client')
+                $yetToAssignUser = $statusCountsQuery1->with('process', 'client')
                 ->where('assignee_user_id', null)
                 ->where('status_id', 1)
                 ->where('is_active', 1)
