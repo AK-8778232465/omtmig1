@@ -162,7 +162,7 @@
                     <div class="form-group row mb-4 pb-0 pl-3 pr-3 mt-3">
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Order ID<span style="color:red;">*</span></label>
-                            <input type="text" id="order_id" name="order_id" class="form-control" placeholder="Enter Order ID" required data-parsley-pattern="^\d+$" data-parsley-error-message="Only numbers allowed" data-parsley-trigger="focusout keyup" maxlength="20"></input>
+                            <input type="text" id="order_id" name="order_id" class="form-control" placeholder="Enter Order ID" required data-parsley-pattern="^[a-zA-Z0-9]+$" data-parsley-error-message="Special Characters Not allowed" data-parsley-trigger="focusout keyup" maxlength="20"></input>
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label for="order_date" class="font-weight-bold">Order Received Date<span style="color:red;">*</span></label>
