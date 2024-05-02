@@ -144,7 +144,27 @@ class OrderCreationController extends Controller
             $spreadsheet = $reader->load(storage_path('app/Uploaded_Excel_Files/' . $filename));
             $output = str_ireplace('.xlsx', '', $filename);
             $worksheet = $spreadsheet->getActiveSheet();
-            $totalRowCount = $worksheet->getHighestRow() - 1;
+            // $totalRowCount = $worksheet->getHighestRow() - 1;
+
+
+            $totalRowCount = -1;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                // Initialize a flag to check if any cell in the row is non-empty
+                $nonEmptyRow = false;
+                foreach ($row->getCellIterator() as $cell) {
+                    // Check if the cell is not empty
+                    if (!is_null($cell->getValue()) && $cell->getValue() !== '') {
+                        $nonEmptyRow = true;
+                        break; // Exit loop if any non-empty cell is found
+                    }
+                }
+                // If any non-empty cell is found in the row, increment the row count
+                if ($nonEmptyRow) {
+                    $totalRowCount++;
+                }
+            }
+            
 
             if (Auth::user()->hasRole('Super Admin') && $totalRowCount >= 4000) {
                 $splitSize = ($totalRowCount/8);
