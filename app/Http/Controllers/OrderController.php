@@ -55,7 +55,7 @@ class OrderController extends Controller
         $yetToAssignUser = OrderCreation::where('assignee_user_id', null)->where('status_id', 1)->where('is_active', 1)->whereIn('process_id', $processIds)->count();
         $yetToAssignQa = OrderCreation::where('assignee_qa_id', null)->where('status_id', 4)->where('is_active', 1)->whereIn('process_id', $processIds)->count();
 
-        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 13, 14])) {
+        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
             $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
             $statusCounts[6] = $yetToAssignUser;
@@ -101,13 +101,13 @@ class OrderController extends Controller
 
             if (
                 isset($request->status) &&
-                in_array($request->status, [1, 2, 3, 4, 5, 13, 14]) &&
+                in_array($request->status, [1, 2, 3, 4, 5]) &&
                 $request->status != 'All' &&
                 $request->status != 6 &&
                 $request->status != 7
             ) {
                 if ($request->status == 1) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 13, 14])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
@@ -131,7 +131,7 @@ class OrderController extends Controller
                         }
                     }
                 } else {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 13, 14])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } elseif(in_array($user->user_type_id, [6])){
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
@@ -234,8 +234,6 @@ class OrderController extends Controller
                                     2 => 'Hold',
                                     3 => 'Cancelled',
                                     5 => 'Completed',
-                                    13 => 'Coversheet Prep',
-                                    14 => 'Clarification',
                                 ];
                         }elseif($order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 ){
                             $statusMapping = [];
@@ -244,8 +242,6 @@ class OrderController extends Controller
                                 2 => 'Hold',
                                 3 => 'Cancelled',
                                 4 => 'Send for QC',
-                                13 => 'Coversheet Prep',
-                                14 => 'Clarification',
                             ];
                         }else{
                             $statusMapping = [];
@@ -255,8 +251,6 @@ class OrderController extends Controller
                                     3 => 'Cancelled',
                                     4 => 'Send for QC',
                                     5 => 'Completed',
-                                    13 => 'Coversheet Prep',
-                                    14 => 'Clarification',
                                 ];
                         }
 
@@ -268,8 +262,6 @@ class OrderController extends Controller
                                 2 => 'Hold',
                                 3 => 'Cancelled',
                                 5 => 'Completed',
-                                13 => 'Coversheet Prep',
-                                14 => 'Clarification',
                             ];
                         }elseif((!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 )||(!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 3 )){
                             $statusMapping = [];
@@ -278,8 +270,6 @@ class OrderController extends Controller
                                 2 => 'Hold',
                                 3 => 'Cancelled',
                                 5 => 'Completed',
-                                13 => 'Coversheet Prep',
-                                14 => 'Clarification',
                             ];
                         }else{
                             $statusMapping = [];
@@ -289,8 +279,6 @@ class OrderController extends Controller
                                 3 => 'Cancelled',
                                 4 => 'Send for QC',
                                 5 => 'Completed',
-                                13 => 'Coversheet Prep',
-                                14 => 'Clarification',
                             ];
                         }
 
