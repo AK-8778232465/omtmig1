@@ -175,6 +175,8 @@
                     <button id="status_11" class="btn btn-info status-btn">Pending<span id="status_11_count"></span></button>
                     <button id="status_12" class="btn btn-info status-btn">On Hold<span id="status_12_count"></span></button>
                     <button id="status_All" class="btn btn-info status-btn @role('Lead') d-none  @endrole @role('User') d-none  @endrole" >All<span id="status_All_count"></span></button>
+                    <button id="status_13" class="btn btn-info status-btn">Coversheet Prep<span id="status_13_count"></span></button>
+                    <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span></button>
                 </div>
             </div>
             <div class="p-0 mx-2">
@@ -362,7 +364,7 @@
     function updateStatusCounts(statusCounts) {
         let total = 0;
 
-        for (let status = 1; status <= 12; status++) {
+        for (let status = 1; status <= 14; status++) {
             let count = statusCounts[status] || 0;
             total += count;
             $('#status_' + status + '_count').text(' (' + count + ')');

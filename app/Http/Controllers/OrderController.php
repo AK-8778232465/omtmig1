@@ -303,9 +303,11 @@ class OrderController extends Controller
             })->join('') .
             '</select>';
         })
+
         ->addColumn('order_date', function ($order) {
-            return $order->order_date ? date('m/d/Y', strtotime($order->order_date)) : '';
+            return $order->order_date ? date('m/d/Y H:i:s', strtotime($order->order_date)) : '';
         })
+        
         ->addColumn('order_id', function ($order) {
             return '<span class="px-2 py-1 rounded text-white goto-order ml-2" id="goto_' . ($order->id ?? '') . '">'.$order->order_id.'</span>';
         })
