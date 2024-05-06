@@ -143,6 +143,8 @@
                                     <option value="3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                                     <option value="4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                                     <option value="5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                    <option value="13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
+                                    <option value="14" @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                 </select>
                             </div>
                         </div>
