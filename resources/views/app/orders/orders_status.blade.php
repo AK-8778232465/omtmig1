@@ -244,7 +244,22 @@
                     "orderable": false,
                 }
             ],
-        });
+            createdRow: function (row, data, dataIndex) {
+                    let status = data.status_id; // Assuming the status_id field exists in the returned data
+                    let tat_value = data.tat_value;
+                    let orderDate = new Date(data.order_date);
+                    let currentDate = new Date();
+                    let timeDiff = Math.abs(currentDate - orderDate);
+                    let diffHours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
+                    if(!tat_value == 0){
+                        if (status == 1 || status == 4 || status == 13) {
+                            if (diffHours > tat_value) {
+                                $(row).addClass('text-danger'); // Apply red color to the row
+                            }
+                        }
+                    }
+                }
+            });
 
         $('.status-btn').removeClass('btn-primary').addClass('text-white');
         $('#status_' + defaultStatus).removeClass('btn-info').addClass('btn-primary');
