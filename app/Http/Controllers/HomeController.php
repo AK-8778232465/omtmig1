@@ -281,6 +281,8 @@ class HomeController extends Controller
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 3 THEN 3 END) AS Cancelled')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 4 THEN 4 END) AS Send_for_QC')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 5 THEN 5 END) AS Completed')
+        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 13 THEN 13 END) AS Coversheet_Prep')
+        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 14 THEN 14 END) AS Clarification')
         ->groupBy('stl_client.client_name', 'stl_item_description.process_name', 'oms_order_creations.process_id', 'stl_item_description.project_code');
 
 
@@ -319,6 +321,8 @@ class HomeController extends Controller
         if (isset($data->Cancelled)) $sum += $data->Cancelled;
         if (isset($data->Send_for_QC)) $sum += $data->Send_for_QC;
         if (isset($data->Completed)) $sum += $data->Completed;
+        if (isset($data->Coversheet_Prep)) $sum += $data->Coversheet_Prep;
+        if (isset($data->Clarification)) $sum += $data->Clarification;
 
         $output[] = [
             'client_name' => $data->client_name,
@@ -329,6 +333,8 @@ class HomeController extends Controller
             'Cancelled' => $data->Cancelled,
             'Send for QC' => $data->Send_for_QC,
             'Completed' => $data->Completed,
+            'Coversheet Prep' => $data->Coversheet_Prep,
+            'Clarification' => $data->Clarification,
             'All' => $sum, // Add the sum as 'All'
             // Add other fields as needed
         ];
@@ -360,6 +366,8 @@ public function dashboard_userwise_count(Request $request)
             SUM(CASE WHEN status_id = 3 THEN 1 ELSE 0 END) as `status_3`,
             SUM(CASE WHEN status_id = 4 THEN 1 ELSE 0 END) as `status_4`,
             SUM(CASE WHEN status_id = 5 THEN 1 ELSE 0 END) as `status_5`,
+            SUM(CASE WHEN status_id = 13 THEN 1 ELSE 0 END) as `status_13`,
+            SUM(CASE WHEN status_id = 14 THEN 1 ELSE 0 END) as `status_14`,
             COUNT(*) as `status_6`
         ')
         ->where('oms_order_creations.is_active', 1)
@@ -384,6 +392,8 @@ public function dashboard_userwise_count(Request $request)
             'status_4' => $count->status_4,
             'status_5' => $count->status_5,
             'status_6' => $count->status_6,
+            'status_13' => $count->status_13,
+            'status_14' => $count->status_14,
         ];
     });
 
