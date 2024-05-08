@@ -724,9 +724,14 @@
 
     $(document).on("click", ".goto-order", function (event) {
         let task_status = $('#statusButtons').find('.btn-primary').attr('id');
+        let status = task_status.replace("status_", "");
         var elementId = $(this).attr('id');
         let order_id = elementId.split('_')[1];
-        window.location.href = "{{url('orderform/')}}/" + order_id;
+    if (status == 13) {
+            window.location.href = "{{ url('coversheet-prep/') }}/" + order_id;
+        } else {
+            window.location.href = "{{ url('orderform/') }}/" + order_id;
+        }    
     });
 
 

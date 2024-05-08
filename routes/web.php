@@ -83,6 +83,7 @@ Route::middleware('auth:web')->controller(OrderController::class)->group(functio
 Route::middleware('auth:web')->controller(OrderFormController::class)->group(function () {
     Route::any('orderform/{order_id?}', 'index')->name('orderform');
     Route::post('orderform_submit', 'orderSubmit')->name('orderform_submit');
+    Route::any('/coversheet-prep/{order_id?}', 'coversheet_prep')->name('coversheet-prep');
 });
 
 
