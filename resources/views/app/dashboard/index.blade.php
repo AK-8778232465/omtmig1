@@ -564,18 +564,18 @@
         <div class="card-body" id="fteProject">
             <div class="p-0 w-100 mx-auto" id="fteProjectTable">
                 <h5 class="text-center"> Process Wise Details </h5>
-                <table id="fterevenueProjectTable" class="table table-bordered mt-0 nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                <table id="fterevenueProjectTable" class="table table-bordered mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                 <thead class="text-center">
                 <tr>
                     <th width="10%">Client</th>
                     <th width="15%">Project Code</th>
-                    <th width="8%">Pricing</th>
-                    <th width="10%">FTE Count</th>
-                    <th width="14%">Expected Revenue</th>
+                    <th width="8%" >Pricing</th>
+                    <th width="8%">FTE Count</th>
+                    <th width="12%">Expected Revenue</th>
                     <th width="10%">Start Date</th>
                     <th width="12%">End Date</th>
                     <th width="5%">Days</th>
-                    <th width="16%">Revenue as Selected Date</th>
+                    <th width="17%">Revenue as Selected Date</th>
                 </tr>
                 </thead>
                 <tbody></tbody>
