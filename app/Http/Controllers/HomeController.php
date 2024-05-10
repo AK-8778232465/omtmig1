@@ -148,8 +148,12 @@ class HomeController extends Controller
             // Case: Project_id is 'All' and client_id is not 'All'
             $statusCountsQuery->with('process', 'client')
                 ->whereIn('process_id', $processIds)
-                ->whereBetween('order_date', [$from_date, $to_date])
-                ->whereHas('process', function ($query) use ($client_id) {
+                ->where(function($datequery) use ($from_date, $to_date) {
+                    $datequery->whereBetween('completion_date', [$from_date, $to_date]);
+                    if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
+                        $datequery->orWhere('carry_over', 1);
+                    }
+                })->whereHas('process', function ($query) use ($client_id) {
                     $query->whereIn('client_id', $client_id);
                 });
         } else {
@@ -157,12 +161,21 @@ class HomeController extends Controller
                 // Case: project_id is specified (not 'All')
                 $statusCountsQuery->whereIn('process_id', $processIds)
                     ->whereIn('process_id', $project_id)
-                    ->whereBetween('order_date', [$from_date, $to_date]);
+                    ->where(function($datequery) use ($from_date, $to_date) {
+                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
+                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
+                            $datequery->orWhere('carry_over', 1);
+                        }
+                    });
             } else {
                 // Case: project_id is 'All'
                 $statusCountsQuery->whereIn('process_id', $processIds)
-                    ->whereBetween('order_date', [$from_date, $to_date]);
-                    // return response()->json($statusCountsQuery->get());
+                    ->where(function($datequery) use ($from_date, $to_date) {
+                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
+                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
+                            $datequery->orWhere('carry_over', 1);
+                        }
+                    });
             }
         }
 
@@ -198,8 +211,12 @@ class HomeController extends Controller
                 $yetToAssignUser = $statusCountsQuery1->where('assignee_user_id', null)
                     ->where('status_id', 1)
                     ->where('is_active', 1)
-                    ->whereBetween('order_date', [$from_date, $to_date])
-                    ->whereHas('process', function ($query) use ($client_id) {
+                    ->where(function($datequery) use ($from_date, $to_date) {
+                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
+                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
+                            $datequery->orWhere('carry_over', 1);
+                        }
+                    })->whereHas('process', function ($query) use ($client_id) {
                         $query->whereIn('client_id', $client_id);
                     })
                     ->count();
@@ -209,23 +226,35 @@ class HomeController extends Controller
                     ->where('status_id', 1)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $project_id)
-                    ->whereBetween('order_date', [$from_date, $to_date])
-                    ->count();
+                    ->where(function($datequery) use ($from_date, $to_date) {
+                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
+                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
+                            $datequery->orWhere('carry_over', 1);
+                        }
+                    })->count();
 
                 $yetToAssignQa = $statusCountsQuery2->where('assignee_qa_id', null)
                     ->where('status_id', 4)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $project_id)
-                    ->whereBetween('order_date', [$from_date, $to_date])
-                    ->count();
+                    ->where(function($datequery) use ($from_date, $to_date) {
+                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
+                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
+                            $datequery->orWhere('carry_over', 1);
+                        }
+                    })->count();
             }elseif(!in_array('All', $project_id) && !in_array('All', $client_id)){
                 $yetToAssignUser = $statusCountsQuery1->with('process', 'client')
                 ->where('assignee_user_id', null)
                 ->where('status_id', 1)
                 ->where('is_active', 1)
                 ->whereIn('process_id', $project_id)
-                ->whereBetween('order_date', [$from_date, $to_date])
-                ->whereHas('process', function ($query) use ($client_id) {
+                ->where(function($datequery) use ($from_date, $to_date) {
+                    $datequery->whereBetween('completion_date', [$from_date, $to_date]);
+                    if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
+                        $datequery->orWhere('carry_over', 1);
+                    }
+                })->whereHas('process', function ($query) use ($client_id) {
                     $query->whereIn('client_id', $client_id);
                 })
                 ->count();
@@ -235,14 +264,24 @@ class HomeController extends Controller
                     ->where('status_id', 1)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $processIds)
-                    ->whereBetween('order_date', [$from_date, $to_date])
+                    ->where(function($datequery) use ($from_date, $to_date) {
+                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
+                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
+                            $datequery->orWhere('carry_over', 1);
+                        }
+                    })
                     ->count();
 
                 $yetToAssignQa = $statusCountsQuery2->where('assignee_qa_id', null)
                     ->where('status_id', 4)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $processIds)
-                    ->whereBetween('order_date', [$from_date, $to_date])
+                    ->where(function($datequery) use ($from_date, $to_date) {
+                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
+                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
+                            $datequery->orWhere('carry_over', 1);
+                        }
+                    })
                     ->count();
             }
 
@@ -300,13 +339,22 @@ class HomeController extends Controller
         $statusCountsQuery->whereIn('oms_order_creations.process_id', $project_id);
     }
 
-    // Apply date filtering
-    if (!empty($fromDate) && !empty($toDate)) {
-        $statusCountsQuery->where('order_date', '>=', $fromDate)->where('order_date', '<=', $toDate);
-    } elseif (!empty($fromDate)) {
-        $statusCountsQuery->where('order_date', '>=', $fromDate);
-    } elseif (!empty($toDate)) {
-        $statusCountsQuery->where('order_date', '<=', $toDate);
+    // // Apply date filtering
+    // if (!empty($fromDate) && !empty($toDate)) {
+    //     $statusCountsQuery->where('order_date', '>=', $fromDate)->where('order_date', '<=', $toDate);
+    // } elseif (!empty($fromDate)) {
+    //     $statusCountsQuery->where('order_date', '>=', $fromDate);
+    // } elseif (!empty($toDate)) {
+    //     $statusCountsQuery->where('order_date', '<=', $toDate);
+    // }
+
+    if ($fromDate && $toDate) {
+        $statusCountsQuery->where(function($datequery) use ($fromDate, $toDate) {
+            $datequery->whereBetween('oms_order_creations.completion_date', [$fromDate, $toDate]);
+            if (date('Y-m', strtotime($toDate)) === date('Y-m')) {
+                $datequery->orWhere('oms_order_creations.carry_over', 1);
+            }
+        });
     }
 
     $dataForDataTables = $statusCountsQuery->get();
@@ -356,7 +404,12 @@ public function dashboard_userwise_count(Request $request)
 
     $statusCountsQuery
     ->whereNotNull('assignee_user_id')
-    ->whereBetween('order_date', [$fromDate, $toDate])
+    ->where(function($datequery) use ($fromDate, $toDate) {
+        $datequery->whereBetween('completion_date', [$fromDate, $toDate]);
+        if (date('Y-m', strtotime($toDate)) === date('Y-m')) {
+            $datequery->orWhere('carry_over', 1);
+        }
+    })
     ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
     ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
         ->selectRaw('
@@ -447,7 +500,12 @@ public function dashboard_userwise_count(Request $request)
                 ->orderBy('stl_item_description.project_code');
 
             if ($fromDate && $toDate) {
-                $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
+                $query->where(function($datequery) use ($fromDate, $toDate) {
+                    $datequery->whereBetween('oms_order_creations.completion_date', [$fromDate, $toDate]);
+                    if (date('Y-m', strtotime($toDate)) === date('Y-m')) {
+                        $datequery->orWhere('oms_order_creations.carry_over', 1);
+                    }
+                });
             }
 
             if (!empty($client_ids) && $client_ids[0] !== 'All') {
@@ -519,7 +577,12 @@ public function dashboard_userwise_count(Request $request)
             ->groupBy('stl_item_description.project_code', 'stl_client.client_name', 'stl_client.client_no','stl_client.id');
 
         if ($fromDate && $toDate) {
-            $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
+            $query->where(function($datequery) use ($fromDate, $toDate) {
+                $datequery->whereBetween('oms_order_creations.completion_date', [$fromDate, $toDate]);
+                if (date('Y-m', strtotime($toDate)) === date('Y-m')) {
+                    $datequery->orWhere('oms_order_creations.carry_over', 1);
+                }
+            });
         }
 
         if (!empty($client_ids) && $client_ids[0] !== 'All') {
@@ -602,7 +665,12 @@ public function dashboard_userwise_count(Request $request)
             ->orderBy('stl_item_description.project_code');
 
         if ($fromDate && $toDate) {
-            $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
+            $query->where(function($datequery) use ($fromDate, $toDate) {
+                $datequery->whereBetween('oms_order_creations.completion_date', [$fromDate, $toDate]);
+                if (date('Y-m', strtotime($toDate)) === date('Y-m')) {
+                    $datequery->orWhere('oms_order_creations.carry_over', 1);
+                }
+            });
         }
 
         if (!empty($client_ids) && $client_ids[0] !== 'All') {
@@ -672,7 +740,12 @@ public function dashboard_userwise_count(Request $request)
             ->orderBy('stl_item_description.project_code');
 
         if ($fromDate && $toDate) {
-            $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
+            $query->where(function($datequery) use ($fromDate, $toDate) {
+                $datequery->whereBetween('oms_order_creations.completion_date', [$fromDate, $toDate]);
+                if (date('Y-m', strtotime($toDate)) === date('Y-m')) {
+                    $datequery->orWhere('oms_order_creations.carry_over', 1);
+                }
+            });
         }
 
         if (!empty($client_ids) && $client_ids[0] !== 'All') {
@@ -686,99 +759,6 @@ public function dashboard_userwise_count(Request $request)
 
         return response()->json(['GrandTotal' => $grandTotalRevenue]);
     }
-
-
-
-// public function revenue_detail_process_fte(Request $request)
-// {
-//     $user = Auth::user();
-//     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
-
-//     $fromDate = $request->input('ftefromDate');
-//     $toDate = $request->input('ftetoDate');
-//     $client_ids = $request->input('fteclient_id');
-
-//     $query = DB::table('stl_item_description')
-//         ->select(
-//             'stl_item_description.id',
-//             'stl_item_description.project_code',
-//             'stl_item_description.process_name',
-//             'stl_item_description.cost AS unit_cost',
-//             'stl_item_description.no_of_resources',
-//             'stl_client.client_no',
-//             'stl_client.client_name',
-//             'stl_item_description.effective_date'
-//         )
-//         ->join('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
-//         ->where('stl_item_description.is_active', 1)
-//         ->where('stl_client.is_active', 1)
-//         ->where('stl_item_description.billing_type_id', 2)
-//         ->whereIn('stl_item_description.id', $processIds);
-//         // ->where('stl_item_description.no_of_resources', '>', 0);
-
-//     if (!empty($client_ids) && $client_ids[0] !== 'All') {
-//         $query->whereIn('stl_client.id', $client_ids);
-//     }
-
-//     $revenueDetails = $query->get();
-
-//     $output = [];
-
-//     foreach ($revenueDetails as $revenueDetail) {
-//         $projectCode = $revenueDetail->project_code;
-//         $process_name = $revenueDetail->process_name;
-//         $effectiveDate = Carbon::parse($revenueDetail->effective_date);
-
-//         // $startDate = empty($fromDate) ? Carbon::parse($revenueDetail->effective_date) : Carbon::parse($fromDate);
-
-//         $startDate = empty($fromDate) ? $effectiveDate : Carbon::parse($fromDate);
-//         if ($startDate->lt($effectiveDate)) {
-//             $startDate = $effectiveDate;
-//         }
-//         $endDate = empty($toDate) ? Carbon::today() : Carbon::parse($toDate)->endOfDay();
-
-//         $cumulativeTotal = 0;
-//         $monthlyRevenue = 0; // Track monthly revenue
-//         $currentDate = $startDate->copy();
-
-//         while ($currentDate <= $endDate) {
-//             $daysInEffectiveMonth = $currentDate->daysInMonth;
-//             $daysRemaining = $endDate->diffInDays($currentDate) + 1;
-
-//             $perDayAmount = $revenueDetail->unit_cost / $daysInEffectiveMonth;
-//             $invoiceAmount = $perDayAmount * $revenueDetail->no_of_resources;
-
-//             // Check if it's the first day of the month
-//             if ($currentDate->day == 1) {
-//                 $monthlyRevenue = 0;
-//             }
-
-//             $monthlyRevenue += $invoiceAmount;
-//             $cumulativeTotal += $invoiceAmount;
-
-//             $output[$projectCode]['id'] = $revenueDetail->id;
-//             $output[$projectCode][$projectCode."(".$process_name.")"][] = [
-//                 'process_name' => $revenueDetail->process_name,
-//                 'Unit cost' => $revenueDetail->unit_cost,
-//                 'No of Resources' => $revenueDetail->no_of_resources,
-//                 'per_day_amount' => number_format($perDayAmount, 2),
-//                 'invoice_amount' => number_format($invoiceAmount, 2),
-//                 'client_no' => $revenueDetail->client_no,
-//                 'Eff Date' => $revenueDetail->effective_date,
-//                 'Client' => $revenueDetail->client_name,
-//                 'Date' => $currentDate->format('Y-m-d'),
-//                 'days' => $daysRemaining,
-//                 'unit_cost_divided_by' => $daysInEffectiveMonth,
-//                 'Monthly Revenue' => number_format($monthlyRevenue, 2),
-//             ];
-//             $output[$projectCode]['total_revenue_generated_till_date'] = number_format($cumulativeTotal, 2);
-//             $currentDate->addDay();
-//         }
-//     }
-//     return Datatables::of($output)->toJson();
-//     // return response()->json($output);
-// }
 
 // Manikandan
 public function revenue_detail_process_fte(Request $request) {
