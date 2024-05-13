@@ -309,6 +309,6 @@ class OrderFormController extends Controller
 
         $orderData = $query->first();
 
-        return view('app.orders.coversheet_prep', compact('orderData', 'lobData','productData'));
+        return view('app.orders.coversheet_prep', compact('orderData'));
     }
 }
