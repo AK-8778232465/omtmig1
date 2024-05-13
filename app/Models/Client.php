@@ -31,5 +31,10 @@ class Client extends Model
     {
         return $this->hasMany(Process::class, 'client_id');
     }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'client_id', 'id');
+    }
 }
 

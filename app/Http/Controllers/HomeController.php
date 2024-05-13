@@ -834,8 +834,29 @@ public function revenue_detail_process_fte(Request $request) {
         $revenue_selected = ($days / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
 
         } else {
+        $revenue_selected = 0;
+        $current_month = $start_date->month;
+        $current_year = $start_date->year;
 
+        // Calculate revenue for the start month
             $revenue_selected += (($start_date->daysInMonth - $start_date->day + 1) / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
+
+        // Calculate revenue for the middle months
+        while (true) {
+            $current_month++;
+            if ($current_month > 12) {
+                $current_month = 1;
+                $current_year++;
+            }
+
+            if ($current_year === $end_date->year && $current_month === $end_date->month) {
+                break;
+            }
+
+            $revenue_selected += $unit_cost * $no_of_resources;
+        }
+
+        // Calculate revenue for the end month
             $revenue_selected += (($end_date->day) / $end_date->daysInMonth) * $unit_cost * $no_of_resources;
         }
 
@@ -843,9 +864,9 @@ public function revenue_detail_process_fte(Request $request) {
             'id' => $auditRecord->service_id,
             'process_name' => $auditRecord->process_name,
             'project_code' => $auditRecord->project_code,
-            'unit_cost' => $unit_cost,
+            'unit_cost' => number_format($unit_cost),
             'no_of_resources' => $no_of_resources,
-            'expected_revenue' => $no_of_resources * $unit_cost,
+            'expected_revenue' => number_format($no_of_resources * $unit_cost),
             'client_name' => $auditRecord->client_name,
             'start_date' => $start_date->format('m-d-Y'),
             'end_date' => $end_date->format('m-d-Y'),

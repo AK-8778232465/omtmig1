@@ -6,6 +6,8 @@ use App\Models\State;
 use App\Models\Status;
 use App\Models\County;
 use App\Models\User;
+use App\Models\Process;
+use App\Models\Product;
 use App\Models\OrderCreation;
 use DB;
 use Illuminate\Http\Request;
@@ -58,13 +60,13 @@ class OrderFormController extends Controller
                 $request->status != 7
             ) {
                 if ($request->status == 1) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 13, 14])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
                     }
                 } elseif($request->status == 4) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 13, 14])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
                         if(in_array($user->user_type_id, [6])) {
@@ -82,7 +84,7 @@ class OrderFormController extends Controller
                         }
                     }
                 } else {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 13, 14])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } elseif(in_array($user->user_type_id, [6])){
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
@@ -110,13 +112,13 @@ class OrderFormController extends Controller
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
             } elseif ($request->status == 6) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9, 13, 14])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9])) {
                     $query->whereNull('oms_order_creations.assignee_user_id')->where('oms_order_creations.status_id', 1);
                 } else {
                     $query->whereNull('oms_order_creations.id');
                 }
             } elseif ($request->status == 7) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9, 13, 14])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9])) {
                     $query->whereNull('oms_order_creations.assignee_qa_id')->where('oms_order_creations.status_id', 4);
                 } else {
                     $query->whereNull('oms_order_creations.id');
@@ -138,12 +140,29 @@ class OrderFormController extends Controller
             }
 
             $orderHistory = DB::table('order_status_history')->where('order_id', $orderId)->orderBy('created_at', 'desc')->first();
-            // dd($orderHistory);
-            return view('app.orders.orderform', compact('orderData', 'countyInfo', 'checklist', 'orderHistory'));
+
+            $query = DB::table('oms_order_creations')
+            ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+            ->leftJoin('oms_products', 'stl_item_description.client_id', '=', 'oms_products.client_id')
+            ->where('oms_order_creations.id',$orderId)->pluck('oms_products.lob_id')
+            ->toArray();
+            $lobData = DB::table('stl_lob')->whereIn('id',array_unique($query))->get();
+            $productData = DB::table('oms_products')->get();
+
+            return view('app.orders.orderform', compact('orderData', 'countyInfo', 'checklist', 'orderHistory','lobData','productData'));
         } else {
             return redirect('/orders_status');
         }
     }
+
+
+    public function getProduct_dropdown(Request $request)
+    {
+        $getProduct['product'] = Product::select('id', 'lob_id','client_id', 'product_name')->where('lob_id', $request->getlob_id)->get();
+
+        return response()->json($getProduct);
+    }
+
 
     private function getProcessIdsBasedOnUserRole($user)
     {
@@ -158,7 +177,12 @@ class OrderFormController extends Controller
     public function orderSubmit(Request $request) {
         if(!empty($request->orderId) && !empty($request->orderStatus)) {
             $orderId = $request->orderId;
-            $update_status = OrderCreation::find($orderId)->update(['status_id' => $request->orderStatus]);
+            $update_status = OrderCreation::find($orderId)
+            ->update([
+                'status_id' => $request->orderStatus,
+                'tier_id' => $request->tierId,
+                'product_id' => $request->productId
+            ]);
             if($update_status) {
                 DB::table('order_status_history')->insert([
                     'order_id' => $orderId,
@@ -285,6 +309,6 @@ class OrderFormController extends Controller
 
         $orderData = $query->first();
 
-        return view('app.orders.coversheet_prep', compact('orderData'));
+        return view('app.orders.coversheet_prep', compact('orderData', 'lobData','productData'));
     }
 }
