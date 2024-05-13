@@ -18,11 +18,11 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">Product Type</div>
-                                <div>{!! isset($orderData->product_type) ? $orderData->product_type : '-' !!}</div>
+                                <div>{{($orderData->product_name) ? $orderData->product_name : '-' }}</div>
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">Tier</div>
-                                <div>{!! isset($orderData->tier) ? $orderData->tier : '-' !!}</div>
+                                <div>{{($orderData->tier_id) ? $orderData->tier_id : '-' }}</div>
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">Order Rec Date and Time</div>

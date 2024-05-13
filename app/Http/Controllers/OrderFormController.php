@@ -29,12 +29,14 @@ class OrderFormController extends Controller
             ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
             ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+            ->leftJoin('oms_products', 'oms_order_creations.product_id', '=', 'oms_products.id') // Assuming 'product_id' is the foreign key linking 'oms_order_creations' to 'oms_products'
             ->select(
                 'oms_order_creations.id',
                 'oms_order_creations.order_id as order_id',
                 'oms_order_creations.status_id as status_id',
                 'oms_order_creations.county_id as county_id',
                 'oms_order_creations.process_id as process_id',
+                'oms_order_creations.tier_id as tier_id',
                 'oms_order_creations.order_date as order_date',
                 'stl_item_description.project_code as project_code',
                 'stl_item_description.process_name as process_name',
@@ -44,12 +46,13 @@ class OrderFormController extends Controller
                 'oms_order_creations.assignee_user_id',
                 'oms_order_creations.assignee_qa_id',
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
-                DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa')
+                DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
+                'oms_products.product_name' // Adding product_name from 'oms_products' table
             )
-            ->where('oms_order_creations.is_active', 1)->where('oms_order_creations.id', $orderId);
+            ->where('oms_order_creations.is_active', 1)
+            ->where('oms_order_creations.id', $orderId);
 
             $query->whereIn('oms_order_creations.process_id', $processIds);
-
 
 
             if (
