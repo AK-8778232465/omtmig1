@@ -147,9 +147,8 @@ class OrderFormController extends Controller
             ->where('oms_order_creations.id',$orderId)->pluck('oms_products.lob_id')
             ->toArray();
             $lobData = DB::table('stl_lob')->whereIn('id',array_unique($query))->get();
-            $productData = DB::table('oms_products')->get();
 
-            return view('app.orders.orderform', compact('orderData', 'countyInfo', 'checklist', 'orderHistory','lobData','productData'));
+            return view('app.orders.orderform', compact('orderData', 'countyInfo', 'checklist', 'orderHistory','lobData'));
         } else {
             return redirect('/orders_status');
         }

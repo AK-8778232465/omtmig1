@@ -162,9 +162,6 @@
                                 <div class="font-weight-bold">Product :</div>
                                 <select name="product_id" class="form-control" id="product_id">
                                     <option value="">Select Product</option>
-                                    @foreach ($productData as $product)
-                                        <option value="{{ $product->id }}">{{ $product->product_name }}</option>
-                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-lg-4 col-xl-4">
