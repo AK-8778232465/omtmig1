@@ -118,65 +118,66 @@
                 <h6 class="font-weight-bold">Order Submition :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
                     <div class="card-body">
-                        <div class="d-flex justify-content-center">
-                            <div class="col-lg-4">
-                                <div class="font-weight-bold">Checklist :</div>
-                                @if(!@empty($checklist))
-                                    {{-- <div class=""></div> --}}
-                                    @foreach ($checklist as $check)
-                                        <div class="row ml-4">
-                                            <input class="mx-2" type="checkbox" name="checks[]" id="check_{{$check->id}}" value="{{$check->id}}">
-                                            <span>{{$check->check_condition}}</span>
-                                        </div>
-                                    @endforeach
-                                @endif
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="font-weight-bold">Comments :</div>
-                                <textarea name="order_comment" style="width: 100%" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="font-weight-bold">Status :</div>
-                                    <select style="width:100%" class="form-control mx-2" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
-                                        <option value="1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                        <option value="2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                        <option value="3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
-                                        <option value="4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                        <option value="5" @if($orderData->status_id == 5) selected @endif>Completed</option>
-                                        <option value="13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
-                                        <option value="14" @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                            <div class="d-flex justify-content-center">
+                                <div class="col-lg-4 col-xl-4">
+                                    <div class="font-weight-bold">LOB :</div>
+                                    <select name="lob_id" id="lob_id" class="form-control">
+                                        <option value="">Select LOB</option>
+                                        @foreach($lobData as $lob)
+                                        <option value="{{ $lob->id }}">{{ $lob->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
-                            </div>
-                            <div class="row mt-4 mb-5">
-                            <div class="col-lg-4 col-xl-4">
-                                <div class="font-weight-bold">LOB :</div>
-                                <select name="lob_id" id="lob_id" class="form-control">
-                                    <option value="">Select LOB</option>
-                                    @foreach($lobData as $lob)
-                                    <option value="{{ $lob->id }}">{{ $lob->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-4 col-xl-4">
-                                <div class="font-weight-bold">Product :</div>
-                                <select name="product_id" class="form-control" id="product_id">
-                                    <option value="">Select Product</option>
-                                </select>
-                            </div>
-                            <div class="col-lg-4 col-xl-4">
-                                <div class="font-weight-bold">Tier :</div>
-                                    <select name="tier_id" id="tier_id" class="form-control">
-                                        <option value="">Select Tier</option>
-                                        <option value="1">Tier 1</option>
-                                        <option value="2">Tier 2</option>
-                                        <option value="3">Tier 3</option>
+                                <div class="col-lg-4 col-xl-4">
+                                    <div class="font-weight-bold">Product :</div>
+                                    <select name="product_id" class="form-control" id="product_id">
+                                        <option value="">Select Product</option>
                                     </select>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-center my-4">
-                            <button class="btn btn-primary btn-sm mx-2" onclick="order_submition({{$orderData->id}})" type="submit">Submit</button>
-                            <button class="btn btn-info btn-sm mx-2" type="submit">Coversheet Prep & Submit</button>
+                                </div>
+                                <div class="col-lg-4 col-xl-4">
+                                    <div class="font-weight-bold">Tier :</div>
+                                        <select name="tier_id" id="tier_id" class="form-control">
+                                            <option value="">Select Tier</option>
+                                            <option value="1">Tier 1</option>
+                                            <option value="2">Tier 2</option>
+                                            <option value="3">Tier 3</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            <div class="row mt-4 mb-4">
+                                <div class="col-lg-4">
+                                    <div class="font-weight-bold ml-2">Checklist :</div>
+                                    @if(!@empty($checklist))
+                                        {{-- <div class=""></div> --}}
+                                        @foreach ($checklist as $check)
+                                            <div class="row ml-4">
+                                                <input class="mx-2" type="checkbox" name="checks[]" id="check_{{$check->id}}" value="{{$check->id}}">
+                                                <span>{{$check->check_condition}}</span>
+                                            </div>
+                                        @endforeach
+                                    @endif
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="font-weight-bold">Comments :</div>
+                                    <textarea name="order_comment" style="width: 100%" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="font-weight-bold">Status :</div>
+                                        <select style="width:100%" class="form-control mx-2" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                            <option value="1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                            <option value="2" @if($orderData->status_id == 2) selected @endif>Hold</option>
+                                            <option value="3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+                                            <option value="4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                            <option value="5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                            <option value="13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
+                                            <option value="14" @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-center my-4">
+                                    <button class="btn btn-primary btn-sm mx-2" onclick="order_submition({{$orderData->id}})" type="submit">Submit</button>
+                                    <button class="btn btn-info btn-sm mx-2" type="submit">Coversheet Prep & Submit</button>
+                                </div>
                         </div>
                     </div>
                 </div>

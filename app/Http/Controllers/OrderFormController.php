@@ -250,7 +250,7 @@ class OrderFormController extends Controller
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
                     }
                 } elseif($request->status == 4) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 13, 14])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
                         if(in_array($user->user_type_id, [6])) {
@@ -268,7 +268,7 @@ class OrderFormController extends Controller
                         }
                     }
                 } else {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 13, 14])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } elseif(in_array($user->user_type_id, [6])){
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
@@ -296,13 +296,13 @@ class OrderFormController extends Controller
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
             } elseif ($request->status == 6) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9, 13, 14])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9])) {
                     $query->whereNull('oms_order_creations.assignee_user_id')->where('oms_order_creations.status_id', 1);
                 } else {
                     $query->whereNull('oms_order_creations.id');
                 }
             } elseif ($request->status == 7) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9, 13, 14])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9])) {
                     $query->whereNull('oms_order_creations.assignee_qa_id')->where('oms_order_creations.status_id', 4);
                 } else {
                     $query->whereNull('oms_order_creations.id');
