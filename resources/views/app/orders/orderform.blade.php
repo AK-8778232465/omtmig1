@@ -140,7 +140,6 @@
                                             <option value="">Select Tier</option>
                                             <option value="1">Tier 1</option>
                                             <option value="2">Tier 2</option>
-                                            <option value="3">Tier 3</option>
                                         </select>
                                     </div>
                                 </div>
