@@ -137,10 +137,13 @@ class OrderFormController extends Controller
             if(!empty($countyData->json)) {
                 $countyInfo = json_decode($countyData->json, true);
             }
+
             if(!empty($countyData->checklist_array)) {
                 $conditionIds = [explode(',', $countyData->checklist_array)];
                 $checklist = DB::table('checklist')->whereIn('id', explode(',', $countyData->checklist_array))->get();
             }
+
+
 
             $orderHistory = DB::table('order_status_history')->where('order_id', $orderId)->orderBy('created_at', 'desc')->first();
 
@@ -151,7 +154,14 @@ class OrderFormController extends Controller
             ->toArray();
             $lobData = DB::table('stl_lob')->whereIn('id',array_unique($query))->get();
 
-            return view('app.orders.orderform', compact('orderData', 'countyInfo', 'checklist', 'orderHistory','lobData'));
+            $checklist_conditions = DB::table('checklist')
+                ->join('oms_order_creations', 'checklist.state_id', '=', 'oms_order_creations.state_id')
+                ->where('oms_order_creations.county_id', $orderData->county_id)
+                ->select('checklist.check_condition','checklist.state_id')
+                ->get();
+
+
+            return view('app.orders.orderform', compact('orderData', 'countyInfo', 'checklist', 'orderHistory','lobData','checklist_conditions'));
         } else {
             return redirect('/orders_status');
         }

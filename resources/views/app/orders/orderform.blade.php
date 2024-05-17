@@ -8,6 +8,9 @@
                 <div class="d-flex justify-content-center">
                     <h5 class="border bg-info rounded font-weight-bold fs-4 text-uppercase border-grey px-2 py-1">{{$orderData->process_name}}</h5>
                 </div>
+                <div class="row">
+                    <h4 class="font-weight-bold ml-2">LOB:</h4>
+                </div>
                 <h6 class="font-weight-bold">Order Information :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
                     <div class="card-body">
@@ -118,8 +121,8 @@
                 <h6 class="font-weight-bold">Order Submition :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
                     <div class="card-body">
-                            <div class="d-flex justify-content-center">
-                                <div class="col-lg-4 col-xl-4">
+                            <!-- <div class="d-flex justify-content-center"> -->
+                                <!-- <div class="col-lg-4 col-xl-4">
                                     <div class="font-weight-bold">LOB :</div>
                                     <select name="lob_id" id="lob_id" class="form-control">
                                         <option value="">Select LOB</option>
@@ -142,9 +145,24 @@
                                             <option value="2">Tier 2</option>
                                         </select>
                                     </div>
+                                </div> -->
+
+                            <!-- <div class="row mt-4 mb-4 m-4">
+                                <div class="col-12 d-flex bg-danger justify-content-center" style="border-radius:14px;">
+                                <input type="checkbox" name="checks[]" id="check_box_id" value="{{ isset($checklist_condition->state_id) ? htmlspecialchars($checklist_condition->state_id) : null }}">
+                                     <label class="text-white font-weight-bold text-uppercase px-1 py-3" style="font-size: 14px !important;">{{ isset($checklist_condition[0]) ? htmlspecialchars($checklist_condition[0]->check_condition) : null }}</label>
                                 </div>
+                            </div> -->
+                            @foreach($checklist_conditions as $checklist_condition)
+                                <div class="row mt-4 mb-4 m-4">
+                                    <div class="col-12 d-flex bg-danger justify-content-center" style="border-radius:14px;">
+                                        <input type="checkbox" name="checks[]" id="check_{{ $checklist_condition->state_id }}" value="{{ $checklist_condition->state_id }}">
+                                        <label class="text-white font-weight-bold text-uppercase px-1 py-3" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
+                                    </div>
+                                </div>
+                            @endforeach
                             <div class="row mt-4 mb-4">
-                                <div class="col-lg-4">
+                                <!-- <div class="col-lg-4">
                                     <div class="font-weight-bold ml-2">Checklist :</div>
                                     @if(!@empty($checklist))
                                         {{-- <div class=""></div> --}}
@@ -155,7 +173,7 @@
                                             </div>
                                         @endforeach
                                     @endif
-                                </div>
+                                </div> -->
                                 <div class="col-lg-4">
                                     <div class="font-weight-bold">Comments :</div>
                                     <textarea name="order_comment" style="width: 100%" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
@@ -209,6 +227,7 @@
         $("input[name='checks[]']:checked").each(function() {
             checklistItems.push($(this).val());
         });
+        var check_box_id = $("#check_box_id").val();
         var orderComment = $("#order_comment").val();
         var orderStatus = $("#order_status").val();
         var tierId = $("#tier_id").val();
@@ -217,6 +236,7 @@
         var data = {
             orderId: orderId,
             checklistItems: checklistItems.join(),
+            check_box_id: check_box_id,
             orderComment: orderComment,
             orderStatus: orderStatus,
             tierId: tierId,
