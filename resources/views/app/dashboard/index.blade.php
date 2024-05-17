@@ -303,64 +303,68 @@
                         </div>
                     </div>
             </div>
-<!-- // -->
+<!-- !-- // --> 
 <div id="rightContent">
-<div class="col-12">
-    <div class="row my-2">
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)">
-                <div class="card custom-card-bg">
-                    <div class="card-content">
-                        <div class="card-body">
-                            <div class="media d-flex">
-                                <div class="media-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-info mb-0 text-dark" id="yet_to_assign_cnt">0</h3>
-                                        <!-- <h3 class="icon-dual-warning mb-0" id="yet_cost">$0.00</h3> -->
-                                    </div>
-                                    <div class="justify-content-between align-items-center mt-2 text-dark">
-                                        <span>Yet to Assign</span>
-                                        <i class="icon-dual-info font-large-2 float-right text-dark" data-feather="book-open"></i>
+    <div class="col-12">
+        <div class="row my-2">
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
+                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)">
+                    <div class="card custom-card-bg">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="media-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h3 class="icon-dual-info mb-0 text-dark" id="yet_to_assign_cnt">0</h3>
+                                        </div>
+                                        <div class="justify-content-between align-items-center mt-2 text-dark">
+                                            <span>Yet to Assign</span>
+                                            <i class="icon-dual-info font-large-2 float-right text-dark" data-feather="book-open"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
             @endif
-        @if(!Auth::user()->hasRole('Qcer'))
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            <div class="media d-flex">
-                                <div class="media-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-pink mb-0" id="wip_cnt">0</h3>
-                                        <!-- <h3 class="icon-dual-pink mb-0" id="wip_cost">$0.00</h3> -->
-                                    </div>
-                                    <div class="justify-content-between align-items-center mt-2">
-                                        <span>WIP</span>
-                                        <i class="icon-dual-pink font-large-2 float-right" data-feather="trending-up"></i>
+            @if(!Auth::user()->hasRole('Qcer'))
+                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="media-body">
+                                        <div class="d-flex align-items-center">
+                                            <h3 class="icon-dual-pink mb-0 mr-2" id="wip_cnt">0</h3>
+                                            <h3 class="plus-symbol mb-0 mr-2 text-pink">+</h3>
+                                            <h3 class="icon-dual-pink mb-0" id="pre_wip_cnt">0</h3>
+                                        </div>
+                                        <div class="justify-content-between align-items-center mt-2">
+                                            <span>WIP</span>
+                                            <i class="icon-dual-pink font-large-2 float-right" data-feather="trending-up"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        @endif
+            @endif
 
-        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(13)">
+            <!-- Existing sections -->
+
+            <!-- Coversheet Prep -->
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(13)">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-success mb-0" id="coversheet_cnt">0</h3>
-                                        <!-- <h3 class="icon-dual-success mb-0" id="completed_cost">$0.00</h3> -->
+                                    <div class="d-flex align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="coversheet_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-success">+</h3>
+                                        <h3 class="icon-dual-success mb-0" id="pre_coversheet_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Coversheet Prep</span>
@@ -373,15 +377,17 @@
                 </div>
             </div>
 
+            <!-- Clarification -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(14)">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-info mb-0" id="Clarification_cnt">0</h3>
-                                        <!-- <h3 class="icon-dual-success mb-0" id="completed_cost">$0.00</h3> -->
+                                    <div class="d-flex  align-items-center">
+                                        <h3 class="icon-dual-info mb-0 mr-2" id="Clarification_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-info mb-0" id="pre_clarification_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Clarification</span>
@@ -394,55 +400,61 @@
                 </div>
             </div>
 
-        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(4)">
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="media-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="icon-dual-warning mb-0" id="Qu_cnt">0</h3>
-                                    <!-- <h3 class="icon-dual-danger mb-0" id="qu_cost">$0.00</h3> -->
-                                </div>
-                                <div class="justify-content-between align-items-center mt-2">
-                                    <span>Send For Qc</span>
-                                    <i class="icon-dual-warning font-large-2 float-right" data-feather="chevrons-right"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(2)">
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="media-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="icon-dual-purple mb-0" id="hold_cnt">0</h3>
-                                    <!-- <h3 class="icon-dual-purple mb-0" id="hold_cost">$0.00</h3> -->
-                                </div>
-                                <div class="justify-content-between align-items-center mt-2">
-                                    <span>Hold</span>
-                                    <i class="icon-dual-purple font-large-2 float-right" data-feather="pause"></i>
+            <!-- Send For QC -->
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(4)">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex  align-items-center">
+                                        <h3 class="icon-dual-warning mb-0 mr-2" id="Qu_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-warning">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_qu_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Send For Qc</span>
+                                        <i class="icon-dual-warning font-large-2 float-right" data-feather="chevrons-right"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Hold -->
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(2)">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex  align-items-center">
+                                        <h3 class="icon-dual-purple mb-0 mr-2" id="hold_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-purple">+</h3>
+                                        <h3 class="icon-dual-purple mb-0" id="pre_hold_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Hold</span>
+                                        <i class="icon-dual-purple font-large-2 float-right" data-feather="pause"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cancelled -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(3)">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-danger mb-0" id="cancelled_cnt">0</h3>
-                                        <!-- <h3 class="icon-dual-danger mb-0" id="cancelled_cost">$0.00</h3> -->
+                                    <div class="d-flex align-items-center">
+                                        <h3 class="icon-dual-danger mb-0 mr-2" id="cancelled_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Cancelled</span>
@@ -454,15 +466,18 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Completed -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(5)">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-success mb-0" id="completed_cnt">0</h3>
-                                        <!-- <h3 class="icon-dual-success mb-0" id="completed_cost">$0.00</h3> -->
+                                    <div class="d-flex align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="completed_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-success">+</h3>
+                                        <h3 class="icon-dual-success mb-0" id="pre_completed_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Completed</span>
@@ -474,18 +489,65 @@
                     </div>
                 </div>
             </div>
+
+            <!-- All -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders('All')">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="icon-dual-pink mb-0" id="all_count">0</h3>
+                                    <div class="d-flex  align-items-center">
+                                        <h3 class="icon-dual-pink mb-0 mr-2" id="all_count">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-pink">+</h3>
+                                        <h3 class="icon-dual-pink mb-0" id="pre_all_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>All</span>
+                                        <i class="icon-dual-pink font-large-2 float-right" data-feather="box"></i>
+                                    </div>
                                 </div>
-                                <div class="justify-content-between align-items-center mt-2">
-                                    <span>All</span>
-                                    <i class="icon-dual-pink font-large-2 float-right" data-feather="box"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carried Over -->
+            <div class="col-xl-4 col-sm-6 col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h3 class="icon-dual-warning mb-0" id="carried_over_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Carried Over</span>
+                                        <i class="icon-dual-warning font-large-2 float-right" data-feather="corner-up-right"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carried Over & Completed -->
+            <div class="col-xl-4 col-sm-6 col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h3 class="icon-dual-blue mb-0" id="carried_over_completed_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Carried Over & Completed</span>
+                                        <i class="icon-dual-blue font-large-2 float-right" data-feather="check-circle"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -750,10 +812,11 @@ $(document).ready(function() {
 
             fetchOrderData(projectId, clientId, fromDate, toDate);
             getGrandTotal(fromDate, toDate, client_id);
+            preOrderData(projectId, clientId, fromDate, toDate)
             datewise_datatable(fromDate, toDate, client_id, projectId)
             userwise_datatable(fromDate, toDate, client_id, projectId);
         });
-
+        preOrderData(projectId, clientId, fromDate, toDate)
         fetchOrderData(projectId, clientId, fromDate, toDate);
         datewise_datatable(fromDate, toDate, client_id, projectId);
 
@@ -795,6 +858,55 @@ function fetchOrderData(projectId, clientId, fromDate, toDate) {
             $('#completed_cnt').text(statusCounts[5] || 0);
             $('#coversheet_cnt').text(statusCounts[13] || 0);
             $('#Clarification_cnt').text(statusCounts[14] || 0);
+        }
+    });
+}
+
+function preOrderData(projectId, clientId, fromDate, toDate) {
+    $.ajax({
+        url: "{{ route('previous_count') }}",
+        type: "POST",
+        data: {
+            project_id: projectId,
+            client_id: clientId,
+            from_date: fromDate,
+            to_date: toDate,
+            _token: '{{csrf_token()}}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            let statusCounts = response.StatusCounts;
+
+            let statusCountMap = {
+                '13': 'pre_coversheet_cnt',
+                '2': 'pre_hold_cnt',
+                '4': 'pre_qu_cnt',
+                '14': 'pre_clarification_cnt',
+                '1': 'pre_wip_cnt'
+            };
+
+            let totalSum = 0;
+
+            for (let statusId in statusCountMap) {
+                if (statusCounts.hasOwnProperty(statusId)) {
+                    $('#' + statusCountMap[statusId]).text(statusCounts[statusId]);
+                }
+            }
+
+            if (statusCounts.hasOwnProperty('total')) {
+                let carriedOverCount = parseInt(statusCounts.total) || 0; // Ensure it's a number or default to 0
+                $('#carried_over_cnt').text(carriedOverCount);
+                totalSum += carriedOverCount;
+            }
+
+            if (statusCounts.hasOwnProperty('carriedOverCompletedCount')) {
+                let carriedOverCompletedCount = parseInt(statusCounts.carriedOverCompletedCount) || 0;
+                $('#carried_over_completed_cnt,#pre_completed_cnt').text(carriedOverCompletedCount);
+                totalSum += carriedOverCompletedCount;
+            }
+
+            $('#pre_all_cnt').text(totalSum);
+
         }
     });
 }

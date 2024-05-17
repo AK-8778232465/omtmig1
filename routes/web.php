@@ -34,6 +34,7 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('revenue_detail_client', 'revenue_detail_client')->name('revenue_detail_client');
     Route::post('order_detail', 'order_detail')->name('order_detail');
     Route::post('getTotalData', 'getTotalData')->name('getTotalData');
+    Route::any('previous_count', 'previous_count')->name('previous_count');
 
     Route::post('getTotalDataFte', 'getTotalDataFte')->name('getTotalDataFte');
 

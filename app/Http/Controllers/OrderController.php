@@ -37,7 +37,8 @@ class OrderController extends Controller
             if ($user->user_type_id == 6) {
                 $statusCountsQuery->where('assignee_user_id', $user->id);
             } elseif($user->user_type_id == 7) {
-                $statusCountsQuery->where('assignee_qa_id', $user->id);
+                $statusCountsQuery->where('assignee_qa_id', $user->id)
+                ->whereNotIn('status_id', [1]);
             } elseif($user->user_type_id == 8) {
                 $statusCountsQuery->where(function ($query) use($user) {
                     $query->where('assignee_user_id', $user->id)
@@ -55,7 +56,7 @@ class OrderController extends Controller
         $yetToAssignUser = OrderCreation::where('assignee_user_id', null)->where('status_id', 1)->where('is_active', 1)->whereIn('process_id', $processIds)->count();
         $yetToAssignQa = OrderCreation::where('assignee_qa_id')->where('assignee_user_id')->where('status_id', 4)->where('is_active', 1)->whereIn('process_id', $processIds)->count();
 
-        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 13, 14])) {
+        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
             $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
             $statusCounts[6] = $yetToAssignUser;
@@ -150,7 +151,8 @@ class OrderController extends Controller
                 if(in_array($user->user_type_id, [6])) {
                     $query->where('oms_order_creations.assignee_user_id', $user->id);
                 } elseif(in_array($user->user_type_id, [7])) {
-                    $query->where('oms_order_creations.assignee_qa_id', $user->id);
+                    $query->where('oms_order_creations.assignee_qa_id', $user->id)
+                    ->whereNotIn('status_id', [1]);
                 } elseif(in_array($user->user_type_id, [8])) {
                     $query->where(function ($optionalquery) use($user) {
                         $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
@@ -179,15 +181,35 @@ class OrderController extends Controller
                 $projectIds = Session::get('projectId');
                 $clientIds = Session::get('clientId');
 
-                $query->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
+                $statusCountsQuery = OrderCreation::select('order_id')
+                ->where('is_active', 1)
+                ->whereIn('status_id', [1, 2, 4, 5, 13, 14])
+                ->where(function ($query) {
+                    $query->whereYear('created_at', '<', now()->year)
+                        ->orWhere(function ($query) {
+                            $query->whereYear('created_at', now()->year)
+                                ->whereMonth('created_at', '<', now()->month);
+                        });
+                })->get();
 
+                $query->where(function($query) use ($statusCountsQuery, $fromDate, $toDate) {
+                    $query->whereIn('oms_order_creations.order_id', $statusCountsQuery)
+                          ->orWhereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
+                });
+                
                 if ($projectIds[0] != 'All') {
-                    $query->whereIn('oms_order_creations.process_id', $projectIds);
-                }
+                    $query->where(function($query) use ($statusCountsQuery, $projectIds) {
+                        $query->whereIn('oms_order_creations.order_id', $statusCountsQuery)
+                              ->orWhereIn('oms_order_creations.process_id', $projectIds);
+                    });
+                   }
 
                 if ($clientIds[0] != 'All') {
-                    $query->whereIn('stl_item_description.client_id', $clientIds);
-                }
+                    $query->where(function($query) use ($statusCountsQuery, $clientIds) {
+                        $query->whereIn('oms_order_creations.order_id', $statusCountsQuery)
+                              ->orWhereIn('stl_item_description.client_id', $clientIds);
+                    });
+                    }
             }
 
         return DataTables::of($query)

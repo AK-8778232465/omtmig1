@@ -95,7 +95,7 @@ class HomeController extends Controller
     }
 
     public function dashboard_dropdown(Request $request)
-    {
+    { 
         $client_id = null;
 
         $getclient_id = $request->client_id;
@@ -148,12 +148,8 @@ class HomeController extends Controller
             // Case: Project_id is 'All' and client_id is not 'All'
             $statusCountsQuery->with('process', 'client')
                 ->whereIn('process_id', $processIds)
-                ->where(function($datequery) use ($from_date, $to_date) {
-                    $datequery->whereBetween('completion_date', [$from_date, $to_date]);
-                    if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
-                        $datequery->orWhere('carry_over', 1);
-                    }
-                })->whereHas('process', function ($query) use ($client_id) {
+                ->whereBetween('order_date', [$from_date, $to_date])
+                ->whereHas('process', function ($query) use ($client_id) {
                     $query->whereIn('client_id', $client_id);
                 });
         } else {
@@ -161,21 +157,12 @@ class HomeController extends Controller
                 // Case: project_id is specified (not 'All')
                 $statusCountsQuery->whereIn('process_id', $processIds)
                     ->whereIn('process_id', $project_id)
-                    ->where(function($datequery) use ($from_date, $to_date) {
-                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
-                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
-                            $datequery->orWhere('carry_over', 1);
-                        }
-                    });
+                    ->whereBetween('order_date', [$from_date, $to_date]);
             } else {
                 // Case: project_id is 'All'
                 $statusCountsQuery->whereIn('process_id', $processIds)
-                    ->where(function($datequery) use ($from_date, $to_date) {
-                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
-                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
-                            $datequery->orWhere('carry_over', 1);
-                        }
-                    });
+                    ->whereBetween('order_date', [$from_date, $to_date]);
+                    // return response()->json($statusCountsQuery->get());
             }
         }
 
@@ -184,7 +171,8 @@ class HomeController extends Controller
             if ($user->user_type_id == 6) {
                 $statusCountsQuery->where('assignee_user_id', $user->id);
             } elseif ($user->user_type_id == 7) {
-                $statusCountsQuery->where('assignee_qa_id', $user->id);
+                $statusCountsQuery->where('assignee_qa_id', $user->id)
+                ->whereNotIn('status_id', [1]);
             } elseif ($user->user_type_id == 8) {
                 $statusCountsQuery->where(function ($query) use($user){
                     $query->where('assignee_user_id', $user->id)
@@ -211,12 +199,8 @@ class HomeController extends Controller
                 $yetToAssignUser = $statusCountsQuery1->where('assignee_user_id', null)
                     ->where('status_id', 1)
                     ->where('is_active', 1)
-                    ->where(function($datequery) use ($from_date, $to_date) {
-                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
-                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
-                            $datequery->orWhere('carry_over', 1);
-                        }
-                    })->whereHas('process', function ($query) use ($client_id) {
+                    ->whereBetween('order_date', [$from_date, $to_date])
+                    ->whereHas('process', function ($query) use ($client_id) {
                         $query->whereIn('client_id', $client_id);
                     })
                     ->count();
@@ -226,35 +210,23 @@ class HomeController extends Controller
                     ->where('status_id', 1)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $project_id)
-                    ->where(function($datequery) use ($from_date, $to_date) {
-                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
-                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
-                            $datequery->orWhere('carry_over', 1);
-                        }
-                    })->count();
+                    ->whereBetween('order_date', [$from_date, $to_date])
+                    ->count();
 
                 $yetToAssignQa = $statusCountsQuery2->where('assignee_qa_id', null)
                     ->where('status_id', 4)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $project_id)
-                    ->where(function($datequery) use ($from_date, $to_date) {
-                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
-                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
-                            $datequery->orWhere('carry_over', 1);
-                        }
-                    })->count();
+                    ->whereBetween('order_date', [$from_date, $to_date])
+                    ->count();
             }elseif(!in_array('All', $project_id) && !in_array('All', $client_id)){
                 $yetToAssignUser = $statusCountsQuery1->with('process', 'client')
                 ->where('assignee_user_id', null)
                 ->where('status_id', 1)
                 ->where('is_active', 1)
                 ->whereIn('process_id', $project_id)
-                ->where(function($datequery) use ($from_date, $to_date) {
-                    $datequery->whereBetween('completion_date', [$from_date, $to_date]);
-                    if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
-                        $datequery->orWhere('carry_over', 1);
-                    }
-                })->whereHas('process', function ($query) use ($client_id) {
+                ->whereBetween('order_date', [$from_date, $to_date])
+                ->whereHas('process', function ($query) use ($client_id) {
                     $query->whereIn('client_id', $client_id);
                 })
                 ->count();
@@ -264,24 +236,14 @@ class HomeController extends Controller
                     ->where('status_id', 1)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $processIds)
-                    ->where(function($datequery) use ($from_date, $to_date) {
-                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
-                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
-                            $datequery->orWhere('carry_over', 1);
-                        }
-                    })
+                    ->whereBetween('order_date', [$from_date, $to_date])
                     ->count();
 
                 $yetToAssignQa = $statusCountsQuery2->where('assignee_qa_id', null)
                     ->where('status_id', 4)
                     ->where('is_active', 1)
                     ->whereIn('process_id', $processIds)
-                    ->where(function($datequery) use ($from_date, $to_date) {
-                        $datequery->whereBetween('completion_date', [$from_date, $to_date]);
-                        if (date('Y-m', strtotime($to_date)) === date('Y-m')) {
-                            $datequery->orWhere('carry_over', 1);
-                        }
-                    })
+                    ->whereBetween('order_date', [$from_date, $to_date])
                     ->count();
             }
 
@@ -295,6 +257,61 @@ class HomeController extends Controller
         return response()->json([
             'StatusCounts' => $statusCounts,
         ]);
+    }
+
+    public function previous_count(Request $request)
+    {
+        $user = Auth::user();
+        $processIds = $this->getProcessIdsBasedOnUserRole($user);
+        $from_date = $request->input('from_date');
+        $to_date = $request->input('to_date');
+        $project_id = $request->input('project_id', 'All');
+        $client_id = $request->input('client_id', 'All');
+
+        if (!is_array($project_id)) {
+            $project_id = explode(',', $project_id);
+        }
+
+        if (!is_array($client_id)) {
+            $client_id = explode(',', $client_id);
+        }
+        $statusIds = [1, 2, 4, 13, 14];
+        $statusCountsQuery = OrderCreation::select('status_id', \DB::raw('COUNT(*) as total_orders'))
+            ->where('is_active', 1)
+            ->whereIn('status_id', $statusIds)
+            ->where(function ($query) {
+                $query->whereYear('created_at', '<', now()->year)
+                    ->orWhere(function ($query) {
+                        $query->whereYear('created_at', now()->year)
+                            ->whereMonth('created_at', '<', now()->month);
+                    });
+            })
+            ->groupBy('status_id')
+            ->get();
+        $totalOrderCount = 0;
+        $statusCounts = [];
+        foreach ($statusCountsQuery as $statusCount) {
+            $statusCounts[$statusCount->status_id] = $statusCount->total_orders;
+            $totalOrderCount += $statusCount->total_orders;
+        }
+        $statusCounts['total'] = $totalOrderCount;
+
+        // Count of orders that changed from status_ids 1, 2, 4, 13, 14 to status_id 5
+        $statusChangeCountQuery = OrderCreation::where('is_active', 1)
+            ->where(function ($query) {
+                $query->whereIn('status_id', [5])
+                    ->whereYear('created_at', '<', now()->year)
+                    ->orWhere(function ($query) {
+                        $query->whereIn('status_id', [5])
+                            ->whereYear('created_at', now()->year)
+                            ->whereMonth('created_at', '<', now()->month);
+                    });
+            })
+            ->count();
+
+        $statusCounts['carriedOverCompletedCount'] = $statusChangeCountQuery;
+
+        return response()->json(['StatusCounts' => $statusCounts]);
     }
 
 
@@ -327,6 +344,11 @@ class HomeController extends Controller
 
         if ($user->user_type_id == 6) {
             $statusCountsQuery->where('oms_order_creations.assignee_user_id', $user->id);
+        }
+
+         if ($user->user_type_id == 7) {
+            $statusCountsQuery->where('oms_order_creations.assignee_qa_id', $user->id)
+            ->whereNotIn('status_id', [1]);
         }
 
     // Apply client_id condition
