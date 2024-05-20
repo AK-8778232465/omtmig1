@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Session;
 use DataTables;
+use Carbon\Carbon;
+
 
 class OrderController extends Controller
 {
@@ -181,16 +183,23 @@ class OrderController extends Controller
                 $projectIds = Session::get('projectId');
                 $clientIds = Session::get('clientId');
 
-                $statusCountsQuery = OrderCreation::select('order_id')
-                ->where('is_active', 1)
-                ->whereIn('status_id', [1, 2, 4, 5, 13, 14])
-                ->where(function ($query) {
-                    $query->whereYear('created_at', '<', now()->year)
-                        ->orWhere(function ($query) {
-                            $query->whereYear('created_at', now()->year)
-                                ->whereMonth('created_at', '<', now()->month);
-                        });
-                })->get();
+             
+                // First query
+                $statusCountsQuery1 = OrderCreation::select('order_id')
+                    ->where('is_active', 1)
+                    ->whereIn('status_id', [1, 2, 4, 5, 13, 14])
+                    ->whereNull('completion_date')
+                    ->whereDate('order_date', '<', $fromDate);
+
+                // Second query
+                $statusCountsQuery2 = OrderCreation::select('order_id')
+                    ->where('is_active', 1)
+                    ->whereDate('completion_date', '>=', $fromDate)
+                    ->whereDate('completion_date', '<=', $toDate)
+                    ->whereDate('created_at', '<', $fromDate);
+
+                // Combine the queries using union
+                $statusCountsQuery = $statusCountsQuery1->union($statusCountsQuery2)->get();
 
                 $query->where(function($query) use ($statusCountsQuery, $fromDate, $toDate) {
                     $query->whereIn('oms_order_creations.order_id', $statusCountsQuery)
@@ -330,7 +339,7 @@ class OrderController extends Controller
         ->addColumn('order_date', function ($order) {
             return $order->order_date ? date('m/d/Y H:i:s', strtotime($order->order_date)) : '';
         })
-        
+
         ->addColumn('order_id', function ($order) {
             return '<span class="px-2 py-1 rounded text-white goto-order ml-2" id="goto_' . ($order->id ?? '') . '">'.$order->order_id.'</span>';
         })
@@ -412,7 +421,17 @@ class OrderController extends Controller
             'rowId' => 'required',
         ]);
 
-        OrderCreation::where('id', $input['rowId'])->update(['status_id' => $input['selectedStatus']]);
+        $statusId = $input['selectedStatus'];
+
+        $updateData = ['status_id' => $statusId];
+
+        if ($statusId == 5) {
+            $updateData['completion_date'] = Carbon::now()->toDateString();
+        }else{
+            $updateData['completion_date'] = null;
+        }
+
+        OrderCreation::where('id', $input['rowId'])->update($updateData);
 
         return response()->json(['data' => 'success', 'msg' => 'Status Updated Successfully']);
     }

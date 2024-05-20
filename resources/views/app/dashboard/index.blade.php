@@ -732,36 +732,6 @@ $(document).ready(function() {
     });
 
 
-
-    // $(document).ready(function () {
-    //     fetchOrderData('All');
-    //     $("#project_id").select2();
-    //     $("#project_id_dcf").select2();
-    //     $("#client_id_dcf").select2();
-    // });
-
-
-    // function fetchOrderData(projectId) {
-    //     $.ajax({
-    //         url: "{{ route('dashboard_count') }}",
-    //         type: "POST",
-    //         data: {
-    //             project_id: projectId,
-    //             _token: '{{csrf_token()}}'
-    //         },
-    //         dataType: 'json',
-    //         success: function (response) {
-    //             let statusCounts = response.StatusCounts;
-    //             $('#yet_to_assign_cnt').text(statusCounts[6] || 0);
-    //             $('#wip_cnt').text(statusCounts[1] || 0);
-    //             $('#hold_cnt').text(statusCounts[2] || 0);
-    //             $('#Qu_cnt').text(statusCounts[4] || 0);
-    //             $('#cancelled_cnt').text(statusCounts[3] || 0);
-    //             $('#completed_cnt').text(statusCounts[5] || 0);
-    //         }
-    //     });
-    // }
-
     function gotoOrders(StatusId) {
         projectId = $("#project_id_dcf").val();
         clientId = $("#client_id_dcf").val();
@@ -877,39 +847,55 @@ function preOrderData(projectId, clientId, fromDate, toDate) {
         success: function (response) {
             let statusCounts = response.StatusCounts;
 
-            let statusCountMap = {
-                '13': 'pre_coversheet_cnt',
-                '2': 'pre_hold_cnt',
-                '4': 'pre_qu_cnt',
-                '14': 'pre_clarification_cnt',
-                '1': 'pre_wip_cnt'
-            };
-
-            let totalSum = 0;
-
-            for (let statusId in statusCountMap) {
-                if (statusCounts.hasOwnProperty(statusId)) {
-                    $('#' + statusCountMap[statusId]).text(statusCounts[statusId]);
+            // Calculate total orders
+            let totalValue = 0;
+            for (const key in statusCounts) {
+                if (statusCounts.hasOwnProperty(key)) {
+                    for (const count of statusCounts[key]) {
+                        totalValue += count.total_orders;
+                    }
                 }
             }
+            $('#pre_all_cnt').text(totalValue);
 
-            if (statusCounts.hasOwnProperty('total')) {
-                let carriedOverCount = parseInt(statusCounts.total) || 0; // Ensure it's a number or default to 0
-                $('#carried_over_cnt').text(carriedOverCount);
-                totalSum += carriedOverCount;
-            }
+            // Update individual counts
+            let carriedCountMap = {};
+            let carriedOverCompletedCountMap = {};
 
-            if (statusCounts.hasOwnProperty('carriedOverCompletedCount')) {
-                let carriedOverCompletedCount = parseInt(statusCounts.carriedOverCompletedCount) || 0;
-                $('#carried_over_completed_cnt,#pre_completed_cnt').text(carriedOverCompletedCount);
-                totalSum += carriedOverCompletedCount;
-            }
+            statusCounts.carriedCount.forEach(item => {
+                carriedCountMap[item.status_id] = item.total_orders;
+            });
 
-            $('#pre_all_cnt').text(totalSum);
+            statusCounts.carriedOverCompletedCount.forEach(item => {
+                carriedOverCompletedCountMap[item.status_id] = item.total_orders;
+            });
+            $('#pre_completed_cnt,#carried_over_completed_cnt').text(carriedOverCompletedCountMap[5] || 0);
 
+            // Update specific counts
+            let preWipCnt = carriedCountMap[1] || 0;
+            let preHoldCnt = carriedCountMap[2] || 0;
+            let preQuCnt = carriedCountMap[4] || 0;
+            let preCoversheetCnt = carriedCountMap[13] || 0;
+            let preClarificationCnt = carriedCountMap[14] || 0;
+
+            $('#pre_wip_cnt').text(preWipCnt);
+            $('#pre_hold_cnt').text(preHoldCnt);
+            $('#pre_qu_cnt').text(preQuCnt);
+            $('#pre_coversheet_cnt').text(preCoversheetCnt);
+            $('#pre_clarification_cnt').text(preClarificationCnt);
+
+            // Calculate and update the total of the specified values
+            let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt;
+            $('#carried_over_cnt').text(totalSpecificValues);
+        },
+        error: function (error) {
+            console.error('Error:', error);
         }
     });
 }
+
+
+
 
 // $(document).on('change', '#project_id_dcf', function() {
 //         fetchOrderData($(this).val());
