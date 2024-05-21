@@ -156,6 +156,7 @@ class HomeController extends Controller
             if (!in_array('All', $project_id)) {
                 // Case: project_id is specified (not 'All')
                 $statusCountsQuery->whereIn('process_id', $processIds)
+                ->whereIn('process_id', $project_id)
                 ->whereDate('order_date', '>=', $from_date)
                 ->whereDate('order_date', '<=', $to_date);
             } else {
