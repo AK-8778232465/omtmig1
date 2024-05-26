@@ -307,27 +307,6 @@
 <div id="rightContent">
     <div class="col-12">
         <div class="row my-2">
-            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
-                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)">
-                    <div class="card custom-card-bg">
-                        <div class="card-content">
-                            <div class="card-body">
-                                <div class="media d-flex">
-                                    <div class="media-body">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h3 class="icon-dual-info mb-0 text-dark" id="yet_to_assign_cnt">0</h3>
-                                        </div>
-                                        <div class="justify-content-between align-items-center mt-2 text-dark">
-                                            <span>Yet to Assign</span>
-                                            <i class="icon-dual-info font-large-2 float-right text-dark" data-feather="book-open"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
             @if(!Auth::user()->hasRole('Qcer'))
                 <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)">
                     <div class="card">
@@ -336,9 +315,9 @@
                                 <div class="media d-flex">
                                     <div class="media-body">
                                         <div class="d-flex align-items-center">
-                                            <h3 class="icon-dual-pink mb-0 mr-2" id="wip_cnt">0</h3>
-                                            <h3 class="plus-symbol mb-0 mr-2 text-pink">+</h3>
-                                            <h3 class="icon-dual-pink mb-0" id="pre_wip_cnt">0</h3>
+                                            <h3 class="icon-dual-success mb-0 mr-2" id="wip_cnt">0</h3>
+                                            <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                            <h3 class="icon-dual-warning mb-0" id="pre_wip_cnt">0</h3>
                                         </div>
                                         <div class="justify-content-between align-items-center mt-2">
                                             <span>WIP</span>
@@ -363,8 +342,8 @@
                                 <div class="media-body">
                                     <div class="d-flex align-items-center">
                                         <h3 class="icon-dual-success mb-0 mr-2" id="coversheet_cnt">0</h3>
-                                        <h3 class="plus-symbol mb-0 mr-2 text-success">+</h3>
-                                        <h3 class="icon-dual-success mb-0" id="pre_coversheet_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_coversheet_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Coversheet Prep</span>
@@ -385,9 +364,9 @@
                             <div class="media d-flex">
                                 <div class="media-body">
                                     <div class="d-flex  align-items-center">
-                                        <h3 class="icon-dual-info mb-0 mr-2" id="Clarification_cnt">0</h3>
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="Clarification_cnt">0</h3>
                                         <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
-                                        <h3 class="icon-dual-info mb-0" id="pre_clarification_cnt">0</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_clarification_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Clarification</span>
@@ -408,8 +387,8 @@
                             <div class="media d-flex">
                                 <div class="media-body">
                                     <div class="d-flex  align-items-center">
-                                        <h3 class="icon-dual-warning mb-0 mr-2" id="Qu_cnt">0</h3>
-                                        <h3 class="plus-symbol mb-0 mr-2 text-warning">+</h3>
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="Qu_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
                                         <h3 class="icon-dual-warning mb-0" id="pre_qu_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
@@ -431,9 +410,9 @@
                             <div class="media d-flex">
                                 <div class="media-body">
                                     <div class="d-flex  align-items-center">
-                                        <h3 class="icon-dual-purple mb-0 mr-2" id="hold_cnt">0</h3>
-                                        <h3 class="plus-symbol mb-0 mr-2 text-purple">+</h3>
-                                        <h3 class="icon-dual-purple mb-0" id="pre_hold_cnt">0</h3>
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="hold_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_hold_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Hold</span>
@@ -454,7 +433,7 @@
                             <div class="media d-flex">
                                 <div class="media-body">
                                     <div class="d-flex align-items-center">
-                                        <h3 class="icon-dual-danger mb-0 mr-2" id="cancelled_cnt">0</h3>
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="cancelled_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Cancelled</span>
@@ -476,8 +455,8 @@
                                 <div class="media-body">
                                     <div class="d-flex align-items-center">
                                         <h3 class="icon-dual-success mb-0 mr-2" id="completed_cnt">0</h3>
-                                        <h3 class="plus-symbol mb-0 mr-2 text-success">+</h3>
-                                        <h3 class="icon-dual-success mb-0" id="pre_completed_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_completed_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Completed</span>
@@ -498,9 +477,9 @@
                             <div class="media d-flex">
                                 <div class="media-body">
                                     <div class="d-flex  align-items-center">
-                                        <h3 class="icon-dual-pink mb-0 mr-2" id="all_count">0</h3>
-                                        <h3 class="plus-symbol mb-0 mr-2 text-pink">+</h3>
-                                        <h3 class="icon-dual-pink mb-0" id="pre_all_cnt">0</h3>
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="all_count">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_all_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>All</span>
@@ -512,6 +491,32 @@
                     </div>
                 </div>
             </div>
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('Process'))
+            <div class="col-xl-4 col-sm-6 col-12">
+
+            </div>
+            @endif
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
+                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="media-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h3 class="icon-dual-info mb-0 text-success" id="yet_to_assign_cnt">0</h3>
+                                        </div>
+                                        <div class="justify-content-between align-items-center mt-2 text-dark">
+                                            <span>Yet to Assign</span>
+                                            <i class="icon-dual-info font-large-2 float-right text-dark" data-feather="book-open"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <!-- Carried Over -->
             <div class="col-xl-4 col-sm-6 col-12">
@@ -542,7 +547,7 @@
                             <div class="media d-flex">
                                 <div class="media-body">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-blue mb-0" id="carried_over_completed_cnt">0</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="carried_over_completed_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Carried Over & Completed</span>
@@ -847,12 +852,21 @@ function preOrderData(projectId, clientId, fromDate, toDate) {
         success: function (response) {
             let statusCounts = response.StatusCounts;
 
+            // Log the response to debug
+            console.log("Response:", response);
+
             // Calculate total orders
             let totalValue = 0;
             for (const key in statusCounts) {
                 if (statusCounts.hasOwnProperty(key)) {
-                    for (const count of statusCounts[key]) {
-                        totalValue += count.total_orders;
+                    if (Array.isArray(statusCounts[key])) {
+                        statusCounts[key].forEach(count => {
+                            totalValue += count.total_orders;
+                        });
+                    } else if (typeof statusCounts[key] === 'object') {
+                        for (const count in statusCounts[key]) {
+                            totalValue += statusCounts[key][count];
+                        }
                     }
                 }
             }
@@ -862,14 +876,21 @@ function preOrderData(projectId, clientId, fromDate, toDate) {
             let carriedCountMap = {};
             let carriedOverCompletedCountMap = {};
 
-            statusCounts.carriedCount.forEach(item => {
-                carriedCountMap[item.status_id] = item.total_orders;
-            });
+            if (Array.isArray(statusCounts.carriedCount)) {
+                statusCounts.carriedCount.forEach(item => {
+                    carriedCountMap[item.status_id] = item.total_orders;
+                });
+            }
 
-            statusCounts.carriedOverCompletedCount.forEach(item => {
-                carriedOverCompletedCountMap[item.status_id] = item.total_orders;
-            });
-            $('#pre_completed_cnt,#carried_over_completed_cnt').text(carriedOverCompletedCountMap[5] || 0);
+            for (const statusId in statusCounts.carriedOverCompletedCount) {
+                if (statusCounts.carriedOverCompletedCount.hasOwnProperty(statusId)) {
+                    carriedOverCompletedCountMap[statusId] = statusCounts.carriedOverCompletedCount[statusId];
+                }
+            }
+
+            console.log("carriedOverCompletedCountMap:", carriedOverCompletedCountMap); // Log to debug
+
+            $('#pre_completed_cnt, #carried_over_completed_cnt').text(carriedOverCompletedCountMap[5] || 0);
 
             // Update specific counts
             let preWipCnt = carriedCountMap[1] || 0;

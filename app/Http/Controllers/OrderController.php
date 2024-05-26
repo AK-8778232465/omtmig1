@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Session;
 use DataTables;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
+
 
 
 class OrderController extends Controller
@@ -101,7 +103,6 @@ class OrderController extends Controller
             )
             ->where('oms_order_creations.is_active', 1);
 
-            $query->whereIn('oms_order_creations.process_id', $processIds);
 
             if (
                 isset($request->status) &&
@@ -177,49 +178,171 @@ class OrderController extends Controller
                 }
             }
 
-            if(isset($request->sessionfilter) && $request->sessionfilter == 'true') {
-                $fromDate = Session::get('fromDate');
-                $toDate = Session::get('toDate');
-                $projectIds = Session::get('projectId');
-                $clientIds = Session::get('clientId');
-
-             
-                // First query
-                $statusCountsQuery1 = OrderCreation::select('order_id')
+    if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
+        $fromDate = Session::get('fromDate');
+        $toDate = Session::get('toDate');
+        $project_id = Session::get('projectId');
+        $client_id = Session::get('clientId');
+    
+        // Ensure project_id and client_id are arrays
+        $project_id = !is_array($project_id) ? explode(',', $project_id) : $project_id;
+        $client_id = !is_array($client_id) ? explode(',', $client_id) : $client_id;
+    
+        // Initialize queries
+        $carryOverAllStatusCounts = OrderCreation::query();
+        $currentCompletedCount = OrderCreation::query();
+        $getPreCompletedorderId = OrderCreation::query();
+        $getcurrentCompletedorderId = OrderCreation::query();
+        $currentOverAllStatusCounts = OrderCreation::query();
+    
+        if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+            $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
+                ->where('status_id', '!=', 5)
+                ->where('is_active', 1)
+                ->whereDate('order_date', '>=', $fromDate)
+                ->whereDate('order_date', '<=', $toDate)
+                ->whereHas('process', function ($query) use ($client_id) {
+                    $query->whereIn('client_id', $client_id);
+                });
+    
+            $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
+                ->where('is_active', 1)
+                ->whereIn('status_id', [1, 2, 4, 13, 14])
+                ->whereNotIn('status_id', [3, 5])
+                ->whereNull('completion_date')
+                ->whereDate('order_date', '<', $fromDate)
+                ->whereHas('process', function ($query) use ($client_id) {
+                    $query->whereIn('client_id', $client_id);
+                });
+    
+            $getcurrentCompletedorderId = OrderCreation::with('process', 'client')->select('id')
+                ->whereDate('completion_date', '>=', $fromDate)
+                ->whereDate('completion_date', '<=', $toDate)
+                ->where('status_id', 5)
+                ->where('is_active', 1)
+                ->whereHas('process', function ($query) use ($client_id) {
+                    $query->whereIn('client_id', $client_id);
+                });
+    
+            $getPreCompletedorderId = OrderCreation::with('process', 'client')
+                ->select('id')
+                ->whereDate('order_date', '<', $fromDate)
+                ->where('status_id', 5)
+                ->where('is_active', 1)
+                ->whereHas('process', function ($query) use ($client_id) {
+                    $query->whereIn('client_id', $client_id);
+                });
+    
+        } else {
+            if (!in_array('All', $project_id)) {
+                // Case: project_id is specified (not 'All')
+                $currentOverAllStatusCounts = OrderCreation::select('id')
+                    ->whereIn('process_id', $project_id)
+                    ->where('status_id', '!=', 5)
                     ->where('is_active', 1)
-                    ->whereIn('status_id', [1, 2, 4, 5, 13, 14])
+                    ->whereDate('order_date', '>=', $fromDate)
+                    ->whereDate('order_date', '<=', $toDate);
+    
+                $carryOverAllStatusCounts = OrderCreation::select('id')
+                    ->where('is_active', 1)
+                    ->whereIn('process_id', $project_id)
+                    ->whereIn('status_id', [1, 2, 4, 13, 14])
+                    ->whereNotIn('status_id', [3, 5])
                     ->whereNull('completion_date')
                     ->whereDate('order_date', '<', $fromDate);
-
-                // Second query
-                $statusCountsQuery2 = OrderCreation::select('order_id')
-                    ->where('is_active', 1)
+    
+                $getcurrentCompletedorderId = OrderCreation::select('id')
+                    ->whereIn('process_id', $project_id)
                     ->whereDate('completion_date', '>=', $fromDate)
                     ->whereDate('completion_date', '<=', $toDate)
-                    ->whereDate('created_at', '<', $fromDate);
-
-                // Combine the queries using union
-                $statusCountsQuery = $statusCountsQuery1->union($statusCountsQuery2)->get();
-
-                $query->where(function($query) use ($statusCountsQuery, $fromDate, $toDate) {
-                    $query->whereIn('oms_order_creations.order_id', $statusCountsQuery)
-                          ->orWhereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
-                });
-                
-                if ($projectIds[0] != 'All') {
-                    $query->where(function($query) use ($statusCountsQuery, $projectIds) {
-                        $query->whereIn('oms_order_creations.order_id', $statusCountsQuery)
-                              ->orWhereIn('oms_order_creations.process_id', $projectIds);
-                    });
-                   }
-
-                if ($clientIds[0] != 'All') {
-                    $query->where(function($query) use ($statusCountsQuery, $clientIds) {
-                        $query->whereIn('oms_order_creations.order_id', $statusCountsQuery)
-                              ->orWhereIn('stl_item_description.client_id', $clientIds);
-                    });
-                    }
+                    ->where('status_id', 5)
+                    ->where('is_active', 1);
+    
+                $getPreCompletedorderId = OrderCreation::select('id')
+                    ->whereIn('process_id', $project_id)
+                    ->whereDate('order_date', '<', $fromDate)
+                    ->where('status_id', 5)
+                    ->where('is_active', 1);
+    
+            } else {
+                $currentOverAllStatusCounts = OrderCreation::select('id')
+                    ->whereDate('order_date', '>=', $fromDate)
+                    ->whereDate('order_date', '<=', $toDate)
+                    ->where('status_id', '!=', 5)
+                    ->where('is_active', 1);
+    
+                $carryOverAllStatusCounts = OrderCreation::select('id')
+                    ->where('is_active', 1)
+                    ->whereIn('status_id', [1, 2, 4, 13, 14])
+                    ->whereNotIn('status_id', [3, 5])
+                    ->whereNull('completion_date')
+                    ->whereDate('order_date', '<', $fromDate);
+    
+                $getcurrentCompletedorderId = OrderCreation::select('id')
+                    ->whereDate('completion_date', '>=', $fromDate)
+                    ->whereDate('completion_date', '<=', $toDate)
+                    ->where('status_id', 5)
+                    ->where('is_active', 1);
+    
+                $getPreCompletedorderId = OrderCreation::select('id')
+                    ->whereDate('order_date', '<', $fromDate)
+                    ->where('status_id', 5)
+                    ->where('is_active', 1);
             }
+        }
+    
+        // Get the IDs from the queries
+        $getPreCompletedorderIdIds = $getPreCompletedorderId->pluck('id')->all();
+        $getcurrentCompletedorderIdIds = $getcurrentCompletedorderId->pluck('id')->all();
+    
+        // Find common IDs
+        $commonIds = array_intersect($getPreCompletedorderIdIds, $getcurrentCompletedorderIdIds);
+    
+        $preCompletedCount = OrderCreation::select('id')->whereIn('id', $commonIds);
+    
+        // Combine the queries using union
+        $carryOverAllStatusCountsIds = $carryOverAllStatusCounts->union($preCompletedCount)->pluck('id')->toArray();
+    
+        // Get IDs from $currentOverAllStatusCounts
+        $currentOverAllStatusCountsIds = $currentOverAllStatusCounts->union($getcurrentCompletedorderId)->pluck('id')->toArray();
+    
+        // Combine the final results
+        $combinedIds = array_merge($carryOverAllStatusCountsIds, $currentOverAllStatusCountsIds);
+    
+        // Optionally, remove duplicate IDs if needed
+        $combinedUniqueIds = array_unique($combinedIds);
+    
+        // Construct the final query
+        $query = DB::table('oms_order_creations')
+            ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+            ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
+            ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
+            ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+            ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
+            ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+            ->select(
+                'oms_order_creations.id',
+                'oms_order_creations.order_id as order_id',
+                'oms_order_creations.status_id as status_id',
+                'oms_order_creations.order_date as order_date',
+                'stl_item_description.project_code as project_code',
+                'stl_item_description.qc_enabled as qc_enabled',
+                'stl_item_description.tat_value as tat_value',
+                'oms_state.short_code as short_code',
+                'county.county_name as county_name',
+                'oms_order_creations.assignee_user_id',
+                'oms_order_creations.assignee_qa_id',
+                DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
+                DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa')
+            )
+            ->where('oms_order_creations.is_active', 1)
+            ->whereIn('oms_order_creations.id', $combinedUniqueIds);
+            
+        if ($request->status != 'All') {
+            $query->where('oms_order_creations.status_id', $request->status);
+        }
+    }
+    $query->whereIn('oms_order_creations.process_id', $processIds);
 
         return DataTables::of($query)
         ->addColumn('checkbox', function ($order) use ($user){
@@ -427,7 +550,7 @@ class OrderController extends Controller
 
         if ($statusId == 5) {
             $updateData['completion_date'] = Carbon::now()->toDateString();
-        }else{
+        } else {
             $updateData['completion_date'] = null;
         }
 
