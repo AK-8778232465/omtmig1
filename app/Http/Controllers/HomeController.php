@@ -609,8 +609,7 @@ public function dashboard_userwise_count(Request $request)
             SUM(CASE WHEN status_id = 5 AND completion_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as `status_5`,
             SUM(CASE WHEN status_id = 13 THEN 1 ELSE 0 END) as `status_13`,
             SUM(CASE WHEN status_id = 14 THEN 1 ELSE 0 END) as `status_14`,
-            COUNT(*) as `status_6`
-        ', [$fromDate, $toDate])
+            COUNT(*) as `All`', [$fromDate, $toDate])
         ->where('oms_order_creations.is_active', 1)
         ->groupBy('oms_order_creations.assignee_user_id');
 
@@ -632,9 +631,9 @@ public function dashboard_userwise_count(Request $request)
             'status_3' => $count->status_3,
             'status_4' => $count->status_4,
             'status_5' => $count->status_5,
-            'status_6' => $count->status_6,
             'status_13' => $count->status_13,
             'status_14' => $count->status_14,
+            'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14,
         ];
     });
 
