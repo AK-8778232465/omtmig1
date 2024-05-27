@@ -509,6 +509,7 @@ class HomeController extends Controller
         ->select('stl_client.client_name', 'stl_item_description.process_name', 'oms_order_creations.process_id', 'stl_item_description.project_code')
         ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
         ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->where('oms_order_creations.is_active',1)
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NOT NULL THEN 1 END) AS WIP')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 2 THEN 2 END) AS Hold')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 3 THEN 3 END) AS Cancelled')
@@ -518,15 +519,14 @@ class HomeController extends Controller
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 14 THEN 14 END) AS Clarification')
         ->groupBy('stl_client.client_name', 'stl_item_description.process_name', 'oms_order_creations.process_id', 'stl_item_description.project_code');
 
+    if ($user->user_type_id == 6) {
+        $statusCountsQuery->where('oms_order_creations.assignee_user_id', $user->id);
+    }
 
-        if ($user->user_type_id == 6) {
-            $statusCountsQuery->where('oms_order_creations.assignee_user_id', $user->id);
-        }
-
-         if ($user->user_type_id == 7) {
-            $statusCountsQuery->where('oms_order_creations.assignee_qa_id', $user->id)
+    if ($user->user_type_id == 7) {
+        $statusCountsQuery->where('oms_order_creations.assignee_qa_id', $user->id)
             ->whereNotIn('status_id', [1]);
-        }
+    }
 
     // Apply client_id condition
     if (!empty($client_id) && $client_id[0] !== 'All') {
@@ -538,23 +538,14 @@ class HomeController extends Controller
         $statusCountsQuery->whereIn('oms_order_creations.process_id', $project_id);
     }
 
-    // // Apply date filtering
-    // if (!empty($fromDate) && !empty($toDate)) {
-    //     $statusCountsQuery->where('order_date', '>=', $fromDate)->where('order_date', '<=', $toDate);
-    // } elseif (!empty($fromDate)) {
-    //     $statusCountsQuery->where('order_date', '>=', $fromDate);
-    // } elseif (!empty($toDate)) {
-    //     $statusCountsQuery->where('order_date', '<=', $toDate);
-    // }
+    // Apply date filtering
+if ($fromDate && $toDate) {
+    $statusCountsQuery->where(function($datequery) use ($fromDate, $toDate) {
+        $datequery->whereDate('oms_order_creations.order_date', '>=', $fromDate)
+                  ->whereDate('oms_order_creations.order_date', '<=', $toDate);
+    });
+}
 
-    if ($fromDate && $toDate) {
-        $statusCountsQuery->where(function($datequery) use ($fromDate, $toDate) {
-            $datequery->whereBetween('oms_order_creations.completion_date', [$fromDate, $toDate]);
-            if (date('Y-m', strtotime($toDate)) === date('Y-m')) {
-                $datequery->orWhere('oms_order_creations.carry_over', 1);
-            }
-        });
-    }
 
     $dataForDataTables = $statusCountsQuery->get();
 
@@ -582,7 +573,7 @@ class HomeController extends Controller
             'Completed' => $data->Completed,
             'Coversheet Prep' => $data->Coversheet_Prep,
             'Clarification' => $data->Clarification,
-            'All' => $sum, // Add the sum as 'All'
+            'All' => $data->WIP + $data->Hold + $data->Cancelled +  $data->Send_for_QC + $data->Completed +  $data->Coversheet_Prep + $data->Clarification, // Add the sum as 'All'
             // Add other fields as needed
         ];
     }
@@ -602,26 +593,24 @@ public function dashboard_userwise_count(Request $request)
     $statusCountsQuery = OrderCreation::query();
 
     $statusCountsQuery
-    ->whereNotNull('assignee_user_id')
-    ->where(function($datequery) use ($fromDate, $toDate) {
-        $datequery->whereBetween('completion_date', [$fromDate, $toDate]);
-        if (date('Y-m', strtotime($toDate)) === date('Y-m')) {
-            $datequery->orWhere('carry_over', 1);
-        }
-    })
-    ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
-    ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->whereNotNull('assignee_user_id')
+        ->where(function($datequery) use ($fromDate, $toDate) {
+            $datequery->whereDate('oms_order_creations.order_date', '>=', $fromDate)
+                      ->whereDate('oms_order_creations.order_date', '<=', $toDate);
+        })
+        ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
+        ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
         ->selectRaw('
             CONCAT(oms_users.emp_id, " (", oms_users.username, ")") as userinfo,
             SUM(CASE WHEN status_id = 1 THEN 1 ELSE 0 END) as `status_1`,
             SUM(CASE WHEN status_id = 2 THEN 1 ELSE 0 END) as `status_2`,
             SUM(CASE WHEN status_id = 3 THEN 1 ELSE 0 END) as `status_3`,
             SUM(CASE WHEN status_id = 4 THEN 1 ELSE 0 END) as `status_4`,
-            SUM(CASE WHEN status_id = 5 THEN 1 ELSE 0 END) as `status_5`,
+            SUM(CASE WHEN status_id = 5 AND completion_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as `status_5`,
             SUM(CASE WHEN status_id = 13 THEN 1 ELSE 0 END) as `status_13`,
             SUM(CASE WHEN status_id = 14 THEN 1 ELSE 0 END) as `status_14`,
             COUNT(*) as `status_6`
-        ')
+        ', [$fromDate, $toDate])
         ->where('oms_order_creations.is_active', 1)
         ->groupBy('oms_order_creations.assignee_user_id');
 

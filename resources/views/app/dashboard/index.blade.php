@@ -303,7 +303,7 @@
                         </div>
                     </div>
             </div>
-<!-- !-- // --> 
+<!-- !-- // -->
 <div id="rightContent">
     <div class="col-12">
         <div class="row my-2">
@@ -1030,7 +1030,7 @@ $('#datewise_datatable').on('draw.dt', function() {
                 { data: 'status_2', name: 'status_2' },
                 { data: 'status_3', name: 'status_3' },
                 { data: 'status_5', name: 'status_5' },
-                { data: 'status_6', name: 'status_6' },
+                { data: 'All', name: 'All' },
             ],
         });
     }
