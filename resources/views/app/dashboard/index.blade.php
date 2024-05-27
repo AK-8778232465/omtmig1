@@ -956,7 +956,7 @@ function datewise_datatable(fromDate, toDate, client_id, project_id) {
                 serverSide: false,
                 searching: true,
                 ajax: {
-                    url: "{{ route('dashboard_datewise_count') }}",
+                    url: "{{ route('dashboard_clientwise_count') }}",
                     type: 'POST',
                     data: function(d) {
                         d.to_date = toDate;

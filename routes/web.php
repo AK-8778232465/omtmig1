@@ -28,7 +28,7 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('getCounty', 'getCounty')->name('getCounty');
     Route::any('getOrderData', 'getOrderData')->name('getOrderData');
     Route::any('dashboard_count', 'dashboard_count')->name('dashboard_count');
-    Route::post('dashboard_datewise_count', 'dashboard_datewise_count')->name('dashboard_datewise_count');
+    Route::post('dashboard_clientwise_count', 'dashboard_clientwise_count')->name('dashboard_clientwise_count');
     Route::post('dashboard_userwise_count', 'dashboard_userwise_count')->name('dashboard_userwise_count');
     Route::post('revenue_detail', 'revenue_detail')->name('revenue_detail');
     Route::post('revenue_detail_client', 'revenue_detail_client')->name('revenue_detail_client');

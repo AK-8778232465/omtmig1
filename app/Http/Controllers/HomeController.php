@@ -494,7 +494,7 @@ class HomeController extends Controller
     return response()->json(['StatusCounts' => $statusCounts]);
 }
 
-    public function dashboard_datewise_count(Request $request)
+    public function dashboard_clientwise_count(Request $request)
 {
     $user = Auth::user();
 
@@ -514,7 +514,7 @@ class HomeController extends Controller
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 2 THEN 2 END) AS Hold')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 3 THEN 3 END) AS Cancelled')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 4 THEN 4 END) AS Send_for_QC')
-        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 5 THEN 5 END) AS Completed')
+        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 5 AND oms_order_creations.completion_date BETWEEN ? AND ? THEN 5 END) AS Completed', [$fromDate, $toDate])
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 13 THEN 13 END) AS Coversheet_Prep')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 14 THEN 14 END) AS Clarification')
         ->groupBy('stl_client.client_name', 'stl_item_description.process_name', 'oms_order_creations.process_id', 'stl_item_description.project_code');
