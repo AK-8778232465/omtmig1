@@ -168,6 +168,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         $existingOrder = OrderCreation::where('order_id', $data['order_id'])
         ->where('order_date', $data['order_date'])
+        ->Where('process_id', $process->id)
         ->exists();
  
         // If the order already exists, handle it accordingly
@@ -193,14 +194,6 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 'assignee_qa_id' => isset($assignee_qa->id) ? $assignee_qa->id : null,
                 'created_by' => $this->userid,
             ]);
-
-            if (!$orderId) {
-                // Duplicate entry found
-                $data['comments'] = 'Duplicate Order ID found';
-                OrderTemp::insert($data);
-                ++$this->unsuccess_rows;
-                return null;
-            }
 
             ++$this->success_rows;
             return null;
