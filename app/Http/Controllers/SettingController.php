@@ -11,6 +11,7 @@ use App\Models\County;
 use App\Models\Lob;
 use App\Models\Order;
 use App\Models\Process;
+use App\Models\Product;
 use App\Models\ProcessLocation;
 use App\Models\Service;
 use App\Models\ServiceUserMapping;
@@ -47,14 +48,29 @@ class SettingController extends Controller
      */
     public function setting(Request $request)
     {
-        if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
-            $usersData = User::with('usertypes:id,usertype')->whereNotIn('user_type_id', [1,4])->get();
-            $userTypes = UserType::whereNotIn('id', [1,4])->get();
-            $exportCount = ServiceUserMapping::count();
-            return view('app.settings.users', compact('usersData', 'userTypes','exportCount'));
-        } else {
-            abort(403);
+        if($request->is('settings/users') ||$request->is('settings') ){
+            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
+                $usersData = User::with('usertypes:id,usertype')->whereNotIn('user_type_id', [1,4])->get();
+                $userTypes = UserType::whereNotIn('id', [1,4])->get();
+                $exportCount = ServiceUserMapping::count();
+                return view('app.settings.users', compact('usersData', 'userTypes','exportCount'));
+            } else {
+                abort(403);
+            }
+        }else if ($request->is('settings/products')) {
+
+            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
+                $lobData = DB::table('stl_lob')->get();
+                $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
+                $products = Product::all();
+                $products = Product::with('client', 'lob')->get();
+
+                // return response()->json($products);
+
+                return view('app.settings.product',compact('lobData','clients','products'));
+                }
         }
+       
     }
 
     //Users
@@ -157,6 +173,95 @@ class SettingController extends Controller
             return response()->json(['data' => 'error', 'msg' => $validator->errors()->all()]);
         }
     }
+
+    public function addproduct(Request $request){
+
+        $request->validate([
+            'client_id' => 'required',
+            'lob_id' => 'required',
+            'product_name' => 'required',
+        ]);
+
+        $input = $request->all();
+
+        $productData = [
+            'client_id' => $input['client_id'],
+            'lob_id' => $input['lob_id'],
+            'product_name' =>$input['product_name'],
+            'comments' => $input['comments'],
+            'is_active' => $input['is_active'],
+            'created_by' => Auth::id(),
+            'created_at' => now(),
+        ];
+
+
+
+        $productId = Product::insertGetId($productData);
+
+        if (isset($productId)) {
+            $product = Product::find($productId);
+        // return response()->json($product);
+            return response()->json(['data' => 'success', 'msg' => 'Product Added Successfully!']);
+        } else {
+            return response()->json(['data' => 'error', 'msg' => $validator->errors()->all()]);
+        }
+
+
+    }
+
+    public function edit_product(Request $request)
+    {
+        $id = $request->id;
+        $productDetail = Product::where('id', $id)->first();
+
+        return response()->json($productDetail);
+    }
+
+    public function productStatus($productid)
+    {
+        $product = Product::find($productid);
+        
+        if ($product->is_active == 1) {
+            Product::where('id', $productid)->update(['is_active' => 0]);
+        } else {
+            Product::where('id', $productid)->update(['is_active' => 1]);
+        }
+
+        return redirect()->back()->with('success', 'Status Changed Successfully!');
+    }
+
+    public function update_product(Request $request)
+    {
+        $request->validate([
+            'client_id_ed' => 'required',
+            'lob_id_ed' => 'required',
+            'product_name_ed' => 'required',
+        ]);
+
+        $input = $request->all();
+        $isactive = isset($input['is_active_ed']) ? 1 : 0;
+
+        $productData = [
+            'client_id' => $input['client_id_ed'],
+            'lob_id' => $input['lob_id_ed'],
+            'product_name' =>$input['product_name_ed'],
+            'comments' => $input['comments_ed'],
+            'is_active' => $isactive,
+            'updated_by' => Auth::id(),
+            'updated_at' => now(),
+        ];
+
+        $res = Product::where('id', $input['id_ed'])->update($productData);
+
+        if ($res > 0) {
+            return response()->json(['data' => 'success', 'msg' => 'Product Updated Successfully!']);
+        } elseif ($res === 0) {
+            return response()->json(['data' => 'success', 'msg' => 'No Changes To Update!']);
+        } else {
+            return response()->json(['data' => 'error', 'msg' => 'Failed to update service.']);
+        }
+    }
+
 
 
     public function mappingData(Request $request){

@@ -303,24 +303,51 @@
                         </div>
                     </div>
             </div>
-<!-- // -->
+<!-- !-- // -->
 <div id="rightContent">
-<div class="col-12">
-    <div class="row my-2">
-        @if(!Auth::user()->hasRole('Qcer'))
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)">
+    <div class="col-12">
+        <div class="row my-2">
+            @if(!Auth::user()->hasRole('Qcer'))
+                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="media-body">
+                                        <div class="d-flex align-items-center">
+                                            <h3 class="icon-dual-success mb-0 mr-2" id="wip_cnt">0</h3>
+                                            <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                            <h3 class="icon-dual-warning mb-0" id="pre_wip_cnt">0</h3>
+                                        </div>
+                                        <div class="justify-content-between align-items-center mt-2">
+                                            <span>WIP</span>
+                                            <i class="icon-dual-pink font-large-2 float-right" data-feather="trending-up"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Existing sections -->
+
+            <!-- Coversheet Prep -->
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(13)">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-pink mb-0" id="wip_cnt">0</h3>
-                                        <!-- <h3 class="icon-dual-pink mb-0" id="wip_cost">$0.00</h3> -->
+                                    <div class="d-flex align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="coversheet_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_coversheet_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
-                                        <span>WIP</span>
-                                        <i class="icon-dual-pink font-large-2 float-right" data-feather="trending-up"></i>
+                                        <span>Coversheet Prep</span>
+                                        <i class="icon-dual-success font-large-2 float-right" data-feather="arrow-up-left"></i>
                                     </div>
                                 </div>
                             </div>
@@ -328,56 +355,85 @@
                     </div>
                 </div>
             </div>
-        @endif
-        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(4)">
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="media-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="icon-dual-danger mb-0" id="Qu_cnt">0</h3>
-                                    <!-- <h3 class="icon-dual-danger mb-0" id="qu_cost">$0.00</h3> -->
-                                </div>
-                                <div class="justify-content-between align-items-center mt-2">
-                                    <span>Send For Qc</span>
-                                    <i class="icon-dual-danger font-large-2 float-right" data-feather="chevrons-right"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(2)">
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="media-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="icon-dual-purple mb-0" id="hold_cnt">0</h3>
-                                    <!-- <h3 class="icon-dual-purple mb-0" id="hold_cost">$0.00</h3> -->
-                                </div>
-                                <div class="justify-content-between align-items-center mt-2">
-                                    <span>Hold</span>
-                                    <i class="icon-dual-purple font-large-2 float-right" data-feather="pause"></i>
+
+            <!-- Clarification -->
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(14)">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex  align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="Clarification_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_clarification_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Clarification</span>
+                                        <i class="icon-dual-info font-large-2 float-right" data-feather="arrow-up-right"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Send For QC -->
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(4)">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex  align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="Qu_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_qu_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Send For Qc</span>
+                                        <i class="icon-dual-warning font-large-2 float-right" data-feather="chevrons-right"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hold -->
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(2)">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex  align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="hold_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_hold_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Hold</span>
+                                        <i class="icon-dual-purple font-large-2 float-right" data-feather="pause"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cancelled -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(3)">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-danger mb-0" id="cancelled_cnt">0</h3>
-                                        <!-- <h3 class="icon-dual-danger mb-0" id="cancelled_cost">$0.00</h3> -->
+                                    <div class="d-flex align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="cancelled_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Cancelled</span>
@@ -389,15 +445,18 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Completed -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(5)">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h3 class="icon-dual-success mb-0" id="completed_cnt">0</h3>
-                                        <!-- <h3 class="icon-dual-success mb-0" id="completed_cost">$0.00</h3> -->
+                                    <div class="d-flex align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="completed_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_completed_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
                                         <span>Completed</span>
@@ -409,18 +468,91 @@
                     </div>
                 </div>
             </div>
+
+            <!-- All -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders('All')">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             <div class="media d-flex">
                                 <div class="media-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="icon-dual-pink mb-0" id="all_count">0</h3>
+                                    <div class="d-flex  align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="all_count">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_all_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>All</span>
+                                        <i class="icon-dual-pink font-large-2 float-right" data-feather="box"></i>
+                                    </div>
                                 </div>
-                                <div class="justify-content-between align-items-center mt-2">
-                                    <span>All</span>
-                                    <i class="icon-dual-pink font-large-2 float-right" data-feather="box"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('Process'))
+            <div class="col-xl-4 col-sm-6 col-12">
+
+            </div>
+            @endif
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
+                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media d-flex">
+                                    <div class="media-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h3 class="icon-dual-info mb-0 text-success" id="yet_to_assign_cnt">0</h3>
+                                        </div>
+                                        <div class="justify-content-between align-items-center mt-2 text-dark">
+                                            <span>Yet to Assign</span>
+                                            <i class="icon-dual-info font-large-2 float-right text-dark" data-feather="book-open"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Carried Over -->
+            <div class="col-xl-4 col-sm-6 col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h3 class="icon-dual-warning mb-0" id="carried_over_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Carried Over</span>
+                                        <i class="icon-dual-warning font-large-2 float-right" data-feather="corner-up-right"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carried Over & Completed -->
+            <div class="col-xl-4 col-sm-6 col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h3 class="icon-dual-warning mb-0" id="carried_over_completed_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Carried Over & Completed</span>
+                                        <i class="icon-dual-blue font-large-2 float-right" data-feather="check-circle"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -428,28 +560,6 @@
                 </div>
             </div>
         </div>
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
-        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)">
-            <div class="card custom-card-bg">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="media-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="icon-dual-info mb-0 text-dark" id="yet_to_assign_cnt">0</h3>
-                                    <!-- <h3 class="icon-dual-warning mb-0" id="yet_cost">$0.00</h3> -->
-                                </div>
-                                <div class="justify-content-between align-items-center mt-2 text-dark">
-                                    <span>Yet to Assign</span>
-                                    <i class="icon-dual-info font-large-2 float-right text-dark" data-feather="book-open"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
     </div>
 </div>
 </section>
@@ -521,18 +631,18 @@
         <div class="card-body" id="fteProject">
             <div class="p-0 w-100 mx-auto" id="fteProjectTable">
                 <h5 class="text-center"> Process Wise Details </h5>
-                <table id="fterevenueProjectTable" class="table table-bordered mt-0 nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                <table id="fterevenueProjectTable" class="table table-bordered mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                 <thead class="text-center">
                 <tr>
                     <th width="10%">Client</th>
                     <th width="15%">Project Code</th>
-                    <th width="8%">Pricing</th>
-                    <th width="10%">FTE Count</th>
-                    <th width="14%">Expected Revenue</th>
+                    <th width="8%" >Pricing</th>
+                    <th width="8%">FTE Count</th>
+                    <th width="12%">Expected Revenue</th>
                     <th width="10%">Start Date</th>
                     <th width="12%">End Date</th>
                     <th width="5%">Days</th>
-                    <th width="16%">Revenue as Selected Date</th>
+                    <th width="17%">Revenue as Selected Date</th>
                 </tr>
                 </thead>
                 <tbody></tbody>
@@ -562,13 +672,15 @@
                     <table id="userwise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
-                                <th width="16%">Users</th>
-                                <th width="14%">WIP</th>
-                                <th width="14%">Send For Qc</th>
-                                <th width="14%">Hold</th>
-                                <th width="14%">Cancelled</th>
-                                <th width="14%">Completed</th>
-                                <th width="14%">All</th>
+                                <th width="12%">Users</th>
+                                <th width="11%">WIP</th>
+                                <th width="11%">Coversheet Prep</th>
+                                <th width="11%">Clarification</th>
+                                <th width="11%">Send For Qc</th>
+                                <th width="11%">Hold</th>
+                                <th width="11%">Cancelled</th>
+                                <th width="11%">Completed</th>
+                                <th width="11%">All</th>
                             </tr>
                         </thead>
                         <tbody class="text-center"></tbody>
@@ -586,14 +698,16 @@
                     <table id="datewise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
-                                <th width="14%">Client</th>
-                                <th width="14%">Project</th>
-                                <th width="12%">WIP</th>
-                                <th width="12%">Send for QC</th>
-                                <th width="12%">Hold</th>
-                                <th width="12%">Cancelled</th>
-                                <th width="12%">Completed</th>
-                                <th width="12%">All</th>
+                                <th width="12%">Client</th>
+                                <th width="12%">Project</th>
+                                <th width="9%">WIP</th>
+                                <th width="10%">Coversheet Prep</th>
+                                <th width="10%">Clarification</th>
+                                <th width="9%">Send for QC</th>
+                                <th width="9%">Hold</th>
+                                <th width="10%">Cancelled</th>
+                                <th width="10%">Completed</th>
+                                <th width="9%">All</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -622,36 +736,6 @@ $(document).ready(function() {
         });
     });
 
-
-
-    // $(document).ready(function () {
-    //     fetchOrderData('All');
-    //     $("#project_id").select2();
-    //     $("#project_id_dcf").select2();
-    //     $("#client_id_dcf").select2();
-    // });
-
-
-    // function fetchOrderData(projectId) {
-    //     $.ajax({
-    //         url: "{{ route('dashboard_count') }}",
-    //         type: "POST",
-    //         data: {
-    //             project_id: projectId,
-    //             _token: '{{csrf_token()}}'
-    //         },
-    //         dataType: 'json',
-    //         success: function (response) {
-    //             let statusCounts = response.StatusCounts;
-    //             $('#yet_to_assign_cnt').text(statusCounts[6] || 0);
-    //             $('#wip_cnt').text(statusCounts[1] || 0);
-    //             $('#hold_cnt').text(statusCounts[2] || 0);
-    //             $('#Qu_cnt').text(statusCounts[4] || 0);
-    //             $('#cancelled_cnt').text(statusCounts[3] || 0);
-    //             $('#completed_cnt').text(statusCounts[5] || 0);
-    //         }
-    //     });
-    // }
 
     function gotoOrders(StatusId) {
         projectId = $("#project_id_dcf").val();
@@ -703,10 +787,11 @@ $(document).ready(function() {
 
             fetchOrderData(projectId, clientId, fromDate, toDate);
             getGrandTotal(fromDate, toDate, client_id);
+            preOrderData(projectId, clientId, fromDate, toDate)
             datewise_datatable(fromDate, toDate, client_id, projectId)
             userwise_datatable(fromDate, toDate, client_id, projectId);
         });
-
+        preOrderData(projectId, clientId, fromDate, toDate)
         fetchOrderData(projectId, clientId, fromDate, toDate);
         datewise_datatable(fromDate, toDate, client_id, projectId);
 
@@ -746,9 +831,92 @@ function fetchOrderData(projectId, clientId, fromDate, toDate) {
             $('#Qu_cnt').text(statusCounts[4] || 0);
             $('#cancelled_cnt').text(statusCounts[3] || 0);
             $('#completed_cnt').text(statusCounts[5] || 0);
+            $('#coversheet_cnt').text(statusCounts[13] || 0);
+            $('#Clarification_cnt').text(statusCounts[14] || 0);
         }
     });
 }
+
+function preOrderData(projectId, clientId, fromDate, toDate) {
+    $.ajax({
+        url: "{{ route('previous_count') }}",
+        type: "POST",
+        data: {
+            project_id: projectId,
+            client_id: clientId,
+            from_date: fromDate,
+            to_date: toDate,
+            _token: '{{csrf_token()}}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            let statusCounts = response.StatusCounts;
+
+            // Log the response to debug
+            console.log("Response:", response);
+
+            // Calculate total orders
+            let totalValue = 0;
+            for (const key in statusCounts) {
+                if (statusCounts.hasOwnProperty(key)) {
+                    if (Array.isArray(statusCounts[key])) {
+                        statusCounts[key].forEach(count => {
+                            totalValue += count.total_orders;
+                        });
+                    } else if (typeof statusCounts[key] === 'object') {
+                        for (const count in statusCounts[key]) {
+                            totalValue += statusCounts[key][count];
+                        }
+                    }
+                }
+            }
+            $('#pre_all_cnt').text(totalValue);
+
+            // Update individual counts
+            let carriedCountMap = {};
+            let carriedOverCompletedCountMap = {};
+
+            if (Array.isArray(statusCounts.carriedCount)) {
+                statusCounts.carriedCount.forEach(item => {
+                    carriedCountMap[item.status_id] = item.total_orders;
+                });
+            }
+
+            for (const statusId in statusCounts.carriedOverCompletedCount) {
+                if (statusCounts.carriedOverCompletedCount.hasOwnProperty(statusId)) {
+                    carriedOverCompletedCountMap[statusId] = statusCounts.carriedOverCompletedCount[statusId];
+                }
+            }
+
+            console.log("carriedOverCompletedCountMap:", carriedOverCompletedCountMap); // Log to debug
+
+            $('#pre_completed_cnt, #carried_over_completed_cnt').text(carriedOverCompletedCountMap[5] || 0);
+
+            // Update specific counts
+            let preWipCnt = carriedCountMap[1] || 0;
+            let preHoldCnt = carriedCountMap[2] || 0;
+            let preQuCnt = carriedCountMap[4] || 0;
+            let preCoversheetCnt = carriedCountMap[13] || 0;
+            let preClarificationCnt = carriedCountMap[14] || 0;
+
+            $('#pre_wip_cnt').text(preWipCnt);
+            $('#pre_hold_cnt').text(preHoldCnt);
+            $('#pre_qu_cnt').text(preQuCnt);
+            $('#pre_coversheet_cnt').text(preCoversheetCnt);
+            $('#pre_clarification_cnt').text(preClarificationCnt);
+
+            // Calculate and update the total of the specified values
+            let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt;
+            $('#carried_over_cnt').text(totalSpecificValues);
+        },
+        error: function (error) {
+            console.error('Error:', error);
+        }
+    });
+}
+
+
+
 
 // $(document).on('change', '#project_id_dcf', function() {
 //         fetchOrderData($(this).val());
@@ -788,7 +956,7 @@ function datewise_datatable(fromDate, toDate, client_id, project_id) {
                 serverSide: false,
                 searching: true,
                 ajax: {
-                    url: "{{ route('dashboard_datewise_count') }}",
+                    url: "{{ route('dashboard_clientwise_count') }}",
                     type: 'POST',
                     data: function(d) {
                         d.to_date = toDate;
@@ -810,6 +978,8 @@ function datewise_datatable(fromDate, toDate, client_id, project_id) {
                         className: "text-left"
                     },
                     { data: 'WIP', name: 'WIP', className: "text-center" },
+                    { data: 'Coversheet Prep', name: 'Coversheet Prep', className: "text-center" },
+                    { data: 'Clarification', name: 'Clarification', className: "text-center" },
                     { data: 'Send for QC', name: 'Send for QC', className: "text-center" },
                     { data: 'Hold', name: 'Hold', className: "text-center" },
                     { data: 'Cancelled', name: 'Cancelled', className: "text-center" },
@@ -854,11 +1024,13 @@ $('#datewise_datatable').on('draw.dt', function() {
             columns: [
                 { data: 'userinfo', name: 'userinfo', class: 'text-left' },
                 { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
+                { data: 'status_13', name: 'status_13' },
+                { data: 'status_14', name: 'status_14' },
                 { data: 'status_4', name: 'status_4' },
                 { data: 'status_2', name: 'status_2' },
                 { data: 'status_3', name: 'status_3' },
                 { data: 'status_5', name: 'status_5' },
-                { data: 'status_6', name: 'status_6' },
+                { data: 'All', name: 'All' },
             ],
         });
     }

@@ -42,7 +42,7 @@
     }
 </style>
 <div class="container-fluid mt-2">
-    {{-- @include('app.settings.index') --}}
+@include('app.settings.index')
 
 {{-- Assigned User Modal --}}
 <div class="modal fade" id="assigneeModal">

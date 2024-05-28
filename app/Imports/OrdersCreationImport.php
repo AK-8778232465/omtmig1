@@ -52,22 +52,24 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
     {
         ++$this->rows;
         $orderDateValue = $row['Order Received Data and Time'];
-
+        
         $order_date = NULL;
         if (is_numeric($orderDateValue)) {
-            $order_date = date('Y-m-d', strtotime('1899-12-30') + ($orderDateValue * 86400));
+            // Assuming the timestamp is in seconds, if it's in milliseconds, you need to adjust accordingly
+            $order_date = date('Y-m-d H:i:s', strtotime('1899-12-30') + ($orderDateValue * 86400));
         } else {
-            $dateFormats = ['m/d/Y', 'm-d-Y'];
-            $parsedDate = null;
+            $dateFormats = ['m/d/Y H:i:s', 'm-d-Y H:i:s', 'm/d/Y', 'm-d-Y'];
+            $parsedDateTime = null;
             foreach ($dateFormats as $format) {
                 $dateTime = DateTime::createFromFormat($format, $orderDateValue);
                 if ($dateTime !== false) {
-                    $parsedDate = $dateTime->format('Y-m-d');
+                    $parsedDateTime = $dateTime->format('Y-m-d H:i:s');
                     break;
                 }
             }
-            $order_date = $parsedDate ?? NULL;
+            $order_date = $parsedDateTime ?? NULL;
         }
+        
 
         $data = [
             'order_date' => $order_date,

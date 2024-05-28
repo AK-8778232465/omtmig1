@@ -14,7 +14,7 @@ class OrderCreation extends Model
     protected $table = 'oms_order_creations';
 
     protected $fillable = [
-        'id', 'order_id', 'order_date', 'process_id', 'state_id', 'county_id', 'status_id', 'assignee_user_id', 'assignee_qa_id', 'created_by', 'is_active'
+        'id', 'order_id', 'order_date', 'process_id', 'state_id', 'county_id', 'status_id', 'assignee_user_id', 'assignee_qa_id','tier_id','product_id','created_by', 'is_active'
     ];
 
     public function process()
@@ -54,6 +54,12 @@ class OrderCreation extends Model
     public function client()
     {
         return $this->hasOneThrough(Client::class, Process::class, 'id', 'id', 'process_id', 'client_id');
+    }
+
+    public function product()
+    {
+        return $this->hasOneThrough(Product::class, Process::class, 'id', 'id', 'process_id', 'client_id');
+
     }
  
 }

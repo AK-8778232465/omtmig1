@@ -106,6 +106,8 @@
                     <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer')) d-none @endif">Yet to Assign User<span id="status_6_count"></span></button>
                     <button id="status_7"  class="btn btn-info status-btn d-none">Yet to Assign QA<span id="status_7_count"></span></button>
                     <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer')) d-none @endif">WIP<span id="status_1_count"></span></button>
+                    <button id="status_13" class="btn btn-info status-btn">Coversheet Prep<span id="status_13_count"></span></button>
+                    <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span></button>
                     <button id="status_4" class="btn btn-info status-btn">Send For Qc<span id="status_4_count"></span></button>
                     <button id="status_2" class="btn btn-info status-btn">Hold<span id="status_2_count"></span></button>
                     <button id="status_5" class="btn btn-info status-btn">Completed<span id="status_5_count"></span></button>
@@ -242,7 +244,22 @@
                     "orderable": false,
                 }
             ],
-        });
+            createdRow: function (row, data, dataIndex) {
+                    let status = data.status_id; // Assuming the status_id field exists in the returned data
+                    let tat_value = data.tat_value;
+                    let orderDate = new Date(data.order_date);
+                    let currentDate = new Date();
+                    let timeDiff = Math.abs(currentDate - orderDate);
+                    let diffHours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
+                    if(!tat_value == 0){
+                        if (status == 1 || status == 4 || status == 13) {
+                            if (diffHours > tat_value) {
+                                $(row).addClass('text-danger'); // Apply red color to the row
+                            }
+                        }
+                    }
+                }
+            });
 
         $('.status-btn').removeClass('btn-primary').addClass('text-white');
         $('#status_' + defaultStatus).removeClass('btn-info').addClass('btn-primary');
@@ -348,7 +365,7 @@
                 if(response.StatusCounts != undefined) {
                     let statusCounts = response.StatusCounts;
                     let total = 0;
-                    for (let status = 1; status <= 5; status++) {
+                    for (let status = 1; status <= 14; status++) {
                         let count = statusCounts[status] || 0;
                         total += count;
                         $('#status_' + status + '_count').text(' (' + count + ')');
@@ -707,9 +724,14 @@
 
     $(document).on("click", ".goto-order", function (event) {
         let task_status = $('#statusButtons').find('.btn-primary').attr('id');
+        let status = task_status.replace("status_", "");
         var elementId = $(this).attr('id');
         let order_id = elementId.split('_')[1];
-        window.location.href = "{{url('orderform/')}}/" + order_id;
+    if (status == 13) {
+            window.location.href = "{{ url('coversheet-prep/') }}/" + order_id;
+        } else {
+            window.location.href = "{{ url('orderform/') }}/" + order_id;
+        }    
     });
 
 

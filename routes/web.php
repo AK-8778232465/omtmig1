@@ -28,12 +28,13 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('getCounty', 'getCounty')->name('getCounty');
     Route::any('getOrderData', 'getOrderData')->name('getOrderData');
     Route::any('dashboard_count', 'dashboard_count')->name('dashboard_count');
-    Route::post('dashboard_datewise_count', 'dashboard_datewise_count')->name('dashboard_datewise_count');
+    Route::post('dashboard_clientwise_count', 'dashboard_clientwise_count')->name('dashboard_clientwise_count');
     Route::post('dashboard_userwise_count', 'dashboard_userwise_count')->name('dashboard_userwise_count');
     Route::post('revenue_detail', 'revenue_detail')->name('revenue_detail');
     Route::post('revenue_detail_client', 'revenue_detail_client')->name('revenue_detail_client');
     Route::post('order_detail', 'order_detail')->name('order_detail');
     Route::post('getTotalData', 'getTotalData')->name('getTotalData');
+    Route::any('previous_count', 'previous_count')->name('previous_count');
 
     Route::post('getTotalDataFte', 'getTotalDataFte')->name('getTotalDataFte');
 
@@ -50,6 +51,7 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
 Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPOC'])->controller(SettingController::class)->group(function () {
     Route::get('settings', 'setting')->name('settings');
     Route::get('settings/users', 'setting')->name('users');
+    Route::get('settings/products', 'setting')->name('products');
     // Users
     Route::post('/usersInsert', 'addUsers')->name('usersInsert');
     Route::post('edit_user', 'edit_user')->name('edit_user');
@@ -60,6 +62,14 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,S
     Route::post('/removeMapping', 'removeMapping')->name('removeMapping');
     Route::post('/show_user', 'showUser')->name('show_user');
     Route::post('/getUserList', 'getUserList')->name('getUserList');
+    //products
+    Route::post('/productInsert', 'addproduct')->name('productInsert');
+    Route::any('/show_products', 'showproduct')->name('show_products');
+    Route::any('/productStatus/{productid?}', 'productStatus');
+    Route::post('/edit_product', 'edit_product')->name('edit_product');
+    Route::any('/update_product', 'update_product')->name('update_product');
+
+
 
     Route::any('/import', 'import')->name('import');
     Route::any('/export', 'export')->name('export');
@@ -78,11 +88,15 @@ Route::middleware('auth:web')->controller(OrderController::class)->group(functio
     Route::any('/delete_order', 'delete_order')->name('delete_order');
     Route::post('update_order_status', 'update_order_status')->name('update_order_status');
     Route::post('redirectwithfilter', 'redirectwithfilter')->name('redirectwithfilter');
+
 });
 
 Route::middleware('auth:web')->controller(OrderFormController::class)->group(function () {
     Route::any('orderform/{order_id?}', 'index')->name('orderform');
     Route::post('orderform_submit', 'orderSubmit')->name('orderform_submit');
+    Route::any('/coversheet-prep/{order_id?}', 'coversheet_prep')->name('coversheet-prep');
+
+    Route::post('Product_dropdown', 'getProduct_dropdown')->name('Product_dropdown');
 });
 
 
