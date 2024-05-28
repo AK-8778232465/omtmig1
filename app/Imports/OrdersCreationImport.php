@@ -183,7 +183,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $orderId = isset($row['OrderID']) ? $row['OrderID'] : null;
 
             // Insert the new record with insertOrIgnore
-            $orderId = OrderCreation::insertOrIgnore([
+            $orderId = OrderCreation::insert([
                 'order_date' => $order_date,
                 'order_id' => $orderId,
                 'process_id' => $process->id,
