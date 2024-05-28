@@ -510,6 +510,7 @@ class HomeController extends Controller
         ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
         ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
         ->where('oms_order_creations.is_active',1)
+        ->whereIn('process_id', $processIds)
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NOT NULL THEN 1 END) AS WIP')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 2 THEN 2 END) AS Hold')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 3 THEN 3 END) AS Cancelled')
@@ -611,6 +612,7 @@ public function dashboard_userwise_count(Request $request)
             SUM(CASE WHEN status_id = 14 THEN 1 ELSE 0 END) as `status_14`,
             COUNT(*) as `All`', [$fromDate, $toDate])
         ->where('oms_order_creations.is_active', 1)
+        ->whereIn('process_id', $processIds)
         ->groupBy('oms_order_creations.assignee_user_id');
 
     if (!empty($project_id) && $project_id[0] !== 'All') {
