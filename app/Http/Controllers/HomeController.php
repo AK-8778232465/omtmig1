@@ -202,7 +202,7 @@ class HomeController extends Controller
         $yetToAssignUser = 0;
         $yetToAssignQa = 0;
 
-        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 8, 9])) {
+        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             // Handle additional query based on project_id and client_id
             if (in_array('All', $project_id) && !in_array('All', $client_id)) {
                 // Case: Project_id is 'All' and client_id is not 'All'
