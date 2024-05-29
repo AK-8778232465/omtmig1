@@ -13,7 +13,7 @@
                         <div class="d-flex">
                             <h5 class="font-weight-bold">LOB:</h5> <!-- Added a colon after "LOB" -->
                             <div style="margin-left: 10px;"> <!-- Added margin for space -->
-                                <h5 class="border bg-primary rounded font-weight-bold fs-4 text-uppercase border-grey">{{ $orderData->lob_id ? ($lobList->where('id', $orderData->lob_id)->first()->name ?? '-') : '-' }}</h5>
+                                <h5 class="border bg-primary rounded font-weight-bold fs-4 text-uppercase border-grey">{{ $orderData->lob_id ? ($lobList->where('id', $orderData->lob_id)->first()->name ?? '') : '-' }}</h5>
                             </div>
                         </div>
                     </div>
