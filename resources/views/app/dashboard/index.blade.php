@@ -99,6 +99,11 @@
          content: "$";
         }
 
+        #datewise_datatable tbody td:nth-child(2) {
+            white-space: normal !important;
+            width:22%;
+    }
+
     </style>
 {{-- Order Wise --}}
 <div class="modal fade vh-75" id="orderDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -500,7 +505,7 @@
                 <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)">
                     <div class="card">
                         <div class="card-content">
-                            <div class="card-body">
+                            <div class="card-body" style = "background-color: #dee2e6;">
                                 <div class="media d-flex">
                                     <div class="media-body">
                                         <div class="d-flex justify-content-between align-items-center">
@@ -699,7 +704,7 @@
                         <thead class="text-center">
                             <tr>
                                 <th width="12%">Client</th>
-                                <th width="12%">Project</th>
+                                <th width="22%" class="wrap-column">Project</th>
                                 <th width="9%">WIP</th>
                                 <th width="10%">Coversheet Prep</th>
                                 <th width="10%">Clarification</th>
@@ -972,7 +977,7 @@ function datewise_datatable(fromDate, toDate, client_id, project_id) {
                     {
                         data: null,
                         render: function(data, type, row) {
-                            return row.project_code + '-' + row.process_name;
+                            return row.project_code +' '+'(' + row.process_name + ')';
                         },
                         name: 'process_name_project_code',
                         className: "text-left"

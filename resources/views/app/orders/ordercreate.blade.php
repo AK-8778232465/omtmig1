@@ -337,15 +337,14 @@
     });
 
 
-const orderDateInput = document.getElementById('order_date');
+// const orderDateInput = document.getElementById('order_date');
 
-orderDateInput.addEventListener('change', function() {
+document.getElementById('order_date').addEventListener('change', function() {
   const selectedDate = new Date(this.value);
   const currentDate = new Date();
-
   if (selectedDate > currentDate) {
     alert('Future date cannot be selected.');
-    this.value = ''; // Reset the input value
+    this.value = '';
   }
 });
 
@@ -447,76 +446,104 @@ orderDateInput.addEventListener('change', function() {
     });
 
     $('#excelImport').on('submit', function(event){
-            event.preventDefault();
-            $('.content-loaded').hide();
-            $('.frame').removeClass('d-none');
-            if($('#excelImport').parsley().isValid()){
-                $.ajax({
-                    type: "POST",
-                    url: "{{ route('OrderCreationsImport') }}",
-                    data: new FormData(this),
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        $('.content-loaded').show();
-                        $('.frame').addClass('d-none');
-                        // Swal.fire({
-                        //     text: "File Uploaded Successfully",
-                        //     icon: "success",
-                        //     confirmButtonText: "OK"
-                        // }).then((result) => {
-                        //     if (result.value) {
-                        //         location.reload();
-                        //     }
-                        // });
-                        console.log(response.bacthId);
-                        if(response.bacthId != undefined) {
-                            getUploadProgress(response.bacthId);
-                            $('#progressId').removeClass('d-none');
-                        }
-                    },
-                    error: function (response) {
-                        $('#progressId').addClass('d-none');
-                        $('.content-loaded').show();
-                         $('.frame').addClass('d-none');
-                        Swal.fire({
-                            text: "File Upload Failed",
-                            icon: "error",
-                            confirmButtonText: "OK"
-                        });
+        event.preventDefault();
+        $('.content-loaded').hide();
+        $('.frame').removeClass('d-none');
+        if ($('#excelImport').parsley().isValid()) {
+            $.ajax({
+                type: "POST",
+                url: "{{ route('OrderCreationsImport') }}",
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('.content-loaded').show();
+                    $('.frame').addClass('d-none');
+                    if (response.bacthId !== undefined) {
+                        getUploadProgress(response.bacthId);
+                        $('#progressId').removeClass('d-none');
+                    } else {
+                        location.reload(); // Reload if no batchId is returned
                     }
-                });
+                },
+                error: function (response) {
+                    $('#progressId').addClass('d-none');
+                    $('.content-loaded').show();
+                    $('.frame').addClass('d-none');
+                    Swal.fire({
+                        text: "File Upload Failed",
+                        icon: "error",
+                        confirmButtonText: "OK"
+                    }).then(() => {
+                        location.reload(); // Reload on error
+                    });
+                }
+            });
+        }
+    });
+
+
+
+    function getUploadProgress(batchId) {
+    let progressBar = $("#progress-bar");
+
+    let progressResponse = setInterval(() => {
+        $.ajax({
+            url: '/progressBar',
+            method: 'GET',
+            data: { id: batchId },
+            success: function (response) {
+                let totalJobs = parseInt(response.total_rows);
+                let completedJobs = parseInt(response.successfull_rows);
+                let progressPercentage = totalJobs === 0 ? 100 : parseInt((completedJobs / totalJobs) * 100);
+
+                progressBar.css("width", progressPercentage + "%");
+                progressBar.text(progressPercentage + "%");
+
+
+                if (progressPercentage === 100) {
+                    clearInterval(progressResponse);
+                    Swal.fire({
+                        title: 'Upload Complete',
+                        text: 'All orders have been successfully uploaded.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        console.log("Reloading...");
+                        window.location.reload();
+                    });
+                } else {
+
+                    clearInterval(progressResponse);
+                    setTimeout(() => {
+                        Swal.fire({
+                            title: 'Upload Incomplete',
+                            text: 'Some orders have failed to upload.',
+                            icon: 'warning',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            console.log("Reloading...");
+                            window.location.reload();
+                        });
+                    }, 3000);
+                }
+            },
+            error: function (error) {
+                console.error(error);
+                clearInterval(progressResponse);
+                window.location.reload();
             }
         });
-
-        function getUploadProgress(batchId) {
-            let progressBar = $("#progress-bar");
-
-            let progressResponse = setInterval(() => {
-                $.ajax({
-                    url: '/progressBar',
-                    method: 'GET',
-                    data: { id: batchId },
-                    success: function (response) {
-                        let totalJobs = parseInt(response.total_rows);
-                        let completedJobs = parseInt(response.successfull_rows);
-                        let pendingJobs = totalJobs - completedJobs;
+    }, 1000);
+}
 
 
-                        let progressPercentage = pendingJobs === 0 ? 100 : parseInt((completedJobs / totalJobs) * 100);
-                        progressBar.css("width", progressPercentage + "%");
-                        progressBar.text(progressPercentage + "%");
 
-                        if (progressPercentage >= 100) {
-                            clearInterval(progressResponse);
-                        }
-                    },
-                    error: function (error) {
-                        console.error(error);
-                    }
-                });
-            }, 1000);
-        }
+
+
+
+
+
 </script>
 
 @endsection
