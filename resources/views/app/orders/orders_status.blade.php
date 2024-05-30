@@ -234,7 +234,7 @@
                 {
                     "data": "checkbox",
                     "name": "checkbox",
-                    "visible": true,
+                    "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) false @else true @endif,
                     "orderable": false,
                 },
                 {
