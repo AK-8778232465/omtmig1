@@ -56,7 +56,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
     {
         ++$this->rows;
         $orderDateValue = $row['Order Received Data and Time'];
-        
+
         $order_date = NULL;
         if (is_numeric($orderDateValue)) {
             // Assuming the timestamp is in seconds, if it's in milliseconds, you need to adjust accordingly
@@ -73,7 +73,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             }
             $order_date = $parsedDateTime ?? NULL;
         }
-        
+
 
         $data = [
             'order_date' => $order_date,

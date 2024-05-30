@@ -179,6 +179,8 @@ class OrderController extends Controller
             }
 
     if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
+        $user = Auth::user();
+        $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $fromDate = Session::get('fromDate');
         $toDate = Session::get('toDate');
         $project_id = Session::get('projectId');
@@ -194,11 +196,12 @@ class OrderController extends Controller
         $getPreCompletedorderId = OrderCreation::query();
         $getcurrentCompletedorderId = OrderCreation::query();
         $currentOverAllStatusCounts = OrderCreation::query();
-    
+    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])){
         if (in_array('All', $project_id) && !in_array('All', $client_id)) {
             $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                 ->where('status_id', '!=', 5)
                 ->where('is_active', 1)
+                ->whereIn('process_id', $processIds)
                 ->whereDate('order_date', '>=', $fromDate)
                 ->whereDate('order_date', '<=', $toDate)
                 ->whereHas('process', function ($query) use ($client_id) {
@@ -208,6 +211,7 @@ class OrderController extends Controller
             $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                 ->where('is_active', 1)
                 ->whereIn('status_id', [1, 2, 4, 13, 14])
+                ->whereIn('process_id', $processIds)
                 ->whereNotIn('status_id', [3, 5])
                 ->whereNull('completion_date')
                 ->whereDate('order_date', '<', $fromDate)
@@ -218,6 +222,7 @@ class OrderController extends Controller
             $getcurrentCompletedorderId = OrderCreation::with('process', 'client')->select('id')
                 ->whereDate('completion_date', '>=', $fromDate)
                 ->whereDate('completion_date', '<=', $toDate)
+                ->whereIn('process_id', $processIds)
                 ->where('status_id', 5)
                 ->where('is_active', 1)
                 ->whereHas('process', function ($query) use ($client_id) {
@@ -227,6 +232,7 @@ class OrderController extends Controller
             $getPreCompletedorderId = OrderCreation::with('process', 'client')
                 ->select('id')
                 ->whereDate('order_date', '<', $fromDate)
+                ->whereIn('process_id', $processIds)
                 ->where('status_id', 5)
                 ->where('is_active', 1)
                 ->whereHas('process', function ($query) use ($client_id) {
@@ -238,6 +244,7 @@ class OrderController extends Controller
                 // Case: project_id is specified (not 'All')
                 $currentOverAllStatusCounts = OrderCreation::select('id')
                     ->whereIn('process_id', $project_id)
+                    ->whereIn('process_id', $processIds)
                     ->where('status_id', '!=', 5)
                     ->where('is_active', 1)
                     ->whereDate('order_date', '>=', $fromDate)
@@ -246,6 +253,7 @@ class OrderController extends Controller
                 $carryOverAllStatusCounts = OrderCreation::select('id')
                     ->where('is_active', 1)
                     ->whereIn('process_id', $project_id)
+                    ->whereIn('process_id', $processIds)
                     ->whereIn('status_id', [1, 2, 4, 13, 14])
                     ->whereNotIn('status_id', [3, 5])
                     ->whereNull('completion_date')
@@ -253,6 +261,7 @@ class OrderController extends Controller
     
                 $getcurrentCompletedorderId = OrderCreation::select('id')
                     ->whereIn('process_id', $project_id)
+                    ->whereIn('process_id', $processIds)
                     ->whereDate('completion_date', '>=', $fromDate)
                     ->whereDate('completion_date', '<=', $toDate)
                     ->where('status_id', 5)
@@ -260,6 +269,7 @@ class OrderController extends Controller
     
                 $getPreCompletedorderId = OrderCreation::select('id')
                     ->whereIn('process_id', $project_id)
+                    ->whereIn('process_id', $processIds)
                     ->whereDate('order_date', '<', $fromDate)
                     ->where('status_id', 5)
                     ->where('is_active', 1);
@@ -268,11 +278,13 @@ class OrderController extends Controller
                 $currentOverAllStatusCounts = OrderCreation::select('id')
                     ->whereDate('order_date', '>=', $fromDate)
                     ->whereDate('order_date', '<=', $toDate)
+                    ->whereIn('process_id', $processIds)
                     ->where('status_id', '!=', 5)
                     ->where('is_active', 1);
     
                 $carryOverAllStatusCounts = OrderCreation::select('id')
                     ->where('is_active', 1)
+                    ->whereIn('process_id', $processIds)
                     ->whereIn('status_id', [1, 2, 4, 13, 14])
                     ->whereNotIn('status_id', [3, 5])
                     ->whereNull('completion_date')
@@ -281,15 +293,406 @@ class OrderController extends Controller
                 $getcurrentCompletedorderId = OrderCreation::select('id')
                     ->whereDate('completion_date', '>=', $fromDate)
                     ->whereDate('completion_date', '<=', $toDate)
+                    ->whereIn('process_id', $processIds)
                     ->where('status_id', 5)
                     ->where('is_active', 1);
     
                 $getPreCompletedorderId = OrderCreation::select('id')
                     ->whereDate('order_date', '<', $fromDate)
+                    ->whereIn('process_id', $processIds)
                     ->where('status_id', 5)
                     ->where('is_active', 1);
             }
         }
+
+    }elseif(!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])){
+            if($user->user_type_id == 6){
+                if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+                    $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
+                        ->where('status_id', '!=', 5)
+                        ->whereIn('process_id', $processIds)
+                        ->where('is_active', 1)
+                        ->where('assignee_user_id', $user->id)
+                        ->whereDate('order_date', '>=', $fromDate)
+                        ->whereDate('order_date', '<=', $toDate)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+            
+                    $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
+                        ->where('is_active', 1)
+                        ->whereIn('status_id', [1, 2, 4, 13, 14])
+                        ->whereNotIn('status_id', [3, 5])
+                        ->where('assignee_user_id', $user->id)
+                        ->whereIn('process_id', $processIds)
+                        ->whereNull('completion_date')
+                        ->whereDate('order_date', '<', $fromDate)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+            
+                    $getcurrentCompletedorderId = OrderCreation::with('process', 'client')->select('id')
+                        ->whereDate('completion_date', '>=', $fromDate)
+                        ->whereDate('completion_date', '<=', $toDate)
+                        ->whereIn('process_id', $processIds)
+                        ->where('assignee_user_id', $user->id)
+                        ->where('status_id', 5)
+                        ->where('is_active', 1)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+            
+                    $getPreCompletedorderId = OrderCreation::with('process', 'client')
+                        ->select('id')
+                        ->whereDate('order_date', '<', $fromDate)
+                        ->where('assignee_user_id', $user->id)
+                        ->whereIn('process_id', $processIds)
+                        ->where('status_id', 5)
+                        ->where('is_active', 1)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+            
+                } else {
+                    if (!in_array('All', $project_id)) {
+                        // Case: project_id is specified (not 'All')
+                        $currentOverAllStatusCounts = OrderCreation::select('id')
+                            ->whereIn('process_id', $project_id)
+                            ->where('status_id', '!=', 5)
+                            ->whereIn('process_id', $processIds)
+                            ->where('assignee_user_id', $user->id)
+                            ->where('is_active', 1)
+                            ->whereDate('order_date', '>=', $fromDate)
+                            ->whereDate('order_date', '<=', $toDate);
+            
+                        $carryOverAllStatusCounts = OrderCreation::select('id')
+                            ->where('is_active', 1)
+                            ->whereIn('process_id', $project_id)
+                            ->whereIn('process_id', $processIds)
+                            ->where('assignee_user_id', $user->id)
+                            ->whereIn('status_id', [1, 2, 4, 13, 14])
+                            ->whereNotIn('status_id', [3, 5])
+                            ->whereNull('completion_date')
+                            ->whereDate('order_date', '<', $fromDate);
+            
+                        $getcurrentCompletedorderId = OrderCreation::select('id')
+                            ->whereIn('process_id', $project_id)
+                            ->whereIn('process_id', $processIds)
+                            ->where('assignee_user_id', $user->id)
+                            ->whereDate('completion_date', '>=', $fromDate)
+                            ->whereDate('completion_date', '<=', $toDate)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+            
+                        $getPreCompletedorderId = OrderCreation::select('id')
+                            ->whereIn('process_id', $project_id)
+                            ->whereIn('process_id', $processIds)
+                            ->where('assignee_user_id', $user->id)
+                            ->whereDate('order_date', '<', $fromDate)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+            
+                    } else {
+                        $currentOverAllStatusCounts = OrderCreation::select('id')
+                            ->whereDate('order_date', '>=', $fromDate)
+                            ->whereDate('order_date', '<=', $toDate)
+                            ->whereIn('process_id', $processIds)
+                            ->where('assignee_user_id', $user->id)
+                            ->where('status_id', '!=', 5)
+                            ->where('is_active', 1);
+            
+                        $carryOverAllStatusCounts = OrderCreation::select('id')
+                            ->where('is_active', 1)
+                            ->whereIn('process_id', $processIds)
+                            ->where('assignee_user_id', $user->id)
+                            ->whereIn('status_id', [1, 2, 4, 13, 14])
+                            ->whereNotIn('status_id', [3, 5])
+                            ->whereNull('completion_date')
+                            ->whereDate('order_date', '<', $fromDate);
+            
+                        $getcurrentCompletedorderId = OrderCreation::select('id')
+                            ->whereDate('completion_date', '>=', $fromDate)
+                            ->whereDate('completion_date', '<=', $toDate)
+                            ->whereIn('process_id', $processIds)
+                            ->where('assignee_user_id', $user->id)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+            
+                        $getPreCompletedorderId = OrderCreation::select('id')
+                            ->whereDate('order_date', '<', $fromDate)
+                            ->where('assignee_user_id', $user->id)
+                            ->whereIn('process_id', $processIds)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+                    }
+                }
+            }elseif($user->user_type_id == 7){
+                if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+                    $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
+                        ->where('status_id', '!=', 5)
+                        ->where('is_active', 1)
+                        ->where('assignee_qa_id', $user->id)
+                        ->whereIn('process_id', $processIds)
+                        ->whereDate('order_date', '>=', $fromDate)
+                        ->whereDate('order_date', '<=', $toDate)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+            
+                    $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
+                        ->where('is_active', 1)
+                        ->where('assignee_qa_id', $user->id)
+                        ->whereIn('process_id', $processIds)
+                        ->whereIn('status_id', [1, 2, 4, 13, 14])
+                        ->whereNotIn('status_id', [3, 5])
+                        ->whereNull('completion_date')
+                        ->whereDate('order_date', '<', $fromDate)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+            
+                    $getcurrentCompletedorderId = OrderCreation::with('process', 'client')->select('id')
+                        ->whereDate('completion_date', '>=', $fromDate)
+                        ->whereDate('completion_date', '<=', $toDate)
+                        ->where('assignee_qa_id', $user->id)
+                        ->whereIn('process_id', $processIds)
+                        ->where('status_id', 5)
+                        ->where('is_active', 1)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+            
+                    $getPreCompletedorderId = OrderCreation::with('process', 'client')
+                        ->select('id')
+                        ->whereDate('order_date', '<', $fromDate)
+                        ->where('assignee_qa_id', $user->id)
+                        ->whereIn('process_id', $processIds)
+                        ->where('status_id', 5)
+                        ->where('is_active', 1)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+            
+                } else {
+                    if (!in_array('All', $project_id)) {
+                        // Case: project_id is specified (not 'All')
+                        $currentOverAllStatusCounts = OrderCreation::select('id')
+                            ->whereIn('process_id', $project_id)
+                            ->where('assignee_qa_id', $user->id)
+                            ->whereIn('process_id', $processIds)
+                            ->where('status_id', '!=', 5)
+                            ->where('is_active', 1)
+                            ->whereDate('order_date', '>=', $fromDate)
+                            ->whereDate('order_date', '<=', $toDate);
+            
+                        $carryOverAllStatusCounts = OrderCreation::select('id')
+                            ->where('is_active', 1)
+                            ->whereIn('process_id', $project_id)
+                            ->where('assignee_qa_id', $user->id)
+                            ->whereIn('process_id', $processIds)
+                            ->whereIn('status_id', [1, 2, 4, 13, 14])
+                            ->whereNotIn('status_id', [3, 5])
+                            ->whereNull('completion_date')
+                            ->whereDate('order_date', '<', $fromDate);
+            
+                        $getcurrentCompletedorderId = OrderCreation::select('id')
+                            ->whereIn('process_id', $project_id)
+                            ->where('assignee_qa_id', $user->id)
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('completion_date', '>=', $fromDate)
+                            ->whereDate('completion_date', '<=', $toDate)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+            
+                        $getPreCompletedorderId = OrderCreation::select('id')
+                            ->whereIn('process_id', $project_id)
+                            ->where('assignee_qa_id', $user->id)
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('order_date', '<', $fromDate)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+            
+                    } else {
+                        $currentOverAllStatusCounts = OrderCreation::select('id')
+                            ->whereDate('order_date', '>=', $fromDate)
+                            ->whereDate('order_date', '<=', $toDate)
+                            ->whereIn('process_id', $processIds)
+                            ->where('assignee_qa_id', $user->id)
+                            ->where('status_id', '!=', 5)
+                            ->where('is_active', 1);
+            
+                        $carryOverAllStatusCounts = OrderCreation::select('id')
+                            ->where('is_active', 1)
+                            ->where('assignee_qa_id', $user->id)
+                            ->whereIn('process_id', $processIds)
+                            ->whereIn('status_id', [1, 2, 4, 13, 14])
+                            ->whereNotIn('status_id', [3, 5])
+                            ->whereNull('completion_date')
+                            ->whereDate('order_date', '<', $fromDate);
+            
+                        $getcurrentCompletedorderId = OrderCreation::select('id')
+                            ->whereDate('completion_date', '>=', $fromDate)
+                            ->whereDate('completion_date', '<=', $toDate)
+                            ->whereIn('process_id', $processIds)
+                            ->where('assignee_qa_id', $user->id)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+            
+                        $getPreCompletedorderId = OrderCreation::select('id')
+                            ->whereDate('order_date', '<', $fromDate)
+                            ->where('assignee_qa_id', $user->id)
+                            ->whereIn('process_id', $processIds)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+                    }
+                }
+
+            }elseif($user->user_type_id == 8){
+                if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+                    $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
+                        ->where(function ($query) use($user){
+                            $query->where('assignee_user_id', $user->id)
+                                ->orWhere('assignee_qa_id', $user->id)
+                        ->where('status_id', '!=', 5)
+                        ->where('is_active', 1)
+                        ->whereDate('order_date', '>=', $fromDate)
+                        ->whereDate('order_date', '<=', $toDate)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+                    });
+            
+                    $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
+                        ->where(function ($query) use($user){
+                            $query->where('assignee_user_id', $user->id)
+                                ->orWhere('assignee_qa_id', $user->id)
+                        ->where('is_active', 1)
+                        ->whereIn('status_id', [1, 2, 4, 13, 14])
+                        ->whereNotIn('status_id', [3, 5])
+                        ->whereNull('completion_date')
+                        ->whereDate('order_date', '<', $fromDate)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+                    });
+            
+                    $getcurrentCompletedorderId = OrderCreation::with('process', 'client')->select('id')
+                        ->where(function ($query) use($user){
+                            $query->where('assignee_user_id', $user->id)
+                                ->orWhere('assignee_qa_id', $user->id)
+                        ->whereDate('completion_date', '>=', $fromDate)
+                        ->whereDate('completion_date', '<=', $toDate)
+                        ->where('status_id', 5)
+                        ->where('is_active', 1)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+                    });
+            
+                    $getPreCompletedorderId = OrderCreation::with('process', 'client')
+                        ->where(function ($query) use($user){
+                            $query->where('assignee_user_id', $user->id)
+                                ->orWhere('assignee_qa_id', $user->id)
+                        ->select('id')
+                        ->whereDate('order_date', '<', $fromDate)
+                        ->where('status_id', 5)
+                        ->where('is_active', 1)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+                    });
+            
+                } else {
+                    if (!in_array('All', $project_id)) {
+                        // Case: project_id is specified (not 'All')
+                        $currentOverAllStatusCounts = OrderCreation::select('id')
+                            ->where(function ($query) use($user){
+                                $query->where('assignee_user_id', $user->id)
+                                    ->orWhere('assignee_qa_id', $user->id)
+                            ->whereIn('process_id', $project_id)
+                            ->where('status_id', '!=', 5)
+                            ->where('is_active', 1)
+                            ->whereDate('order_date', '>=', $fromDate)
+                            ->whereDate('order_date', '<=', $toDate);
+                        });
+
+                        $carryOverAllStatusCounts = OrderCreation::select('id')
+                            ->where(function ($query) use($user){
+                                $query->where('assignee_user_id', $user->id)
+                                    ->orWhere('assignee_qa_id', $user->id)
+                            ->where('is_active', 1)
+                            ->whereIn('process_id', $project_id)
+                            ->whereIn('status_id', [1, 2, 4, 13, 14])
+                            ->whereNotIn('status_id', [3, 5])
+                            ->whereNull('completion_date')
+                            ->whereDate('order_date', '<', $fromDate);
+                        });
+
+                        $getcurrentCompletedorderId = OrderCreation::select('id')
+                            ->where(function ($query) use($user){
+                                $query->where('assignee_user_id', $user->id)
+                                    ->orWhere('assignee_qa_id', $user->id)
+                            ->whereIn('process_id', $project_id)
+                            ->whereDate('completion_date', '>=', $fromDate)
+                            ->whereDate('completion_date', '<=', $toDate)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+                        });
+            
+                        $getPreCompletedorderId = OrderCreation::select('id')
+                            ->where(function ($query) use($user){
+                                $query->where('assignee_user_id', $user->id)
+                                    ->orWhere('assignee_qa_id', $user->id)
+                            ->whereIn('process_id', $project_id)
+                            ->whereDate('order_date', '<', $fromDate)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+                        });
+            
+                    } else {
+                        $currentOverAllStatusCounts = OrderCreation::select('id')
+                            ->where(function ($query) use($user){
+                                $query->where('assignee_user_id', $user->id)
+                                    ->orWhere('assignee_qa_id', $user->id)
+                            ->whereDate('order_date', '>=', $fromDate)
+                            ->whereDate('order_date', '<=', $toDate)
+                            ->where('status_id', '!=', 5)
+                            ->where('is_active', 1);
+                        });
+            
+                        $carryOverAllStatusCounts = OrderCreation::select('id')
+                            ->where(function ($query) use($user){
+                                $query->where('assignee_user_id', $user->id)
+                                    ->orWhere('assignee_qa_id', $user->id)
+                            ->where('is_active', 1)
+                            ->whereIn('status_id', [1, 2, 4, 13, 14])
+                            ->whereNotIn('status_id', [3, 5])
+                            ->whereNull('completion_date')
+                            ->whereDate('order_date', '<', $fromDate);
+                        });
+                        $getcurrentCompletedorderId = OrderCreation::select('id')
+                            ->where(function ($query) use($user){
+                                $query->where('assignee_user_id', $user->id)
+                                    ->orWhere('assignee_qa_id', $user->id)
+                            ->whereDate('completion_date', '>=', $fromDate)
+                            ->whereDate('completion_date', '<=', $toDate)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+                        });
+                        $getPreCompletedorderId = OrderCreation::select('id')
+                            ->where(function ($query) use($user){
+                                $query->where('assignee_user_id', $user->id)
+                                    ->orWhere('assignee_qa_id', $user->id)
+                            ->whereDate('order_date', '<', $fromDate)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+                        });
+                    }
+                }
+
+            }
+    }
+        
     
         // Get the IDs from the queries
         $getPreCompletedorderIdIds = $getPreCompletedorderId->pluck('id')->all();
@@ -542,6 +945,7 @@ class OrderController extends Controller
 
         $validatedData = $request->validate([
             'rowId' => 'required',
+            'selectedStatus' => 'required|integer',
         ]);
 
         $statusId = $input['selectedStatus'];
@@ -560,14 +964,17 @@ class OrderController extends Controller
     }
 
     public function redirectwithfilter(Request $request)
-    {
+    {   $user = Auth::user();
+        $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $projectId = $request->input('projectId');
         $clientId = $request->input('clientId');
         $fromDate = $request->input('fromDate');
         $toDate = $request->input('toDate');
 
-        session()->forget(['projectId', 'clientId', 'fromDate', 'toDate', 'dashboardfilters']);
+        session()->forget(['projectId', 'clientId', 'fromDate', 'toDate', 'dashboardfilters','user','processIds']);
         // Store values in session
+        session(['user' => $user ?? '']);
+        session(['processIds' => $processIds ?? '']);
         session(['projectId' => $projectId ?? '']);
         session(['clientId' => $clientId ?? '']);
         session(['fromDate' => $fromDate ?? '']);

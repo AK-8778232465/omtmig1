@@ -167,7 +167,7 @@
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label for="order_date" class="font-weight-bold">Order Received Date<span style="color:red;">*</span></label>
                             <br>
-                            <input type="datetime-local" id="order_date" class="form-control" name="order_date" max="">
+                            <input type="datetime-local" id="order_date" class="form-control" name="order_date">
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Project Code<span style="color:red;">*</span></label><br>
