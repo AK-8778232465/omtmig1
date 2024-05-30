@@ -751,7 +751,9 @@ class OrderController extends Controller
             $query->where('oms_order_creations.status_id', $request->status);
         }
         if($request->status == 6){
-            $query = $currentYet_to_assign->whereNull('assignee_user_id');
+            $query = $currentYet_to_assign->whereNull('assignee_user_id')
+            ->whereDate('order_date', '>=', $fromDate)
+            ->whereDate('order_date', '<=', $toDate);
         }
     }
     $query->whereIn('oms_order_creations.process_id', $processIds);
