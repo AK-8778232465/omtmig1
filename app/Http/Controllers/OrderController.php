@@ -103,7 +103,6 @@ class OrderController extends Controller
             )
             ->where('oms_order_creations.is_active', 1);
 
-
             if (
                 isset($request->status) &&
                 in_array($request->status, [1, 2, 3, 4, 5, 13, 14]) &&
@@ -201,6 +200,7 @@ class OrderController extends Controller
             $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                 ->where('status_id', '!=', 5)
                 ->where('is_active', 1)
+                ->whereNotNull('assignee_user_id')
                 ->whereIn('process_id', $processIds)
                 ->whereDate('order_date', '>=', $fromDate)
                 ->whereDate('order_date', '<=', $toDate)
@@ -245,6 +245,7 @@ class OrderController extends Controller
                 $currentOverAllStatusCounts = OrderCreation::select('id')
                     ->whereIn('process_id', $project_id)
                     ->whereIn('process_id', $processIds)
+                    ->whereNotNull('assignee_user_id')
                     ->where('status_id', '!=', 5)
                     ->where('is_active', 1)
                     ->whereDate('order_date', '>=', $fromDate)
@@ -278,6 +279,7 @@ class OrderController extends Controller
                 $currentOverAllStatusCounts = OrderCreation::select('id')
                     ->whereDate('order_date', '>=', $fromDate)
                     ->whereDate('order_date', '<=', $toDate)
+                    ->whereNotNull('assignee_user_id')
                     ->whereIn('process_id', $processIds)
                     ->where('status_id', '!=', 5)
                     ->where('is_active', 1);
@@ -311,6 +313,7 @@ class OrderController extends Controller
                     $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                         ->where('status_id', '!=', 5)
                         ->whereIn('process_id', $processIds)
+                        ->whereNotNull('assignee_user_id')
                         ->where('is_active', 1)
                         ->where('assignee_user_id', $user->id)
                         ->whereDate('order_date', '>=', $fromDate)
@@ -738,11 +741,17 @@ class OrderController extends Controller
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa')
             )
-            ->where('oms_order_creations.is_active', 1)
-            ->whereIn('oms_order_creations.id', $combinedUniqueIds);
+            ->where('oms_order_creations.is_active', 1);
+
+            $currentYet_to_assign = clone $query;
+
+            $query->whereIn('oms_order_creations.id', $combinedUniqueIds);
             
         if ($request->status != 'All') {
             $query->where('oms_order_creations.status_id', $request->status);
+        }
+        if($request->status == 6){
+            $query = $currentYet_to_assign->whereNull('assignee_user_id');
         }
     }
     $query->whereIn('oms_order_creations.process_id', $processIds);
