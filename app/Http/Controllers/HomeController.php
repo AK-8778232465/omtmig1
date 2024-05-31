@@ -142,7 +142,13 @@ class HomeController extends Controller
             $client_id = explode(',', $client_id); // Convert string to array
         }
 
-        $statusCountsQuery = OrderCreation::query();
+        $statusCountsQuery = OrderCreation::query()->with('process', 'client')
+        ->whereHas('process', function ($query) {
+            $query->where('stl_item_description.is_approved', 1);
+        })
+        ->whereHas('client', function ($query) {
+            $query->where('stl_client.is_approved', 1);
+        });
         $statusCountsQuery3 = clone $statusCountsQuery;
 
         // Handle project_id and client_id cases
@@ -192,12 +198,12 @@ class HomeController extends Controller
         }
 
         $statusCountsQuery1 = $statusCountsQuery2 = $statusCountsQuery;
-    //  return response()->json($statusCountsQuery3->get());
+        //  return response()->json($statusCountsQuery3->get());
 
- $statusCounts = $statusCountsQuery->groupBy('status_id')
-            ->selectRaw('count(*) as count, status_id')
-            ->where('is_active', 1)
-            ->pluck('count', 'status_id');
+        $statusCounts = $statusCountsQuery->groupBy('status_id')
+                    ->selectRaw('count(*) as count, status_id')
+                    ->where('is_active', 1)
+                    ->pluck('count', 'status_id');
         // Additional conditions based on user type
         $yetToAssignUser = 0;
         $yetToAssignQa = 0;
@@ -526,7 +532,13 @@ class HomeController extends Controller
             $client_id = explode(',', $client_id); // Convert string to array
         }
 
-        $statusCountsQuery = OrderCreation::query();
+        $statusCountsQuery = OrderCreation::query()->with('process', 'client')
+        ->whereHas('process', function ($query) {
+            $query->where('stl_item_description.is_approved', 1);
+        })
+        ->whereHas('client', function ($query) {
+            $query->where('stl_client.is_approved', 1);
+        });
         $statusCountsQuery2 = clone $statusCountsQuery;
 
         // Handle project_id and client_id cases
@@ -882,8 +894,6 @@ class HomeController extends Controller
                 }
             }
         }
-
-
 
         // Convert query results to collections
         $getorderId = collect($getorderId);

@@ -35,7 +35,14 @@ class OrderController extends Controller
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $statusCountsQuery = OrderCreation::query();
-        $statusCountsQuery = $statusCountsQuery->whereIn('process_id', $processIds);
+        $statusCountsQuery = $statusCountsQuery->with('process', 'client')
+            ->whereIn('process_id', $processIds)
+            ->whereHas('process', function ($query) {
+                $query->where('stl_item_description.is_approved', 1);
+            })
+            ->whereHas('client', function ($query) {
+                $query->where('stl_client.is_approved', 1);
+            });
 
         if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             if ($user->user_type_id == 6) {
@@ -57,8 +64,31 @@ class OrderController extends Controller
             ->where('is_active', 1)
             ->pluck('count', 'status_id');
 
-        $yetToAssignUser = OrderCreation::where('assignee_user_id', null)->where('status_id', 1)->where('is_active', 1)->whereIn('process_id', $processIds)->count();
-        $yetToAssignQa = OrderCreation::where('assignee_qa_id')->where('assignee_user_id')->where('status_id', 4)->where('is_active', 1)->whereIn('process_id', $processIds)->count();
+        $yetToAssignUser = OrderCreation::with('process', 'client')
+            ->where('assignee_user_id', null)
+            ->where('status_id', 1)
+            ->where('is_active', 1)
+            ->whereIn('process_id', $processIds)
+            ->whereHas('process', function ($query) {
+                $query->where('stl_item_description.is_approved', 1);
+            })
+            ->whereHas('client', function ($query) {
+                $query->where('stl_client.is_approved', 1);
+            })
+            ->count();
+        $yetToAssignQa = OrderCreation::with('process', 'client')
+            ->where('assignee_qa_id')
+            ->where('assignee_user_id')
+            ->where('status_id', 4)
+            ->where('is_active', 1)
+            ->whereIn('process_id', $processIds)
+            ->whereHas('process', function ($query) {
+                $query->where('stl_item_description.is_approved', 1);
+            })
+            ->whereHas('client', function ($query) {
+                $query->where('stl_client.is_approved', 1);
+            })
+            ->count();
 
         if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
@@ -84,6 +114,7 @@ class OrderController extends Controller
             ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
             ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
             ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+            ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
             ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
             ->select(
@@ -101,7 +132,9 @@ class OrderController extends Controller
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa')
             )
-            ->where('oms_order_creations.is_active', 1);
+            ->where('oms_order_creations.is_active', 1)
+            ->where('stl_item_description.is_approved', 1)
+            ->where('stl_client.is_approved', 1);
 
             if (
                 isset($request->status) &&
@@ -190,11 +223,41 @@ class OrderController extends Controller
         $client_id = !is_array($client_id) ? explode(',', $client_id) : $client_id;
     
         // Initialize queries
-        $carryOverAllStatusCounts = OrderCreation::query();
-        $currentCompletedCount = OrderCreation::query();
-        $getPreCompletedorderId = OrderCreation::query();
-        $getcurrentCompletedorderId = OrderCreation::query();
-        $currentOverAllStatusCounts = OrderCreation::query();
+        $carryOverAllStatusCounts = OrderCreation::query()->with('process', 'client')
+                ->whereHas('process', function ($query) {
+                    $query->where('stl_item_description.is_approved', 1);
+                })
+                ->whereHas('client', function ($query) {
+                    $query->where('stl_client.is_approved', 1);
+                });
+        $currentCompletedCount = OrderCreation::query()->with('process', 'client')
+                ->whereHas('process', function ($query) {
+                    $query->where('stl_item_description.is_approved', 1);
+                })
+                ->whereHas('client', function ($query) {
+                    $query->where('stl_client.is_approved', 1);
+                });
+        $getPreCompletedorderId = OrderCreation::query()->with('process', 'client')
+                ->whereHas('process', function ($query) {
+                    $query->where('stl_item_description.is_approved', 1);
+                })
+                ->whereHas('client', function ($query) {
+                    $query->where('stl_client.is_approved', 1);
+                });
+        $getcurrentCompletedorderId = OrderCreation::query()->with('process', 'client')
+                ->whereHas('process', function ($query) {
+                    $query->where('stl_item_description.is_approved', 1);
+                })
+                ->whereHas('client', function ($query) {
+                    $query->where('stl_client.is_approved', 1);
+                });
+        $currentOverAllStatusCounts = OrderCreation::query()->with('process', 'client')
+                ->whereHas('process', function ($query) {
+                    $query->where('stl_item_description.is_approved', 1);
+                })
+                ->whereHas('client', function ($query) {
+                    $query->where('stl_client.is_approved', 1);
+                });
     if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])){
         if (in_array('All', $project_id) && !in_array('All', $client_id)) {
             $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
@@ -723,6 +786,7 @@ class OrderController extends Controller
             ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
             ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
             ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
+            ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
             ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
             ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
@@ -741,7 +805,9 @@ class OrderController extends Controller
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa')
             )
-            ->where('oms_order_creations.is_active', 1);
+            ->where('oms_order_creations.is_active', 1)
+            ->where('stl_item_description.is_approved', 1)
+            ->where('stl_client.is_approved', 1);
 
             $currentYet_to_assign = clone $query;
 
