@@ -47,6 +47,7 @@ class OrderFormController extends Controller
             'oms_state.short_code as short_code',
             'county.county_name as county_name',
             'oms_order_creations.assignee_user_id',
+            'oms_order_creations.product_id as product_id',
             'oms_order_creations.tier_id',
             'oms_order_creations.assignee_qa_id',
             'oms_order_creations.lob_id as lob_id', // Add this line
@@ -159,7 +160,6 @@ class OrderFormController extends Controller
             // $lobData = DB::table('oms_order_creations')->select('id','lob_id')->get();
 
         // For List matching $orderData->product_id
-        $checklist_conditions_with_product = [];
         if(!empty($orderData->product_id)) {
             $checklist_conditions_with_product = DB::table('checklist')
                 ->where('checklist.state_id', $orderData->property_state)
