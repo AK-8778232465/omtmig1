@@ -159,11 +159,14 @@ class OrderFormController extends Controller
             // $lobData = DB::table('oms_order_creations')->select('id','lob_id')->get();
 
         // For List matching $orderData->product_id
-        $checklist_conditions_with_product = DB::table('checklist')
-            ->where('checklist.state_id', $orderData->property_state)
-            ->where('checklist.lob_id', $orderData->lob_id)
-            ->where('checklist.products', $orderData->product_id)
-            ->get();
+        $checklist_conditions_with_product = [];
+        if(!empty($orderData->product_id)) {
+            $checklist_conditions_with_product = DB::table('checklist')
+                ->where('checklist.state_id', $orderData->property_state)
+                ->where('checklist.lob_id', $orderData->lob_id)
+                ->where('checklist.products', $orderData->product_id)
+                ->get();
+        }
 
         // For List with NULL value
         $checklist_conditions_with_null = DB::table('checklist')
