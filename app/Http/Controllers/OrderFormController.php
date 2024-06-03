@@ -158,12 +158,24 @@ class OrderFormController extends Controller
             ->toArray();
             // $lobData = DB::table('oms_order_creations')->select('id','lob_id')->get();
 
+        // For List matching $orderData->product_id
+        $checklist_conditions_with_product = DB::table('checklist')
+            ->where('checklist.state_id', $orderData->state_id)
+            ->where('checklist.lob_id', $orderData->lob_id)
+            ->where('checklist.products', $orderData->product_id)
+            ->get();
 
-            $checklist_conditions = DB::table('checklist')
-                ->join('oms_order_creations', 'checklist.state_id', '=', 'oms_order_creations.state_id')
-                ->where('oms_order_creations.county_id', $orderData->county_id)
-                ->select('checklist.check_condition','checklist.state_id')
-                ->get();
+        // For List with NULL value
+        $checklist_conditions_with_null = DB::table('checklist')
+            ->where('checklist.state_id', $orderData->state_id)
+            ->where('checklist.lob_id', $orderData->lob_id)
+            ->whereNull('checklist.products')
+            ->get();
+
+        // Merge both lists
+        $checklist_conditions = $checklist_conditions_with_product->merge($checklist_conditions_with_null);
+
+
 
               
             //state

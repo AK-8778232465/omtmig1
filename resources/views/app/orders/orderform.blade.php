@@ -181,14 +181,21 @@
                                      <label class="text-white font-weight-bold text-uppercase px-1 py-3" style="font-size: 14px !important;">{{ isset($checklist_condition[0]) ? htmlspecialchars($checklist_condition[0]->check_condition) : null }}</label>
                                 </div>
                             </div> -->
-                            @foreach($checklist_conditions as $checklist_condition)
+                            @if(count($checklist_conditions) > 0)
                                 <div class="row mt-4 mb-4 m-4">
-                                    <div class="col-12 d-flex bg-danger justify-content-center" style="border-radius:14px;">
-                                        <input type="checkbox" name="checks[]" id="check_{{ $checklist_condition->state_id }}" value="{{ $checklist_condition->state_id }}">
-                                        <label class="text-white font-weight-bold text-uppercase px-1 py-3" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
+                                    <div class="col-12 row bg-danger justify-content-center" style="border-radius:14px;">
+                                        @foreach($checklist_conditions as $checklist_condition)
+                                            <div class="row col-12">
+                                                <input type="checkbox" name="checks[]" id="check_{{ $checklist_condition->lob_id }}_{{ $checklist_condition->state_id }}_{{ $checklist_condition->products }}" value="{{ $checklist_condition->lob_id }}_{{ $checklist_condition->state_id }}_{{ $checklist_condition->products }}">
+                                                <label class="text-white font-weight-bold text-uppercase px-1 py-1" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
+                                                <input type="hidden" name="state_ids[]" value="{{ $checklist_condition->state_id }}">
+                                                <input type="hidden" name="lob_ids[]" value="{{ $checklist_condition->lob_id }}">
+                                                <input type="hidden" name="product_ids[]" value="{{ $checklist_condition->products }}">
+                                            </div>
+                                        @endforeach
                                     </div>
                                 </div>
-                            @endforeach
+                            @endif
                             <div class="row mt-4 mb-4">
                                 <!-- <div class="col-lg-4">
                                     <div class="font-weight-bold ml-2">Checklist :</div>
