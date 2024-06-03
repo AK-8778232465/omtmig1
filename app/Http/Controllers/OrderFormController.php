@@ -176,8 +176,11 @@ class OrderFormController extends Controller
             ->get();
 
         // Merge both lists
-        $checklist_conditions = $checklist_conditions_with_product->merge($checklist_conditions_with_null);
-
+        if(!empty($orderData->product_id)) {
+            $checklist_conditions = $checklist_conditions_with_product->merge($checklist_conditions_with_null);
+        } else {
+            $checklist_conditions = $checklist_conditions_with_null;
+        }
 
 
               
