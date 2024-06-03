@@ -28,6 +28,9 @@ class FailedOrdersExport implements FromCollection, WithHeadings
                 $row->state,
                 $row->county,
                 $row->status,
+                $row->Lob,
+                $row->Product,
+                $row->Tier,
                 $row->comments,
             ];
         });
@@ -44,6 +47,9 @@ class FailedOrdersExport implements FromCollection, WithHeadings
             'State',
             'County',
             'Status',
+            'lob',
+            'product',
+            'tier',
             'Comments',
         ];
     }

@@ -9,6 +9,10 @@ use App\Models\OrderTemp;
 use App\Models\Process;
 use App\Models\State;
 use App\Models\Status;
+
+use App\Models\Lob;
+use App\Models\Tier;
+use App\Models\Product;
 use App\Models\User;
 use Carbon\Carbon;
 use DB;
@@ -52,7 +56,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
     {
         ++$this->rows;
         $orderDateValue = $row['Order Received Data and Time'];
-        
+
         $order_date = NULL;
         if (is_numeric($orderDateValue)) {
             // Assuming the timestamp is in seconds, if it's in milliseconds, you need to adjust accordingly
@@ -69,7 +73,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             }
             $order_date = $parsedDateTime ?? NULL;
         }
-        
+
 
         $data = [
             'order_date' => $order_date,
@@ -81,6 +85,9 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'county' => isset($row['County']) ? $row['County'] : null,
             'status' => isset($row['Status']) ? $row['Status'] : null,
             'created_by' => $this->userid,
+            'lob' => $row['Lob'] ?? null,
+            'product' => $row['Product Type'] ?? null,
+            'tier' => $row['Tier'] ?? null,
             'audit_id' => $this->auditId,
         ];
 
@@ -166,11 +173,60 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             return null;
         }
 
+        $Lob = trim($row['Lob']);
+        // if (!$Lob) {
+        //     $data['comments'] = 'Lob should not be empty';
+        //     OrderTemp::insert($data);
+        //     ++$this->unsuccess_rows;
+        //     return null;
+        // } else {
+            $Lob = Lob::where('name', $Lob)->first();
+            if (!$Lob) {
+                $data['comments'] = 'Lob not matched with database records';
+                OrderTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
+        // }
+
+        $Product = trim($row['Product Type']);
+        // if (!$Product) {
+        //     $data['comments'] = 'Product should not be empty';
+        //     OrderTemp::insert($data);
+        //     ++$this->unsuccess_rows;
+        //     return null;
+        // } else {
+            $Product = Product::where('product_name', $Product)->first();
+            if (!$Product) {
+                $data['comments'] = 'Product not matched with database records';
+                OrderTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
+        // }
+
+        $Tier = trim($row['Tier']);
+        // if (!$Tier) {
+        //     $data['comments'] = 'Tier should not be empty';
+        //     OrderTemp::insert($data);
+        //     ++$this->unsuccess_rows;
+        //     return null;
+        // } else {
+            $Tier = Tier::where('tier_id', $Tier)->first();
+            if (!$Tier) {
+                $data['comments'] = 'Tier not matched with database records';
+                OrderTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
+        // }
+
         $existingOrder = OrderCreation::where('order_id', $data['order_id'])
-        ->where('order_date', $data['order_date'])
-        ->exists();
- 
-        // If the order already exists, handle it accordingly
+            ->where('order_date', $data['order_date'])
+            ->Where('process_id', $process->id)
+            ->exists();
+
+
         if ($existingOrder) {
             $data['comments'] = 'Duplicate Order ID and Order Date found';
             OrderTemp::insert($data);
@@ -182,7 +238,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $orderId = isset($row['OrderID']) ? $row['OrderID'] : null;
 
             // Insert the new record with insertOrIgnore
-            $orderId = OrderCreation::insertOrIgnore([
+            $orderId = OrderCreation::insert([
                 'order_date' => $order_date,
                 'order_id' => $orderId,
                 'process_id' => $process->id,
@@ -192,10 +248,12 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 'assignee_user_id' => isset($assignee_user->id) ? $assignee_user->id : null,
                 'assignee_qa_id' => isset($assignee_qa->id) ? $assignee_qa->id : null,
                 'created_by' => $this->userid,
+                'lob_id' => $Lob->id ?? null,
+                'product_id' =>  $Product->id ?? null,
+                'tier_id' => $Tier->id ?? null,
             ]);
 
             if (!$orderId) {
-                // Duplicate entry found
                 $data['comments'] = 'Duplicate Order ID found';
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;

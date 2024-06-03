@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Lob;
 use App\Models\State;
 use App\Models\Status;
 use App\Models\County;
 use App\Models\User;
 use App\Models\Process;
+use App\Models\Tier;
 use App\Models\Product;
 use App\Models\OrderCreation;
 use DB;
@@ -21,40 +22,43 @@ class OrderFormController extends Controller
     {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
         $query = DB::table('oms_order_creations')
-            ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
-            ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
-            ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
-            ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
-            ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
-            ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
-            ->leftJoin('oms_products', 'oms_order_creations.product_id', '=', 'oms_products.id') // Assuming 'product_id' is the foreign key linking 'oms_order_creations' to 'oms_products'
-            ->select(
-                'oms_order_creations.id',
-                'oms_order_creations.order_id as order_id',
-                'oms_order_creations.status_id as status_id',
-                'oms_order_creations.county_id as county_id',
-                'oms_order_creations.process_id as process_id',
-                'oms_order_creations.tier_id as tier_id',
-                'oms_order_creations.order_date as order_date',
-                'stl_item_description.project_code as project_code',
-                'stl_item_description.process_name as process_name',
-                'stl_item_description.qc_enabled as qc_enabled',
-                'oms_state.short_code as short_code',
-                'county.county_name as county_name',
-                'oms_order_creations.assignee_user_id',
-                'oms_order_creations.assignee_qa_id',
-                DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
-                DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
-                'oms_products.product_name' // Adding product_name from 'oms_products' table
-            )
-            ->where('oms_order_creations.is_active', 1)
-            ->where('oms_order_creations.id', $orderId);
+        ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
+        ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
+        ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+        ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
+        ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+        ->leftJoin('oms_products', 'oms_order_creations.product_id', '=', 'oms_products.id')
+        ->leftJoin('stl_lob', 'oms_order_creations.lob_id', '=', 'stl_lob.id')
+        ->select(
+            'oms_order_creations.id',
+            'oms_order_creations.order_id as order_id',
+            'oms_order_creations.status_id as status_id',
+            'oms_order_creations.county_id as county_id',
+            'oms_order_creations.process_id as process_id',
+            'oms_order_creations.tier_id as tier_id',
+            'oms_order_creations.order_date as order_date',
+            'oms_order_creations.state_id as property_state', // Add this line
+            'oms_order_creations.county_id as property_county', // Add this line
+            'stl_item_description.project_code as project_code',
+            'stl_item_description.process_name as process_name',
+            'stl_item_description.qc_enabled as qc_enabled',
+            'oms_state.short_code as short_code',
+            'county.county_name as county_name',
+            'oms_order_creations.assignee_user_id',
+            'oms_order_creations.tier_id',
+            'oms_order_creations.assignee_qa_id',
+            'oms_order_creations.lob_id as lob_id', // Add this line
+            'stl_lob.name as lob_name', // Select the lob name
+            DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
+            DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
+            'oms_products.product_name' // Adding product_name from 'oms_products' table
+        )
+        ->where('oms_order_creations.is_active', 1)
+        ->where('oms_order_creations.id', $orderId);
 
-            $query->whereIn('oms_order_creations.process_id', $processIds);
-
-
+    $query->whereIn('oms_order_creations.process_id', $processIds);
             if (
                 isset($request->status) &&
                 in_array($request->status, [1, 2, 3, 4, 5, 13, 14]) &&
@@ -152,7 +156,8 @@ class OrderFormController extends Controller
             ->leftJoin('oms_products', 'stl_item_description.client_id', '=', 'oms_products.client_id')
             ->where('oms_order_creations.id',$orderId)->pluck('oms_products.lob_id')
             ->toArray();
-            $lobData = DB::table('stl_lob')->whereIn('id',array_unique($query))->get();
+            // $lobData = DB::table('oms_order_creations')->select('id','lob_id')->get();
+
 
             $checklist_conditions = DB::table('checklist')
                 ->join('oms_order_creations', 'checklist.state_id', '=', 'oms_order_creations.state_id')
@@ -160,8 +165,21 @@ class OrderFormController extends Controller
                 ->select('checklist.check_condition','checklist.state_id')
                 ->get();
 
+              
+            //state
+            $stateList = State::select('id', 'short_code')->get();
+            //county
+            $countyList = County::select('id', 'county_name')->get();
+            //product
+            $productList = product::select('id','product_name')->get();
+            //tier
+            $tierList = Tier::select('id','tier_id')->get();
+            //lob
+            // return response()->json($stateList);
+        // $lobList = Lob::select('id','name')->get();
+        $lobList = DB::table('stl_lob')->select('id', 'name')->get(); // Adjust according to your LOB table structure
 
-            return view('app.orders.orderform', compact('orderData', 'countyInfo', 'checklist', 'orderHistory','lobData','checklist_conditions'));
+            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','tierList','productList','countyInfo', 'checklist', 'orderHistory','checklist_conditions','stateList'));
         } else {
             return redirect('/orders_status');
         }
@@ -193,7 +211,9 @@ class OrderFormController extends Controller
             ->update([
                 'status_id' => $request->orderStatus,
                 'tier_id' => $request->tierId,
-                'product_id' => $request->productId
+                'product_id' => $request->productId,
+                'state_id' => $request->stateId,
+                'county_id' => $request->countyId
             ]);
             if($update_status) {
                 DB::table('order_status_history')->insert([
@@ -205,6 +225,20 @@ class OrderFormController extends Controller
                 ]);
 
                 return response()->json(['success' => 'Order Status Updated Successfully']);;
+            } else {
+                return response()->json(['error' => 'Something went wrong']);
+            }
+        } else {
+            if(!empty($request->orderId)){
+                $orderId = $request->orderId;
+                $update_status = OrderCreation::find($orderId)
+                ->update([
+                    'tier_id' => $request->tierId,
+                    'state_id' => $request->stateId,
+                    'county_id' => $request->countyId
+                ]);
+
+                return response()->json(['success' => 'Updated Successfully']);;
             } else {
                 return response()->json(['error' => 'Something went wrong']);
             }

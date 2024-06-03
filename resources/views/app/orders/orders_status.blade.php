@@ -234,7 +234,7 @@
                 {
                     "data": "checkbox",
                     "name": "checkbox",
-                    "visible": true,
+                    "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) false @else true @endif,
                     "orderable": false,
                 },
                 {
@@ -355,33 +355,35 @@
     });
 
     function updateStatusCounts() {
-        $.ajax({
-            url: "{{route('getStatusCount')}}",
-            type: 'POST',
-            data: {
-                _token: '{{csrf_token()}}',
-            },
-            success: function(response) {
-                if(response.StatusCounts != undefined) {
-                    let statusCounts = response.StatusCounts;
-                    let total = 0;
-                    for (let status = 1; status <= 14; status++) {
-                        let count = statusCounts[status] || 0;
-                        total += count;
-                        $('#status_' + status + '_count').text(' (' + count + ')');
-                    }
-                    let count6 = statusCounts[6] || 0;
-                    let count7 = statusCounts[7] || 0;
-                    $('#status_6_count').text(' (' + count6 + ')');
-                    $('#status_7_count').text(' (' + count7 + ')');
-                    $('#status_All_count').text(' (' + total + ')');
-                }
-            },
-            error: function(error) {
-                console.error('Error updating status count:', error);
-            }
-        });
+  $.ajax({
+    url: "{{route('getStatusCount')}}",
+    type: 'POST',
+    data: {
+      _token: '{{csrf_token()}}'
+    },
+    success: function(response) {
+      if (response.StatusCounts !== undefined) {
+        let statusCounts = response.StatusCounts;
+        let total = 0;
+        for (let status = 1; status <= 14; status++) {
+          if (status !== 6) { // Exclude status 6
+            let count = statusCounts[status] || 0;
+            total += count;
+            $('#status_' + status + '_count').text(' (' + count + ')');
+          }
+        }
+        let count6 = statusCounts[6] || 0;
+        let count7 = statusCounts[7] || 0;
+        $('#status_6_count').text(' (' + count6 + ')');
+        $('#status_7_count').text(' (' + count7 + ')');
+        $('#status_All_count').text(' (' + total + ')');
+      }
+    },
+    error: function(error) {
+      console.error('Error updating status count:', error);
     }
+  });
+}
 
     $(document).on('change', 'input.check-all', function() {
         var isChecked = $(this).prop('checked');

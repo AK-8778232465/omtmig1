@@ -9,7 +9,14 @@
                     <h5 class="border bg-info rounded font-weight-bold fs-4 text-uppercase border-grey px-2 py-1">{{$orderData->process_name}}</h5>
                 </div>
                 <div class="row">
-                    <h4 class="font-weight-bold ml-2">LOB:</h4>
+                    <div class="col-md-3">
+                        <div class="d-flex">
+                            <h5 class="font-weight-bold">LOB:</h5> <!-- Added a colon after "LOB" -->
+                            <div style="margin-left: 10px;"> <!-- Added margin for space -->
+                            <h6 class="border bg-light rounded font-weight-bold fs-3 text-uppercase  p-1 mt-2">{{ $orderData->lob_id ? ($lobList->where('id', $orderData->lob_id)->first()->name ?? '-') : '' }}</h6>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <h6 class="font-weight-bold">Order Information :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
@@ -24,8 +31,15 @@
                                 <div>{{($orderData->product_name) ? $orderData->product_name : '-' }}</div>
                             </div>
                             <div class="col-md-3">
-                                <div class="font-weight-bold">Tier</div>
-                                <div>{{($orderData->tier_id) ? $orderData->tier_id : '-' }}</div>
+                                <div class="font-weight-bold">Tier :</div>
+                                <select name="tier_id" id="tier_id" class="form-control">
+                                    <option value="">Select Tier</option>
+                                    @foreach($tierList as $tier)
+                                        <option value="{{ $tier->id }}" {{ $orderData->tier_id == $tier->id ? 'selected' : '' }}>
+                                            {{ $tier->tier_id }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">Order Rec Date and Time</div>
@@ -43,11 +57,25 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">State</div>
-                                <div>{{ $orderData->short_code }}</div>
+                                <select class="form-control select2dropdown" style="width:100%" name="property_state" id="property_state" aria-hidden="true">
+                                    <option value="">Select State</option>
+                                    @foreach ($stateList as $state)
+                                        <option value="{{ $state->id }}" {{ $orderData->property_state == $state->id ? 'selected' : '' }}>
+                                            {{ $state->short_code }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">County</div>
-                                <div>{{ $orderData->county_name }}</div>
+                                <select class="form-control select2dropdown" style="width:100%" name="property_county" id="property_county" aria-hidden="true">
+                                    <option value="">Select County</option>
+                                    @foreach ($countyList as $county)
+                                        <option value="{{ $county->id }}" {{ $orderData->property_county == $county->id ? 'selected' : '' }}>
+                                            {{ $county->county_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -126,9 +154,9 @@
                                     <div class="font-weight-bold">LOB :</div>
                                     <select name="lob_id" id="lob_id" class="form-control">
                                         <option value="">Select LOB</option>
-                                        @foreach($lobData as $lob)
-                                        <option value="{{ $lob->id }}">{{ $lob->name }}</option>
-                                        @endforeach
+                                        {{-- @foreach($lobData as $lob) --}}
+                                        {{-- <option value="{{ $lob->id }}">{{ $lob->name }}</option> --}}
+                                        {{-- @endforeach --}}
                                     </select>
                                 </div>
                                 <div class="col-lg-4 col-xl-4">
@@ -204,6 +232,25 @@
 </div>
 
 <script>
+
+
+document.addEventListener('DOMContentLoaded', function() {
+        var orderStatus = document.getElementById('order_status');
+        var currentStatus = {{ $orderData->status_id }};
+
+        for (var i = 0; i < orderStatus.options.length; i++) {
+            if (parseInt(orderStatus.options[i].value) === currentStatus) {
+                orderStatus.options[i].disabled = true;
+                break;
+            }
+        }
+    });
+
+
+
+
+
+
     $(document).ready( function () {
         $('#source_datatable').DataTable({
             paging: false,
@@ -219,7 +266,7 @@
             });
         @endif
 
-        $("#order_status,#lob_id,#product_id,#tier_id").select2();
+        $("#order_status,#lob_id,#product_id,#tier_id,#property_state,#property_county").select2();
     });
 
     function order_submition(orderId) {
@@ -232,13 +279,16 @@
         var orderStatus = $("#order_status").val();
         var tierId = $("#tier_id").val();
         var productId = $("#product_id").val();
-
+        var propertystate = $("#property_state").val();
+        var propertycounty = $("#property_county").val();
         var data = {
             orderId: orderId,
             checklistItems: checklistItems.join(),
             check_box_id: check_box_id,
             orderComment: orderComment,
             orderStatus: orderStatus,
+            stateId: propertystate,
+            countyId: propertycounty,
             tierId: tierId,
             productId: productId,
             _token: '{{ csrf_token() }}'
@@ -297,6 +347,27 @@
                 $.each(result.product, function (key, value) {
                     $("#product_id").append('<option value="' + value
                         .id + '">' + value.product_name + '</option>');
+                });
+            }
+        });
+    });
+
+    $('#property_state').on('change', function () {
+        var state_id = $("#property_state").val();
+        $("#property_county").html('');
+        $.ajax({
+            url: "{{url('getCounty')}}",
+            type: "POST",
+            data: {
+                state_id: state_id,
+                _token: '{{csrf_token()}}'
+            },
+            dataType: 'json',
+            success: function (result) {
+                $('#property_county').html('<option value="">Select County</option>');
+                $.each(result.county, function (key, value) {
+                    $("#property_county").append('<option value="' + value
+                        .id + '">' + value.county_name + '</option>');
                 });
             }
         });
