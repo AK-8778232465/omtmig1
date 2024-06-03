@@ -160,14 +160,14 @@ class OrderFormController extends Controller
 
         // For List matching $orderData->product_id
         $checklist_conditions_with_product = DB::table('checklist')
-            ->where('checklist.state_id', $orderData->state_id)
+            ->where('checklist.state_id', $orderData->property_state)
             ->where('checklist.lob_id', $orderData->lob_id)
             ->where('checklist.products', $orderData->product_id)
             ->get();
 
         // For List with NULL value
         $checklist_conditions_with_null = DB::table('checklist')
-            ->where('checklist.state_id', $orderData->state_id)
+            ->where('checklist.state_id', $orderData->property_state)
             ->where('checklist.lob_id', $orderData->lob_id)
             ->whereNull('checklist.products')
             ->get();
