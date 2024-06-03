@@ -1030,7 +1030,7 @@ class OrderController extends Controller
         $updateData = ['status_id' => $statusId];
 
         if ($statusId == 5) {
-            $updateData['completion_date'] = Carbon::now()->toDateString();
+            $updateData['completion_date'] = Carbon::now();
         } else {
             $updateData['completion_date'] = null;
         }

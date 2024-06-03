@@ -17,9 +17,4 @@ class Product extends Model
     {
         return $this->belongsTo(Client::class, 'client_id', 'id');
     }
-
-    public function lob()
-    {
-        return $this->belongsTo(Lob::class, 'lob_id', 'id');
-    }
 }

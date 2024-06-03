@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Session;
 use DataTables;
+use Carbon\Carbon;
 
 class OrderFormController extends Controller
 {
@@ -164,7 +165,7 @@ class OrderFormController extends Controller
             $checklist_conditions_with_product = DB::table('checklist')
                 ->where('checklist.state_id', $orderData->property_state)
                 ->where('checklist.lob_id', $orderData->lob_id)
-                ->where('checklist.products', $orderData->product_id)
+                ->where('checklist.product_id', $orderData->product_id)
                 ->get();
         }
 
@@ -172,7 +173,7 @@ class OrderFormController extends Controller
         $checklist_conditions_with_null = DB::table('checklist')
             ->where('checklist.state_id', $orderData->property_state)
             ->where('checklist.lob_id', $orderData->lob_id)
-            ->whereNull('checklist.products')
+            ->whereNull('checklist.product_id')
             ->get();
 
         // Merge both lists
@@ -197,11 +198,17 @@ class OrderFormController extends Controller
         // $lobList = Lob::select('id','name')->get();
         $lobList = DB::table('stl_lob')->select('id', 'name')->get(); // Adjust according to your LOB table structure
 
+        if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
+            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','tierList','productList','countyInfo', 'checklist', 'orderHistory','checklist_conditions','stateList'));
+        } else if(in_array($user->user_type_id, [1,2,3,4,5,9])) {
             return view('app.orders.orderform', compact('orderData', 'lobList','countyList','tierList','productList','countyInfo', 'checklist', 'orderHistory','checklist_conditions','stateList'));
         } else {
             return redirect('/orders_status');
         }
+    } else {
+        return redirect('/orders_status');
     }
+}
 
 
     public function getProduct_dropdown(Request $request)
@@ -231,7 +238,8 @@ class OrderFormController extends Controller
                 'tier_id' => $request->tierId,
                 'product_id' => $request->productId,
                 'state_id' => $request->stateId,
-                'county_id' => $request->countyId
+                'county_id' => $request->countyId,
+                'completion_date' => ($request->orderStatus == '5') ? Carbon::now() : Null,
             ]);
             if($update_status) {
                 DB::table('order_status_history')->insert([

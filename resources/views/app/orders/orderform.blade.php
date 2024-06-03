@@ -13,7 +13,7 @@
                         <div class="d-flex">
                             <h5 class="font-weight-bold">LOB:</h5> <!-- Added a colon after "LOB" -->
                             <div style="margin-left: 10px;"> <!-- Added margin for space -->
-                            <h6 class="border bg-light rounded font-weight-bold fs-3 text-uppercase  p-1 mt-2">{{ $orderData->lob_id ? ($lobList->where('id', $orderData->lob_id)->first()->name ?? '-') : '' }}</h6>
+                            <h5 class="border bg-light rounded font-weight-bold fs-3 text-uppercase  ">{{ $orderData->lob_id ? ($lobList->where('id', $orderData->lob_id)->first()->name ?? '-') : '' }}</h5>
                             </div>
                         </div>
                     </div>
@@ -146,7 +146,7 @@
                     </div>
                 </div>
                 @endif
-                <h6 class="font-weight-bold">Order Submition :</h6>
+                <h6 class="font-weight-bold">Order Submission :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
                     <div class="card-body">
                             <!-- <div class="d-flex justify-content-center"> -->
@@ -184,14 +184,16 @@
                             @if(count($checklist_conditions) > 0)
                                 <div class="row mt-4 mb-4 m-4">
                                     <div class="col-12 row bg-danger justify-content-center" style="border-radius:14px;">
+                                        @php $counter = 0; @endphp
                                         @foreach($checklist_conditions as $checklist_condition)
-                                            <div class="row col-12">
-                                                <input type="checkbox" name="checks[]" id="check_{{ $checklist_condition->lob_id }}_{{ $checklist_condition->state_id }}_{{ $checklist_condition->products }}" value="{{ $checklist_condition->lob_id }}_{{ $checklist_condition->state_id }}_{{ $checklist_condition->products }}">
-                                                <label class="text-white font-weight-bold text-uppercase px-1 py-1" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
+                                            <div class="row col-12 {{ $counter > 0 ? '' : 'box' }}" style="{{  $counter > 0 ? 'margin-top: -9px; padding-top: 0;' : '' }}">
+                                                <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->lob_id }}_{{ $checklist_condition->state_id }}_{{ $checklist_condition->products }}" value="{{ $checklist_condition->lob_id }}_{{ $checklist_condition->state_id }}_{{ $checklist_condition->products }}">
+                                                <label class="text-white font-weight-bold text-uppercase px-1" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
                                                 <input type="hidden" name="state_ids[]" value="{{ $checklist_condition->state_id }}">
                                                 <input type="hidden" name="lob_ids[]" value="{{ $checklist_condition->lob_id }}">
-                                                <input type="hidden" name="product_ids[]" value="{{ $checklist_condition->products }}">
+                                                <input type="hidden" name="product_ids[]" value="{{ $checklist_condition->product_id }}">
                                             </div>
+                                            @php $counter++; @endphp
                                         @endforeach
                                     </div>
                                 </div>

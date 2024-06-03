@@ -286,9 +286,11 @@
                 </tr>
                 </thead>
                 <tbody>
+                    @php $j = 1 @endphp
                     @foreach($exceldetail as $detail)
+                    @if(!empty($detail->unsuccessfull_rows) || !empty($detail->successfull_rows))
                         <tr>
-                            <td>{{ $loop->iteration}}</td>
+                            <td>{{ $j++ }}</td>
                             <td>{{ $detail->file_name}}</td>
                             <td>{{ $detail->total_rows}}</td>
                             <td>{{ $detail->successfull_rows}}</td>
@@ -303,7 +305,8 @@
                             <td>{{ date('m/d/Y H:i:s', strtotime($detail->created_at)) }}</td>
                             <td>{!! optional($detail->users)->emp_id . " (" . optional($detail->users)->username. ")" !!}</td>
                         </tr>
-                        @endforeach
+                    @endif
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -475,7 +478,7 @@ document.getElementById('order_date').addEventListener('change', function() {
                         icon: "error",
                         confirmButtonText: "OK"
                     }).then(() => {
-                        location.reload(); // Reload on error
+                        location.reload();
                     });
                 }
             });

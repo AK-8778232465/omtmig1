@@ -154,48 +154,20 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $assignee_qa = User::where('emp_id', $assignee_qa)->whereIn('user_type_id', [7,8])->first();
         }
 
-        if($Status->id == 5) {
-            if($process->qc_enabled && (!$assignee_user || !$assignee_qa)) {
-                $data['comments'] = 'User and QA should not empty for Completed orders';
-                OrderTemp::insert($data);
-                ++$this->unsuccess_rows;
-                return null;
-            } elseif(!$assignee_user) {
-                $data['comments'] = 'User should not empty for Completed orders';
-                OrderTemp::insert($data);
-                ++$this->unsuccess_rows;
-                return null;
-            }
-        } elseif($Status->id != 1 && !$assignee_user) {
-            $data['comments'] = 'User should only empty on WIP orders';
-            OrderTemp::insert($data);
-            ++$this->unsuccess_rows;
-            return null;
-        }
-
-        $Lob = trim($row['Lob']);
-        // if (!$Lob) {
-        //     $data['comments'] = 'Lob should not be empty';
-        //     OrderTemp::insert($data);
-        //     ++$this->unsuccess_rows;
-        //     return null;
-        // } else {
-            $Lob = Lob::where('name', $Lob)->first();
+        if (isset($row['Lob'])){
+            $Lob = trim($row['Lob']);
+            $Lob = Lob::where('name',$Lob)->first();
             if (!$Lob) {
                 $data['comments'] = 'Lob not matched with database records';
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;
                 return null;
             }
-        // }
+        }
 
-        $Product = trim($row['Product Type']);
-        // if (!$Product) {
-        //     $data['comments'] = 'Product should not be empty';
-        //     OrderTemp::insert($data);
-        //     ++$this->unsuccess_rows;
-        //     return null;
-        // } else {
+
+        if (isset($row['Product Type'])){
+            $Product = trim($row['Product Type']);
             $Product = Product::where('product_name', $Product)->first();
             if (!$Product) {
                 $data['comments'] = 'Product not matched with database records';
@@ -203,15 +175,11 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 ++$this->unsuccess_rows;
                 return null;
             }
-        // }
+        }
 
-        $Tier = trim($row['Tier']);
-        // if (!$Tier) {
-        //     $data['comments'] = 'Tier should not be empty';
-        //     OrderTemp::insert($data);
-        //     ++$this->unsuccess_rows;
-        //     return null;
-        // } else {
+
+        if (isset($row['Tier'])){
+            $Tier = trim($row['Tier']);
             $Tier = Tier::where('tier_id', $Tier)->first();
             if (!$Tier) {
                 $data['comments'] = 'Tier not matched with database records';
@@ -219,7 +187,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 ++$this->unsuccess_rows;
                 return null;
             }
-        // }
+        }
 
         $existingOrder = OrderCreation::where('order_id', $data['order_id'])
             ->where('order_date', $data['order_date'])
