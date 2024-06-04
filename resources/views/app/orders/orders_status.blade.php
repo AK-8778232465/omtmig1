@@ -385,7 +385,7 @@
   });
 }
 
-    $(document).on('change', 'input.check-all', function() {
+$(document).on('change', 'input.check-all', function() {
         var isChecked = $(this).prop('checked');
         $('input.check-one').prop('checked', isChecked);
 
@@ -403,9 +403,15 @@
         } else {
             $('#assign_tab').addClass('d-none');
             $('#user_id').empty();
+    }
+});
 
-        }
-    });
+$(document).on('change', 'input.check-one', function() {
+    var allChecked = $('input.check-one').length === $('input.check-one:checked').length;
+    $('input.check-all').prop('checked', allChecked);
+});
+
+
 
     $(document).on('change', 'input.check-one', function() {
         var anyCheckboxChecked = $('input.check-one:checked').length > 0;
@@ -432,6 +438,9 @@
         }
     });
 
+
+
+    //new chanages
     $(document).on('change', '.status-dropdown', function() {
     var selectedStatus = $(this).val();
     var rowId = $(this).data('row-id');
@@ -444,7 +453,8 @@
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, update it!'
+        confirmButtonText: 'Yes, update it!',
+        cancelButtonText: 'No, cancel!',
     }).then((result) => {
         if (result.value) {
             $.ajax({
@@ -462,8 +472,6 @@
                             icon: "success",
                             timer: 1000
                         });
-                        // page_reload();
-
                         var table = $('#order_datatable').DataTable();
                         var currentPage = table.page();
                         var row = table.row($(this).closest('tr'));
@@ -483,6 +491,8 @@
                     console.error('Error updating status:', error);
                 }
             });
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            page_reload();
         }
     });
 });

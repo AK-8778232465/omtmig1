@@ -641,12 +641,12 @@
                 <tr>
                     <th width="10%">Client</th>
                     <th width="15%">Project Code</th>
-                    <th width="8%" >Pricing</th>
+                    <th width="7%" >Pricing</th>
                     <th width="8%">FTE Count</th>
-                    <th width="12%">Expected Revenue</th>
-                    <th width="10%">Start Date</th>
-                    <th width="12%">End Date</th>
-                    <th width="5%">Days</th>
+                    <th width="13%">Expected Revenue</th>
+                    <th width="8%">Start Date</th>
+                    <th width="8%">End Date</th>
+                    <th width="6%">Days</th>
                     <th width="17%">Revenue as Selected Date</th>
                 </tr>
                 </thead>
