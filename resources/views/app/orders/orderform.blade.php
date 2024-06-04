@@ -187,7 +187,7 @@
                                         @php $counter = 0; @endphp
                                         @foreach($checklist_conditions as $checklist_condition)
                                             <div class="row col-12 {{ $counter > 0 ? '' : 'box' }}" style="{{  $counter > 0 ? 'margin-top: -9px; padding-top: 0;' : '' }}">
-                                                <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->lob_id }}_{{ $checklist_condition->state_id }}_{{ $checklist_condition->products }}" value="{{ $checklist_condition->lob_id }}_{{ $checklist_condition->state_id }}_{{ $checklist_condition->products }}">
+                                                <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->lob_id }}_{{ $checklist_condition->state_id }}_{{ $checklist_condition->product_id }}" value="{{ $checklist_condition->lob_id }}_{{ $checklist_condition->state_id }}_{{ $checklist_condition->product_id }}">
                                                 <label class="text-white font-weight-bold text-uppercase px-1" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
                                                 <input type="hidden" name="state_ids[]" value="{{ $checklist_condition->state_id }}">
                                                 <input type="hidden" name="lob_ids[]" value="{{ $checklist_condition->lob_id }}">
