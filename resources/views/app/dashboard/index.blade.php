@@ -524,7 +524,7 @@
             @endif
 
             <!-- Carried Over -->
-            <div class="col-xl-4 col-sm-6 col-12"  style="cursor: pointer;">
+            <div class="col-xl-4 col-sm-6 col-12"  >
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -545,7 +545,7 @@
             </div>
 
             <!-- Carried Over & Completed -->
-            <div class="col-xl-4 col-sm-6 col-12"  style="cursor: pointer;">
+            <div class="col-xl-4 col-sm-6 col-12" >
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">

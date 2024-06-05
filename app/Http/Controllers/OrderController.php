@@ -55,6 +55,8 @@ class OrderController extends Controller
                     $query->where('assignee_user_id', $user->id)
                         ->orWhere('assignee_qa_id', $user->id);
                 });
+            } else{
+
             }
         }
 
@@ -89,6 +91,21 @@ class OrderController extends Controller
                 $query->where('stl_client.is_approved', 1);
             })
             ->count();
+        $coverSheet = OrderCreation::with('process', 'client')
+            ->where('status_id',13)
+            ->where('is_active', 1)
+            ->whereIn('process_id', $processIds)
+            ->whereHas('process', function ($query) {
+                $query->where('stl_item_description.is_approved', 1);
+            })
+            ->whereHas('client', function ($query) {
+                $query->where('stl_client.is_approved', 1);
+            })
+            ->where(function ($query) use($user) {
+            $query->whereNull('oms_order_creations.associate_id')
+                ->orWhere('oms_order_creations.associate_id',$user->id);
+             })
+            ->count();
 
         if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
@@ -98,6 +115,7 @@ class OrderController extends Controller
         } else {
             $statusCounts[6] = in_array($user->user_type_id, [6, 8]) ? $yetToAssignUser : 0;
             $statusCounts[7] = in_array($user->user_type_id, [7, 8]) ? $yetToAssignQa : 0;
+            $statusCounts[13] = $coverSheet;
         }
 
         return response()->json(['StatusCounts' => $statusCounts]);
@@ -117,6 +135,7 @@ class OrderController extends Controller
             ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
             ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+            ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
             ->select(
                 'oms_order_creations.id',
                 'oms_order_creations.order_id as order_id',
@@ -129,8 +148,10 @@ class OrderController extends Controller
                 'county.county_name as county_name',
                 'oms_order_creations.assignee_user_id',
                 'oms_order_creations.assignee_qa_id',
+                'oms_order_creations.associate_id',
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
-                DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa')
+                DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
+                DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name')
             )
             ->where('oms_order_creations.is_active', 1)
             ->where('stl_item_description.is_approved', 1)
@@ -153,6 +174,7 @@ class OrderController extends Controller
                     if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
+                        if($request->status != 13){
                         if(in_array($user->user_type_id, [6])) {
                             $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
 
@@ -167,19 +189,28 @@ class OrderController extends Controller
 
                         }
                     }
+                    }
                 } else {
                     if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
-                    } elseif(in_array($user->user_type_id, [6])){
+                    } elseif(in_array($user->user_type_id, [6]) && $request->status != 13){
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
                     }
-                    else if(in_array($user->user_type_id, [7])) {
+                    elseif(in_array($user->user_type_id, [7]) && $request->status != 13) {
                         $query->where('oms_order_creations.status_id', $request->status)->Where('oms_order_creations.assignee_qa_id', $user->id);
                     }else{
+                        if($request->status != 13){
                         $query->where(function ($optionalquery) use($user) {
                             $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
                                 ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
                         });
+                        } else{
+                            $query->where('oms_order_creations.status_id', $request->status);
+                            $query->where(function ($optionalquery) use($user) {
+                            $optionalquery->whereNull('oms_order_creations.associate_id')
+                                ->orWhere('oms_order_creations.associate_id',$user->id);
+                        });
+                        }
                     }
                 }
             } elseif ($request->status == 'All') {
@@ -790,6 +821,7 @@ class OrderController extends Controller
             ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
             ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+            ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
             ->select(
                 'oms_order_creations.id',
                 'oms_order_creations.order_id as order_id',
@@ -802,8 +834,10 @@ class OrderController extends Controller
                 'county.county_name as county_name',
                 'oms_order_creations.assignee_user_id',
                 'oms_order_creations.assignee_qa_id',
+                'oms_order_creations.associate_id',
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
-                DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa')
+                DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
+                DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name')
             )
             ->where('oms_order_creations.is_active', 1)
             ->where('stl_item_description.is_approved', 1)
@@ -857,6 +891,10 @@ class OrderController extends Controller
         })
         ->filterColumn('assignee_qa', function($order, $keyword) {
             $sql = 'CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")")  like ?';
+            $order->whereRaw($sql, ["%{$keyword}%"]);
+        })
+        ->filterColumn('associate_id', function($order, $keyword) {
+            $sql = 'CONCAT(associate_names.emp_id, " (", associate_names.username, ")")  like ?';
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
         ->addColumn('status', function ($order) use ($request) {

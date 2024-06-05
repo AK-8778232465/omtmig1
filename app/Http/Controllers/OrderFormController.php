@@ -137,6 +137,10 @@ class OrderFormController extends Controller
         $orderData = $query->first();
 
         if(!empty($orderData)) {
+            if($orderData->process_id != 35) {
+                return view('app.orders.comingsoon');
+
+            }
             $countyData = DB::table('county_instructions')->where('county_id', $orderData->county_id)->where('process_id', $orderData->process_id)->first();
             $countyInfo = Null;
             $checklist = Null;
@@ -164,6 +168,8 @@ class OrderFormController extends Controller
         if(!empty($orderData->product_id)) {
             $checklist_conditions_with_product = DB::table('checklist')
                 ->where('checklist.state_id', $orderData->property_state)
+                ->where('checklist.process_id', $orderData->process_id)
+                ->where('checklist.is_special', 1)
                 ->where('checklist.lob_id', $orderData->lob_id)
                 ->where('checklist.product_id', $orderData->product_id)
                 ->get();
@@ -172,6 +178,8 @@ class OrderFormController extends Controller
         // For List with NULL value
         $checklist_conditions_with_null = DB::table('checklist')
             ->where('checklist.state_id', $orderData->property_state)
+            ->where('checklist.process_id', $orderData->process_id)
+            ->where('checklist.is_special', 1)
             ->where('checklist.lob_id', $orderData->lob_id)
             ->whereNull('checklist.product_id')
             ->get();
@@ -183,12 +191,44 @@ class OrderFormController extends Controller
             $checklist_conditions = $checklist_conditions_with_null;
         }
 
+        if(!empty($orderData->product_id)) {
+            $checklist_conditions_with_product_2 = DB::table('checklist')
+                ->where('checklist.state_id', $orderData->property_state)
+                ->where('checklist.process_id', $orderData->process_id)
+                ->where('checklist.is_special', 0)
+                ->where('checklist.lob_id', $orderData->lob_id)
+                ->where('checklist.product_id', $orderData->product_id)
+                ->get();
+        }
+
+        // For List with NULL value
+        $checklist_conditions_with_null_2 = DB::table('checklist')
+            ->where('checklist.state_id', $orderData->property_state)
+            ->where('checklist.process_id', $orderData->process_id)
+            ->where('checklist.is_special', 0)
+            ->where('checklist.lob_id', $orderData->lob_id)
+            ->whereNull('checklist.product_id')
+            ->get();
+
+        // Merge both lists
+        if(!empty($orderData->product_id)) {
+            $checklist_conditions_2 = $checklist_conditions_with_product_2->merge($checklist_conditions_with_null_2);
+        } else {
+            $checklist_conditions_2 = $checklist_conditions_with_null_2;
+        }
+
 
               
             //state
             $stateList = State::select('id', 'short_code')->get();
             //county
+        if( isset($orderData->property_state)){
+            $countyList = County::select('id','county_name')->where('stateId',$orderData->property_state)->get();
+        }
+        else{
             $countyList = County::select('id', 'county_name')->get();
+        }
+
             //product
             $productList = product::select('id','product_name')->get();
             //tier
@@ -198,17 +238,11 @@ class OrderFormController extends Controller
         // $lobList = Lob::select('id','name')->get();
         $lobList = DB::table('stl_lob')->select('id', 'name')->get(); // Adjust according to your LOB table structure
 
-        if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
-            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','tierList','productList','countyInfo', 'checklist', 'orderHistory','checklist_conditions','stateList'));
-        } else if(in_array($user->user_type_id, [1,2,3,4,5,9])) {
             return view('app.orders.orderform', compact('orderData', 'lobList','countyList','tierList','productList','countyInfo', 'checklist', 'orderHistory','checklist_conditions','stateList'));
         } else {
             return redirect('/orders_status');
         }
-    } else {
-        return redirect('/orders_status');
     }
-}
 
 
     public function getProduct_dropdown(Request $request)
@@ -236,10 +270,8 @@ class OrderFormController extends Controller
             ->update([
                 'status_id' => $request->orderStatus,
                 'tier_id' => $request->tierId,
-                'product_id' => $request->productId,
                 'state_id' => $request->stateId,
-                'county_id' => $request->countyId,
-                'completion_date' => ($request->orderStatus == '5') ? Carbon::now() : Null,
+                'county_id' => $request->countyId
             ]);
             if($update_status) {
                 DB::table('order_status_history')->insert([
@@ -262,6 +294,9 @@ class OrderFormController extends Controller
                     'tier_id' => $request->tierId,
                     'state_id' => $request->stateId,
                     'county_id' => $request->countyId
+                ]);
+                DB::table('order_status_history')->where('order_id',$orderId)->update([
+                    'comment' => $request->orderComment,
                 ]);
 
                 return response()->json(['success' => 'Updated Successfully']);;

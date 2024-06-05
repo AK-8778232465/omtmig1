@@ -137,6 +137,7 @@
                             </th>
                             @endif
                             <th style="width:7%">Action</th>
+                            <th style="width:10%">Coversheet Preparer</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -242,7 +243,8 @@
                     "name": "action",
                     "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) false @else true @endif,
                     "orderable": false,
-                }
+                },
+                { "data": "associate_name", "name": "associate_name", "visible": true},
             ],
             createdRow: function (row, data, dataIndex) {
                     let status = data.status_id; // Assuming the status_id field exists in the returned data
@@ -312,6 +314,22 @@
         } else {
             $('.status-dropdown').prop('disabled', false);
             datatable.column(8).visible(false);
+        }
+        // //
+        // @if(Auth::user()->hasRole('Business Head'))
+        //     if(status == 13){
+        //         $('.status-dropdown').prop('disabled', false);
+        //         datatable.column(8).visible(true);
+        //     } else {
+        //         datatable.column(8).visible(false);
+        //     }
+        // @endif
+        // //
+        if(status == 13){
+            $('.status-dropdown').prop('disabled', false);
+            datatable.column(10).visible(true);
+        } else {
+            datatable.column(10).visible(false);
         }
         @if(Auth::user()->hasRole('Qcer'))
         if(status == 1 || status == 2 || status == 5) {
@@ -385,7 +403,7 @@
   });
 }
 
-$(document).on('change', 'input.check-all', function() {
+    $(document).on('change', 'input.check-all', function() {
         var isChecked = $(this).prop('checked');
         $('input.check-one').prop('checked', isChecked);
 
@@ -404,14 +422,12 @@ $(document).on('change', 'input.check-all', function() {
             $('#assign_tab').addClass('d-none');
             $('#user_id').empty();
     }
-});
+    });
 
-$(document).on('change', 'input.check-one', function() {
+    $(document).on('change', 'input.check-one', function() {
     var allChecked = $('input.check-one').length === $('input.check-one:checked').length;
     $('input.check-all').prop('checked', allChecked);
-});
-
-
+    });
 
     $(document).on('change', 'input.check-one', function() {
         var anyCheckboxChecked = $('input.check-one:checked').length > 0;
@@ -438,9 +454,6 @@ $(document).on('change', 'input.check-one', function() {
         }
     });
 
-
-
-    //new chanages
     $(document).on('change', '.status-dropdown', function() {
     var selectedStatus = $(this).val();
     var rowId = $(this).data('row-id');
@@ -472,6 +485,8 @@ $(document).on('change', 'input.check-one', function() {
                             icon: "success",
                             timer: 1000
                         });
+                        // page_reload();
+
                         var table = $('#order_datatable').DataTable();
                         var currentPage = table.page();
                         var row = table.row($(this).closest('tr'));
