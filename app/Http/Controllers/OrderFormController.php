@@ -137,7 +137,7 @@ class OrderFormController extends Controller
         $orderData = $query->first();
 
         if(!empty($orderData)) {
-            if($orderData->process_id != 52) {
+            if($orderData->process_id != 44) {
                 return view('app.orders.comingsoon');
 
             }
