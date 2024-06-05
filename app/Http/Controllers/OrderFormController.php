@@ -238,7 +238,13 @@ class OrderFormController extends Controller
         // $lobList = Lob::select('id','name')->get();
         $lobList = DB::table('stl_lob')->select('id', 'name')->get(); // Adjust according to your LOB table structure
 
-            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','tierList','productList','countyInfo', 'checklist', 'orderHistory','checklist_conditions','stateList'));
+            if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
+            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList'));
+        } else if(in_array($user->user_type_id, [1,2,3,4,5,9])) {
+            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList'));
+        } else {
+            return redirect('/orders_status');
+        }
         } else {
             return redirect('/orders_status');
         }
