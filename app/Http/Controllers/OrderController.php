@@ -893,7 +893,7 @@ class OrderController extends Controller
             $sql = 'CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")")  like ?';
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
-        ->filterColumn('associate_id', function($order, $keyword) {
+        ->filterColumn('associate_name', function($order, $keyword) {
             $sql = 'CONCAT(associate_names.emp_id, " (", associate_names.username, ")")  like ?';
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
