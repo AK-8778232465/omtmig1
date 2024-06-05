@@ -149,7 +149,7 @@
                 <h6 class="font-weight-bold">Order Submission :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
                     <div class="card-body">
-                            @if(count($checklist_conditions) > 0)
+                            @if(isset($checklist_conditions) && count($checklist_conditions) > 0)
                                 <div class="font-weight-bold"> Special Checklist :</div>
                                 <div class="row mt-1 mb-4 m-4">
                                     <div class="col-12 row bg-danger justify-content-center" style="border-radius:14px;">
@@ -169,7 +169,7 @@
                             @endif
                             <div class="row mt-4 mb-4">
                                 <div class="col-12 card-body ">
-                                    @if(count($checklist_conditions_2) > 0)
+                                    @if(isset($checklist_conditions_2) && count($checklist_conditions_2) > 0)
                                     <div class="font-weight-bold">Checklist :</div>
                                     <div class="row mt-1 m-4 ">
                                         <div class="col-12  ">
