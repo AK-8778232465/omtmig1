@@ -162,21 +162,29 @@
                     <div class="form-group row mb-4 pb-0 pl-3 pr-3 mt-3">
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Order ID<span style="color:red;">*</span></label>
-                            <input type="text" id="order_id" name="order_id" class="form-control" placeholder="Enter Order ID" required data-parsley-pattern="^[a-zA-Z0-9]+$" data-parsley-error-message="Special Characters Not allowed" data-parsley-trigger="focusout keyup" maxlength="20"></input>
+                            <input type="text" id="order_id" name="order_id" class="form-control" placeholder="Enter Order ID" required
+                            data-parsley-pattern="^[a-zA-Z0-9]+$"
+                            data-parsley-error-message="Order ID should not be empty and No special characters are allowed."
+                            data-parsley-trigger="focusout keyup"
+                            maxlength="20">
                         </div>
+                {{--new changes--}}
                         <div class="form-group col-lg-3 mb-0 pb-0">
-                            <label for="order_date" class="font-weight-bold">Order Received Date<span style="color:red;">*</span></label>
+                    <label for="order_date" class="font-weight-bold">Order Received Date and Time<span style="color:red;">*</span></label>
                             <br>
-                            <input type="datetime-local" id="order_date" class="form-control" name="order_date">
+                    <input type="datetime-local" id="order_date" class="form-control" name="order_date" required data-parsley-trigger="focusout keyup"
+                    data-parsley-error-message="Order Received Date and Time should not be empty" >
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Project Code<span style="color:red;">*</span></label><br>
-                            <select class="form-control select2dropdown" style="width:100%" name="process_code" id="process_code" aria-hidden="true" required>
+                            <select class="form-control select2dropdown" style="width:100%" name="process_code" id="process_code" aria-hidden="true" data-parsley-trigger="focusout keyup"
+                            data-parsley-error-message="Project Code should not be empty" data-parsley-errors-container="#process_code_error" required>
                                 <option selected="" disabled="" value="">Select Project Code</option>
                                 @foreach ($processList as $process)
                                     <option value="{{ $process->id }}">{!! $process->project_code.' ('.$process->process_name.')' !!}</option>
                                 @endforeach
                             </select>
+                            <div id="process_code_error" class="parsley-error"></div>
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">State</label><br>
@@ -197,7 +205,7 @@
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Status<span style="color:red;">*</span></label>
-                            <select id="order_status" name="order_status" type="text" class="form-control" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
+                            <select id="order_status" name="order_status" required type="text" class="form-control" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup" data-parsley-error-message="Status should not be Empty ">
                                 <option selected="" disabled="" value="">Select Status</option>
                                 @foreach ($statusList as $status)
                                 @if($status->id == 1)
@@ -286,9 +294,11 @@
                 </tr>
                 </thead>
                 <tbody>
+                    @php $j = 1 @endphp
                     @foreach($exceldetail as $detail)
+                    @if(!empty($detail->unsuccessfull_rows) || !empty($detail->successfull_rows))
                         <tr>
-                            <td>{{ $loop->iteration}}</td>
+                            <td>{{ $j++ }}</td>
                             <td>{{ $detail->file_name}}</td>
                             <td>{{ $detail->total_rows}}</td>
                             <td>{{ $detail->successfull_rows}}</td>
@@ -303,7 +313,8 @@
                             <td>{{ date('m/d/Y H:i:s', strtotime($detail->created_at)) }}</td>
                             <td>{!! optional($detail->users)->emp_id . " (" . optional($detail->users)->username. ")" !!}</td>
                         </tr>
-                        @endforeach
+                    @endif
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -475,7 +486,7 @@ document.getElementById('order_date').addEventListener('change', function() {
                         icon: "error",
                         confirmButtonText: "OK"
                     }).then(() => {
-                        location.reload(); // Reload on error
+                        location.reload();
                     });
                 }
             });

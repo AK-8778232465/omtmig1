@@ -10,9 +10,9 @@ class Lob extends Model
     use HasFactory;
 	protected $table='stl_lob';
     public $timestamps = false;
-  
-    public function products()
-    {
-        return $this->hasMany(Product::class, 'lob_id', 'id');
-    }
+
+    protected $fillable = [
+        'id',
+        'name',
+    ];
 }

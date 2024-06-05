@@ -13,7 +13,7 @@
                         <div class="d-flex">
                             <h5 class="font-weight-bold">LOB:</h5> <!-- Added a colon after "LOB" -->
                             <div style="margin-left: 10px;"> <!-- Added margin for space -->
-                            <h6 class="border bg-light rounded font-weight-bold fs-3 text-uppercase  p-1 mt-2">{{ $orderData->lob_id ? ($lobList->where('id', $orderData->lob_id)->first()->name ?? '-') : '' }}</h6>
+                                <h5 class="border bg-light rounded font-weight-bold fs-3 text-uppercase  p-1 mt-1">{{ $orderData->lob_id ? ($lobList->where('id', $orderData->lob_id)->first()->name ?? '-') : '' }}</h5>
                             </div>
                         </div>
                     </div>
@@ -146,62 +146,48 @@
                     </div>
                 </div>
                 @endif
-                <h6 class="font-weight-bold">Order Submition :</h6>
+                <h6 class="font-weight-bold">Order Submission :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
                     <div class="card-body">
-                            <!-- <div class="d-flex justify-content-center"> -->
-                                <!-- <div class="col-lg-4 col-xl-4">
-                                    <div class="font-weight-bold">LOB :</div>
-                                    <select name="lob_id" id="lob_id" class="form-control">
-                                        <option value="">Select LOB</option>
-                                        {{-- @foreach($lobData as $lob) --}}
-                                        {{-- <option value="{{ $lob->id }}">{{ $lob->name }}</option> --}}
-                                        {{-- @endforeach --}}
-                                    </select>
-                                </div>
-                                <div class="col-lg-4 col-xl-4">
-                                    <div class="font-weight-bold">Product :</div>
-                                    <select name="product_id" class="form-control" id="product_id">
-                                        <option value="">Select Product</option>
-                                    </select>
-                                </div>
-                                <div class="col-lg-4 col-xl-4">
-                                    <div class="font-weight-bold">Tier :</div>
-                                        <select name="tier_id" id="tier_id" class="form-control">
-                                            <option value="">Select Tier</option>
-                                            <option value="1">Tier 1</option>
-                                            <option value="2">Tier 2</option>
-                                        </select>
-                                    </div>
-                                </div> -->
-
-                            <!-- <div class="row mt-4 mb-4 m-4">
-                                <div class="col-12 d-flex bg-danger justify-content-center" style="border-radius:14px;">
-                                <input type="checkbox" name="checks[]" id="check_box_id" value="{{ isset($checklist_condition->state_id) ? htmlspecialchars($checklist_condition->state_id) : null }}">
-                                     <label class="text-white font-weight-bold text-uppercase px-1 py-3" style="font-size: 14px !important;">{{ isset($checklist_condition[0]) ? htmlspecialchars($checklist_condition[0]->check_condition) : null }}</label>
-                                </div>
-                            </div> -->
-                            @foreach($checklist_conditions as $checklist_condition)
-                                <div class="row mt-4 mb-4 m-4">
-                                    <div class="col-12 d-flex bg-danger justify-content-center" style="border-radius:14px;">
-                                        <input type="checkbox" name="checks[]" id="check_{{ $checklist_condition->state_id }}" value="{{ $checklist_condition->state_id }}">
-                                        <label class="text-white font-weight-bold text-uppercase px-1 py-3" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
-                                    </div>
-                                </div>
-                            @endforeach
-                            <div class="row mt-4 mb-4">
-                                <!-- <div class="col-lg-4">
-                                    <div class="font-weight-bold ml-2">Checklist :</div>
-                                    @if(!@empty($checklist))
-                                        {{-- <div class=""></div> --}}
-                                        @foreach ($checklist as $check)
-                                            <div class="row ml-4">
-                                                <input class="mx-2" type="checkbox" name="checks[]" id="check_{{$check->id}}" value="{{$check->id}}">
-                                                <span>{{$check->check_condition}}</span>
+                            @if(isset($checklist_conditions) && count($checklist_conditions) > 0)
+                                <div class="font-weight-bold"> Special Checklist :</div>
+                                <div class="row mt-1 mb-4 m-4">
+                                    <div class="col-12 row bg-danger justify-content-center" style="border-radius:14px;">
+                                        @php $counter = 0; @endphp
+                                        @foreach($checklist_conditions as $checklist_condition)
+                                            <div class="row col-12 {{ $counter > 0 ? '' : 'box' }}" style="{{  $counter > 0 ? 'margin-top: -9px; padding-top: 0;' : '' }}">
+                                                <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
+                                                <label class="text-white font-weight-bold text-uppercase px-1" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
+                                                <input type="hidden" name="state_ids[]" value="{{ $checklist_condition->state_id }}">
+                                                <input type="hidden" name="lob_ids[]" value="{{ $checklist_condition->lob_id }}">
+                                                <input type="hidden" name="product_ids[]" value="{{ $checklist_condition->product_id }}">
                                             </div>
+                                            @php $counter++; @endphp
                                         @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                            <div class="row mt-4 mb-4">
+                                <div class="col-12 card-body ">
+                                    @if(isset($checklist_conditions_2) && count($checklist_conditions_2) > 0)
+                                    <div class="font-weight-bold">Checklist :</div>
+                                    <div class="row mt-1 m-4 ">
+                                        <div class="col-12  ">
+                                            @php $counter = 0; @endphp
+                                            @foreach($checklist_conditions_2 as $checklist_condition)
+                                                <div class="row col-12 ">
+                                                    <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
+                                                    <label class="text-black   px-1" >{{ $checklist_condition->check_condition }}</label>
+                                                    <input type="hidden" name="state_ids[]" value="{{ $checklist_condition->state_id }}">
+                                                    <input type="hidden" name="lob_ids[]" value="{{ $checklist_condition->lob_id }}">
+                                                    <input type="hidden" name="product_ids[]" value="{{ $checklist_condition->product_id }}">
+                                            </div>
+                                                @php $counter++; @endphp
+                                        @endforeach
+                                        </div>
+                                    </div>
                                     @endif
-                                </div> -->
+                                </div>
                                 <div class="col-lg-4">
                                     <div class="font-weight-bold">Comments :</div>
                                     <textarea name="order_comment" style="width: 100%" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
@@ -220,7 +206,7 @@
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-center my-4">
-                                    <button class="btn btn-primary btn-sm mx-2" onclick="order_submition({{$orderData->id}})" type="submit">Submit</button>
+                                    <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}})" type="submit">Submit</button>
                                     <button class="btn btn-info btn-sm mx-2" type="submit">Coversheet Prep & Submit</button>
                                 </div>
                         </div>
@@ -234,16 +220,18 @@
 <script>
 
 
-document.addEventListener('DOMContentLoaded', function() {
-        var orderStatus = document.getElementById('order_status');
+    $(document).ready(function() {
+        var orderStatus = $('#order_status');
         var currentStatus = {{ $orderData->status_id }};
 
-        for (var i = 0; i < orderStatus.options.length; i++) {
-            if (parseInt(orderStatus.options[i].value) === currentStatus) {
-                orderStatus.options[i].disabled = true;
+        orderStatus.on('change', 'option', function() {
+            for (var i = 0; i < orderStatus[0].options.length; i++) {
+                if (parseInt(orderStatus[0].options[i].value) === currentStatus) {
+                    orderStatus[0].options[i].disabled = true;
                 break;
             }
         }
+        }).trigger('change');
     });
 
 
@@ -371,6 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         });
+        $('#ordersubmit').click();
     });
 
 </script>

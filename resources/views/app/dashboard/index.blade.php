@@ -313,7 +313,7 @@
     <div class="col-12">
         <div class="row my-2">
             @if(!Auth::user()->hasRole('Qcer'))
-                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)">
+                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)" style="cursor: pointer;">
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
@@ -339,7 +339,7 @@
             <!-- Existing sections -->
 
             <!-- Coversheet Prep -->
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(13)">
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(13)"  style="cursor: pointer;">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -362,7 +362,7 @@
             </div>
 
             <!-- Clarification -->
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(14)">
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(14)"  style="cursor: pointer;">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -385,7 +385,7 @@
             </div>
 
             <!-- Send For QC -->
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(4)">
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(4)"  style="cursor: pointer;">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -408,7 +408,7 @@
             </div>
 
             <!-- Hold -->
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(2)">
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(2)"  style="cursor: pointer;">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -431,7 +431,7 @@
             </div>
 
             <!-- Cancelled -->
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(3)">
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(3)"  style="cursor: pointer;">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -452,7 +452,7 @@
             </div>
 
             <!-- Completed -->
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(5)">
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(5)"  style="cursor: pointer;">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -475,7 +475,7 @@
             </div>
 
             <!-- All -->
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders('All')">
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders('All')"  style="cursor: pointer;">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -502,7 +502,7 @@
             </div>
             @endif
             @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
-                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)">
+                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)"  style="cursor: pointer;">
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body" style = "background-color: #dee2e6;">
@@ -524,7 +524,7 @@
             @endif
 
             <!-- Carried Over -->
-            <div class="col-xl-4 col-sm-6 col-12">
+            <div class="col-xl-4 col-sm-6 col-12"  >
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -545,7 +545,7 @@
             </div>
 
             <!-- Carried Over & Completed -->
-            <div class="col-xl-4 col-sm-6 col-12">
+            <div class="col-xl-4 col-sm-6 col-12" >
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
@@ -641,12 +641,12 @@
                 <tr>
                     <th width="10%">Client</th>
                     <th width="15%">Project Code</th>
-                    <th width="8%" >Pricing</th>
+                    <th width="7%" >Pricing</th>
                     <th width="8%">FTE Count</th>
-                    <th width="12%">Expected Revenue</th>
-                    <th width="10%">Start Date</th>
-                    <th width="12%">End Date</th>
-                    <th width="5%">Days</th>
+                    <th width="13%">Expected Revenue</th>
+                    <th width="8%">Start Date</th>
+                    <th width="8%">End Date</th>
+                    <th width="6%">Days</th>
                     <th width="17%">Revenue as Selected Date</th>
                 </tr>
                 </thead>
