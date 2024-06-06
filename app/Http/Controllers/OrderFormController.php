@@ -248,7 +248,7 @@ class OrderFormController extends Controller
         } else {
             return redirect('/orders_status');
         }
-    }
+}
 
 
     public function getProduct_dropdown(Request $request)
@@ -288,7 +288,10 @@ class OrderFormController extends Controller
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
 
-                return response()->json(['success' => 'Order Status Updated Successfully']);;
+                if($request->submit_type == 2) {
+                    return response()->json(['redirect' => $request->orderId]);
+                }
+                return response()->json(['success' => 'Order Status Updated Successfully']);
             } else {
                 return response()->json(['error' => 'Something went wrong']);
             }
@@ -305,20 +308,24 @@ class OrderFormController extends Controller
                     'comment' => $request->orderComment,
                 ]);
 
-                return response()->json(['success' => 'Updated Successfully']);;
+                if($request->submit_type == 2) {
+                    return response()->json(['redirect' => $request->orderId]);
+                }
+                return response()->json(['success' => 'Updated Successfully']);
             } else {
                 return response()->json(['error' => 'Something went wrong']);
             }
         }
     }
 
-public function coversheet_prep(Request $request, $orderId = null){
+
+    public function coversheet_prep(Request $request, $orderId = null){
         $user = Auth::user();
         $orderData = OrderCreation::find($orderId);
 
-        if (($user->user_type_id === 6 || $user->user_type_id === 8) && $orderData->status_id === 13 && empty($orderData->associate_id)) {
+        if (($user->user_type_id === 6 || $user->user_type_id === 8) && empty($orderData->associate_id)) {
             $orderData->update(['associate_id' => $user->id]);
-        } elseif (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9]) && $orderData->status_id === 13) {
+        } elseif (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             // No action needed, continue execution
         } elseif (in_array($user->id, [$orderData->assignee_user_id, $orderData->assignee_qa_id, $orderData->associate_id])) {
             // No action needed, continue execution

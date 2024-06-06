@@ -81,7 +81,7 @@ class HomeController extends Controller
         $user->password = Hash::make($request->input('new_password'));
         $user->save();
 
-        return redirect()->route('home')->with('success', 'Password updated successfully.');
+        return response()->json(['success' => 'Password updated successfully.']);
     }
 
     public function profileEdit(Request $request)

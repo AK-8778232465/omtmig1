@@ -6,6 +6,22 @@
         align-items: middle;
         padding-top: 4px;
     }
+
+    .input-container {
+        position: relative;
+    }
+    .input-container input[type="password"], .input-container input[type="text"] {
+        width: 100%;
+        padding-right: 10px; /* Make space for the eye icon */
+    }
+    .input-container .toggle-password {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+
 </style>
 <div class="container-fluid">
     <div class="row justify-content-center"> <!-- Center the content horizontally -->
@@ -13,20 +29,14 @@
             <div class="card mt-2">
 
                 <div class="card-body mr-4">
-                    <h4 class="ml-4 mb-4">Change Password:</h4>
+                    <h4 class="ml-1 mb-4">User Details:</h4>
                     <form action="{{ route("profile_Update") }}" method="POST" id="reset_password_form" name="reset_password_form" onsubmit="return validatePassword()">
                         @csrf
                         <input name="user_id" value="" id="ed_user_id" type="hidden" />
                         <div class="form-group row">
-                            <label for="first_name" class="col-sm-3 text-right">First Name</label>
+                            <label for="username" class="col-sm-3 text-right">User Name</label>
                             <div class="col-sm-9">
-                                <input readonly class="form-control" type="text" id="first_name" name="first_name" value="{{ old('first_name', Auth::user()->first_name) }}">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="last_name" class="col-sm-3 text-right">Last Name</label>
-                            <div class="col-sm-9">
-                                <input readonly class="form-control" type="text" id="last_name" name="last_name" value="{{ old('last_name', Auth::user()->last_name) }}">
+                                <input readonly class="form-control" type="text" id="username" name="username" value="{{ old('username', Auth::user()->username) }}">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -38,20 +48,28 @@
                         <div class="form-group row">
                             <label for="contact_no" class="col-sm-3 text-right">Contact No</label>
                             <div class="col-sm-9">
-                                <input readonly class="form-control" type="text" id="contact_no" name="contact_no" value="{{ old('contact_no', Auth::user()->contact_no) }}">
+                                <input readonly class="form-control" type="text" id="contact_no" name="contact_no"
+                                       value="{{ old('contact_no', Auth::user()->contact_no ?: 'NA') }}">
                             </div>
                         </div>
                         <hr>
+                        <h4 class="ml-1 mb-4">Change Password:</h4>
                         <div class="form-group row">
                             <label for="new_password" class="col-sm-3 text-right">New Password</label>
-                            <div class="col-sm-9">
-                                <input class="form-control" type="password" id="new_password" name="new_password" value="" required>
+                           <div class="col-sm-9 input-container">
+                          <input class="form-control" type="password" id="new_password" name="new_password" value="" required >
+                          <span class="toggle-password" id="togglePassword1">
+                          <i class="fas fa-eye"></i>
+                          </span>
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="new_password_confirmation" class="col-sm-3 text-right">Confirm Password</label>
-                            <div class="col-sm-9">
-                                <input class="form-control" type="password" id="new_password_confirmation" name="new_password_confirmation" data-parsley-equalto="#new_password_confirmation" value="" required>
+                    <div class="col-sm-9 input-container">
+                     <input class="form-control" type="password" id="new_password_confirmation" name="new_password_confirmation" data-parsley-equalto="#new_password" value="" required>
+                      <span class="toggle-password" id="togglePassword2">
+                       <i class="fas fa-eye "></i>
+                      </span>
                             </div>
                         </div>
                         <div class="text-center mb-4">
@@ -239,6 +257,35 @@ function validatePassword() {
 
     return true; // Allow form submission
 }
+
+$(document).ready(function() {
+        $('#reset_password_form').submit(function(e) {
+            e.preventDefault();
+            var form = $(this);
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.success,
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(function() {
+                        location.reload(); // Reload the page or redirect as per your requirement
+                    });
+                },
+                error: function(xhr) {
+                    // Handle errors if any
+                }
+            });
+        });
+    });
+///
+
 
     $('#updateuserfrm').on('submit', function(event){
 		event.preventDefault();

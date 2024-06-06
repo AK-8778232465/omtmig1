@@ -390,6 +390,8 @@
             $('#status_' + status + '_count').text(' (' + count + ')');
           }
         }
+        total -= statusCounts[13];
+        
         let count6 = statusCounts[6] || 0;
         let count7 = statusCounts[7] || 0;
         $('#status_6_count').text(' (' + count6 + ')');
