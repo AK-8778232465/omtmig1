@@ -372,16 +372,17 @@
 
     });
 
-    function updateStatusCounts() {
+function updateStatusCounts() {
   $.ajax({
-    url: "{{route('getStatusCount')}}",
+    url: "{{ route('getStatusCount') }}",
     type: 'POST',
     data: {
-      _token: '{{csrf_token()}}'
+      _token: '{{ csrf_token() }}'
     },
     success: function(response) {
       if (response.StatusCounts !== undefined) {
         let statusCounts = response.StatusCounts;
+        let assign = response.AssignCoverSheet;
         let total = 0;
         for (let status = 1; status <= 14; status++) {
           if (status !== 6) { // Exclude status 6
@@ -390,7 +391,7 @@
             $('#status_' + status + '_count').text(' (' + count + ')');
           }
         }
-        total -= statusCounts[13];
+        $('#status_13_count').text("(" + statusCounts[13] + "+" + assign + ")");
         
         let count6 = statusCounts[6] || 0;
         let count7 = statusCounts[7] || 0;
@@ -404,6 +405,11 @@
     }
   });
 }
+
+$(document).ready(function() {
+  updateStatusCounts();
+});
+
 
     $(document).on('change', 'input.check-all', function() {
         var isChecked = $(this).prop('checked');
