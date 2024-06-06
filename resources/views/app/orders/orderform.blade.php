@@ -151,7 +151,7 @@
                     <div class="card-body">
                             @if(isset($checklist_conditions) && count($checklist_conditions) > 0)
                                 <div class="font-weight-bold"> Special Checklist :</div>
-                                <div class="row mt-1 mb-4 m-4">
+                                <div class="row mt-1 mb-4  mx-5 ">
                                     <div class="col-12 row bg-danger justify-content-center" style="border-radius:14px;">
                                         @php $counter = 0; @endphp
                                         @foreach($checklist_conditions as $checklist_condition)
@@ -171,7 +171,7 @@
                                 <div class="col-12 card-body ">
                                     @if(isset($checklist_conditions_2) && count($checklist_conditions_2) > 0)
                                     <div class="font-weight-bold">Checklist :</div>
-                                    <div class="row mt-1 m-4 ">
+                                    <div class="row mt-1  mx-5 ">
                                         <div class="col-12  ">
                                             @php $counter = 0; @endphp
                                             @foreach($checklist_conditions_2 as $checklist_condition)
@@ -188,13 +188,13 @@
                                     </div>
                                     @endif
                                 </div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-4 ">
                                     <div class="font-weight-bold">Comments :</div>
-                                    <textarea name="order_comment" style="width: 100%" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
+                                    <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
                                 </div>
-                                <div class="col-lg-4">
-                                    <div class="font-weight-bold">Status :</div>
-                                        <select style="width:100%" class="form-control mx-2" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                <div class="col-lg-5 mx-5 mt-1">
+                                    <div class="font-weight-bold mb-1 mt-1">Status :</div>
+                                        <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
                                             <option value="1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                             <option value="2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                                             <option value="3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
@@ -206,8 +206,8 @@
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-center my-4">
-                                    <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}})" type="submit">Submit</button>
-                                    <button class="btn btn-info btn-sm mx-2" type="submit">Coversheet Prep & Submit</button>
+                                    <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
+                                    <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit" name="coversheetsubmit" onclick="order_submition({{$orderData->id}},2)" type="submit">Coversheet Prep & Submit</button>
                                 </div>
                         </div>
                     </div>
@@ -257,7 +257,7 @@
         $("#order_status,#lob_id,#product_id,#tier_id,#property_state,#property_county").select2();
     });
 
-    function order_submition(orderId) {
+    function order_submition(orderId, type) {
         var checklistItems = [];
         $("input[name='checks[]']:checked").each(function() {
             checklistItems.push($(this).val());
@@ -279,6 +279,7 @@
             countyId: propertycounty,
             tierId: tierId,
             productId: productId,
+            submit_type: type,
             _token: '{{ csrf_token() }}'
         };
 
@@ -289,7 +290,11 @@
             data: data,
             dataType: 'json',
             success: function(response) {
-                if(response.success) {
+                if(response.redirect) {
+                    console.log(response.redirect);
+                    window.location.href = '{{url("/coversheet-prep")}}/' + response.redirect;                     
+                }
+                else if(response.success) {
                     Swal.fire({
                         title: "Success",
                         text: response.success,
