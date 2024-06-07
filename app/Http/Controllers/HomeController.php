@@ -73,9 +73,7 @@ class HomeController extends Controller
 
     public function profileupdate(Request $request)
     {
-        $request->validate([
-            'new_password' => 'required|min:8|confirmed',
-        ]);
+
 
         $user = Auth::user();
         $user->password = Hash::make($request->input('new_password'));
@@ -939,7 +937,8 @@ class HomeController extends Controller
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 2 THEN 2 END) AS Hold')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 3 THEN 3 END) AS Cancelled')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 4 THEN 4 END) AS Send_for_QC')
-        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 5 AND oms_order_creations.completion_date BETWEEN ? AND ? THEN 5 END) AS Completed', [$fromDate, $toDate])
+         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 5 AND DATE_FORMAT(oms_order_creations.completion_date, "%Y-%m-%d") >= ? AND DATE_FORMAT(oms_order_creations.completion_date, "%Y-%m-%d") <= ? THEN 1 ELSE NULL END) AS Completed', [$fromDate, $toDate])
+
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 13 THEN 13 END) AS Coversheet_Prep')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 14 THEN 14 END) AS Clarification')
         ->groupBy('stl_client.client_name', 'stl_item_description.process_name', 'oms_order_creations.process_id', 'stl_item_description.project_code');
@@ -1030,7 +1029,7 @@ public function dashboard_userwise_count(Request $request)
             SUM(CASE WHEN status_id = 2 THEN 1 ELSE 0 END) as `status_2`,
             SUM(CASE WHEN status_id = 3 THEN 1 ELSE 0 END) as `status_3`,
             SUM(CASE WHEN status_id = 4 THEN 1 ELSE 0 END) as `status_4`,
-            SUM(CASE WHEN status_id = 5 AND completion_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as `status_5`,
+        SUM(CASE WHEN status_id = 5 AND DATE_FORMAT(completion_date, "%Y-%m-%d") BETWEEN ? AND ? THEN 1 ELSE 0 END) as `status_5`,
             SUM(CASE WHEN status_id = 13 THEN 1 ELSE 0 END) as `status_13`,
             SUM(CASE WHEN status_id = 14 THEN 1 ELSE 0 END) as `status_14`,
             COUNT(*) as `All`', [$fromDate, $toDate])

@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Stellar-OMS | Dashboard')
 @section('content')
-
+@php
+    $currentDate = \Carbon\Carbon::now()->toDateString();
+@endphp
 
     <style>
 
@@ -100,6 +102,10 @@
         }
 
         #datewise_datatable tbody td:nth-child(2) {
+            white-space: normal !important;
+            width:22%;
+    }
+    #fterevenueProjectTable tbody td:nth-child(2) {
             white-space: normal !important;
             width:22%;
     }
@@ -636,11 +642,11 @@
         <div class="card-body" id="fteProject">
             <div class="p-0 w-100 mx-auto" id="fteProjectTable">
                 <h5 class="text-center"> Process Wise Details </h5>
-                <table id="fterevenueProjectTable" class="table table-bordered mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                <table id="fterevenueProjectTable" class="table table-bordered nowrap mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                 <thead class="text-center">
                 <tr>
                     <th width="10%">Client</th>
-                    <th width="15%">Project Code</th>
+                    <th width="15%" class="wrap-column">Project Code</th>
                     <th width="7%" >Pricing</th>
                     <th width="8%">FTE Count</th>
                     <th width="13%">Expected Revenue</th>
@@ -1521,9 +1527,16 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
 
 //date script-start
 
-    document.getElementById('toDate_dcf').valueAsDate = new Date();
+    // Get the current date from PHP and create a new Date object
+    let currentDate12 = new Date('<?php echo $currentDate; ?>');
 
-    var currentDate = new Date();
+    // Set the modified date as the value of the input element
+    document.getElementById('toDate_dcf').valueAsDate = currentDate12;
+
+    // document.getElementById('toDate_dcf').valueAsDate = new Date('<?php echo $currentDate; ?>');
+
+    // var currentDate = new Date();
+    var currentDate = new Date('<?php echo $currentDate; ?>');
 
     var firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
 
@@ -1533,7 +1546,7 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
 
     // future date script
 function isFutureDate(date) {
-    var currentDate = new Date();
+    var currentDate = new Date('<?php echo $currentDate; ?>');
     return date > currentDate;
 }
 
@@ -1543,7 +1556,7 @@ document.getElementById('toDate_dcf').addEventListener('change', function() {
 
     if (isFutureDate(selectedDate)) {
         alert("You cannot select a future date.");
-        this.valueAsDate = new Date();
+        this.valueAsDate = currentDate12;
     }
 });
 
@@ -1552,7 +1565,7 @@ document.getElementById('fromDate_dcf').addEventListener('change', function() {
     var selectedDate = new Date(this.value);
         if (isFutureDate(selectedDate)) {
         alert("You cannot select a future date.");
-        this.valueAsDate = new Date();
+        this.valueAsDate = currentDate12;
     }
 });
 

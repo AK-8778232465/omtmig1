@@ -221,7 +221,7 @@
                     _token: '{{ csrf_token() }}',
                     status: defaultStatus,
                     sessionfilter : sessionfilter
-                } 
+                }
             },
             "columns": [
                 { "data": "order_id", "name": "order_id" },
@@ -316,14 +316,18 @@
             datatable.column(8).visible(false);
         }
         // //
-        // @if(Auth::user()->hasRole('Business Head'))
-        //     if(status == 13){
-        //         $('.status-dropdown').prop('disabled', false);
-        //         datatable.column(8).visible(true);
-        //     } else {
-        //         datatable.column(8).visible(false);
-        //     }
-        // @endif
+        @if(Auth::user()->hasRole('Business Head'))
+            if(status == 13){
+                $('.status-dropdown').prop('disabled', false);
+                //datatable.column(8).visible(true);
+            }
+            else if(status == 6){
+                $('.status-dropdown').prop('disabled', false);
+                datatable.column(8).visible(true);
+            } else {
+                datatable.column(8).visible(false);
+            }
+        @endif
         // //
         if(status == 13){
             $('.status-dropdown').prop('disabled', false);
@@ -767,7 +771,7 @@ $(document).ready(function() {
             window.location.href = "{{ url('coversheet-prep/') }}/" + order_id;
         } else {
             window.location.href = "{{ url('orderform/') }}/" + order_id;
-        }    
+        }
     });
 
 
