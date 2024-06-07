@@ -391,8 +391,9 @@ function updateStatusCounts() {
             $('#status_' + status + '_count').text(' (' + count + ')');
           }
         }
+        @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
         $('#status_13_count').text("(" + statusCounts[13] + "+" + assign + ")");
-        
+        @endif
         let count6 = statusCounts[6] || 0;
         let count7 = statusCounts[7] || 0;
         $('#status_6_count').text(' (' + count6 + ')');
