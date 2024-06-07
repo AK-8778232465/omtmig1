@@ -105,6 +105,10 @@
             white-space: normal !important;
             width:22%;
     }
+    #fterevenueProjectTable tbody td:nth-child(2) {
+            white-space: normal !important;
+            width:22%;
+    }
 
     </style>
 {{-- Order Wise --}}
@@ -638,11 +642,11 @@
         <div class="card-body" id="fteProject">
             <div class="p-0 w-100 mx-auto" id="fteProjectTable">
                 <h5 class="text-center"> Process Wise Details </h5>
-                <table id="fterevenueProjectTable" class="table table-bordered mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                <table id="fterevenueProjectTable" class="table table-bordered nowrap mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                 <thead class="text-center">
                 <tr>
                     <th width="10%">Client</th>
-                    <th width="15%">Project Code</th>
+                    <th width="15%" class="wrap-column">Project Code</th>
                     <th width="7%" >Pricing</th>
                     <th width="8%">FTE Count</th>
                     <th width="13%">Expected Revenue</th>
