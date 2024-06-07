@@ -1526,9 +1526,6 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
     // Get the current date from PHP and create a new Date object
     let currentDate12 = new Date('<?php echo $currentDate; ?>');
 
-    // Add one day to the current date
-    currentDate12.setDate(currentDate12.getDate() + 1);
-
     // Set the modified date as the value of the input element
     document.getElementById('toDate_dcf').valueAsDate = currentDate12;
 
@@ -1546,7 +1543,6 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
     // future date script
 function isFutureDate(date) {
     var currentDate = new Date('<?php echo $currentDate; ?>');
-    currentDate.setDate(currentDate.getDate() + 1);
     return date > currentDate;
 }
 
