@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Stellar-OMS | Dashboard')
 @section('content')
-
+@php
+    $currentDate = \Carbon\Carbon::now()->toDateString();
+@endphp
 
     <style>
 
@@ -1521,9 +1523,19 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
 
 //date script-start
 
-    document.getElementById('toDate_dcf').valueAsDate = new Date();
+    // Get the current date from PHP and create a new Date object
+    let currentDate12 = new Date('<?php echo $currentDate; ?>');
 
-    var currentDate = new Date();
+    // Add one day to the current date
+    currentDate12.setDate(currentDate12.getDate() + 1);
+
+    // Set the modified date as the value of the input element
+    document.getElementById('toDate_dcf').valueAsDate = currentDate12;
+
+    // document.getElementById('toDate_dcf').valueAsDate = new Date('<?php echo $currentDate; ?>');
+
+    // var currentDate = new Date();
+    var currentDate = new Date('<?php echo $currentDate; ?>');
 
     var firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
 
@@ -1533,7 +1545,8 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
 
     // future date script
 function isFutureDate(date) {
-    var currentDate = new Date();
+    var currentDate = new Date('<?php echo $currentDate; ?>');
+    currentDate.setDate(currentDate.getDate() + 1);
     return date > currentDate;
 }
 
@@ -1543,7 +1556,7 @@ document.getElementById('toDate_dcf').addEventListener('change', function() {
 
     if (isFutureDate(selectedDate)) {
         alert("You cannot select a future date.");
-        this.valueAsDate = new Date();
+        this.valueAsDate = currentDate12;
     }
 });
 
@@ -1552,7 +1565,7 @@ document.getElementById('fromDate_dcf').addEventListener('change', function() {
     var selectedDate = new Date(this.value);
         if (isFutureDate(selectedDate)) {
         alert("You cannot select a future date.");
-        this.valueAsDate = new Date();
+        this.valueAsDate = currentDate12;
     }
 });
 
