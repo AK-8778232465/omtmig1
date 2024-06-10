@@ -117,10 +117,10 @@ class OrderController extends Controller
             })
 
             ->where('oms_order_creations.assignee_user_id', '!=', $user->id)
-            ->where(function ($query) {
-                $query->whereColumn('oms_order_creations.associate_id', '!=', 'oms_order_creations.assignee_user_id')
-                    ->orWhereNull('oms_order_creations.associate_id');
-             })
+            ->where(function ($query) use ($user) {
+                $query->whereNull('oms_order_creations.associate_id')
+                    ->orWhere('oms_order_creations.associate_id', $user->id);
+            })
             ->count();
 
         if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
