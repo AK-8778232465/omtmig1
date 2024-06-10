@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Lenders OMS | Products')
 @section('content')
+
 <div class="container-fluid mt-2">
     @include('app.settings.index')
     <div class="col-lg-12">
