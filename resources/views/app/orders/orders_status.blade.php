@@ -106,7 +106,7 @@
                     <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer')) d-none @endif">Yet to Assign User<span id="status_6_count"></span></button>
                     <button id="status_7"  class="btn btn-info status-btn d-none">Yet to Assign QA<span id="status_7_count"></span></button>
                     <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer')) d-none @endif">WIP<span id="status_1_count"></span></button>
-                    <button id="status_13" class="btn btn-info status-btn">Coversheet Prep<span id="status_13_count"></span></button>
+                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span></button>
                     <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span></button>
                     <button id="status_4" class="btn btn-info status-btn">Send For Qc<span id="status_4_count"></span></button>
                     <button id="status_2" class="btn btn-info status-btn">Hold<span id="status_2_count"></span></button>

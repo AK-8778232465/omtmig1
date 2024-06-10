@@ -340,7 +340,7 @@
                         </div>
                     </div>
                 </div>
-            @endif
+            
 
             <!-- Existing sections -->
 
@@ -366,6 +366,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- Clarification -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(14)"  style="cursor: pointer;">
