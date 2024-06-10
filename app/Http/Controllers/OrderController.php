@@ -237,7 +237,7 @@ class OrderController extends Controller
                     $query->where('oms_order_creations.assignee_user_id', $user->id);
                 } elseif(in_array($user->user_type_id, [7])) {
                     $query->where('oms_order_creations.assignee_qa_id', $user->id)
-                    ->whereNotIn('status_id', [1]);
+                    ->whereNotIn('status_id', [1, 13]);
                 } elseif(in_array($user->user_type_id, [8])) {
                     $query->where(function ($optionalquery) use($user) {
                         $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
