@@ -712,8 +712,10 @@
                             <tr>
                                 <th width="12%">Client</th>
                                 <th width="22%" class="wrap-column">Project</th>
+                                @if(!Auth::user()->hasRole('Qcer'))
                                 <th width="9%">WIP</th>
                                 <th width="10%">Coversheet Prep</th>
+                                @endif
                                 <th width="10%">Clarification</th>
                                 <th width="9%">Send for QC</th>
                                 <th width="9%">Hold</th>
@@ -989,8 +991,10 @@ function datewise_datatable(fromDate, toDate, client_id, project_id) {
                         name: 'process_name_project_code',
                         className: "text-left"
                     },
+                    @if(!Auth::user()->hasRole('Qcer'))
                     { data: 'WIP', name: 'WIP', className: "text-center" },
                     { data: 'Coversheet Prep', name: 'Coversheet Prep', className: "text-center" },
+                    @endif
                     { data: 'Clarification', name: 'Clarification', className: "text-center" },
                     { data: 'Send for QC', name: 'Send for QC', className: "text-center" },
                     { data: 'Hold', name: 'Hold', className: "text-center" },
