@@ -546,6 +546,7 @@ class OrderController extends Controller
                 if (in_array('All', $project_id) && !in_array('All', $client_id)) {
                     $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                         ->where('status_id', '!=', 5)
+                        ->whereNotIn('status_id', [1, 13])
                         ->where('is_active', 1)
                         ->where('assignee_qa_id', $user->id)
                         ->whereIn('process_id', $processIds)
@@ -559,8 +560,7 @@ class OrderController extends Controller
                         ->where('is_active', 1)
                         ->where('assignee_qa_id', $user->id)
                         ->whereIn('process_id', $processIds)
-                        ->whereIn('status_id', [1, 2, 4, 13, 14])
-                        ->whereNotIn('status_id', [3, 5])
+                        ->whereIn('status_id', [2, 4, 14])
                         ->whereNull('completion_date')
                         ->whereDate('order_date', '<', $fromDate)
                         ->whereHas('process', function ($query) use ($client_id) {
@@ -597,6 +597,7 @@ class OrderController extends Controller
                             ->where('assignee_qa_id', $user->id)
                             ->whereIn('process_id', $processIds)
                             ->where('status_id', '!=', 5)
+                            ->whereNotIn('status_id', [1, 13])
                             ->where('is_active', 1)
                             ->whereDate('order_date', '>=', $fromDate)
                             ->whereDate('order_date', '<=', $toDate);
@@ -606,8 +607,7 @@ class OrderController extends Controller
                             ->whereIn('process_id', $project_id)
                             ->where('assignee_qa_id', $user->id)
                             ->whereIn('process_id', $processIds)
-                            ->whereIn('status_id', [1, 2, 4, 13, 14])
-                            ->whereNotIn('status_id', [3, 5])
+                            ->whereIn('status_id', [2, 4, 14])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
             
@@ -635,14 +635,14 @@ class OrderController extends Controller
                             ->whereIn('process_id', $processIds)
                             ->where('assignee_qa_id', $user->id)
                             ->where('status_id', '!=', 5)
+                            ->whereNotIn('status_id', [1, 13])
                             ->where('is_active', 1);
             
                         $carryOverAllStatusCounts = OrderCreation::select('id')
                             ->where('is_active', 1)
                             ->where('assignee_qa_id', $user->id)
                             ->whereIn('process_id', $processIds)
-                            ->whereIn('status_id', [1, 2, 4, 13, 14])
-                            ->whereNotIn('status_id', [3, 5])
+                            ->whereIn('status_id', [2, 4, 14])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
             
