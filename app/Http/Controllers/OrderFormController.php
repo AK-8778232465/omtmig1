@@ -291,7 +291,7 @@ class OrderFormController extends Controller
                 if($request->submit_type == 2) {
                     return response()->json(['redirect' => $request->orderId]);
                 }
-                return response()->json(['success' => 'Order Status Updated Successfully']);
+                return response()->json(['success' => 'Order Status Updated Successfully', 'redirect' => 'orders']);
             } else {
                 return response()->json(['error' => 'Something went wrong']);
             }
@@ -311,7 +311,7 @@ class OrderFormController extends Controller
                 if($request->submit_type == 2) {
                     return response()->json(['redirect' => $request->orderId]);
                 }
-                return response()->json(['success' => 'Updated Successfully']);
+                return response()->json(['success' => 'Order Status Updated Successfully', 'redirect' => 'orders']);
             } else {
                 return response()->json(['error' => 'Something went wrong']);
             }

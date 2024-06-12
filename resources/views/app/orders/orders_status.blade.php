@@ -319,7 +319,7 @@
         @if(Auth::user()->hasRole('Business Head'))
             if(status == 13){
                 $('.status-dropdown').prop('disabled', false);
-                //datatable.column(8).visible(true);
+                datatable.column(8).visible(true);
             }
             else if(status == 6){
                 $('.status-dropdown').prop('disabled', false);
@@ -427,6 +427,8 @@ $(document).ready(function() {
 
             var userlist = (status == 6) ? <?php echo json_encode($processors); ?> : <?php echo json_encode($qcers); ?>;
 
+            var userlist = (status == 13) ? <?php echo json_encode($processors); ?> : <?php echo json_encode(null); ?>;
+    
             $('#user_id').empty().append('<option selected disabled value="">Select User</option>');
             $.each(userlist, function(index, user) {
                 $('#user_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
@@ -454,6 +456,8 @@ $(document).ready(function() {
                 userlist = <?php echo json_encode($processors); ?>;
             } else if (status == 7) {
                 userlist = <?php echo json_encode($qcers); ?>;
+            }else if (status == 13) {
+                userlist = <?php echo json_encode($processors); ?>;
             }
 
             $('#user_id').empty();

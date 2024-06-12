@@ -290,9 +290,13 @@
             data: data,
             dataType: 'json',
             success: function(response) {
-                if(response.redirect) {
-                    console.log(response.redirect);
-                    window.location.href = '{{url("/coversheet-prep")}}/' + response.redirect;                     
+
+            if (response.redirect) {
+                if (response.redirect === 'orders') {
+                    window.location.href = '{{ url("orders_status") }}';
+                } else {
+                    window.location.href = '{{ url("/coversheet-prep") }}/' + response.redirect;
+                }
                 }
                 else if(response.success) {
                     Swal.fire({

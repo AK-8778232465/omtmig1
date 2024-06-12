@@ -1084,6 +1084,9 @@ class OrderController extends Controller
             if ($input['type_id'] == 7) {
                 OrderCreation::whereIn('id', $orderIds)->whereNull('assignee_qa_id')->update(['assignee_qa_id' => $input['user_id']]);
             }
+            if ($input['type_id'] == 13) {
+                OrderCreation::whereIn('id', $orderIds)->update(['associate_id' => $input['user_id']]);
+            }
 
             return response()->json(['data' => 'success', 'msg' => 'Order Assigned Successfully']);
         }
