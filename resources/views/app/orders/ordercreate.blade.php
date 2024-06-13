@@ -2,6 +2,18 @@
 @section('title', config('app.name') . ' | Order Creation')
 @section('content')
 <style>
+        #filename-display {
+            margin-top: 10px;
+            font-size: 14px; /* Adjust the font size as needed */
+            color: #333; /* Change to the desired color */
+            font-weight: bold; /* Makes the text bold */
+            background-color: #f9f9f9; /* Light grey background */
+            padding: 5px 10px; /* Adds some padding */
+            border-radius: 5px; /* Rounds the corners */
+            border: 1px solid #ddd; /* Adds a light border */
+            display: inline-block; /* Makes the element fit the content */
+        }
+
     /* Loader */
     .content-loaded{
         display: none;
@@ -272,6 +284,7 @@
                     <div class="form-group col-lg-6 mb-2 pb-0">
 
                         <input type="file" id="file" name="file"  data-height="75" height="100px" class="form-controlfile suppdoc dropify" accept=".csv,.xlsx,.ods">
+                        <p id="filename-display" style="margin-top: 10px;"></p> <!-- Element to display the filename -->
                     </div>
 
                     <div class="form-group col-lg-6 mb-2 mt-2 pb-0 text-center" style="margin-top: auto;">
@@ -611,9 +624,28 @@ $('#lob_id').on('change', function () {
     });
 });
 
+// Js Dropify
+$(document).ready(function() {
+        // Initialize Dropify
+        $('.dropify').dropify();
+        // Event listener for file change
+        $('.dropify').on('change', function(event) {
+            var input = event.target;
+            if (input.files && input.files[0]) {
+                var fileName = input.files[0].name;
+                $('#filename-display').text('Selected file: ' + fileName);
+            } else {
+                $('#filename-display').text('');
+            }
+        });
 
+        // Event listener for Dropify's events (for example, file clear event)
+        var drEvent = $('.dropify').dropify();
 
-
+        drEvent.on('dropify.afterClear', function(event, element){
+            $('#filename-display').text('');
+        });
+    });
 
 </script>
 
