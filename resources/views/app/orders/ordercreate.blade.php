@@ -172,8 +172,7 @@
                         <div class="form-group col-lg-3 mb-0 pb-0">
                     <label for="order_date" class="font-weight-bold">Order Received Date and Time<span style="color:red;">*</span></label>
                             <br>
-                    <input type="datetime-local" id="order_date" class="form-control" name="order_date" required data-parsley-trigger="focusout keyup"
-                    data-parsley-error-message="Order Received Date and Time should not be empty" >
+                    <input type="datetime-local" id="order_date" class="form-control" step="1" name="order_date" required data-parsley-trigger="focusout keyup" data-parsley-error-message="Order Received Date and Time should not be empty" format="MM-DD-YYYY THH:mm" hour24="true">
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Project Code<span style="color:red;">*</span></label><br>
@@ -229,6 +228,29 @@
                                 <option selected="" disabled="" value="">Select QA</option>
                                 @foreach ($qcers as $qcer)
                                     <option value="{{ $qcer->id }}">{{ $qcer->emp_id. " (" .$qcer->username. ")"  }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-4 pb-0 pl-3 pr-3">
+                        <div class="form-group col-lg-3 mb-0 pb-0">
+                            <label class="font-weight-bold">LOB</label>
+                            <select id="lob_id" name="lob_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select LOB"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
+                                <option selected="" disabled="" value="">Select LOB</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-3 mb-0 pb-0">
+                            <label class="font-weight-bold">Product</label>
+                            <select id="product_id" name="product_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Product"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
+                                <option selected="" disabled="" value="">Select Product</option>
+                            </select> 
+                        </div>
+                        <div class="form-group col-lg-3 mb-0 pb-0">
+                            <label class="font-weight-bold">Tier</label>
+                            <select id="tier_id" name="tier_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Tier"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
+                                <option selected="" disabled="" value="">Select Tier</option>
+                                @foreach ($tierList as $tier)
+                                    <option value="{{ $tier->id }}">{{ $tier->Tier_id }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -548,8 +570,46 @@ document.getElementById('order_date').addEventListener('change', function() {
     }, 1000);
 }
 
+$('#process_code').on('change', function () {
+    var process_id = $("#process_code").val();
+    $("#lob_id").html('');
+    $.ajax({
+        url: "{{ url('getlob') }}",
+        type: "POST",
+        data: {
+            process_id: process_id,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            $('#lob_id').html('<option value="">Select LOB</option>');
+            $.each(response, function (key, value) {
+                $("#lob_id").append('<option value="' + value.id + '">' + value.name + '</option>');
+            });
+        }
+    });
+});
 
 
+$('#lob_id').on('change', function () {
+    var lob_id = $("#lob_id").val();
+    $("#product_id").html('');
+    $.ajax({
+        url: "{{ url('getproduct') }}",
+        type: "POST",
+        data: {
+            lob_id: lob_id,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            $('#product_id').html('<option value="">Select Product</option>');
+            $.each(response, function (key, value) {
+                $("#product_id").append('<option value="' + value.id + '">' + value.product_name + '</option>');
+            });
+        }
+    });
+});
 
 
 

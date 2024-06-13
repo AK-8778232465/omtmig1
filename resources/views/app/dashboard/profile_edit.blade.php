@@ -30,7 +30,7 @@
 
                 <div class="card-body mr-4">
                     <h4 class="ml-1 mb-4">User Details:</h4>
-                    <form action="{{ route("profile_Update") }}" method="POST" id="reset_password_form" name="reset_password_form" onsubmit="return validatePassword()">
+                    <form action="{{ route("profile_Update") }}" method="POST" id="reset_password_form" name="reset_password_form">
                         @csrf
                         <input name="user_id" value="" id="ed_user_id" type="hidden" />
                         <div class="form-group row">
@@ -57,8 +57,8 @@
                         <div class="form-group row">
                             <label for="new_password" class="col-sm-3 text-right">New Password</label>
                            <div class="col-sm-9 input-container">
-                          <input class="form-control" type="password" id="new_password" name="new_password" value="" required >
-                          <span class="toggle-password" id="togglePassword1">
+                                <input class="form-control" type="password" id="new_password" name="new_password" value="">
+                                <span class="toggle-password" id="togglePassword1" style="display: none;">
                           <i class="fas fa-eye"></i>
                           </span>
                             </div>
@@ -66,12 +66,13 @@
                         <div class="form-group row">
                             <label for="new_password_confirmation" class="col-sm-3 text-right">Confirm Password</label>
                     <div class="col-sm-9 input-container">
-                     <input class="form-control" type="password" id="new_password_confirmation" name="new_password_confirmation" data-parsley-equalto="#new_password" value="" required>
-                      <span class="toggle-password" id="togglePassword2">
-                       <i class="fas fa-eye "></i>
+                                <input class="form-control" type="password" id="new_password_confirmation" name="new_password_confirmation">
+                                <span class="toggle-password" id="togglePassword2" style="display: none;">
+                                    <i class="fas fa-eye"></i>
                       </span>
                             </div>
                         </div>
+                    <div id="passwordLengthValidation" style="color: red;"></div>
                         <div class="text-center mb-4">
                             <button class="btn btn-sm btn-primary" type="submit" id="reset_password" name="reset_password">Reset Password</button>
                             <a href="{{route("home")}}" class="btn btn-sm btn-danger ml-1">Go Back</a>
@@ -244,19 +245,88 @@
     function usersStatus(value) {
         window.location.href = '/usersStatus/' + value;
     }
-//validate password confirmation
 
-function validatePassword() {
-    var newPassword = document.getElementById("new_password").value;
-    var confirmPassword = document.getElementById("new_password_confirmation").value;
+//new
 
-    if (newPassword !== confirmPassword) {
-        alert("Passwords do not match. Please enter matching passwords.");
-        return false; // Prevent form submission
+
+document.getElementById('new_password').addEventListener('input', function () {
+    var togglePassword1 = document.getElementById('togglePassword1');
+    if (this.value.length > 0) {
+        togglePassword1.style.display = 'inline';
+    } else {
+        togglePassword1.style.display = 'none';
+    }
+});
+
+document.getElementById('new_password_confirmation').addEventListener('input', function () {
+    var togglePassword2 = document.getElementById('togglePassword2');
+    if (this.value.length > 0) {
+        togglePassword2.style.display = 'inline';
+    } else {
+        togglePassword2.style.display = 'none';
+    }
+});
+
+
+
+
+
+
+document.getElementById('togglePassword1').addEventListener('click', function () {
+    var passwordField = document.getElementById('new_password');
+    var passwordFieldType = passwordField.getAttribute('type');
+    if (passwordFieldType === 'password') {
+
+        passwordField.setAttribute('type', 'text');
+
+        this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+    } else {
+
+        passwordField.setAttribute('type', 'password');
+
+        this.innerHTML = '<i class="fas fa-eye"></i>';
+    }
+});
+
+
+document.getElementById('togglePassword2').addEventListener('click', function () {
+    var passwordField = document.getElementById('new_password_confirmation');
+    var passwordFieldType = passwordField.getAttribute('type');
+    if (passwordFieldType === 'password') {
+
+        passwordField.setAttribute('type', 'text');
+
+        this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+    } else {
+
+        passwordField.setAttribute('type', 'password');
+
+        this.innerHTML = '<i class="fas fa-eye"></i>';
+    }
+});
+
+function checkPasswordsMatch(event) {
+    var newPassword = document.getElementById('new_password').value;
+    var confirmPassword = document.getElementById('new_password_confirmation').value;
+
+    if (newPassword.length < 8 || confirmPassword.length < 8) {
+        alert('Password must be at least 8 characters long.');
+        event.preventDefault();
+        location.reload(); // Reload the page after the alert is acknowledged
+        return;
     }
 
-    return true; // Allow form submission
+    if (newPassword !== confirmPassword) {
+        alert('Passwords do not match!');
+        event.preventDefault();
+        location.reload();
+        return;
+    }
 }
+
+document.getElementById('reset_password').addEventListener('click', checkPasswordsMatch);
+
+///
 
 $(document).ready(function() {
         $('#reset_password_form').submit(function(e) {

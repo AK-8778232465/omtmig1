@@ -11,6 +11,8 @@ use App\Models\OrderTemp;
 use App\Models\State;
 use App\Models\Status;
 use App\Models\User;
+use App\Models\Product;
+use App\Models\Tier;
 use Carbon\Carbon;
 use DataTables;
 use DB;
@@ -59,8 +61,30 @@ class OrderCreationController extends Controller
         $countyList = County::select('id', 'county_name')->get();
         $exceldetail = OrderCreationAudit::with('users')->orderBy('created_at', 'desc')->get();
 
-        return view('app.orders.ordercreate', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList','exceldetail'));
+        $tierList = Tier::select('id','Tier_id')->get();
+
+        return view('app.orders.ordercreate', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList','exceldetail','tierList'));
     }
+
+    public function getlob(Request $request){
+
+        $query = DB::table('oms_order_creations')
+            ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+            ->leftJoin('oms_products', 'stl_item_description.client_id', '=', 'oms_products.client_id')
+            ->where('stl_item_description.id', $request->process_id)->pluck('oms_products.lob_id')
+            ->toArray();
+            $lobData = DB::table('stl_lob')->whereIn('id',array_unique($query))->get();
+        return response()->json($lobData);
+    }
+
+    public function getproduct(Request $request) {
+        $productList = Product::where('lob_id', $request->lob_id)
+            ->where('is_active', 1)
+            ->get();
+            
+        return response()->json($productList);
+    }
+    
 
     public function exportFailedOrders($audit_id)
     {
@@ -91,6 +115,9 @@ class OrderCreationController extends Controller
             'status_id' => $input['order_status'],
             'assignee_user_id' => isset($input['assignee_user']) ? $input['assignee_user'] : NULL,
             'assignee_qa_id' => isset($input['assignee_qa']) ? $input['assignee_qa'] : NULL,
+            'lob_id' => isset($input['lob_id']) ? $input['lob_id'] : NULL,
+            'product_id' => isset($input['product_id']) ? $input['product_id'] : NULL,
+            'tier_id' => isset($input['tier_id']) ? $input['tier_id'] : NULL,
             'created_by' => Auth::id(),
         ];
 
