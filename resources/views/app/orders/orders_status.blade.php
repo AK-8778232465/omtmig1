@@ -310,6 +310,7 @@
             $('.status-dropdown').prop('disabled', true);
             if (status == 6 || status == 7) {
                 datatable.column(8).visible(true);
+                $('.status-dropdown').prop('disabled', true);
             }
         } else {
             $('.status-dropdown').prop('disabled', false);
@@ -324,6 +325,7 @@
             else if(status == 6){
                 $('.status-dropdown').prop('disabled', false);
                 datatable.column(8).visible(true);
+                $('.status-dropdown').prop('disabled', true);
             } else {
                 datatable.column(8).visible(false);
             }

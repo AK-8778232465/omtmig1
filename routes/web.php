@@ -112,5 +112,9 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::any('/progressBar', 'progressBar')->name('progressBar');
 
     Route::any('/getStatus', 'getStatus')->name('getStatus');
+    Route::any('/getlob', 'getlob')->name('getlob');
+    Route::any('/getproduct', 'getproduct')->name('getproduct');
+
+
 
 });

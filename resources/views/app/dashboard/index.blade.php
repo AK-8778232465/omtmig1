@@ -865,10 +865,6 @@ function preOrderData(projectId, clientId, fromDate, toDate) {
         dataType: 'json',
         success: function (response) {
             let statusCounts = response.StatusCounts;
-
-            // Log the response to debug
-            console.log("Response:", response);
-
             // Calculate total orders
             let totalValue = 0;
             for (const key in statusCounts) {
@@ -1158,7 +1154,6 @@ $('#datewise_datatable').on('draw.dt', function() {
                     },
                     dataSrc: function (data) {
                         var rows = [];
-                        var grandTotalRevenue = data['Grand Total Revenue'];
                         $.each(data.data, function (index, value) {
                             var date = moment(value['Date']).format('MM/DD/YYYY');
                             var row = {
@@ -1174,14 +1169,14 @@ $('#datewise_datatable').on('draw.dt', function() {
                     }
                 },
                 columns: [
-                    { data: 'Project Code', name: 'Project Code' },
+            { data: 'Project Code', name: 'Project Code',class:'text-left'},
                     { data: 'No of orders completed', name: 'No of orders completed' },
-                    { data: 'Unit cost', name: 'Unit cost' },
-                    { data: 'Total', name: 'Total' }
-                ],
+            { data: 'Unit cost', name: 'Unit cost', render: function (data, type, row) { return '$' + parseFloat(data).toFixed(2); } },
+            { data: 'Total', name: 'Total', render: function (data, type, row) { return '$' + parseFloat(data).toFixed(2); } }
+        ]
             });
+}
 
-        }
         $('#revenueTable').on('draw.dt', function () {
             $('#revenueTable').removeClass('d-none');
         });
@@ -1221,7 +1216,7 @@ $('#datewise_datatable').on('draw.dt', function() {
                     { data: 'Date', name: 'Date' },
                     { data: 'No of orders completed', name: 'No of orders completed' },
                     { data: 'Unit cost', name: 'Unit cost' },
-                    { data: 'Total', name: 'Total' }
+                    { data: 'Total', name: 'Total'}
                 ],
             });
         }
@@ -1266,9 +1261,9 @@ $('#datewise_datatable').on('draw.dt', function() {
                     }
                 },
                 columns: [
-                    { data: 'Client', name: 'Client' },
+                    { data: 'Client', name: 'Client',class:'text-left'},
                     { data: 'No of orders completed', name: 'No of orders completed' },
-                    { data: 'Total', name: 'Total' },
+                    { data: 'Total', name: 'Total' , render: function (data, type, row) { return '$' + parseFloat(data).toFixed(2); }},
                 ],
                 createdRow: function (row, data, dataIndex) {
                     $(row).find('.client-link').on('click', function () {
@@ -1394,7 +1389,7 @@ $(document).ready(function() {
                 },
                 columns: [
                     { data: 'client_name', name: 'client_name', className: "text-left" },
-                    { data: 'total_revenue_selected', name: 'total_revenue_selected', className: "text-center" },
+                    { data: 'total_revenue_selected', name: 'total_revenue_selected', className: "text-center", render: function (data, type, row) { return '$' + parseFloat(data).toFixed(2); } },
                 ],
             });
 
@@ -1457,13 +1452,13 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
 
             name: 'project_code', className: "text-left"
                 },
-            { data: 'unit_cost', name: 'unit_cost', className: "text-center" },
+            { data: 'unit_cost', name: 'unit_cost', className: "text-center" , render: function (data, type, row) { return '$' + parseFloat(data).toFixed(2); }},
             { data: 'no_of_resources', name: 'no_of_resources', className: "text-center" },
-            { data: 'expected_revenue', name: 'expected_revenue', className: "text-center" },
+            { data: 'expected_revenue', name: 'expected_revenue', className: "text-center", render: function (data, type, row) { return '$' + parseFloat(data).toFixed(2); } },
             { data: 'start_date', name: 'start_date', className: "text-center" },
             { data: 'end_date', name: 'end_date', className: "text-center" },
             { data: 'days', name: 'days', className: "text-center" },
-            { data: 'revenue_selected', name: 'revenue_selected', className: "text-center" },
+            { data: 'revenue_selected', name: 'revenue_selected', className: "text-center" , render: function (data, type, row) { return '$' + parseFloat(data).toFixed(2); }},
         ],
     });
     }
@@ -1520,8 +1515,8 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
                             columns: [
                                 { data: 'Date', name: 'Date' },
                                 { data: 'No of Resources', name: 'No of Resources' },
-                                { data: 'Unit cost', name: 'Unit cost' },
-                                { data: 'Total', name: 'Total' }
+                                { data: 'Unit cost', name: 'Unit cost', render: function (data, type, row) { return '$' + parseFloat(data).toFixed(2); } },
+                                { data: 'Total', name: 'Total', render: function (data, type, row) { return '$' + parseFloat(data).toFixed(2); } }
                             ],
                         });
 
@@ -1589,12 +1584,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const datewiseIdDcf = document.getElementById('datewise_table');
     const transIdDcf = document.getElementById('Trans_hide');
     const fteIdDcf = document.getElementById('fteClientTable');
-
-    // Function to update the visibility based on the toggle switch state
     function updateVisibility() {
         if (toggleSwitch.checked) {
-            // If the switch is checked (Revenue side), hide the left content and billing content
-            // and show the right content and project content
             leftContent.style.display = 'none';
             projectIdDcf.style.display = 'block';
             rightContent.style.display = 'block';
@@ -1607,8 +1598,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fteClientIdDcf.style.display = 'none';
 
         } else {
-            // If the switch is unchecked (Production side), hide the right content and project content
-            // and show the left content and billing content
             leftContent.style.display = 'block';
             projectIdDcf.style.display = 'none';
             rightContent.style.display = 'none';
@@ -1623,10 +1612,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Call the function initially to set the correct visibility based on the initial state of the toggle switch
     updateVisibility();
-
-    // Add an event listener to the toggle switch to handle changes in state
     toggleSwitch.addEventListener('change', function() {
         updateVisibility();
     });
