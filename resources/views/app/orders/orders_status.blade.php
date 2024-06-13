@@ -317,7 +317,7 @@
             datatable.column(8).visible(false);
         }
         // //
-        @if(Auth::user()->hasRole('Business Head'))
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') )
             if(status == 13){
                 $('.status-dropdown').prop('disabled', false);
                 datatable.column(8).visible(true);
