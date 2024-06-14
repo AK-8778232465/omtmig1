@@ -426,11 +426,11 @@ $(document).ready(function() {
             $('#assign_tab').removeClass('d-none');
             task_status = $('#statusButtons').find('.btn-primary').attr('id');
             let status = task_status.replace("status_", "");
-
+            if (status == 6) {
             var userlist = (status == 6) ? <?php echo json_encode($processors); ?> : <?php echo json_encode($qcers); ?>;
-
-            var userlist = (status == 13) ? <?php echo json_encode($processors); ?> : <?php echo json_encode(null); ?>;
-    
+            } else if (status == 13) {
+                userlist = <?php echo json_encode($processors); ?>;
+            }  
             $('#user_id').empty().append('<option selected disabled value="">Select User</option>');
             $.each(userlist, function(index, user) {
                 $('#user_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
