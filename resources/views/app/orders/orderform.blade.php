@@ -368,7 +368,6 @@
                 });
             }
         });
-        $('#ordersubmit').click();
     });
 
 </script>
