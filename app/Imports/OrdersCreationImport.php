@@ -91,7 +91,9 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'audit_id' => $this->auditId,
         ];
 
-        if (!$order_date) {
+
+
+        if (!$order_date ) {
             $data['comments'] = 'Invalid Data Format';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
@@ -201,6 +203,16 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             ++$this->unsuccess_rows;
             return null;
         }
+
+        $order_date = isset($order_date) ? date('Y-m-d', strtotime($order_date)) : null;
+
+        if ($order_date > date('Y-m-d')) {
+            $data['comments'] = 'Future Date not Allowed';
+            OrderTemp::insert($data);
+            ++$this->unsuccess_rows;
+            return null;
+        }
+
 
         try {
             $orderId = isset($row['OrderID']) ? $row['OrderID'] : null;
