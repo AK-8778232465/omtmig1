@@ -7,12 +7,12 @@
             <div class="col-lg-3">
                 <div class="font-weight-bold">Status :</div>
                 <select style="width:100%" class="form-control mx-2" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
-                    <option value="1" @if($orderData->status_id == 1 || $orderData->status_id == 13) selected disabled @endif>WIP</option>
+                    <option value="1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                     <option value="2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                     <option value="3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                     <option value="4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                     <option value="5" @if($orderData->status_id == 5) selected @endif>Completed</option>
-                    <option value="13" @if($orderData->status_id == 13) selected disabled @endif>Coversheet Prep</option>
+                    <option value="13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
                     <option value="14" @if($orderData->status_id == 14) selected @endif>Clarification</option>
                 </select>
             </div>
