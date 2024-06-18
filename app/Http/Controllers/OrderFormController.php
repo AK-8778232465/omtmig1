@@ -335,4 +335,20 @@ class OrderFormController extends Controller
 
         return view('app.orders.coversheet_prep', compact('orderData'));
     }
+
+    public function coversheet_submit(Request $request)
+    {
+        if(!empty($request->orderId) && !empty($request->orderStatus)) {
+            $orderId = $request->orderId;
+            $update_status = OrderCreation::find($orderId)
+            ->update([
+                'status_id' => $request->orderStatus,
+            ]);
+
+            return response()->json(['success' => 'Order Status Updated Successfully']);
+        } else {
+            return response()->json(['error' => 'Something went wrong']);
+        }
+    }
+
 }

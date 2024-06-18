@@ -18,8 +18,7 @@
             </div>
         </div>
         <div class="d-flex justify-content-center my-4">
-            <button class="btn btn-primary btn-sm mx-2" onclick="order_submition({{$orderData->id}})" type="submit">Submit</button>
-            <!-- <button class="btn btn-info btn-sm mx-2" type="submit">Coversheet Prep & Submit</button> -->
+            <button class="btn btn-primary btn-sm mx-2" onclick="status_submition({{$orderData->id}})" type="submit">Submit</button>
         </div>
     </div>
 </div>
@@ -29,25 +28,18 @@
         $('#order_status').select2();
     });
 
-    function order_submition(orderId) {
-        var checklistItems = [];
-        $("input[name='checks[]']:checked").each(function() {
-            checklistItems.push($(this).val());
-        });
-        var orderComment = $("#order_comment").val();
+    function status_submition(orderId) {
         var orderStatus = $("#order_status").val();
 
         var data = {
             orderId: orderId,
-            checklistItems: checklistItems.join(),
-            orderComment: orderComment,
             orderStatus: orderStatus,
             _token: '{{ csrf_token() }}'
         };
 
         // Perform AJAX request
         $.ajax({
-            url: '{{url("orderform_submit")}}',
+            url: '{{url("coversheet_submit")}}',
             type: 'POST',
             data: data,
             dataType: 'json',

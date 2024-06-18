@@ -97,6 +97,8 @@ Route::middleware('auth:web')->controller(OrderFormController::class)->group(fun
     Route::any('/coversheet-prep/{order_id?}', 'coversheet_prep')->name('coversheet-prep');
 
     Route::post('Product_dropdown', 'getProduct_dropdown')->name('Product_dropdown');
+    Route::any('coversheet_submit', 'coversheet_submit')->name('coversheet_submit');
+
 });
 
 
