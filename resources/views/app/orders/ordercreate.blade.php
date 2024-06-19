@@ -198,9 +198,9 @@
                             <div id="process_code_error" class="parsley-error"></div>
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
-                            <label class="font-weight-bold">State</label><br>
+                            <label class="font-weight-bold">State Code</label><br>
                             <select class="form-control select2dropdown" style="width:100%" name="property_state" id="property_state" aria-hidden="true">
-                            <option selected="" disabled="" value="">Select State</option>
+                            <option selected="" disabled="" value="">Select State Code</option>
                             @foreach ($stateList as $state)
                                     <option value="{{ $state->id }}">{{ $state->short_code }}</option>
                             @endforeach
