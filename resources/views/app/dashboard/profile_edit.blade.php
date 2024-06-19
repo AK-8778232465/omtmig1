@@ -74,7 +74,7 @@
                         </div>
                     <div id="passwordLengthValidation" style="color: red;"></div>
                         <div class="text-center mb-4">
-                            <button class="btn btn-sm btn-primary" type="submit" id="reset_password" name="reset_password">Reset Password</button>
+                            <button class="btn btn-sm btn-primary" type="submit" id="reset_password" name="reset_password">Change Password</button>
                             <a href="{{route("home")}}" class="btn btn-sm btn-danger ml-1">Go Back</a>
                         </div>
                     </form>
@@ -309,17 +309,21 @@ function checkPasswordsMatch(event) {
     var newPassword = document.getElementById('new_password').value;
     var confirmPassword = document.getElementById('new_password_confirmation').value;
 
+    if (newPassword.trim() === '' || confirmPassword.trim() === '') {
+        alert('Password cannot be empty.');
+        event.preventDefault();
+        return;
+    }
+
     if (newPassword.length < 8 || confirmPassword.length < 8) {
         alert('Password must be at least 8 characters long.');
         event.preventDefault();
-        location.reload(); // Reload the page after the alert is acknowledged
         return;
     }
 
     if (newPassword !== confirmPassword) {
         alert('Passwords do not match!');
         event.preventDefault();
-        location.reload();
         return;
     }
 }
