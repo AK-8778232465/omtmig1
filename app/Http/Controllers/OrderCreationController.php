@@ -73,12 +73,13 @@ class OrderCreationController extends Controller
             ->leftJoin('oms_products', 'stl_item_description.client_id', '=', 'oms_products.client_id')
             ->where('stl_item_description.id', $request->process_id)->pluck('oms_products.lob_id')
             ->toArray();
-            $lobData = DB::table('stl_lob')->whereIn('id',array_unique($query))->get();
+            $lobData = DB::table('stl_lob')->whereIn('id',array_unique($query))->orderBy('name','asc')->get();
         return response()->json($lobData);
     }
 
     public function getproduct(Request $request) {
         $productList = Product::where('lob_id', $request->lob_id)
+        ->orderBy('product_name','asc')
             ->where('is_active', 1)
             ->get();
             
