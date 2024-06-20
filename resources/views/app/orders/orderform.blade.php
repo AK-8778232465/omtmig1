@@ -378,7 +378,7 @@ var changeCounty = false;
         $('#ordersubmit').click();
     });
 
-    $('#property_state').on('change', function () {
+    $('#property_county').on('change', function () {
         changeCounty = true;
         $('#ordersubmit').click();
     });
