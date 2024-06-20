@@ -218,6 +218,8 @@
 </div>
 
 <script>
+var changeState = false;
+var changeCounty = false;
 
 
     $(document).ready(function() {
@@ -293,7 +295,11 @@
 
             if (response.redirect) {
                 if (response.redirect === 'orders') {
-                    window.location.href = '{{ url("orders_status") }}';
+                    if(changeState || changeCounty) {
+                        location.reload();
+                    } else {
+                        window.location.href = '{{ url("orders_status") }}';
+                    }
                 } else {
                     window.location.href = '{{ url("/coversheet-prep") }}/' + response.redirect;
                 }
@@ -368,6 +374,13 @@
                 });
             }
         });
+        changeState = true;
+        $('#ordersubmit').click();
+    });
+
+    $('#property_county').on('change', function () {
+        changeCounty = true;
+        $('#ordersubmit').click();
     });
 
 </script>
