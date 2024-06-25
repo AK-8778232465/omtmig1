@@ -204,10 +204,10 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             return null;
         }
 
-        $order_date = isset($order_date) ? date('Y-m-d H:i:s', strtotime($order_date)) : null;
 
-        if ($order_date > date('Y-m-d H:i:s')) {
-            $data['comments'] = 'Future Date not Allowed';
+        $currentTimeIST = Carbon::now('Asia/Kolkata');
+        if ($order_date > ($currentTimeIST)) {
+            $data['comments'] = 'Future Date and Time not Allowed';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
