@@ -55,8 +55,8 @@ class OrderCreationController extends Controller
         }
         $processList = DB::table('stl_item_description')->where('is_approved', 1)->where('is_active', 1)->whereIn('id', $processIds)->select('id', 'process_name', 'project_code')->orderBy('project_code')->get();
         $stateList = State::select('id', 'short_code')->get();
-        $processors = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [6,8])->orderBy('username')->get();
-        $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7,8])->orderBy('username')->get();
+        $processors = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [6,8])->orderBy('emp_id')->get();
+        $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7,8])->orderBy('emp_id')->get();
         $statusList = Status::select('id', 'status')->get();
         $countyList = County::select('id', 'county_name')->get();
         $exceldetail = OrderCreationAudit::with('users')->orderBy('created_at', 'desc')->get();
