@@ -60,7 +60,10 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         $order_date = NULL;
         if (is_numeric($orderDateValue)) {
             // Assuming the timestamp is in seconds, if it's in milliseconds, you need to adjust accordingly
-            $order_date = date('Y-m-d H:i:s', strtotime('1899-12-30') +round ($orderDateValue * 86400));
+            $order_date = date('Y-m-d H:i:s', strtotime('1899-12-30') +round($orderDateValue * 86400));
+            $order_date =  Carbon::parse($order_date);
+            $order_date->subSeconds(8 * 60 + 50);
+            
         } else {
             $dateFormats = ['m/d/Y H:i:s', 'm-d-Y H:i:s', 'm/d/Y', 'm-d-Y'];
             $parsedDateTime = null;
@@ -206,8 +209,9 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         $order_date = isset($order_date) ? date('Y-m-d H:i:s', strtotime($order_date)) : null;
 
-        if ($order_date > date('Y-m-d H:i:s')) {
-            $data['comments'] = 'Future Date not Allowed';
+        $currentTimeIST = Carbon::now();
+        if ($order_date > ($currentTimeIST)) {
+            $data['comments'] = 'Future Date and Time not Allowed';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
