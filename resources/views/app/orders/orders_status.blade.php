@@ -412,6 +412,13 @@ function updateStatusCounts() {
     }
   });
 }
+$(document).ready(function() {
+    var table = $('#order_datatable').DataTable();     
+
+    table.on('draw', function() {
+        $('.check-all').prop('checked', false);
+    });
+});
 
 $(document).ready(function() {
   updateStatusCounts();
