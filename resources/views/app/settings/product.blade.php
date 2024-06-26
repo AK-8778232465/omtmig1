@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Stellar OMS | Products')
+@section('title', 'Lenders OMS | Products')
 @section('content')
 
 <div class="container-fluid mt-2">
@@ -65,7 +65,7 @@
           <div class="row">
             <div class="col-lg-4">
                 <label for="name-input" class="col-form-label">Client Name<span class="text-danger"> * <span></label>
-                <select name="client_id" id="client_id" class="form-control">
+                <select name="client_id" id="client_id" class="form-control" required>
                     <option value="">Select Client</option>
                     @foreach($clients as $client)
                     <option value="{{ $client->id }}">{{ $client->client_name }}</option>
@@ -74,7 +74,7 @@
             </div>
             <div class="col-lg-4">
                 <label for="name-input" class="col-form-label">Lob<span class="text-danger"> * <span></label>
-                <select name="lob_id" id="lob_id" class="form-control">
+                <select name="lob_id" id="lob_id" class="form-control" required>
                     <option value="">Select Lob</option>
                     @foreach($lobData as $lob)
                     <option value="{{ $lob->id }}">{{ $lob->name }}</option>
@@ -83,7 +83,7 @@
             </div>
             <div class="col-lg-4">
                 <label for="name-input" class="col-form-label">Product Name<span class="text-danger"> * <span></label>
-                <input id="product_name" name="product_name" type="text" class="form-control" autocomplete="off" placeholder="Enter Product Name">
+                <input id="product_name" name="product_name" type="text" class="form-control" autocomplete="off" placeholder="Enter Product Name" required>
             </div>
           </div>
             <div class="row mt-1">
