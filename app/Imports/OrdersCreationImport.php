@@ -195,8 +195,8 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
 
         $existingOrder = OrderCreation::where('order_id', $data['order_id'])
-            ->where('order_date', $data['order_date'])
-            ->Where('process_id', $process->id)
+       ->whereDate('order_date', '=', $data['order_date'])
+       ->where('process_id', $process->id)
             ->exists();
 
 
