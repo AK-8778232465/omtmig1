@@ -633,9 +633,9 @@ $(document).ready(function() {
             var input = event.target;
             if (input.files && input.files[0]) {
                 var fileName = input.files[0].name;
-                $('#filename-display').text('Selected file: ' + fileName);
+            $('#filename-display').text('Selected file: ' + fileName).show(); // Show the element and set text
             } else {
-                $('#filename-display').text('');
+            $('#filename-display').text('').hide(); // Clear text and hide the element
             }
         });
 
@@ -643,9 +643,15 @@ $(document).ready(function() {
         var drEvent = $('.dropify').dropify();
 
         drEvent.on('dropify.afterClear', function(event, element){
-            $('#filename-display').text('');
-        });
+        $('#filename-display').text('').hide(); // Clear text and hide the element
     });
+
+    // Hide initially if it's empty
+    if ($('#filename-display').text().trim() === '') {
+        $('#filename-display').hide();
+    }
+});
+
 
 </script>
 

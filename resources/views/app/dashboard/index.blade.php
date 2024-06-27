@@ -579,7 +579,7 @@
         <div class="card mt-5 tabledetails" id="Trans_hide">
             <h4 class="text-center mt-3">Revenue Details - Transactional Billing</h4>
             <div class="card-body">
-                <div class="p-0">
+                <div class="p-0 w-75 mx-auto">
                     <h5 class="text-center"> Client Wise Details </h5>
                     <table id="revenueClientTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
@@ -593,7 +593,7 @@
                         <tbody class="text-center"></tbody>
                     </table>
                 </div>
-                <div class="p-0 process_wise">
+                <div class="p-0 process_wise w-75 mx-auto">
                     <h5 class="text-center"> Process Wise Details </h5>
                     <table id="revenueTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
@@ -611,7 +611,7 @@
                     <table id="totalTable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
                         <thead class="text-center">
                             <tr>
-                                <th width="14%">Grand Total Revenue</th>
+                                <th width="14%">Grand Total Transactional Revenue</th>
                             </tr>
                         </thead>
                         <tbody class="text-center">
@@ -664,7 +664,7 @@
                 <table id="totalFTETable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
                     <thead class="text-center">
                         <tr>
-                            <th width="14%">Grand Total Revenue</th>
+                            <th width="14%">Grand Total FTE Revenue</th>
                         </tr>
                     </thead>
                     <tbody class="text-center">
@@ -866,8 +866,7 @@ function preOrderData(projectId, clientId, fromDate, toDate) {
         success: function (response) {
             let statusCounts = response.StatusCounts;
 
-            // Log the response to debug
-            console.log("Response:", response);
+           
 
             // Calculate total orders
             let totalValue = 0;
@@ -902,7 +901,6 @@ function preOrderData(projectId, clientId, fromDate, toDate) {
                 }
             }
 
-            console.log("carriedOverCompletedCountMap:", carriedOverCompletedCountMap); // Log to debug
 
             $('#pre_completed_cnt, #carried_over_completed_cnt').text(carriedOverCompletedCountMap[5] || 0);
 
@@ -931,12 +929,6 @@ function preOrderData(projectId, clientId, fromDate, toDate) {
 
 
 
-
-// $(document).on('change', '#project_id_dcf', function() {
-//         fetchOrderData($(this).val());
-//         datatable.settings()[0].ajax.data.project_id = $(this).val();
-//         datatable.ajax.reload();
-//     });
 
 function fetchProData(client_id) {
     $.ajax({
@@ -1174,10 +1166,14 @@ $('#datewise_datatable').on('draw.dt', function() {
                     }
                 },
                 columns: [
-                    { data: 'Project Code', name: 'Project Code' },
+                    { data: 'Project Code', name: 'Project Code',className:'text-left' },
                     { data: 'No of orders completed', name: 'No of orders completed' },
-                    { data: 'Unit cost', name: 'Unit cost' },
-                    { data: 'Total', name: 'Total' }
+                    { data: 'Unit cost', name: 'Unit cost',render: function (data) {
+                  return '$' + data;
+              } },
+                    { data: 'Total', name: 'Total',render: function (data) {
+                  return '$' + data;
+              } }
                 ],
             });
 
@@ -1266,9 +1262,11 @@ $('#datewise_datatable').on('draw.dt', function() {
                     }
                 },
                 columns: [
-                    { data: 'Client', name: 'Client' },
+                    { data: 'Client', name: 'Client',className:'text-left' },
                     { data: 'No of orders completed', name: 'No of orders completed' },
-                    { data: 'Total', name: 'Total' },
+                    { data: 'Total', name: 'Total',render: function (data) {
+                  return '$' + data;
+              } },
                 ],
                 createdRow: function (row, data, dataIndex) {
                     $(row).find('.client-link').on('click', function () {
@@ -1394,7 +1392,9 @@ $(document).ready(function() {
                 },
                 columns: [
                     { data: 'client_name', name: 'client_name', className: "text-left" },
-                    { data: 'total_revenue_selected', name: 'total_revenue_selected', className: "text-center" },
+                    { data: 'total_revenue_selected', name: 'total_revenue_selected', className: "text-center",render: function (data) {
+                  return '$' + data;
+              } },
                 ],
             });
 
@@ -1457,13 +1457,19 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
 
             name: 'project_code', className: "text-left"
                 },
-            { data: 'unit_cost', name: 'unit_cost', className: "text-center" },
+            { data: 'unit_cost', name: 'unit_cost', className: "text-center",render: function (data) {
+                  return '$' + data;
+              } },
             { data: 'no_of_resources', name: 'no_of_resources', className: "text-center" },
-            { data: 'expected_revenue', name: 'expected_revenue', className: "text-center" },
+            { data: 'expected_revenue', name: 'expected_revenue', className: "text-center",render: function (data) {
+                  return '$' + data;
+              } },
             { data: 'start_date', name: 'start_date', className: "text-center" },
             { data: 'end_date', name: 'end_date', className: "text-center" },
             { data: 'days', name: 'days', className: "text-center" },
-            { data: 'revenue_selected', name: 'revenue_selected', className: "text-center" },
+            { data: 'revenue_selected', name: 'revenue_selected', className: "text-center",render: function (data) {
+                  return '$' + data;
+              } },
         ],
     });
     }
@@ -1472,7 +1478,6 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
             event.preventDefault();
             var project_id = $(this).data('id');
             var processName = $(this).text();
-            console.log(project_id);
             fterevenueProject(fromDate, toDate,processName,project_id);
             ftetotalProccessWise(fromDate, toDate,project_id);
         });
@@ -1520,8 +1525,12 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
                             columns: [
                                 { data: 'Date', name: 'Date' },
                                 { data: 'No of Resources', name: 'No of Resources' },
-                                { data: 'Unit cost', name: 'Unit cost' },
-                                { data: 'Total', name: 'Total' }
+                                { data: 'Unit cost', name: 'Unit cost',render: function (data) {
+                  return '$' + data;
+              } },
+                                { data: 'Total', name: 'Total',render: function (data) {
+                  return '$' + data;
+              } }
                             ],
                         });
 

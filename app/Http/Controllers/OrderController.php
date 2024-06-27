@@ -952,33 +952,34 @@ class OrderController extends Controller
                             $statusMapping = [];
                                 $statusMapping = [
                                     1 => 'WIP',
-                                    4 => 'Send for QC',
-                                    2 => 'Hold',
-                                    3 => 'Cancelled',
-                                    5 => 'Completed',
                                     13 => 'Coversheet Prep',
                                     14 => 'Clarification',
+                                    4 => 'Send for QC',
+                                    2 => 'Hold',
+                                    5 => 'Completed',
+                                    3 => 'Cancelled',
                                 ];
                         }elseif($order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 ){
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                4 => 'Send for QC',
                                 13 => 'Coversheet Prep',
                                 14 => 'Clarification',
+                                4 => 'Send for QC',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                                3 => 'Cancelled',
                             ];
                         }else{
                             $statusMapping = [];
                                 $statusMapping = [
                                     1 => 'WIP',
-                                    2 => 'Hold',
-                                    3 => 'Cancelled',
-                                    4 => 'Send for QC',
-                                    5 => 'Completed',
-                                    13 => 'Coversheet Prep',
+                                    13 =>'Coversheet Prep',
                                     14 => 'Clarification',
+                                    4 => 'Send for QC',
+                                    2 => 'Hold',
+                                    5 => 'Completed',
+                                    3 => 'Cancelled',
                                 ];
                         }
 
@@ -987,32 +988,35 @@ class OrderController extends Controller
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                5 => 'Completed',
                                 13 => 'Coversheet Prep',
                                 14 => 'Clarification',
+                                4 => 'Send for QC',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                                3 => 'Cancelled',
                             ];
                         }elseif((!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 )||(!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 3 )){
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                5 => 'Completed',
                                 13 => 'Coversheet Prep',
                                 14 => 'Clarification',
+                                4 => 'Send for QC',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                                3 => 'Cancelled',
                             ];
                         }else{
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                4 => 'Send for QC',
-                                5 => 'Completed',
                                 13 => 'Coversheet Prep',
                                 14 => 'Clarification',
+                                4 => 'Send for QC',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                                3 => 'Cancelled',
+
                             ];
                         }
 
