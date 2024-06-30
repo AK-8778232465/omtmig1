@@ -93,14 +93,14 @@
                                 <div class="font-weight-bold">Primary Image Source</div>
                                 <div>{{$countyInfo['PRIMARY']['PRIMARY_IMAGE_SOURCE']}}</div>
                             </div>
-                            <div class="col-md-3">
+                            <!-- <div class="col-md-3">
                                 <div class="font-weight-bold">Secondary Source</div>
                                 <div>{{$countyInfo['SECONDARY']['SECONDARY_SOURCE']}}</div>
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">Secondary Image Source</div>
                                 <div>{{$countyInfo['SECONDARY']['SECONDARY_IMAGE_SOURCE']}}</div>
-                            </div>
+                            </div> -->
                         </div>
                         <table id="source_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead>

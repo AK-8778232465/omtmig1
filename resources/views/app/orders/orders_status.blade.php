@@ -122,7 +122,9 @@
                         <tr>
                             <th style="width:7%">Order ID</th>
                             <th style="width:10%">Received Date</th>
-                            <th style="width:10%">Project Code</th>
+                            <th style="width:10%">Product Code</th>
+                            <th style="width: 9%">Lob</th>
+                            <th style="width: 9%">Process Type</th>
                             <th style="width:7%">State</th>
                             <th style="width:10%">County</th>
                             <th style="width:10%">Status</th>
@@ -227,6 +229,8 @@
                 { "data": "order_id", "name": "order_id" },
                 { "data": "order_date", "name": "order_date" },
                 { "data": "project_code", "name": "project_code" },
+                { "data": "lob_name", "name": "lob_name" },
+                { "data": "process_name", "name": "process_name" },
                 { "data": "short_code", "name": "short_code" },
                 { "data": "county_name", "name": "county_name" },
                 { "data": "status", "name": "status" },
