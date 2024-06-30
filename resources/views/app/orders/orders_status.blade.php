@@ -127,7 +127,7 @@
                             <th style="width:10%">Type</th>
                             <th style="width:15%">State</th>
                             <th style="width:15%">County</th>
-                            <th style="width:20%">Status</th>
+                            <th style="width:20%">Status&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
                             <th style="width:10%">User</th>
                             <th style="width:10%">QA</th>
                             @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer'))
