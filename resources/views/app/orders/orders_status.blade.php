@@ -120,12 +120,12 @@
                     <table id="order_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead>
                         <tr>
-                            <th style="width:7%">Order ID</th>
+                            <th style="width:10%">Order ID</th>
                             <th style="width:10%">Received Date</th>
                             <th style="width:10%">Product Code</th>
-                            <th style="width: 9%">Lob</th>
-                            <th style="width: 9%">Process Type</th>
-                            <th style="width:7%">State</th>
+                            <th style="width:10%">Lob</th>
+                            <th style="width:10%">Process Type</th>
+                            <th style="width:10%">State</th>
                             <th style="width:10%">County</th>
                             <th style="width:10%">Status</th>
                             <th style="width:10%">User</th>
