@@ -124,10 +124,10 @@
                             <th style="width:10%">Received Date</th>
                             <th style="width:10%">Product Code</th>
                             <th style="width:10%">Lob</th>
-                            <th style="width:10%">Process Type</th>
-                            <th style="width:10%">State</th>
-                            <th style="width:10%">County</th>
-                            <th style="width:10%">Status</th>
+                            <th style="width:10%">Type</th>
+                            <th style="width:15%">State</th>
+                            <th style="width:15%">County</th>
+                            <th style="width:20%">Status</th>
                             <th style="width:10%">User</th>
                             <th style="width:10%">QA</th>
                             @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer'))
