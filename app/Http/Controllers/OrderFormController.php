@@ -143,7 +143,7 @@ class OrderFormController extends Controller
             //     return view('app.orders.comingsoon');
 
             // }
-            $countyData = DB::table('county_instructions')->where('county_id', $orderData->county_id)->where('process_id', $orderData->process_id)->first();
+            $countyData = DB::table('county_instructions')->where('county_id', $orderData->county_id)->where('lob_id', $orderData->lob_id)->first();
             $countyInfo = Null;
             $checklist = Null;
             if(!empty($countyData->json)) {
