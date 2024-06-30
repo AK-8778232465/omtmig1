@@ -944,7 +944,7 @@ class HomeController extends Controller
         ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
         ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
         ->where('oms_order_creations.is_active',1)
-        ->whereIn('process_id', $processIds)
+        ->whereIn('oms_order_creations.process_id', $processIds)
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NOT NULL THEN 1 END) AS WIP')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 2 THEN 2 END) AS Hold')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 3 THEN 3 END) AS Cancelled')
@@ -966,7 +966,7 @@ class HomeController extends Controller
     if ($user->user_type_id == 8) {
         $statusCountsQuery->where('oms_order_creations.assignee_qa_id', $user->id)
         ->orWhere('oms_order_creations.assignee_user_id', $user->id)
-        ->whereIn('process_id', $processIds);
+        ->whereIn('oms_order_creations.process_id', $processIds);
 
     }
 
