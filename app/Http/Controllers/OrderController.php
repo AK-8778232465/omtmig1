@@ -859,6 +859,8 @@ class OrderController extends Controller
             ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
             ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
+            ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
+            ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
             ->select(
                 'oms_order_creations.id',
                 'oms_order_creations.order_id as order_id',
@@ -872,6 +874,8 @@ class OrderController extends Controller
                 'oms_order_creations.assignee_user_id',
                 'oms_order_creations.assignee_qa_id',
                 'oms_order_creations.associate_id',
+                'stl_lob.name as lob_name',
+                'stl_process.name as process_name',
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
                 DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name')
