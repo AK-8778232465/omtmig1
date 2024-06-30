@@ -28,7 +28,7 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">Product Type</div>
-                                <div>{{($orderData->product_name) ? $orderData->product_name : '-' }}</div>
+                                <div>{{($orderData->process_name) ? $orderData->process_name : '-' }}</div>
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">Tier :</div>
@@ -158,9 +158,6 @@
                                             <div class="row col-12 {{ $counter > 0 ? '' : 'box' }}" style="{{  $counter > 0 ? 'margin-top: -9px; padding-top: 0;' : '' }}">
                                                 <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
                                                 <label class="text-white font-weight-bold text-uppercase px-1" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
-                                                <input type="hidden" name="state_ids[]" value="{{ $checklist_condition->state_id }}">
-                                                <input type="hidden" name="lob_ids[]" value="{{ $checklist_condition->lob_id }}">
-                                                <input type="hidden" name="product_ids[]" value="{{ $checklist_condition->product_id }}">
                                             </div>
                                             @php $counter++; @endphp
                                         @endforeach
@@ -178,9 +175,6 @@
                                                 <div class="row col-12 ">
                                                     <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
                                                     <label class="text-black   px-1" >{{ $checklist_condition->check_condition }}</label>
-                                                    <input type="hidden" name="state_ids[]" value="{{ $checklist_condition->state_id }}">
-                                                    <input type="hidden" name="lob_ids[]" value="{{ $checklist_condition->lob_id }}">
-                                                    <input type="hidden" name="product_ids[]" value="{{ $checklist_condition->product_id }}">
                                             </div>
                                                 @php $counter++; @endphp
                                         @endforeach
@@ -256,7 +250,7 @@ var changeCounty = false;
             });
         @endif
 
-        $("#order_status,#lob_id,#product_id,#tier_id,#property_state,#property_county").select2();
+        $("#order_status,#process_id,#tier_id,#property_state,#property_county").select2();
     });
 
     function order_submition(orderId, type) {
@@ -268,7 +262,7 @@ var changeCounty = false;
         var orderComment = $("#order_comment").val();
         var orderStatus = $("#order_status").val();
         var tierId = $("#tier_id").val();
-        var productId = $("#product_id").val();
+        var productId = $("#process_id").val();
         var propertystate = $("#property_state").val();
         var propertycounty = $("#property_county").val();
         var data = {
@@ -333,27 +327,6 @@ var changeCounty = false;
             }
         });
     }
-
-    $('#lob_id').on('change', function () {
-        var getlob_id = $("#lob_id").val();
-        $("#product_id").html('');
-        $.ajax({
-            url: "{{url('Product_dropdown')}}",
-            type: "POST",
-            data: {
-                getlob_id: getlob_id,
-                _token: '{{csrf_token()}}'
-            },
-            dataType: 'json',
-            success: function (result) {
-                $('#product_id').html('<option value="">Select Product</option>');
-                $.each(result.product, function (key, value) {
-                    $("#product_id").append('<option value="' + value
-                        .id + '">' + value.product_name + '</option>');
-                });
-            }
-        });
-    });
 
     $('#property_state').on('change', function () {
         var state_id = $("#property_state").val();

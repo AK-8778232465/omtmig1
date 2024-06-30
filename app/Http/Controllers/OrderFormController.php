@@ -30,8 +30,7 @@ class OrderFormController extends Controller
         ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
         ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
         ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
-        ->leftJoin('oms_products', 'oms_order_creations.product_id', '=', 'oms_products.id')
-        ->leftJoin('stl_lob', 'oms_order_creations.lob_id', '=', 'stl_lob.id')
+        ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
         ->select(
             'oms_order_creations.id',
             'oms_order_creations.order_id as order_id',
@@ -48,14 +47,13 @@ class OrderFormController extends Controller
             'oms_state.short_code as short_code',
             'county.county_name as county_name',
             'oms_order_creations.assignee_user_id',
-            'oms_order_creations.product_id as product_id',
             'oms_order_creations.tier_id',
             'oms_order_creations.assignee_qa_id',
-            'oms_order_creations.lob_id as lob_id', // Add this line
+            'stl_item_description.lob_id as lob_id', // Add this line
             'stl_lob.name as lob_name', // Select the lob name
             DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
             DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
-            'oms_products.product_name' // Adding product_name from 'oms_products' table
+            'stl_item_description.process_name' // Adding product_name from 'oms_products' table
         )
         ->where('oms_order_creations.is_active', 1)
         ->where('oms_order_creations.id', $orderId);
@@ -164,14 +162,14 @@ class OrderFormController extends Controller
             ->toArray();
             // $lobData = DB::table('oms_order_creations')->select('id','lob_id')->get();
 
-        // For List matching $orderData->product_id
-        if(!empty($orderData->product_id)) {
+        // For List matching $orderData->process_id
+        if(!empty($orderData->process_id)) {
             $checklist_conditions_with_product = DB::table('checklist')
                 ->where('checklist.state_id', $orderData->property_state)
                 ->where('checklist.process_id', $orderData->process_id)
                 ->where('checklist.is_special', 1)
                 ->where('checklist.lob_id', $orderData->lob_id)
-                ->where('checklist.product_id', $orderData->product_id)
+                ->where('checklist.process_id', $orderData->process_id)
                 ->get();
         }
 
@@ -181,23 +179,23 @@ class OrderFormController extends Controller
             ->where('checklist.process_id', $orderData->process_id)
             ->where('checklist.is_special', 1)
             ->where('checklist.lob_id', $orderData->lob_id)
-            ->whereNull('checklist.product_id')
+            ->whereNull('checklist.process_id')
             ->get();
 
         // Merge both lists
-        if(!empty($orderData->product_id)) {
+        if(!empty($orderData->process_id)) {
             $checklist_conditions = $checklist_conditions_with_product->merge($checklist_conditions_with_null);
         } else {
             $checklist_conditions = $checklist_conditions_with_null;
         }
 
-        if(!empty($orderData->product_id)) {
+        if(!empty($orderData->process_id)) {
             $checklist_conditions_with_product_2 = DB::table('checklist')
                 ->where('checklist.state_id', $orderData->property_state)
                 ->where('checklist.process_id', $orderData->process_id)
                 ->where('checklist.is_special', 0)
                 ->where('checklist.lob_id', $orderData->lob_id)
-                ->where('checklist.product_id', $orderData->product_id)
+                ->where('checklist.process_id', $orderData->process_id)
                 ->get();
         }
 
@@ -207,18 +205,18 @@ class OrderFormController extends Controller
             ->where('checklist.process_id', $orderData->process_id)
             ->where('checklist.is_special', 0)
             ->where('checklist.lob_id', $orderData->lob_id)
-            ->whereNull('checklist.product_id')
+            ->whereNull('checklist.process_id')
             ->get();
 
         // Merge both lists
-        if(!empty($orderData->product_id)) {
+        if(!empty($orderData->process_id)) {
             $checklist_conditions_2 = $checklist_conditions_with_product_2->merge($checklist_conditions_with_null_2);
         } else {
             $checklist_conditions_2 = $checklist_conditions_with_null_2;
         }
 
 
-              
+
             //state
             $stateList = State::select('id', 'short_code')->get();
             //county

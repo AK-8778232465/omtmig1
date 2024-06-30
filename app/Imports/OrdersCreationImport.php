@@ -12,7 +12,6 @@ use App\Models\Status;
 
 use App\Models\Lob;
 use App\Models\Tier;
-use App\Models\Product;
 use App\Models\User;
 use Carbon\Carbon;
 use DB;
@@ -88,8 +87,6 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'county' => isset($row['County']) ? $row['County'] : null,
             'status' => isset($row['Status']) ? $row['Status'] : null,
             'created_by' => $this->userid,
-            'lob' => $row['Lob'] ?? null,
-            'product' => $row['Product Type'] ?? null,
             'tier' => $row['Tier'] ?? null,
             'audit_id' => $this->auditId,
         ];
@@ -159,29 +156,6 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $assignee_qa = User::where('emp_id', $assignee_qa)->whereIn('user_type_id', [7,8])->first();
         }
 
-        if (isset($row['Lob'])){
-            $Lob = trim($row['Lob']);
-            $Lob = Lob::where('name',$Lob)->first();
-            if (!$Lob) {
-                $data['comments'] = 'Lob not matched with database records';
-                OrderTemp::insert($data);
-                ++$this->unsuccess_rows;
-                return null;
-            }
-        }
-
-
-        if (isset($row['Product Type'])){
-            $Product = trim($row['Product Type']);
-            $Product = Product::where('product_name', $Product)->first();
-            if (!$Product) {
-                $data['comments'] = 'Product not matched with database records';
-                OrderTemp::insert($data);
-                ++$this->unsuccess_rows;
-                return null;
-            }
-        }
-
 
         if (isset($row['Tier'])){
             $Tier = trim($row['Tier']);
@@ -231,8 +205,6 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 'assignee_user_id' => isset($assignee_user->id) ? $assignee_user->id : null,
                 'assignee_qa_id' => isset($assignee_qa->id) ? $assignee_qa->id : null,
                 'created_by' => $this->userid,
-                'lob_id' => $Lob->id ?? null,
-                'product_id' =>  $Product->id ?? null,
                 'tier_id' => $Tier->id ?? null,
             ]);
 
