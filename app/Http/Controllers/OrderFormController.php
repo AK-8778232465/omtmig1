@@ -135,10 +135,10 @@ class OrderFormController extends Controller
         $orderData = $query->first();
 
         if(!empty($orderData)) {
-            if($orderData->process_id != 44) {
-                return view('app.orders.comingsoon');
+            // if($orderData->process_id != 44) {
+            //     return view('app.orders.comingsoon');
 
-            }
+            // }
             $countyData = DB::table('county_instructions')->where('county_id', $orderData->county_id)->where('process_id', $orderData->process_id)->first();
             $countyInfo = Null;
             $checklist = Null;
