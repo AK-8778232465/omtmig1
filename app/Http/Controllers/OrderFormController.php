@@ -168,8 +168,6 @@ class OrderFormController extends Controller
                 ->where('checklist.state_id', $orderData->property_state)
                 ->where('checklist.process_id', $orderData->process_id)
                 ->where('checklist.is_special', 1)
-                ->where('checklist.lob_id', $orderData->lob_id)
-                ->where('checklist.process_id', $orderData->process_id)
                 ->get();
         }
 
@@ -178,7 +176,6 @@ class OrderFormController extends Controller
             ->where('checklist.state_id', $orderData->property_state)
             ->where('checklist.process_id', $orderData->process_id)
             ->where('checklist.is_special', 1)
-            ->where('checklist.lob_id', $orderData->lob_id)
             ->whereNull('checklist.process_id')
             ->get();
 
@@ -194,8 +191,6 @@ class OrderFormController extends Controller
                 ->where('checklist.state_id', $orderData->property_state)
                 ->where('checklist.process_id', $orderData->process_id)
                 ->where('checklist.is_special', 0)
-                ->where('checklist.lob_id', $orderData->lob_id)
-                ->where('checklist.process_id', $orderData->process_id)
                 ->get();
         }
 
@@ -204,7 +199,6 @@ class OrderFormController extends Controller
             ->where('checklist.state_id', $orderData->property_state)
             ->where('checklist.process_id', $orderData->process_id)
             ->where('checklist.is_special', 0)
-            ->where('checklist.lob_id', $orderData->lob_id)
             ->whereNull('checklist.process_id')
             ->get();
 
