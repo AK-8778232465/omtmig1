@@ -1046,6 +1046,14 @@ class OrderController extends Controller
             return $order->order_date ? date('m/d/Y H:i:s', strtotime($order->order_date)) : '';
         })
 
+        ->addColumn('lob_name', function ($order) {
+            return $order->lob_name ? $order->lob_name : '';
+        })
+
+        ->addColumn('process_name', function ($order) {
+            return $order->process_name ? $order->process_name : '';
+        })
+
         ->addColumn('order_id', function ($order) {
             return '<span class="px-2 py-1 rounded text-white goto-order ml-2" id="goto_' . ($order->id ?? '') . '">'.$order->order_id.'</span>';
         })
