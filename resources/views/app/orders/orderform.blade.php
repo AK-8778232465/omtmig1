@@ -215,7 +215,6 @@
 var changeState = false;
 var changeCounty = false;
 
-
     $(document).ready(function() {
         var orderStatus = $('#order_status');
         var currentStatus = {{ $orderData->status_id }};

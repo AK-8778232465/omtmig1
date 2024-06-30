@@ -51,7 +51,7 @@
                         icon: "success"
                     }).then((result) => {
                         if (result.value) {
-                            location.reload();
+                            window.location.href = '{{ url("orders_status") }}';
                         }
                     });
                 }

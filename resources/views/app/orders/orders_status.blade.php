@@ -272,6 +272,14 @@
         $('#status_' + defaultStatus).removeClass('btn-info').addClass('btn-primary');
         $('.status-dropdown').prop('disabled', true);
         updateStatusCounts();
+        
+        var lastOrderStatus = localStorage.getItem("lastOrderStatus");
+
+        if(lastOrderStatus) {
+            $('#'+lastOrderStatus).click();
+        }
+
+        lastOrderStatus = null;
     });
 
     $(document).on('click', '.status-btn', function () {
@@ -286,6 +294,7 @@
         $(this).removeClass('btn-info');
         $(this).addClass('btn-primary');
         let status = $(this).attr('id').replace("status_", "");
+        localStorage.setItem("lastOrderStatus", $(this).attr('id'));
         datatable.settings()[0].ajax.data.status = status;
         datatable.ajax.reload();
     });
@@ -785,6 +794,7 @@ $(document).ready(function() {
         let status = task_status.replace("status_", "");
         var elementId = $(this).attr('id');
         let order_id = elementId.split('_')[1];
+        localStorage.setItem("lastOrderStatus", task_status);
     if (status == 13) {
             window.location.href = "{{ url('coversheet-prep/') }}/" + order_id;
         } else {
