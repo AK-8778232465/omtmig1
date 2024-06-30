@@ -940,7 +940,7 @@ function fetchProData(client_id) {
         },
         dataType: 'json',
         success: function (response) {
-            $('#project_id_dcf').html('<option selected value="All">All Projects</option>');
+            $('#project_id_dcf').html('<option selected value="All">All Products</option>');
             $.each(response, function (index, item) {
                 $("#project_id_dcf").append('<option value="' + item.id + '">(' + item.project_code + ') - ' + item.process_name + '</option>');
             });
