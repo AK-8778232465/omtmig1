@@ -175,7 +175,6 @@ class OrderFormController extends Controller
         // For List with NULL value
         $checklist_conditions_with_null = DB::table('checklist')
             ->where('checklist.state_id', $orderData->property_state)
-            ->where('checklist.process_id', $orderData->process_id)
             ->where('checklist.is_special', 1)
             ->where('checklist.lob_id', $orderData->lob_id)
             ->whereNull('checklist.process_id')
@@ -200,7 +199,6 @@ class OrderFormController extends Controller
         // For List with NULL value
         $checklist_conditions_with_null_2 = DB::table('checklist')
             ->where('checklist.state_id', $orderData->property_state)
-            ->where('checklist.process_id', $orderData->process_id)
             ->where('checklist.is_special', 0)
             ->where('checklist.lob_id', $orderData->lob_id)
             ->whereNull('checklist.process_id')
