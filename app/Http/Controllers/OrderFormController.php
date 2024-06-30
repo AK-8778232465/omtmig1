@@ -32,7 +32,7 @@ class OrderFormController extends Controller
         ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
         ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
         ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
-        ->leftJoin('stl_process', 'stl_item_description.lob_id', '=', 'stl_process.id')
+        ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
         ->select(
             'oms_order_creations.id',
             'oms_order_creations.order_id as order_id',
