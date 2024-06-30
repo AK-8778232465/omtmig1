@@ -1052,11 +1052,11 @@ public function dashboard_userwise_count(Request $request)
             SUM(CASE WHEN status_id = 14 THEN 1 ELSE 0 END) as `status_14`,
             COUNT(*) as `All`', [$fromDate, $toDate])
         ->where('oms_order_creations.is_active', 1)
-        ->whereIn('process_id', $processIds)
+        ->whereIn('oms_order_creations.process_id', $processIds)
         ->groupBy('oms_order_creations.assignee_user_id');
 
     if (!empty($project_id) && $project_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('process_id', $project_id);
+        $statusCountsQuery->whereIn('oms_order_creations.process_id', $project_id);
     }
 
     if (!empty($client_id) && $client_id[0] !== 'All') {
