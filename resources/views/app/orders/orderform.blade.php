@@ -6,7 +6,7 @@
         <div class="card-body">
             <div class="p-0">
                 <div class="d-flex justify-content-center">
-                    <h5 class="border bg-info rounded font-weight-bold fs-4 text-uppercase border-grey px-2 py-1">{{$orderData->client_name}} - {{$orderData->process_name}}</h5>
+                    <h5 class="border bg-info rounded font-weight-bold fs-4 text-uppercase border-grey px-2 py-1">{{$orderData->client_name}} - {{$orderData->process_type}}</h5>
                 </div>
                 <div class="row">
                     <div class="col-md-3">
@@ -27,7 +27,7 @@
                                 <div>{{ $orderData->order_id }}</div>
                             </div>
                             <div class="col-md-3">
-                                <div class="font-weight-bold">Product Type</div>
+                                <div class="font-weight-bold">Product</div>
                                 <div>{{($orderData->process_name) ? $orderData->process_name : '-' }}</div>
                             </div>
                             <div class="col-md-3">

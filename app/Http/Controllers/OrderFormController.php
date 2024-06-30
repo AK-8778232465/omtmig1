@@ -32,6 +32,7 @@ class OrderFormController extends Controller
         ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
         ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
         ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
+        ->leftJoin('stl_process', 'stl_item_description.lob_id', '=', 'stl_process.id')
         ->select(
             'oms_order_creations.id',
             'oms_order_creations.order_id as order_id',
@@ -53,6 +54,7 @@ class OrderFormController extends Controller
             'stl_item_description.lob_id as lob_id', // Add this line
             'stl_lob.name as lob_name', // Select the lob name
             'stl_client.client_name',
+            'stl_process.name as process_type',
             DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
             DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
             'stl_item_description.process_name' // Adding product_name from 'oms_products' table
