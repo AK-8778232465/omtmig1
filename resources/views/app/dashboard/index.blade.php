@@ -224,7 +224,7 @@
                     <div class="col-lg-2" id="project_hide">
                         <label for="project">Product</label>
                         <Select class="form-control select2-basic-multiple" style="width:100%" name="dcf_project_id[]" id="project_id_dcf" multiple="multiple">
-                            <option selected value="All">All Projects</option>
+                            <option selected value="All">All Products</option>
                         </Select>
                     </div>
                     @if(Auth::user()->hasRole('Business Head'))
