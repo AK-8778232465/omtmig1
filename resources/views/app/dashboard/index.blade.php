@@ -222,7 +222,7 @@
                         </div>
                     </div>
                     <div class="col-lg-2" id="project_hide">
-                        <label for="project">Project</label>
+                        <label for="project">Product</label>
                         <Select class="form-control select2-basic-multiple" style="width:100%" name="dcf_project_id[]" id="project_id_dcf" multiple="multiple">
                             <option selected value="All">All Projects</option>
                         </Select>
@@ -598,7 +598,7 @@
                     <table id="revenueTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
-                                <th width="14%" class="text-left">Project Code</th>
+                                <th width="14%" class="text-left">Product Code</th>
                                 <th width="14%">No of orders completed</th>
                                 <th width="14%">Unit cost</th>
                                 <th width="14%">Total</th>
@@ -647,7 +647,7 @@
                 <thead class="text-center">
                 <tr>
                     <th width="10%">Client</th>
-                    <th width="15%" class="wrap-column">Project Code</th>
+                    <th width="15%" class="wrap-column">Product Code</th>
                     <th width="7%" >Pricing</th>
                     <th width="8%">FTE Count</th>
                     <th width="13%">Expected Revenue</th>
@@ -711,7 +711,7 @@
                         <thead class="text-center">
                             <tr>
                                 <th width="12%">Client</th>
-                                <th width="22%" class="wrap-column">Project</th>
+                                <th width="22%" class="wrap-column">Product</th>
                                 @if(!Auth::user()->hasRole('Qcer'))
                                 <th width="9%">WIP</th>
                                 <th width="10%">Coversheet Prep</th>
@@ -1155,7 +1155,7 @@ $('#datewise_datatable').on('draw.dt', function() {
                             var date = moment(value['Date']).format('MM/DD/YYYY');
                             var row = {
 
-                                'Project Code': '<a href="#" id="' + value['id'] + '" class="project-link">' + value['Project Code'] + ' (' + value['Process Name'] + ')</a>',
+                                'Product Code': '<a href="#" id="' + value['id'] + '" class="project-link">' + value['Product Code'] + ' (' + value['Process Name'] + ')</a>',
                                 'No of orders completed': value['No of orders completed'],
                                 'Unit cost': value['Unit cost'],
                                 'Total': value['Total']
@@ -1166,7 +1166,7 @@ $('#datewise_datatable').on('draw.dt', function() {
                     }
                 },
                 columns: [
-                    { data: 'Project Code', name: 'Project Code',className:'text-left' },
+                    { data: 'Product Code', name: 'Product Code',className:'text-left' },
                     { data: 'No of orders completed', name: 'No of orders completed' },
                     { data: 'Unit cost', name: 'Unit cost',render: function (data) {
                   return '$' + data;
