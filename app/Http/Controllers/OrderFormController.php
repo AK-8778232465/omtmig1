@@ -25,6 +25,7 @@ class OrderFormController extends Controller
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $query = DB::table('oms_order_creations')
         ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
         ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
         ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
         ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
@@ -51,6 +52,7 @@ class OrderFormController extends Controller
             'oms_order_creations.assignee_qa_id',
             'stl_item_description.lob_id as lob_id', // Add this line
             'stl_lob.name as lob_name', // Select the lob name
+            'stl_client.client_name'
             DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
             DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
             'stl_item_description.process_name' // Adding product_name from 'oms_products' table
