@@ -52,7 +52,7 @@ class OrderFormController extends Controller
             'oms_order_creations.assignee_qa_id',
             'stl_item_description.lob_id as lob_id', // Add this line
             'stl_lob.name as lob_name', // Select the lob name
-            'stl_client.client_name'
+            'stl_client.client_name',
             DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
             DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
             'stl_item_description.process_name' // Adding product_name from 'oms_products' table
