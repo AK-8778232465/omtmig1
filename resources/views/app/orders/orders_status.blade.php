@@ -215,6 +215,7 @@
             destroy: true,
             processing: true,
             serverSide: true,
+            scrollX: true,
             lengthMenu: [10, 25, 50, 100, 200, 500],
             ajax: {
                 url: '{{ route("getOrderData") }}',
