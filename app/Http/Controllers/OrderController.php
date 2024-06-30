@@ -922,6 +922,14 @@ class OrderController extends Controller
         ->addColumn('action', function ($order) {
             return '<td><div class="row mb-0"><div class="edit_order col-6" style="cursor: pointer;" data-id="' . ($order->id ?? '') . '"><img class="menuicon tbl_editbtn" src="/assets/images/edit.svg" />&nbsp;</div><div class="col-6"><span class="dripicons-trash delete_order text-danger" style="font-size:14px; cursor: pointer;" data-id="' . ($order->id ?? '') . '"></span></div></div></td>';
         })
+        ->filterColumn('lob_name', function($order, $keyword) {
+            $sql = "stl_item_description.project_code  like ?";
+            $order->whereRaw($sql, ["%{$keyword}%"]);
+        })
+        ->filterColumn('process_name', function($order, $keyword) {
+            $sql = "stl_item_description.project_code  like ?";
+            $order->whereRaw($sql, ["%{$keyword}%"]);
+        })
         ->filterColumn('project_code', function($order, $keyword) {
             $sql = "stl_item_description.project_code  like ?";
             $order->whereRaw($sql, ["%{$keyword}%"]);

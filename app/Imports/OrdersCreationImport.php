@@ -82,7 +82,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'order_id' => isset($row['OrderID']) ? $row['OrderID'] : null,
             'assignee_user' => isset($row['Emp ID-Order Assigned']) ? $row['Emp ID-Order Assigned'] : null,
             'assignee_qa' => isset($row['Assignee_QA']) ? $row['Assignee_QA'] : null,
-            'process' => isset($row['Process']) ? $row['Process'] : null,
+            'process' => isset($row['Product Code']) ? $row['Product Code'] : null,
             'state' => isset($row['State']) ? $row['State'] : null,
             'county' => isset($row['County']) ? $row['County'] : null,
             'status' => isset($row['Status']) ? $row['Status'] : null,
@@ -109,17 +109,17 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
 
 
-        $process = trim($row['Process']);
+        $process = trim($row['Product Code']);
 
         if (!$process) {
-            $data['comments'] = 'Process should not empty';
+            $data['comments'] = 'Product Code should not empty';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
         } else {
             $process = Process::whereRaw('LOWER(process_name) = ?', strtolower($process))->first();
             if (!$process) {
-                $data['comments'] = 'Process not matched with database records';
+                $data['comments'] = 'Product Code not matched with database records';
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;
                 return null;
