@@ -89,7 +89,7 @@
                                 <div class="font-weight-bold">Primary Source</div>
                                 <div>{{$countyInfo['PRIMARY']['PRIMARY_SOURCE']}}</div>
                             </div>
-                            <div class="col-md-3">
+                            {{-- <div class="col-md-3">
                                 <div class="font-weight-bold">Primary Image Source</div>
                                 <div>{{$countyInfo['PRIMARY']['PRIMARY_IMAGE_SOURCE']}}</div>
                             </div>
@@ -100,13 +100,12 @@
                             <div class="col-md-3">
                                 <div class="font-weight-bold">Secondary Image Source</div>
                                 <div>{{$countyInfo['SECONDARY']['SECONDARY_IMAGE_SOURCE']}}</div>
-                            </div> -->
+                            </div> --> --}}
                         </div>
                         <table id="source_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead>
                                 <tr>
                                     <th>Source</th>
-                                    <th>Name</th>
                                     <th>Site Link</th>
                                     <th>Username</th>
                                     <th>Password</th>
@@ -114,32 +113,28 @@
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td>Tax</td>
+                                    <td><a href="{{$countyInfo['TAX']['TAX_SITE']}}">{{$countyInfo['TAX']['TAX_SITE']}}</a></td>
+                                    <td>{{$countyInfo['TAX']['TAX_USERNAME']}}</td>
+                                    <td>{{$countyInfo['TAX']['TAX_PASSWORD']}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Court</td>
+                                    <td><a href="{{$countyInfo['COURT']['COURT_SITE']}}">{{$countyInfo['COURT']['COURT_SITE']}}</a></td>
+                                    <td>{{$countyInfo['COURT']['COURT_PASSWORD']}}</td>
+                                    <td>{{$countyInfo['COURT']['COURT_USERNAME']}}</td>
+                                </tr>
+                                <tr>
                                     <td>Recorder</td>
-                                    <td>{{$countyInfo['RECORDER']['RECORDER']}}</td>
                                     <td><a href="{{$countyInfo['RECORDER']['RECORDER_SITE']}}">{{$countyInfo['RECORDER']['RECORDER_SITE']}}</a></td>
                                     <td>{{$countyInfo['RECORDER']['RECORDER_USERNAME']}}</td>
                                     <td>{{$countyInfo['RECORDER']['RECORDER_PASSWORD']}}</td>
                                 </tr>
                                 <tr>
-                                    <td>Court</td>
-                                    <td>{{$countyInfo['COURT']['COURT']}}</td>
-                                    <td><a href="{{$countyInfo['COURT']['COURT_SITE']}}">{{$countyInfo['COURT']['COURT_SITE']}}</a></td>
-                                    <td>{{$countyInfo['COURT']['COURT_USERNAME']}}</td>
-                                    <td>{{$countyInfo['COURT']['COURT_PASSWORD']}}</td>
-                                </tr>
-                                <tr>
                                     <td>Assessor</td>
-                                    <td>{{$countyInfo['ASSESSOR']['ASSESSOR']}}</td>
                                     <td><a href="{{$countyInfo['ASSESSOR']['ASSESSOR_SITE']}}">{{$countyInfo['ASSESSOR']['ASSESSOR_SITE']}}</a></td>
                                     <td>{{$countyInfo['ASSESSOR']['ASSESSOR_USERNAME']}}</td>
                                     <td>{{$countyInfo['ASSESSOR']['ASSESSOR_PASSWORD']}}</td>
-                                </tr>
-                                <tr>
-                                    <td>Tax</td>
-                                    <td>{{$countyInfo['TAX']['TAX']}}</td>
-                                    <td><a href="{{$countyInfo['TAX']['TAX_SITE']}}">{{$countyInfo['TAX']['TAX_SITE']}}</a></td>
-                                    <td>{{$countyInfo['TAX']['TAX_USERNAME']}}</td>
-                                    <td>{{$countyInfo['TAX']['TAX_PASSWORD']}}</td>
                                 </tr>
                             </tbody>
                         </table>
