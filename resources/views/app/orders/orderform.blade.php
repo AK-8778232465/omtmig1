@@ -139,6 +139,12 @@
                                     <td>{{$countyInfo['ASSESSOR']['ASSESSOR_USERNAME']}}</td>
                                     <td>{{$countyInfo['ASSESSOR']['ASSESSOR_PASSWORD']}}</td>
                                 </tr>
+                                <tr>
+                                    <td>Probate Court</td>
+                                    <td><a href="{{$countyInfo['PROBATE_COURT']['PROBATE_LINK']}}">{  {$countyInfo['ASSESSOR']['ASSESSOR_SITE']}}</a></td>
+                                    <td>{{$countyInfo['PROBATE_COURT']['PROBATE_USERNAME']}}</td>
+                                    <td>{{$countyInfo['PROBATE_COURT']['PROBATE_PASSWORD']}}</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
