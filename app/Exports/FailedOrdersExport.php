@@ -24,11 +24,11 @@ class FailedOrdersExport implements FromCollection, WithHeadings
                 $row->order_id,
                 $row->assignee_user,
                 $row->assignee_qa,
-                $row->project_code,
+                $row->process,
                 $row->state,
                 $row->county,
                 $row->status,
-                $row->Tier,
+                $row->tier,
                 $row->comments,
             ];
         });
