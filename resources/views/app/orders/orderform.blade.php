@@ -42,8 +42,11 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <div class="font-weight-bold">Order Rec Date and Time</div>
-                                <div>{{ $orderData->order_date ? (($formattedDate = date('m/d/Y h:i A', strtotime($orderData->order_date))) !== false ? $formattedDate : '-') : '-' }}</div>
+                                <div class="font-weight-bold">Order Rec Date and Time:</div>
+                                <div>
+                                    {{ $orderData->order_date ? (($formattedDate = date('m/d/Y H:i', strtotime($orderData->order_date))) !== false ? $formattedDate : '-') : '-' }}
+                                </div>
+ 
                             </div>
                         </div>
                         <div class="row mt-1">
