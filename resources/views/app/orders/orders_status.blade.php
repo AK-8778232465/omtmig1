@@ -345,6 +345,16 @@
             }
         @endif
         // //
+
+        @if(Auth::user()->hasRole('Process/Qcer'))
+        if(status == 6){
+            datatable.column(10).visible(true);////
+        }else{
+            datatable.column(10).visible(false);
+        }
+        @endif
+
+
         if(status == 13){
             $('.status-dropdown').prop('disabled', false);
             datatable.column(12).visible(true);
