@@ -323,33 +323,33 @@
         if (status == 6 || status == 7 || status == 5) {
             $('.status-dropdown').prop('disabled', true);
             if (status == 6 || status == 7) {
-                datatable.column(8).visible(true);
+                datatable.column(10).visible(true);
                 $('.status-dropdown').prop('disabled', true);
             }
         } else {
             $('.status-dropdown').prop('disabled', false);
-            datatable.column(8).visible(false);
+            datatable.column(10).visible(false);
         }
         // //
         @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') )
             if(status == 13){
                 $('.status-dropdown').prop('disabled', false);
-                datatable.column(8).visible(true);
+                datatable.column(10).visible(true);
             }
             else if(status == 6){
                 $('.status-dropdown').prop('disabled', false);
-                datatable.column(8).visible(true);
+                datatable.column(10).visible(true);
                 $('.status-dropdown').prop('disabled', true);
             } else {
-                datatable.column(8).visible(false);
+                datatable.column(10).visible(false);
             }
         @endif
         // //
         if(status == 13){
             $('.status-dropdown').prop('disabled', false);
-            datatable.column(10).visible(true);
+            datatable.column(12).visible(true);
         } else {
-            datatable.column(10).visible(false);
+            datatable.column(12).visible(false);
         }
         @if(Auth::user()->hasRole('Qcer'))
         if(status == 1 || status == 2 || status == 5) {
