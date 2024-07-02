@@ -54,6 +54,7 @@ class OrderFormController extends Controller
             'stl_item_description.lob_id as lob_id', // Add this line
             'stl_lob.name as lob_name', // Select the lob name
             'stl_client.client_name',
+            'stl_item_description.client_id as client_id',
             'stl_process.name as process_type',
             DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
             DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
@@ -139,10 +140,10 @@ class OrderFormController extends Controller
         $orderData = $query->first();
 
         if(!empty($orderData)) {
-            // if($orderData->process_id != 44) {
-            //     return view('app.orders.comingsoon');
+            if($orderData->client_id != 16) {
+                return view('app.orders.comingsoon');
 
-            // }
+            }
             $countyData = DB::table('county_instructions')->where('county_id', $orderData->county_id)->where('lob_id', $orderData->lob_id)->first();
             $countyInfo = Null;
             $checklist = Null;
