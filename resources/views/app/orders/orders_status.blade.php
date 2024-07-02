@@ -28,7 +28,7 @@
                             <input type="date" id="order_date_ed" value="" class="form-control" name="order_date">
                         </div>
                         <div class="col-lg-4">
-                            <label class="font-weight-bold">Project Code<span style="color:red;">*</span></label><br>
+                            <label class="font-weight-bold">Product Code<span style="color:red;">*</span></label><br>
                             <select class="form-control" style="width:100%" name="process_code" id="process_code_ed" aria-hidden="true" required>
                                 <option selected="" disabled="" value="">Select Project Code</option>
                                 @foreach ($processList as $process)
