@@ -156,11 +156,11 @@
                             @if(isset($checklist_conditions) && count($checklist_conditions) > 0)
                                 <div class="font-weight-bold"> Special Checklist :</div>
                                 <div class="row mt-1 mb-4  mx-5 ">
-                                    <div class="col-12 row bg-danger justify-content-center" style="border-radius:14px;">
+                                    <div class="col-12 row bg-danger justify-content-center" id="checklist-container" style="border-radius:14px;">
                                         @php $counter = 0; @endphp
                                         @foreach($checklist_conditions as $checklist_condition)
                                             <div class="row col-12 {{ $counter > 0 ? '' : 'box' }}" style="{{  $counter > 0 ? 'margin-top: -9px; padding-top: 0;' : '' }}">
-                                                <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
+                                                <input type="checkbox" class="p-0 checklist-item" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
                                                 <label class="text-white font-weight-bold text-uppercase px-1" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
                                             </div>
                                             @php $counter++; @endphp
@@ -357,6 +357,29 @@ var changeCounty = false;
     $('#property_county').on('change', function () {
         changeCounty = true;
         $('#ordersubmit').click();
+    });
+
+    $(document).ready(function() {
+        function updateSubmitButtonVisibility() {
+            const totalCheckboxes = $('.checklist-item').length;
+            const checkedCheckboxes = $('.checklist-item:checked').length;
+
+            if (totalCheckboxes === checkedCheckboxes) {
+                $('#ordersubmit').show();
+                $('#coversheetsubmit').show();
+            } else {
+                $('#ordersubmit').hide();
+                $('#coversheetsubmit').hide();
+            }
+        }
+
+        // Initial check on page load
+        updateSubmitButtonVisibility();
+
+        // Event delegation for checkbox changes
+        $('#checklist-container').on('change', '.checklist-item', function() {
+            updateSubmitButtonVisibility();
+        });
     });
 
 </script>
