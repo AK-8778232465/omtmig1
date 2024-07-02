@@ -109,17 +109,17 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
 
 
-        $process = trim($row['Product Code']);
+        $process = trim($row['Product Name']);
 
         if (!$process) {
-            $data['comments'] = 'Product Code should not empty';
+            $data['comments'] = 'Product Name should not empty';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
         } else {
             $process = Process::whereRaw('LOWER(process_name) = ?', strtolower($process))->first();
             if (!$process) {
-                $data['comments'] = 'Product Code not matched with database records';
+                $data['comments'] = 'Product Name not matched with database records';
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;
                 return null;
