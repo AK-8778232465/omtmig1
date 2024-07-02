@@ -5,15 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Lob extends Model
+class stlprocess extends Model
 {
     use HasFactory;
-	protected $table='stl_lob';
+
+    protected $table = 'stl_process';
     public $timestamps = false;
 
-    protected $fillable = [
-        'id',
-        'client_id',
-        'name',
-    ];
+    protected $fillable = ['id', 'name', 'lob_id', 'is_active'];
 }
