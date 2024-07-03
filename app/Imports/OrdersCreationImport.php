@@ -120,6 +120,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $process = Process::whereRaw('LOWER(process_name) = ?', strtolower($process))->first();
             if (!$process) {
                 $data['comments'] = 'Product Name not matched with database records';
+                $data['process'] = trim($row['Product Name']);
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;
                 return null;
