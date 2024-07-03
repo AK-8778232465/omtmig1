@@ -181,6 +181,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             return null;
         }
 
+        $order_date = isset($order_date) ? date('Y-m-d H:i:s', strtotime($order_date)) : null;
 
         $currentTimeIST = Carbon::now();
         if ($order_date > ($currentTimeIST)) {

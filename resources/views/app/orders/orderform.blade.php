@@ -219,6 +219,7 @@
 var changeState = false;
 var changeCounty = false;
 
+
     $(document).ready(function() {
         var orderStatus = $('#order_status');
         var currentStatus = {{ $orderData->status_id }};
@@ -351,6 +352,11 @@ var changeCounty = false;
             }
         });
         changeState = true;
+        $('#ordersubmit').click();
+    });
+
+    $('#property_county').on('change', function () {
+        changeCounty = true;
         $('#ordersubmit').click();
     });
 
