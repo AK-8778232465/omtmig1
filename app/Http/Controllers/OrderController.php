@@ -152,6 +152,8 @@ class OrderController extends Controller
             ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
             ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
+            ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
+            ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
             ->select(
                 'oms_order_creations.id',
                 'oms_order_creations.order_id as order_id',
@@ -165,6 +167,8 @@ class OrderController extends Controller
                 'oms_order_creations.assignee_user_id',
                 'oms_order_creations.assignee_qa_id',
                 'oms_order_creations.associate_id',
+                'stl_lob.name as lob_name',
+                'stl_process.name as process_name',
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
                 DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name')
@@ -855,6 +859,8 @@ class OrderController extends Controller
             ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
             ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
+            ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
+            ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
             ->select(
                 'oms_order_creations.id',
                 'oms_order_creations.order_id as order_id',
@@ -868,6 +874,8 @@ class OrderController extends Controller
                 'oms_order_creations.assignee_user_id',
                 'oms_order_creations.assignee_qa_id',
                 'oms_order_creations.associate_id',
+                'stl_lob.name as lob_name',
+                'stl_process.name as process_name',
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
                 DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name')
@@ -918,6 +926,14 @@ class OrderController extends Controller
         ->addColumn('action', function ($order) {
             return '<td><div class="row mb-0"><div class="edit_order col-6" style="cursor: pointer;" data-id="' . ($order->id ?? '') . '"><img class="menuicon tbl_editbtn" src="/assets/images/edit.svg" />&nbsp;</div><div class="col-6"><span class="dripicons-trash delete_order text-danger" style="font-size:14px; cursor: pointer;" data-id="' . ($order->id ?? '') . '"></span></div></div></td>';
         })
+        ->filterColumn('lob_name', function($order, $keyword) {
+            $sql = "stl_lob.name  like ?";
+            $order->whereRaw($sql, ["%{$keyword}%"]);
+        })
+        ->filterColumn('process_name', function($order, $keyword) {
+            $sql = "stl_process.name  like ?";
+            $order->whereRaw($sql, ["%{$keyword}%"]);
+        })
         ->filterColumn('project_code', function($order, $keyword) {
             $sql = "stl_item_description.project_code  like ?";
             $order->whereRaw($sql, ["%{$keyword}%"]);
@@ -952,33 +968,34 @@ class OrderController extends Controller
                             $statusMapping = [];
                                 $statusMapping = [
                                     1 => 'WIP',
-                                    4 => 'Send for QC',
-                                    2 => 'Hold',
-                                    3 => 'Cancelled',
-                                    5 => 'Completed',
                                     13 => 'Coversheet Prep',
                                     14 => 'Clarification',
+                                    4 => 'Send for QC',
+                                    2 => 'Hold',
+                                    5 => 'Completed',
+                                    3 => 'Cancelled',
                                 ];
                         }elseif($order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 ){
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                4 => 'Send for QC',
                                 13 => 'Coversheet Prep',
                                 14 => 'Clarification',
+                                4 => 'Send for QC',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                                3 => 'Cancelled',
                             ];
                         }else{
                             $statusMapping = [];
                                 $statusMapping = [
                                     1 => 'WIP',
-                                    2 => 'Hold',
-                                    3 => 'Cancelled',
-                                    4 => 'Send for QC',
-                                    5 => 'Completed',
-                                    13 => 'Coversheet Prep',
+                                    13 =>'Coversheet Prep',
                                     14 => 'Clarification',
+                                    4 => 'Send for QC',
+                                    2 => 'Hold',
+                                    5 => 'Completed',
+                                    3 => 'Cancelled',
                                 ];
                         }
 
@@ -987,32 +1004,35 @@ class OrderController extends Controller
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                5 => 'Completed',
                                 13 => 'Coversheet Prep',
                                 14 => 'Clarification',
+                                4 => 'Send for QC',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                                3 => 'Cancelled',
                             ];
                         }elseif((!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 )||(!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 3 )){
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                5 => 'Completed',
                                 13 => 'Coversheet Prep',
                                 14 => 'Clarification',
+                                4 => 'Send for QC',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                                3 => 'Cancelled',
                             ];
                         }else{
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
-                                2 => 'Hold',
-                                3 => 'Cancelled',
-                                4 => 'Send for QC',
-                                5 => 'Completed',
                                 13 => 'Coversheet Prep',
                                 14 => 'Clarification',
+                                4 => 'Send for QC',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                                3 => 'Cancelled',
+
                             ];
                         }
 
@@ -1028,6 +1048,14 @@ class OrderController extends Controller
 
         ->addColumn('order_date', function ($order) {
             return $order->order_date ? date('m/d/Y H:i:s', strtotime($order->order_date)) : '';
+        })
+
+        ->addColumn('lob_name', function ($order) {
+            return $order->lob_name ? $order->lob_name : '';
+        })
+
+        ->addColumn('process_name', function ($order) {
+            return $order->process_name ? $order->process_name : '';
         })
 
         ->addColumn('order_id', function ($order) {

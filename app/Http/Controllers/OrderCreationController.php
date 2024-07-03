@@ -116,8 +116,6 @@ class OrderCreationController extends Controller
             'status_id' => $input['order_status'],
             'assignee_user_id' => isset($input['assignee_user']) ? $input['assignee_user'] : NULL,
             'assignee_qa_id' => isset($input['assignee_qa']) ? $input['assignee_qa'] : NULL,
-            'lob_id' => isset($input['lob_id']) ? $input['lob_id'] : NULL,
-            'product_id' => isset($input['product_id']) ? $input['product_id'] : NULL,
             'tier_id' => isset($input['tier_id']) ? $input['tier_id'] : NULL,
             'created_by' => Auth::id(),
         ];

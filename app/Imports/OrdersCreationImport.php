@@ -12,7 +12,6 @@ use App\Models\Status;
 
 use App\Models\Lob;
 use App\Models\Tier;
-use App\Models\Product;
 use App\Models\User;
 use Carbon\Carbon;
 use DB;
@@ -83,13 +82,11 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'order_id' => isset($row['OrderID']) ? $row['OrderID'] : null,
             'assignee_user' => isset($row['Emp ID-Order Assigned']) ? $row['Emp ID-Order Assigned'] : null,
             'assignee_qa' => isset($row['Assignee_QA']) ? $row['Assignee_QA'] : null,
-            'process' => isset($row['Process']) ? $row['Process'] : null,
+            'process' => isset($row['Product Code']) ? $row['Product Code'] : null,
             'state' => isset($row['State']) ? $row['State'] : null,
             'county' => isset($row['County']) ? $row['County'] : null,
             'status' => isset($row['Status']) ? $row['Status'] : null,
             'created_by' => $this->userid,
-            'lob' => $row['Lob'] ?? null,
-            'product' => $row['Product Type'] ?? null,
             'tier' => $row['Tier'] ?? null,
             'audit_id' => $this->auditId,
         ];
@@ -112,17 +109,17 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
 
 
-        $process = trim($row['Process']);
+        $process = trim($row['Product Name']);
 
         if (!$process) {
-            $data['comments'] = 'Process should not empty';
+            $data['comments'] = 'Product Name should not empty';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
         } else {
             $process = Process::whereRaw('LOWER(process_name) = ?', strtolower($process))->first();
             if (!$process) {
-                $data['comments'] = 'Process not matched with database records';
+                $data['comments'] = 'Product Name not matched with database records';
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;
                 return null;
@@ -157,29 +154,6 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         $assignee_qa = trim($row['Assignee_QA']);
         if ($assignee_qa) {
             $assignee_qa = User::where('emp_id', $assignee_qa)->whereIn('user_type_id', [7,8])->first();
-        }
-
-        if (isset($row['Lob'])){
-            $Lob = trim($row['Lob']);
-            $Lob = Lob::where('name',$Lob)->first();
-            if (!$Lob) {
-                $data['comments'] = 'Lob not matched with database records';
-                OrderTemp::insert($data);
-                ++$this->unsuccess_rows;
-                return null;
-            }
-        }
-
-
-        if (isset($row['Product Type'])){
-            $Product = trim($row['Product Type']);
-            $Product = Product::where('product_name', $Product)->first();
-            if (!$Product) {
-                $data['comments'] = 'Product not matched with database records';
-                OrderTemp::insert($data);
-                ++$this->unsuccess_rows;
-                return null;
-            }
         }
 
 
@@ -232,8 +206,6 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 'assignee_user_id' => isset($assignee_user->id) ? $assignee_user->id : null,
                 'assignee_qa_id' => isset($assignee_qa->id) ? $assignee_qa->id : null,
                 'created_by' => $this->userid,
-                'lob_id' => $Lob->id ?? null,
-                'product_id' =>  $Product->id ?? null,
                 'tier_id' => $Tier->id ?? null,
             ]);
 

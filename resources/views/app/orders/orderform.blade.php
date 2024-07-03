@@ -6,7 +6,7 @@
         <div class="card-body">
             <div class="p-0">
                 <div class="d-flex justify-content-center">
-                    <h5 class="border bg-info rounded font-weight-bold fs-4 text-uppercase border-grey px-2 py-1">{{$orderData->process_name}}</h5>
+                    <h5 class="border bg-info rounded font-weight-bold fs-4 text-uppercase border-grey px-2 py-1">{{$orderData->client_name}} - {{$orderData->process_type}}</h5>
                 </div>
                 <div class="row">
                     <div class="col-md-3">
@@ -27,8 +27,8 @@
                                 <div>{{ $orderData->order_id }}</div>
                             </div>
                             <div class="col-md-3">
-                                <div class="font-weight-bold">Product Type</div>
-                                <div>{{($orderData->product_name) ? $orderData->product_name : '-' }}</div>
+                                <div class="font-weight-bold">Product</div>
+                                <div>{{($orderData->process_name) ? $orderData->process_name : '-' }}</div>
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">Tier :</div>
@@ -42,8 +42,11 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <div class="font-weight-bold">Order Rec Date and Time</div>
-                                <div>{{ $orderData->order_date ? (($formattedDate = date('m/d/Y h:i A', strtotime($orderData->order_date))) !== false ? $formattedDate : '-') : '-' }}</div>
+                                <div class="font-weight-bold">Order Rec Date and Time:</div>
+                                <div>
+                                    {{ $orderData->order_date ? (($formattedDate = date('m/d/Y H:i', strtotime($orderData->order_date))) !== false ? $formattedDate : '-') : '-' }}
+                                </div>
+ 
                             </div>
                         </div>
                         <div class="row mt-1">
@@ -89,24 +92,23 @@
                                 <div class="font-weight-bold">Primary Source</div>
                                 <div>{{$countyInfo['PRIMARY']['PRIMARY_SOURCE']}}</div>
                             </div>
-                            <div class="col-md-3">
+                            {{-- <div class="col-md-3">
                                 <div class="font-weight-bold">Primary Image Source</div>
                                 <div>{{$countyInfo['PRIMARY']['PRIMARY_IMAGE_SOURCE']}}</div>
                             </div>
-                            <div class="col-md-3">
+                            <!-- <div class="col-md-3">
                                 <div class="font-weight-bold">Secondary Source</div>
                                 <div>{{$countyInfo['SECONDARY']['SECONDARY_SOURCE']}}</div>
                             </div>
                             <div class="col-md-3">
                                 <div class="font-weight-bold">Secondary Image Source</div>
                                 <div>{{$countyInfo['SECONDARY']['SECONDARY_IMAGE_SOURCE']}}</div>
-                            </div>
+                            </div> --> --}}
                         </div>
                         <table id="source_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead>
                                 <tr>
                                     <th>Source</th>
-                                    <th>Name</th>
                                     <th>Site Link</th>
                                     <th>Username</th>
                                     <th>Password</th>
@@ -114,32 +116,34 @@
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td>Tax</td>
+                                    <td><a href="{{$countyInfo['TAX']['TAX_SITE']}}">{{$countyInfo['TAX']['TAX_SITE']}}</a></td>
+                                    <td>{{$countyInfo['TAX']['TAX_USERNAME']}}</td>
+                                    <td>{{$countyInfo['TAX']['TAX_PASSWORD']}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Court</td>
+                                    <td><a href="{{$countyInfo['COURT']['COURT_SITE']}}">{{$countyInfo['COURT']['COURT_SITE']}}</a></td>
+                                    <td>{{$countyInfo['COURT']['COURT_PASSWORD']}}</td>
+                                    <td>{{$countyInfo['COURT']['COURT_USERNAME']}}</td>
+                                </tr>
+                                <tr>
                                     <td>Recorder</td>
-                                    <td>{{$countyInfo['RECORDER']['RECORDER']}}</td>
                                     <td><a href="{{$countyInfo['RECORDER']['RECORDER_SITE']}}">{{$countyInfo['RECORDER']['RECORDER_SITE']}}</a></td>
                                     <td>{{$countyInfo['RECORDER']['RECORDER_USERNAME']}}</td>
                                     <td>{{$countyInfo['RECORDER']['RECORDER_PASSWORD']}}</td>
                                 </tr>
                                 <tr>
-                                    <td>Court</td>
-                                    <td>{{$countyInfo['COURT']['COURT']}}</td>
-                                    <td><a href="{{$countyInfo['COURT']['COURT_SITE']}}">{{$countyInfo['COURT']['COURT_SITE']}}</a></td>
-                                    <td>{{$countyInfo['COURT']['COURT_USERNAME']}}</td>
-                                    <td>{{$countyInfo['COURT']['COURT_PASSWORD']}}</td>
-                                </tr>
-                                <tr>
                                     <td>Assessor</td>
-                                    <td>{{$countyInfo['ASSESSOR']['ASSESSOR']}}</td>
                                     <td><a href="{{$countyInfo['ASSESSOR']['ASSESSOR_SITE']}}">{{$countyInfo['ASSESSOR']['ASSESSOR_SITE']}}</a></td>
                                     <td>{{$countyInfo['ASSESSOR']['ASSESSOR_USERNAME']}}</td>
                                     <td>{{$countyInfo['ASSESSOR']['ASSESSOR_PASSWORD']}}</td>
                                 </tr>
                                 <tr>
-                                    <td>Tax</td>
-                                    <td>{{$countyInfo['TAX']['TAX']}}</td>
-                                    <td><a href="{{$countyInfo['TAX']['TAX_SITE']}}">{{$countyInfo['TAX']['TAX_SITE']}}</a></td>
-                                    <td>{{$countyInfo['TAX']['TAX_USERNAME']}}</td>
-                                    <td>{{$countyInfo['TAX']['TAX_PASSWORD']}}</td>
+                                    <td>Probate Court</td>
+                                    <td><a href="{{$countyInfo['PROBATE_COURT']['PROBATE_LINK']}}">{{$countyInfo['PROBATE_COURT']['PROBATE_LINK']}}</a></td>
+                                    <td>{{$countyInfo['PROBATE_COURT']['PROBATE_USERNAME']}}</td>
+                                    <td>{{$countyInfo['PROBATE_COURT']['PROBATE_PASSWORD']}}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -152,15 +156,12 @@
                             @if(isset($checklist_conditions) && count($checklist_conditions) > 0)
                                 <div class="font-weight-bold"> Special Checklist :</div>
                                 <div class="row mt-1 mb-4  mx-5 ">
-                                    <div class="col-12 row bg-danger justify-content-center" style="border-radius:14px;">
+                                    <div class="col-12 row bg-danger justify-content-center" id="checklist-container" style="border-radius:14px;">
                                         @php $counter = 0; @endphp
                                         @foreach($checklist_conditions as $checklist_condition)
                                             <div class="row col-12 {{ $counter > 0 ? '' : 'box' }}" style="{{  $counter > 0 ? 'margin-top: -9px; padding-top: 0;' : '' }}">
-                                                <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
+                                                <input type="checkbox" class="p-0 checklist-item" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
                                                 <label class="text-white font-weight-bold text-uppercase px-1" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
-                                                <input type="hidden" name="state_ids[]" value="{{ $checklist_condition->state_id }}">
-                                                <input type="hidden" name="lob_ids[]" value="{{ $checklist_condition->lob_id }}">
-                                                <input type="hidden" name="product_ids[]" value="{{ $checklist_condition->product_id }}">
                                             </div>
                                             @php $counter++; @endphp
                                         @endforeach
@@ -178,9 +179,6 @@
                                                 <div class="row col-12 ">
                                                     <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
                                                     <label class="text-black   px-1" >{{ $checklist_condition->check_condition }}</label>
-                                                    <input type="hidden" name="state_ids[]" value="{{ $checklist_condition->state_id }}">
-                                                    <input type="hidden" name="lob_ids[]" value="{{ $checklist_condition->lob_id }}">
-                                                    <input type="hidden" name="product_ids[]" value="{{ $checklist_condition->product_id }}">
                                             </div>
                                                 @php $counter++; @endphp
                                         @endforeach
@@ -256,7 +254,7 @@ var changeCounty = false;
             });
         @endif
 
-        $("#order_status,#lob_id,#product_id,#tier_id,#property_state,#property_county").select2();
+        $("#order_status,#process_id,#tier_id,#property_state,#property_county").select2();
     });
 
     function order_submition(orderId, type) {
@@ -268,7 +266,7 @@ var changeCounty = false;
         var orderComment = $("#order_comment").val();
         var orderStatus = $("#order_status").val();
         var tierId = $("#tier_id").val();
-        var productId = $("#product_id").val();
+        var productId = $("#process_id").val();
         var propertystate = $("#property_state").val();
         var propertycounty = $("#property_county").val();
         var data = {
@@ -334,27 +332,6 @@ var changeCounty = false;
         });
     }
 
-    $('#lob_id').on('change', function () {
-        var getlob_id = $("#lob_id").val();
-        $("#product_id").html('');
-        $.ajax({
-            url: "{{url('Product_dropdown')}}",
-            type: "POST",
-            data: {
-                getlob_id: getlob_id,
-                _token: '{{csrf_token()}}'
-            },
-            dataType: 'json',
-            success: function (result) {
-                $('#product_id').html('<option value="">Select Product</option>');
-                $.each(result.product, function (key, value) {
-                    $("#product_id").append('<option value="' + value
-                        .id + '">' + value.product_name + '</option>');
-                });
-            }
-        });
-    });
-
     $('#property_state').on('change', function () {
         var state_id = $("#property_state").val();
         $("#property_county").html('');
@@ -381,6 +358,34 @@ var changeCounty = false;
     $('#property_county').on('change', function () {
         changeCounty = true;
         $('#ordersubmit').click();
+    });
+
+    $('#property_county').on('change', function () {
+        changeCounty = true;
+        $('#ordersubmit').click();
+    });
+
+    $(document).ready(function() {
+        function updateSubmitButtonVisibility() {
+            const totalCheckboxes = $('.checklist-item').length;
+            const checkedCheckboxes = $('.checklist-item:checked').length;
+
+            if (totalCheckboxes === checkedCheckboxes) {
+                $('#ordersubmit').show();
+                $('#coversheetsubmit').show();
+            } else {
+                $('#ordersubmit').hide();
+                $('#coversheetsubmit').hide();
+            }
+        }
+
+        // Initial check on page load
+        updateSubmitButtonVisibility();
+
+        // Event delegation for checkbox changes
+        $('#checklist-container').on('change', '.checklist-item', function() {
+            updateSubmitButtonVisibility();
+        });
     });
 
 </script>

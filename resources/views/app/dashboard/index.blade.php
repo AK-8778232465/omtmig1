@@ -222,9 +222,9 @@
                         </div>
                     </div>
                     <div class="col-lg-2" id="project_hide">
-                        <label for="project">Project</label>
+                        <label for="project">Product</label>
                         <Select class="form-control select2-basic-multiple" style="width:100%" name="dcf_project_id[]" id="project_id_dcf" multiple="multiple">
-                            <option selected value="All">All Projects</option>
+                            <option selected value="All">All Products</option>
                         </Select>
                     </div>
                     @if(Auth::user()->hasRole('Business Head'))
@@ -579,7 +579,7 @@
         <div class="card mt-5 tabledetails" id="Trans_hide">
             <h4 class="text-center mt-3">Revenue Details - Transactional Billing</h4>
             <div class="card-body">
-                <div class="p-0">
+                <div class="p-0 w-75 mx-auto">
                     <h5 class="text-center"> Client Wise Details </h5>
                     <table id="revenueClientTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
@@ -593,12 +593,12 @@
                         <tbody class="text-center"></tbody>
                     </table>
                 </div>
-                <div class="p-0 process_wise">
+                <div class="p-0 process_wise w-75 mx-auto">
                     <h5 class="text-center"> Process Wise Details </h5>
                     <table id="revenueTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
-                                <th width="14%" class="text-left">Project Code</th>
+                                <th width="14%" class="text-left">Product Code</th>
                                 <th width="14%">No of orders completed</th>
                                 <th width="14%">Unit cost</th>
                                 <th width="14%">Total</th>
@@ -611,7 +611,7 @@
                     <table id="totalTable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
                         <thead class="text-center">
                             <tr>
-                                <th width="14%">Grand Total Revenue</th>
+                                <th width="14%">Grand Total Transactional Revenue</th>
                             </tr>
                         </thead>
                         <tbody class="text-center">
@@ -647,7 +647,7 @@
                 <thead class="text-center">
                 <tr>
                     <th width="10%">Client</th>
-                    <th width="15%" class="wrap-column">Project Code</th>
+                    <th width="15%" class="wrap-column">Product Code</th>
                     <th width="7%" >Pricing</th>
                     <th width="8%">FTE Count</th>
                     <th width="13%">Expected Revenue</th>
@@ -664,7 +664,7 @@
                 <table id="totalFTETable" class="table table-bordered nowrap mt-3 w-50" style="border-collapse: collapse; border-spacing: 0;">
                     <thead class="text-center">
                         <tr>
-                            <th width="14%">Grand Total Revenue</th>
+                            <th width="14%">Grand Total FTE Revenue</th>
                         </tr>
                     </thead>
                     <tbody class="text-center">
@@ -711,7 +711,7 @@
                         <thead class="text-center">
                             <tr>
                                 <th width="12%">Client</th>
-                                <th width="22%" class="wrap-column">Project</th>
+                                <th width="22%" class="wrap-column">Product</th>
                                 @if(!Auth::user()->hasRole('Qcer'))
                                 <th width="9%">WIP</th>
                                 <th width="10%">Coversheet Prep</th>
@@ -902,7 +902,6 @@ function preOrderData(projectId, clientId, fromDate, toDate) {
                 }
             }
 
-            console.log("carriedOverCompletedCountMap:", carriedOverCompletedCountMap); // Log to debug
 
             $('#pre_completed_cnt, #carried_over_completed_cnt').text(carriedOverCompletedCountMap[5] || 0);
 
@@ -932,12 +931,6 @@ function preOrderData(projectId, clientId, fromDate, toDate) {
 
 
 
-// $(document).on('change', '#project_id_dcf', function() {
-//         fetchOrderData($(this).val());
-//         datatable.settings()[0].ajax.data.project_id = $(this).val();
-//         datatable.ajax.reload();
-//     });
-
 function fetchProData(client_id) {
     $.ajax({
         url: "{{ url('dashboard_dropdown') }}",
@@ -948,7 +941,7 @@ function fetchProData(client_id) {
         },
         dataType: 'json',
         success: function (response) {
-            $('#project_id_dcf').html('<option selected value="All">All Projects</option>');
+            $('#project_id_dcf').html('<option selected value="All">All Products</option>');
             $.each(response, function (index, item) {
                 $("#project_id_dcf").append('<option value="' + item.id + '">(' + item.project_code + ') - ' + item.process_name + '</option>');
             });
@@ -1163,7 +1156,7 @@ $('#datewise_datatable').on('draw.dt', function() {
                             var date = moment(value['Date']).format('MM/DD/YYYY');
                             var row = {
 
-                                'Project Code': '<a href="#" id="' + value['id'] + '" class="project-link">' + value['Project Code'] + ' (' + value['Process Name'] + ')</a>',
+                                'Product Code': '<a href="#" id="' + value['id'] + '" class="project-link">' + value['Product Code'] + ' (' + value['Process Name'] + ')</a>',
                                 'No of orders completed': value['No of orders completed'],
                                 'Unit cost': value['Unit cost'],
                                 'Total': value['Total']
@@ -1472,7 +1465,6 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
             event.preventDefault();
             var project_id = $(this).data('id');
             var processName = $(this).text();
-            console.log(project_id);
             fterevenueProject(fromDate, toDate,processName,project_id);
             ftetotalProccessWise(fromDate, toDate,project_id);
         });

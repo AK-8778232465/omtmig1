@@ -28,7 +28,7 @@
                             <input type="date" id="order_date_ed" value="" class="form-control" name="order_date">
                         </div>
                         <div class="col-lg-4">
-                            <label class="font-weight-bold">Project Code<span style="color:red;">*</span></label><br>
+                            <label class="font-weight-bold">Product Code<span style="color:red;">*</span></label><br>
                             <select class="form-control" style="width:100%" name="process_code" id="process_code_ed" aria-hidden="true" required>
                                 <option selected="" disabled="" value="">Select Project Code</option>
                                 @foreach ($processList as $process)
@@ -120,12 +120,14 @@
                     <table id="order_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead>
                         <tr>
-                            <th style="width:7%">Order ID</th>
+                            <th style="width:10%">Order ID</th>
                             <th style="width:10%">Received Date</th>
-                            <th style="width:10%">Project Code</th>
-                            <th style="width:7%">State</th>
-                            <th style="width:10%">County</th>
-                            <th style="width:10%">Status</th>
+                            <th style="width:10%">Product Code @for($i = 0; $i < 5; $i++) &nbsp; @endfor</th>
+                            <th style="width:10%">Lob</th>
+                            <th style="width:10%">Type</th>
+                            <th style="width:15%">State @for($i = 0; $i < 5; $i++) &nbsp; @endfor</th>
+                            <th style="width:15%">County @for($i = 0; $i < 5; $i++) &nbsp; @endfor</th>
+                            <th style="width:20%">Status @for($i = 0; $i < 17; $i++) &nbsp; @endfor</th>
                             <th style="width:10%">User</th>
                             <th style="width:10%">QA</th>
                             @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer'))
@@ -213,6 +215,7 @@
             destroy: true,
             processing: true,
             serverSide: true,
+            scrollX: true,
             lengthMenu: [10, 25, 50, 100, 200, 500],
             ajax: {
                 url: '{{ route("getOrderData") }}',
@@ -227,6 +230,8 @@
                 { "data": "order_id", "name": "order_id" },
                 { "data": "order_date", "name": "order_date" },
                 { "data": "project_code", "name": "project_code" },
+                { "data": "lob_name", "name": "lob_name" },
+                { "data": "process_name", "name": "process_name" },
                 { "data": "short_code", "name": "short_code" },
                 { "data": "county_name", "name": "county_name" },
                 { "data": "status", "name": "status" },
@@ -267,6 +272,14 @@
         $('#status_' + defaultStatus).removeClass('btn-info').addClass('btn-primary');
         $('.status-dropdown').prop('disabled', true);
         updateStatusCounts();
+        
+        var lastOrderStatus = localStorage.getItem("lastOrderStatus");
+
+        if(lastOrderStatus) {
+            $('#'+lastOrderStatus).click();
+        }
+
+        lastOrderStatus = null;
     });
 
     $(document).on('click', '.status-btn', function () {
@@ -281,6 +294,7 @@
         $(this).removeClass('btn-info');
         $(this).addClass('btn-primary');
         let status = $(this).attr('id').replace("status_", "");
+        localStorage.setItem("lastOrderStatus", $(this).attr('id'));
         datatable.settings()[0].ajax.data.status = status;
         datatable.ajax.reload();
     });
@@ -309,33 +323,43 @@
         if (status == 6 || status == 7 || status == 5) {
             $('.status-dropdown').prop('disabled', true);
             if (status == 6 || status == 7) {
-                datatable.column(8).visible(true);
+                datatable.column(10).visible(true);
                 $('.status-dropdown').prop('disabled', true);
             }
         } else {
             $('.status-dropdown').prop('disabled', false);
-            datatable.column(8).visible(false);
+            datatable.column(10).visible(false);
         }
         // //
         @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') )
             if(status == 13){
                 $('.status-dropdown').prop('disabled', false);
-                datatable.column(8).visible(true);
+                datatable.column(10).visible(true);
             }
             else if(status == 6){
                 $('.status-dropdown').prop('disabled', false);
-                datatable.column(8).visible(true);
+                datatable.column(10).visible(true);
                 $('.status-dropdown').prop('disabled', true);
             } else {
-                datatable.column(8).visible(false);
+                datatable.column(10).visible(false);
             }
         @endif
         // //
+
+        @if(Auth::user()->hasRole('Process/Qcer'))
+        if(status == 6){
+            datatable.column(10).visible(true);////
+        }else{
+            datatable.column(10).visible(false);
+        }
+        @endif
+
+
         if(status == 13){
             $('.status-dropdown').prop('disabled', false);
-            datatable.column(10).visible(true);
+            datatable.column(12).visible(true);
         } else {
-            datatable.column(10).visible(false);
+            datatable.column(12).visible(false);
         }
         @if(Auth::user()->hasRole('Qcer'))
         if(status == 1 || status == 2 || status == 5) {
@@ -780,6 +804,7 @@ $(document).ready(function() {
         let status = task_status.replace("status_", "");
         var elementId = $(this).attr('id');
         let order_id = elementId.split('_')[1];
+        localStorage.setItem("lastOrderStatus", task_status);
     if (status == 13) {
             window.location.href = "{{ url('coversheet-prep/') }}/" + order_id;
         } else {

@@ -187,7 +187,7 @@
                     <input type="datetime-local" id="order_date" class="form-control" step="1" name="order_date" required data-parsley-trigger="focusout keyup" data-parsley-error-message="Order Received Date and Time should not be empty" format="MM-DD-YYYY THH:mm" hour24="true">
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
-                            <label class="font-weight-bold">Project Code<span style="color:red;">*</span></label><br>
+                            <label class="font-weight-bold">Product Code<span style="color:red;">*</span></label><br>
                             <select class="form-control select2dropdown" style="width:100%" name="process_code" id="process_code" aria-hidden="true" data-parsley-trigger="focusout keyup"
                             data-parsley-error-message="Project Code should not be empty" data-parsley-errors-container="#process_code_error" required>
                                 <option selected="" disabled="" value="">Select Project Code</option>
@@ -245,18 +245,6 @@
                         </div>
                     </div>
                     <div class="form-group row mb-4 pb-0 pl-3 pr-3">
-                        <div class="form-group col-lg-3 mb-0 pb-0">
-                            <label class="font-weight-bold">LOB</label>
-                            <select id="lob_id" name="lob_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select LOB"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
-                                <option selected="" disabled="" value="">Select LOB</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-lg-3 mb-0 pb-0">
-                            <label class="font-weight-bold">Product</label>
-                            <select id="product_id" name="product_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Product"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
-                                <option selected="" disabled="" value="">Select Product</option>
-                            </select> 
-                        </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Tier</label>
                             <select id="tier_id" name="tier_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Tier"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
@@ -633,9 +621,9 @@ $(document).ready(function() {
             var input = event.target;
             if (input.files && input.files[0]) {
                 var fileName = input.files[0].name;
-                $('#filename-display').text('Selected file: ' + fileName);
+            $('#filename-display').text('Selected file: ' + fileName).show(); // Show the element and set text
             } else {
-                $('#filename-display').text('');
+            $('#filename-display').text('').hide(); // Clear text and hide the element
             }
         });
 
@@ -643,9 +631,15 @@ $(document).ready(function() {
         var drEvent = $('.dropify').dropify();
 
         drEvent.on('dropify.afterClear', function(event, element){
-            $('#filename-display').text('');
-        });
+        $('#filename-display').text('').hide(); // Clear text and hide the element
     });
+
+    // Hide initially if it's empty
+    if ($('#filename-display').text().trim() === '') {
+        $('#filename-display').hide();
+    }
+});
+
 
 </script>
 
