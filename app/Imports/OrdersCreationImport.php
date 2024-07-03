@@ -82,7 +82,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'order_id' => isset($row['OrderID']) ? $row['OrderID'] : null,
             'assignee_user' => isset($row['Emp ID-Order Assigned']) ? $row['Emp ID-Order Assigned'] : null,
             'assignee_qa' => isset($row['Assignee_QA']) ? $row['Assignee_QA'] : null,
-            'process' => isset($row['Product Code']) ? $row['Product Code'] : null,
+            'process' => isset($row['Product Name']) ? $row['Product Name'] : null,
             'state' => isset($row['State']) ? $row['State'] : null,
             'county' => isset($row['County']) ? $row['County'] : null,
             'status' => isset($row['Status']) ? $row['Status'] : null,
@@ -108,16 +108,16 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $county = County::where('county_name', $countyName)->where('stateId', $state->id)->first();
         }
 
-        $process = trim($row['Product Code']);
+        $process = trim($row['Product Name']);
         if (!$process) {
-            $data['comments'] = 'Product Code should not be empty';
+            $data['comments'] = 'Product Name should not be empty';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
         } else {
-            $process = Process::whereRaw('LOWER(project_code) = ?', strtolower($process))->first();
+            $process = Process::whereRaw('LOWER(process_name) = ?', strtolower($process))->first();
             if (!$process) {
-                $data['comments'] = 'Product Code not matched with database records';
+                $data['comments'] = 'Product Name not matched with database records';
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;
                 return null;
