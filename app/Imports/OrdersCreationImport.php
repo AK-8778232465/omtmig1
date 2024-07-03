@@ -124,6 +124,23 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             }
         }
 
+        //Lob
+        $lob = trim($row['Lob']);
+        if (!$lob) {
+            $data['comments'] = 'Lob should not be empty';
+            OrderTemp::insert($data);
+            ++$this->unsuccess_rows;
+            return null;
+        } else {
+            $lob = Lob::whereRaw('LOWER(name) = ?', [strtolower($lob)])->first();
+            if (!$lob) {
+                $data['comments'] = 'Lob not matched with database records';
+                OrderTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
+        }
+
         // Status
         $Status = trim($row['Status']);
         if (!$Status) {
@@ -189,6 +206,17 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             return null;
         }
 
+        $processOrg = Process::where('process_name', $process->process_name)
+            ->where('lob_id', $lob->id)
+            ->first();
+
+        if (!$processOrg) {
+            $data['comments'] = 'Product Name not matched with database records for the given Lob';
+            OrderTemp::insert($data);
+            ++$this->unsuccess_rows;
+            return null;
+        }
+
 
         try {
             $orderId = isset($row['OrderID']) ? $row['OrderID'] : null;
@@ -197,7 +225,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $orderId = OrderCreation::insert([
                 'order_date' => $order_date,
                 'order_id' => $orderId,
-                'process_id' => $process->id,
+                'process_id' => $processOrg->id,
                 'state_id' => isset($state) ? $state->id : null,
                 'county_id' => isset($county) ? $county->id : null,
                 'status_id' => $Status->id,
