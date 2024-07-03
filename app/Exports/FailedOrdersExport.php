@@ -41,11 +41,11 @@ class FailedOrdersExport implements FromCollection, WithHeadings
             'OrderID',
             'Emp ID-Order Assigned',
             'Assignee_QA',
-            'Product Name',
+            'Product Code',
             'State',
             'County',
             'Status',
-            'Tier',
+            'tier',
             'Comments',
         ];
     }
