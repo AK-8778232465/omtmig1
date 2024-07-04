@@ -187,10 +187,10 @@
                     <input type="datetime-local" id="order_date" class="form-control" step="1" name="order_date" required data-parsley-trigger="focusout keyup" data-parsley-error-message="Order Received Date and Time should not be empty" format="MM-DD-YYYY THH:mm" hour24="true">
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
-                            <label class="font-weight-bold">Product Code<span style="color:red;">*</span></label><br>
+                            <label class="font-weight-bold">Product<span style="color:red;">*</span></label><br>
                             <select class="form-control select2dropdown" style="width:100%" name="process_code" id="process_code" aria-hidden="true" data-parsley-trigger="focusout keyup"
-                            data-parsley-error-message="Project Code should not be empty" data-parsley-errors-container="#process_code_error" required>
-                                <option selected="" disabled="" value="">Select Project Code</option>
+                            data-parsley-error-message="Product Code should not be empty" data-parsley-errors-container="#process_code_error" required>
+                                <option selected="" disabled="" value="">Select Product</option>
                                 @foreach ($processList as $process)
                                     <option value="{{ $process->id }}">{!! $process->project_code.' ('.$process->process_name.')' !!}</option>
                                 @endforeach
@@ -246,6 +246,12 @@
                     </div>
                     <div class="form-group row mb-4 pb-0 pl-3 pr-3">
                         <div class="form-group col-lg-3 mb-0 pb-0">
+                                <label class="font-weight-bold">Lob</label>
+                                <select id="lob_id" name="lob_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Lob"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
+                                    <option selected="" disabled="" value="">Select lob</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Tier</label>
                             <select id="tier_id" name="tier_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Tier"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Tier</option>

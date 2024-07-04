@@ -68,12 +68,13 @@ class OrderCreationController extends Controller
 
     public function getlob(Request $request){
 
-        $query = DB::table('oms_order_creations')
-            ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
-            ->leftJoin('oms_products', 'stl_item_description.client_id', '=', 'oms_products.client_id')
-            ->where('stl_item_description.id', $request->process_id)->pluck('oms_products.lob_id')
-            ->toArray();
-            $lobData = DB::table('stl_lob')->whereIn('id',array_unique($query))->orderBy('name','asc')->get();
+        // $query = DB::table('oms_order_creations')
+        //     ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        //     ->leftJoin('oms_products', 'stl_item_description.client_id', '=', 'oms_products.client_id')
+        //     ->where('stl_item_description.id', $request->process_id)->pluck('oms_products.lob_id')
+        //     ->toArray();
+        $query = DB::table('stl_item_description')->select('lob_id')->where('id',$request->process_id);
+            $lobData = DB::table('stl_lob')->where('id',$query)->orderBy('name','asc')->get();
         return response()->json($lobData);
     }
 
@@ -116,6 +117,7 @@ class OrderCreationController extends Controller
             'status_id' => $input['order_status'],
             'assignee_user_id' => isset($input['assignee_user']) ? $input['assignee_user'] : NULL,
             'assignee_qa_id' => isset($input['assignee_qa']) ? $input['assignee_qa'] : NULL,
+            'lob_id' => isset($input['lob_id']) ? $input['lob_id'] : NULL,
             'tier_id' => isset($input['tier_id']) ? $input['tier_id'] : NULL,
             'created_by' => Auth::id(),
         ];
