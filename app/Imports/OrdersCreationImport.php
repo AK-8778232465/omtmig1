@@ -83,6 +83,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'assignee_user' => isset($row['Emp ID-Order Assigned']) ? $row['Emp ID-Order Assigned'] : null,
             'assignee_qa' => isset($row['Assignee_QA']) ? $row['Assignee_QA'] : null,
             'process' => isset($row['Product Name']) ? $row['Product Name'] : null,
+            'lob' => isset($row['Lob']) ? $row['Lob'] : null,
             'state' => isset($row['State']) ? $row['State'] : null,
             'county' => isset($row['County']) ? $row['County'] : null,
             'status' => isset($row['Status']) ? $row['Status'] : null,
