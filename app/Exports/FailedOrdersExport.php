@@ -5,8 +5,6 @@ namespace App\Exports;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Illuminate\Support\Carbon;
 
 class FailedOrdersExport implements FromCollection, WithHeadings
@@ -51,12 +49,6 @@ class FailedOrdersExport implements FromCollection, WithHeadings
             'Status',
             'tier',
             'Comments',
-        ];
-    }
-    public function styles(Worksheet $sheet)
-    {
-        return [
-            1 => ['font' => ['bold' => true]],
         ];
     }
 }
