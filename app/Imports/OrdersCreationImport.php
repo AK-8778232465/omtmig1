@@ -218,6 +218,29 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             return null;
         }
 
+        $existingOrder = OrderCreation::where('order_id', $data['order_id'])
+        ->whereDate('order_date', '=', $data['order_date'])
+        ->where('process_id', $processOrg->id)
+             ->exists();
+ 
+ 
+         if ($existingOrder) {
+             $data['comments'] = 'Duplicate Order ID and Order Date found';
+             OrderTemp::insert($data);
+             ++$this->unsuccess_rows;
+             return null;
+         }
+ 
+         $order_date = isset($order_date) ? date('Y-m-d H:i:s', strtotime($order_date)) : null;
+ 
+         $currentTimeIST = Carbon::now();
+         if ($order_date > ($currentTimeIST)) {
+             $data['comments'] = 'Future Date and Time not Allowed';
+             OrderTemp::insert($data);
+             ++$this->unsuccess_rows;
+             return null;
+         }
+
 
         try {
             $orderId = isset($row['OrderID']) ? $row['OrderID'] : null;
