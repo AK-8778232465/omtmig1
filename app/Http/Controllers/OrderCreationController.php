@@ -90,7 +90,7 @@ class OrderCreationController extends Controller
 
     public function exportFailedOrders($audit_id)
     {
-        $failedOrders = OrderTemp::where('audit_id', $audit_id)->where('created_by', Auth::id())->get();
+        $failedOrders = OrderTemp::where('audit_id', $audit_id)->get();
 
         $export = new FailedOrdersExport($failedOrders);
         $exportFileName = 'failed_orders_export_' . now()->format('YmdHis') . '.xlsx';
