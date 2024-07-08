@@ -9,6 +9,7 @@ use Session;
 use App\Models\User;
 use App\Models\Service;
 use App\Models\Order;
+use App\Models\City;
 use App\Models\Client;
 use App\Models\Process;
 use App\Models\County;
@@ -100,6 +101,16 @@ class HomeController extends Controller
 
         return response()->json($getCounty);
     }
+
+    public function getCities(Request $request)
+    {
+        $county_id = $request->county_id;
+        $county = County::with('cities')->find($county_id);
+        $cities = $county->cities()->select('id', 'city')->get();
+        return response()->json(['cities' => $cities]);
+    }
+
+
 
     public function dashboard_dropdown(Request $request)
     {

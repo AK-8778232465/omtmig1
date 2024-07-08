@@ -81,6 +81,20 @@
                                 </select>
                             </div>
                         </div>
+                        @if(!is_null($orderData->city_id))
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="font-weight-bold">City/Municipality</div>
+                                <select id="city" name="city" class="form-control" data-parsley-required="true">
+                                    <option value="">Select City/Municipality</option>
+                                    @foreach($cityList as $city)
+                                        <option value="{{ $city->id }}" {{ ($orderData->city_id == $city->id) ? 'selected' : '' }}>
+                                            {{ $city->city }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
                 @if(!@empty($countyInfo))
@@ -235,7 +249,40 @@ var changeCounty = false;
     });
 
 
+// ///
+// $('#property_county').on('change', function () {
+//     var county_id = $(this).val();
+//     $("#city").html('');
+//     if (county_id) {
+//         $.ajax({
+//             url: "{{ route('getCities') }}",
+//             type: "POST",
+//             data: {
+//                 county_id: county_id,
+//                 _token: '{{ csrf_token() }}'
+//             },
+//             dataType: 'json',
+//             success: function (result) {
+//                 $('#city').html('<option value="">Select City</option>');
+//                 $.each(result.cities, function (key, value) {
+//                     $("#city").append('<option value="' + value.id + '">' + value.city + '</option>');
+//                 });
+//             },
+//             error: function (xhr, status, error) {
+//                 console.error(xhr.responseText);
+//             }
+//         });
+//     } else {
+//         $('#city').html('<option value="">Select City</option>');
+//     }
+// });
 
+/////
+
+$('#city').on('change', function () {
+        changeCounty = true;
+        $('#ordersubmit').click();
+});
 
 
 
@@ -269,6 +316,7 @@ var changeCounty = false;
         var productId = $("#process_id").val();
         var propertystate = $("#property_state").val();
         var propertycounty = $("#property_county").val();
+        var city = $("#city").val();
         var data = {
             orderId: orderId,
             checklistItems: checklistItems.join(),
@@ -276,6 +324,7 @@ var changeCounty = false;
             orderComment: orderComment,
             orderStatus: orderStatus,
             stateId: propertystate,
+            cityId: city,
             countyId: propertycounty,
             tierId: tierId,
             productId: productId,
@@ -352,11 +401,6 @@ var changeCounty = false;
             }
         });
         changeState = true;
-        $('#ordersubmit').click();
-    });
-
-    $('#property_county').on('change', function () {
-        changeCounty = true;
         $('#ordersubmit').click();
     });
 

@@ -9,6 +9,7 @@ use App\Models\OrderCreation;
 use App\Models\OrderCreationAudit;
 use App\Models\OrderTemp;
 use App\Models\State;
+use App\Models\City;
 use App\Models\Status;
 use App\Models\User;
 use App\Models\Product;
@@ -87,6 +88,25 @@ class OrderCreationController extends Controller
         return response()->json($productList);
     }
     
+    public function getCities(Request $request)
+    {
+        $lobData = DB::table('stl_item_description')
+                    ->select('lob_id')
+                    ->where('id', $request->process_id)
+                    ->first();
+
+        $cities = DB::table('county_instructions')->select('oms_city.id','oms_city.city')
+                    ->leftJoin('oms_city', 'county_instructions.city_id', '=', 'oms_city.id')
+                    ->leftJoin('oms_state', 'county_instructions.state_id', '=', 'oms_state.id')
+                    ->leftJoin('oms_county', 'county_instructions.county_id', '=', 'oms_county.id')
+                    ->where('county_instructions.lob_id', $lobData->lob_id)
+                    ->where('oms_state.id', $request->state_id)
+                    ->where('oms_county.id', $request->county_id)
+                    ->get();
+
+        return response()->json($cities);
+    }
+    
 
     public function exportFailedOrders($audit_id)
     {
@@ -114,6 +134,7 @@ class OrderCreationController extends Controller
             'process_id' => $input['process_code'],
             'state_id' => isset($input['property_state']) ? $input['property_state'] : NULL,
             'county_id' => isset($input['property_county']) ? $input['property_county'] : NULL,
+            'city_id' => isset($input['city']) ? $input['city'] : NULL,
             'status_id' => $input['order_status'],
             'assignee_user_id' => isset($input['assignee_user']) ? $input['assignee_user'] : NULL,
             'assignee_qa_id' => isset($input['assignee_qa']) ? $input['assignee_qa'] : NULL,

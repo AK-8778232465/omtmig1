@@ -8,6 +8,7 @@ use App\Models\County;
 use App\Models\User;
 use App\Models\Process;
 use App\Models\Tier;
+use App\Models\City;
 use App\Models\Product;
 use App\Models\OrderCreation;
 use DB;
@@ -33,12 +34,17 @@ class OrderFormController extends Controller
         ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
         ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
         ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
+        ->leftJoin('oms_city','oms_order_creations.city_id','=','oms_city.id')
         ->select(
             'oms_order_creations.id',
             'oms_order_creations.order_id as order_id',
             'oms_order_creations.status_id as status_id',
             'oms_order_creations.county_id as county_id',
             'oms_order_creations.process_id as process_id',
+            ///
+                'oms_order_creations.city_id as city_id',
+            'oms_city.city as city',
+            ////
             'oms_order_creations.tier_id as tier_id',
             'oms_order_creations.order_date as order_date',
             'oms_order_creations.state_id as property_state', // Add this line
@@ -142,14 +148,24 @@ class OrderFormController extends Controller
         if(!empty($orderData)) {
             if($orderData->client_id != 16) {
                 return view('app.orders.comingsoon');
-
             }
-            $countyData = DB::table('county_instructions')->where('county_id', $orderData->county_id)->whereNotNull('county_id')->where('lob_id', $orderData->lob_id)->first();
+
+            $countyData = Null;
             $countyInfo = Null;
             $checklist = Null;
-            if(!empty($countyData->json)) {
+
+            if ($orderData->city_id) {
+                $countyData = DB::table('county_instructions')
+                                            ->where('city_id', $orderData->city_id)
+                                            ->where('county_id', $orderData->county_id)
+                                            ->whereNotNull('county_id')
+                                            ->where('lob_id', $orderData->lob_id)
+                    ->first();
+                                    }
+            
+            if (!empty($countyData)) {
                 $countyInfo = json_decode($countyData->json, true);
-            }
+                        }
 
             if(!empty($countyData->checklist_array)) {
                 $conditionIds = [explode(',', $countyData->checklist_array)];
@@ -221,11 +237,19 @@ class OrderFormController extends Controller
             //state
             $stateList = State::select('id', 'short_code')->get();
             //county
-        if( isset($orderData->property_state)){
+        if(isset($orderData->property_state)){
             $countyList = County::select('id','county_name')->where('stateId',$orderData->property_state)->get();
         }
         else{
-            $countyList = County::select('id', 'county_name')->get();
+            $countyList = County::select('id', 'county_name')->where('id', 0)->get();
+        }
+
+        if(empty($orderData->city_id)){
+            if (!empty($orderData->property_county)) {
+                $cityList = City::select('id','city')->where('county_id',$orderData->property_county)->get();
+            }else{
+                $cityList = City::select('id', 'city')->where('id', 0)->get();
+            }
         }
 
             //product
@@ -238,9 +262,9 @@ class OrderFormController extends Controller
         $lobList = DB::table('stl_lob')->select('id', 'name')->get(); // Adjust according to your LOB table structure
 
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
-            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList'));
+            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList'));
         } else if(in_array($user->user_type_id, [1,2,3,4,5,9])) {
-            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList'));
+            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList'));
         } else {
             return redirect('/orders_status');
         }
@@ -276,7 +300,8 @@ class OrderFormController extends Controller
                 'status_id' => $request->orderStatus,
                 'tier_id' => $request->tierId,
                 'state_id' => $request->stateId,
-                'county_id' => $request->countyId
+                'county_id' => $request->countyId,
+                'city_id' => $request->cityId
             ]);
             if($update_status) {
                 DB::table('order_status_history')->insert([
@@ -301,7 +326,8 @@ class OrderFormController extends Controller
                 ->update([
                     'tier_id' => $request->tierId,
                     'state_id' => $request->stateId,
-                    'county_id' => $request->countyId
+                    'county_id' => $request->countyId,
+                    'city_id' => $request->cityId
                 ]);
                 DB::table('order_status_history')->where('order_id',$orderId)->update([
                     'comment' => $request->orderComment,

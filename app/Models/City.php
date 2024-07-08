@@ -5,22 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Countyinstructions extends Model
+class City extends Model
 {
     use HasFactory;
-    protected $table = 'county_instructions';
+    protected $table = 'oms_city';
     public $timestamps = false;
 
     protected $fillable = [
         'id',
-        'state_id',
         'county_id',
-        'city_id',
-        'process_id',
-        'lob_id',
-        'json',
-        'last_updated_by',
-        'created_at',
-        'updated_at'
+        'city',
     ];
+
+    public function county()
+    {
+        return $this->belongsTo(County::class, 'county_id', 'id');
+    }
+
 }

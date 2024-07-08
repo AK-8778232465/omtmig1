@@ -21,35 +21,43 @@ class CountyImport implements ToCollection, WithHeadingRow
             $entry = [
                 'state' => $row['state'] ?? null,
                 'county' => $row['county'] ?? null,
-                'process_id' => $row['process_id'] ?? null,
+                'process' => $row['process'] ?? null,
+                'municipality' => $row['municipality'] ?? null,
                 'lob' => $row['lob'] ?? null,
                 'json' => [
                     'TAX' => [
-                        'TAX' => $row['TAX'] ?? null,
-                        'TAX_SITE' => $row['TAX SITE'] ?? null,
-                        'TAX_PASSWORD' => $row['TAX SITE PASSWORD'] ?? null,
-                        'TAX_USERNAME' => $row['TAX SITE USERNAME'] ?? null,
+                        'TAX_SITE' => $row['tax_site'] ?? null,
+                        'TAX_USERNAME' => $row['tax_site_username'] ?? null,
+                        'TAX_PASSWORD' => $row['tax_site_password'] ?? null,
                     ],
                     'COURT' => [
-                        'COURT' => $row['sample5'] ?? null,
-                        'COURT_SITE' => $row['COURT SITE'] ?? null,
-                        'COURT_PASSWORD' => $row['COURT PASSWORD'] ?? null,
-                        'COURT_USERNAME' => $row['COURT USERNAME'] ?? null,
+                        'COURT_SITE' => $row['court_site'] ?? null,
+                        'COURT_USERNAME' => $row['court_username'] ?? null,
+                        'COURT_PASSWORD' => $row['court_password'] ?? null,
                     ],
                     'PRIMARY' => [
-                        'PRIMARY_SOURCE' => $row['PRIMARY SOURCE'] ?? null,
-                        'PRIMARY_SOURCE_STD' => $row['sample15'] ?? null,
-                        'PRIMARY_IMAGE_SOURCE' => $row['sample21'] ?? null,
-                        'ONLINE_GEO_START_DATE' => $row['sample22'] ?? null,
-                        'PRIMARY_IMAGE_START_DATE' => $row['sample23'] ?? null,
-                        'PRIMARY_SEARCH_START_DATE' => $row['sample24'] ?? null,
+                        'PRIMARY_SOURCE' => $row['primary_source'] ?? null,
+                    ],
+                    'RECORDER' => [
+                        'RECORDER_SITE' => $row['recorder_site'] ?? null,
+                        'RECORDER_USERNAME' => $row['recorder_username'] ?? null,
+                        'RECORDER_PASSWORD' => $row['recorder_password'] ?? null,
+                    ],
+                    'PROBATE_COURT' => [
+                        'PROBATE_LINK' => $row['probate_court_link'] ?? null,
+                        'PROBATE_USERNAME' => $row['probate_court_username'] ?? null,
+                        'PROBATE_PASSWORD' => $row['probate_court_password'] ?? null,
                     ],
                     'ASSESSOR' => [
-                        'ASSESSOR' => $row['sample25'] ?? null,
-                        'ASSESSOR_SITE' => $row['ASSESSOR SITE'] ?? null,
-                        'ASSESSOR_PASSWORD' => $row['ASSESSOR PASSWORD'] ?? null,
-                        'ASSESSOR_USERNAME' => $row['ASSESSOR USERNAME'] ?? null,
+                        'ASSESSOR_SITE' => $row['assessor_site'] ?? null,
+                        'ASSESSOR_USERNAME' => $row['assessor_username'] ?? null,
+                        'ASSESSOR_PASSWORD'  => $row['assessor_password'] ?? null,
                     ],
+                    'MUNICIPALITY' =>  [
+                        'MUNICIPALITY' => $row['municipality'] ?? null,
+                        'STATE_COUNTY' => $row['statecounty'] ?? null,
+                        'STATE_COUNTY_TOWNSHIP' => $row['statecountytownship'] ?? null,
+                    ]
                 ]
             ];
 

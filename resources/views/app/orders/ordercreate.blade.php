@@ -198,6 +198,14 @@
                             <div id="process_code_error" class="parsley-error"></div>
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
+                                <label class="font-weight-bold">Lob</label>
+                                <select id="lob_id" name="lob_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Lob"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
+                                    <option selected="" disabled="" value="">Select lob</option>
+                                </select>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-4 pb-0 pl-3 pr-3">
+                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">State Code</label><br>
                             <select class="form-control select2dropdown" style="width:100%" name="property_state" id="property_state" aria-hidden="true">
                             <option selected="" disabled="" value="">Select State Code</option>
@@ -206,12 +214,16 @@
                             @endforeach
                         </select>
                         </div>
-                    </div>
-                    <div class="form-group row mb-4 pb-0 pl-3 pr-3">
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">County</label>
                             <select id="property_county" name="property_county" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Enter Property County"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select County</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-3 mb-0 pb-0">
+                            <label class="font-weight-bold">City/Municipality</label>
+                            <select id="city" name="city" class="form-control select2dropdown" style="width:100%" autocomplete="off"  data-parsley-trigger="focusout keyup">
+                                <option selected="" disabled="" value="">Select City/Municipality</option>
                             </select>
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
@@ -225,6 +237,8 @@
                                 @endforeach
                             </select>
                         </div>
+                    </div>
+                    <div class="form-group row mb-4 pb-0 pl-3 pr-3">
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Assign User</label>
                             <select id="assignee_user" name="assignee_user" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
@@ -243,14 +257,6 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
-                    <div class="form-group row mb-4 pb-0 pl-3 pr-3">
-                        <div class="form-group col-lg-3 mb-0 pb-0">
-                                <label class="font-weight-bold">Lob</label>
-                                <select id="lob_id" name="lob_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Lob"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
-                                    <option selected="" disabled="" value="">Select lob</option>
-                                </select>
-                            </div>
                             <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Tier</label>
                             <select id="tier_id" name="tier_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Tier"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
@@ -463,7 +469,77 @@ document.getElementById('order_date').addEventListener('change', function() {
             }
         });
     });
+    ////
+//     $('#property_county').on('change', function () {
+//     var county_id = $(this).val();
+//     var state_id = $('#property_state').val();
+//     var process_id = $("#process_code").val();
+//     $("#city").html('');
+//     if (county_id) {
+//         $.ajax({
+//             url: "{{ route('getCities') }}",
+//             type: "POST",
+//             data: {
+//                 county_id: county_id,
+//                 state_id: state_id,
+//                 process_id: process_id,
+//                 _token: '{{ csrf_token() }}'
+//             },
+//             dataType: 'json',
+//             success: function (result) {
+//                 $('#city').html('<option value="">Select City</option>');
+//                 $.each(result.city, function (key, value) {
+//                     $("#city").append('<option value="' + value.id + '">' + value.city + '</option>');
+//                 });
+//             },
+//             error: function (xhr, status, error) {
+//                 // console.error(xhr.responseText);
+//             }
+//         });
+//     } else {
+//         $('#city').html('<option value="">Select City</option>');
+//     }
+// });
 
+$('#property_county').on('change', function () {
+    var county_id = $(this).val();
+    var state_id = $('#property_state').val();
+    var process_id = $("#process_code").val();
+    $("#city").html(''); // Clear previous options
+
+    if (county_id) {
+        $.ajax({
+            url: "{{ route('getCities') }}",
+            type: "POST",
+            data: {
+                county_id: county_id,
+                state_id: state_id,
+                process_id: process_id,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: 'json',
+            success: function (result) {
+                if (result.length > 0 && result[0].id !== null) {
+                    $('#city').html('<option value="">Select City</option>');
+                    $.each(result, function (key, value) {
+                        $("#city").append('<option value="' + value.id + '">' + value.city + '</option>');
+                    });
+                } else {
+                    $('#city').html('<option value="">No Cities Found</option>');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    } else {
+        $('#city').html('<option value="">Select City</option>');
+    }
+});
+
+
+
+///
     $(document).ready(function() {
         var form = document.getElementById('orderInputForm');
 
