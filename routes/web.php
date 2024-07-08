@@ -117,6 +117,8 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::any('/getlob', 'getlob')->name('getlob');
     Route::any('/getproduct', 'getproduct')->name('getproduct');
 
+    Route::post('getCities', 'getCities')->name('getCities');
+
 
 
 });
