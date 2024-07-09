@@ -970,5 +970,7 @@
                 });
             }
         });
+
+
 </script>
 @endsection

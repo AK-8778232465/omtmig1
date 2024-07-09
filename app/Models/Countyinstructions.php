@@ -16,7 +16,6 @@ class Countyinstructions extends Model
         'state_id',
         'county_id',
         'city_id',
-        'client_id',
         'process_id',
         'lob_id',
         'json',
