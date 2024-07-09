@@ -237,25 +237,20 @@ class OrderFormController extends Controller
             //state
             $stateList = State::select('id', 'short_code')->get();
             //county
+        if(isset($orderData->property_state)){
             $countyList = County::select('id','county_name')->where('stateId',$orderData->property_state)->get();
-            //city
-            $cityList = City::select('id','city')->where('county_id',$orderData->property_county)->get();
+        }
+        else{
+            $countyList = County::select('id', 'county_name')->where('id', 0)->get();
+        }
 
-            //county
-            // if(isset($orderData->property_state)){
-            //     $countyList = County::select('id','county_name')->where('stateId',$orderData->property_state)->get();
-            // }
-            // else{
-            //     $countyList = County::select('id', 'county_name')->where('id', 0)->get();
-            // }
-
-            // if(empty($orderData->city_id)){
-            //     if (!empty($orderData->property_county)) {
-            //         $cityList = City::select('id','city')->where('county_id',$orderData->property_county)->get();
-            //     }else{
-            //         $cityList = City::select('id', 'city')->where('id', 0)->get();
-            //     }
-            // }
+        if(empty($orderData->city_id)){
+            if (!empty($orderData->property_county)) {
+                $cityList = City::select('id','city')->where('county_id',$orderData->property_county)->get();
+            }else{
+                $cityList = City::select('id', 'city')->where('id', 0)->get();
+            }
+        }
 
             //product
             $productList = product::select('id','product_name')->get();

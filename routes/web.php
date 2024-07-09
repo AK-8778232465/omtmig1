@@ -52,6 +52,7 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,S
     Route::get('settings', 'setting')->name('settings');
     Route::get('settings/users', 'setting')->name('users');
     Route::get('settings/products', 'setting')->name('products');
+    Route::get('settings/sduploads', 'setting')->name('sduploads');
     // Users
     Route::post('/usersInsert', 'addUsers')->name('usersInsert');
     Route::post('edit_user', 'edit_user')->name('edit_user');
@@ -69,6 +70,10 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,S
     Route::post('/edit_product', 'edit_product')->name('edit_product');
     Route::any('/update_product', 'update_product')->name('update_product');
 
+    //Supporting doc's
+    Route::any('/getlobId', 'getlobId')->name('getlobId');
+    Route::any('/getprocessId', 'getprocessId')->name('getprocessId');
+    Route::any('/sduploadfileImport', 'sduploadfileImport')->name('sduploadfileImport');
 
 
     Route::any('/import', 'import')->name('import');
@@ -118,7 +123,6 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::any('/getproduct', 'getproduct')->name('getproduct');
 
     Route::post('getCities', 'getCities')->name('getCities');
-
 
 
 });

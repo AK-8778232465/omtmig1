@@ -25,8 +25,12 @@ use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Imports\AssignImport;
+use App\Imports\SduploadImport;
 use App\Exports\UserServiceMappingExport;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Session;
 
 class SettingController extends Controller
@@ -69,8 +73,10 @@ class SettingController extends Controller
 
                 return view('app.settings.product',compact('lobData','clients','products'));
                 }
+        }else if ($request->is('settings/sduploads')){
+            $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
+            return view('app.settings.sduploads',compact('clients'));
         }
-       
     }
 
     //Users
@@ -420,5 +426,147 @@ class SettingController extends Controller
         }
     }
 
+    public function getlobId(Request $request)
+    {
+        $lobs = DB::table('stl_lob')
+                    ->select('id', 'name')
+                    ->where('client_id', $request->client_id)
+                    ->orderBy('name', 'asc')
+                    ->get();
+       
+        return response()->json($lobs);
+    }
+
+    public function getprocessId(Request $request)
+    {
+        $process = DB::table('stl_process')
+                    ->select('id', 'name')
+                    ->where('lob_id', $request->lob_id)
+                    ->orderBy('name', 'asc')
+                    ->get();
+       
+        return response()->json($process);
+    }
+
+    public function sduploadfileImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx',
+            'client_id' => 'required',
+            'lob_id' => 'required',
+            'process_id' => 'required',
+        ]);
+
+        $file = $request->file('file');
+
+        if ($file && $file->getClientOriginalExtension() == 'xlsx' && $file->isValid()) {
+            $filename = 'excelupload_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('Uploaded_Excel_Files', $filename);
+
+            $original_file_name = $file->getClientOriginalName();
+
+            $reader = IOFactory::createReader('Xlsx');
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load(storage_path('app/Uploaded_Excel_Files/' . $filename));
+            $output = str_ireplace('.xlsx', '', $filename);
+            $worksheet = $spreadsheet->getActiveSheet();
+            // $totalRowCount = $worksheet->getHighestRow() - 1;
+
+
+            $totalRowCount = -1;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                // Initialize a flag to check if any cell in the row is non-empty
+                $nonEmptyRow = false;
+                foreach ($row->getCellIterator() as $cell) {
+                    // Check if the cell is not empty
+                    if (!is_null($cell->getValue()) && $cell->getValue() !== '') {
+                        $nonEmptyRow = true;
+                        break; // Exit loop if any non-empty cell is found
+                    }
+                }
+                // If any non-empty cell is found in the row, increment the row count
+                if ($nonEmptyRow) {
+                    $totalRowCount++;
+                }
+            }
+            
+
+            if (Auth::user()->hasRole('Super Admin') && $totalRowCount >= 4000) {
+                $splitSize = ($totalRowCount/8);
+            } elseif (Auth::user()->hasRole('AVP/VP') && $totalRowCount >= 4000) {
+                $splitSize = ($totalRowCount/4);
+            } elseif (Auth::user()->hasRole('Business Head') && $totalRowCount >= 3000) {
+                $splitSize = ($totalRowCount/3);
+            } elseif (Auth::user()->hasRole('PM/TL') && $totalRowCount > 2000) {
+                $splitSize = ($totalRowCount/2);
+            } else {
+                $splitSize = ($totalRowCount/1);
+            }
+
+            $fileCount = 1;
+            $rowCount = 1;
+            $newSpreadsheet = new Spreadsheet();
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                if ($row->getRowIndex() > 1) { // Skip the heading row
+                    $cellIterator = $row->getCellIterator();
+                    $rowData = [];
+                    foreach ($cellIterator as $cell) {
+                        $rowData[] = $cell->getValue();
+                    }
+                    $newSpreadsheet->getActiveSheet()->fromArray([$rowData], null, 'A' . ++$rowCount);
+
+                    if ($rowCount >= $splitSize + 1) {
+                        // Add header row
+                        $headerRow = $worksheet->getRowIterator(1)->current()->getCellIterator();
+                        $headerData = [];
+                        foreach ($headerRow as $cell) {
+                            $headerData[] = $cell->getValue();
+                        }
+                        $newSpreadsheet->getActiveSheet()->fromArray([$headerData], null, 'A1');
+
+                        $writer = new Xlsx($newSpreadsheet);
+                        $writer->save(storage_path('app/Uploaded_Excel_Files/' . $output . '_' . str_pad($fileCount++, 4, '0', STR_PAD_LEFT) . '.xlsx'));
+
+                        $rowCount = 1;
+                        $newSpreadsheet = new Spreadsheet();
+                    }
+                }
+            }
+
+            // Save the remaining data with header row
+            if ($rowCount > 1) {
+                // Add header row
+                $headerRow = $worksheet->getRowIterator(1)->current()->getCellIterator();
+                $headerData = [];
+                foreach ($headerRow as $cell) {
+                    $headerData[] = $cell->getValue();
+                }
+                $newSpreadsheet->getActiveSheet()->fromArray([$headerData], null, 'A1');
+
+                $writer = new Xlsx($newSpreadsheet);
+                $writer->save(storage_path('app/Uploaded_Excel_Files/' . $output . '_' . str_pad($fileCount++, 4, '0', STR_PAD_LEFT) . '.xlsx'));
+            }
+
+            // Dispatch job for each split XLSX file
+            $outputFilesPath = storage_path('app/Uploaded_Excel_Files/' . $output . '_*.xlsx');
+            
+
+            if (file_exists(storage_path('app/Uploaded_Excel_Files/' . $filename))) {
+                unlink(storage_path('app/Uploaded_Excel_Files/' . $filename));
+            }
+
+            foreach (glob($outputFilesPath) as $file) {
+                Excel::import(new SduploadImport(Auth::id(),$request->client_id,
+                $request->lob_id,
+                $request->process_id), $file);
+            }
+
+            return response()->json(['success' => 'Excel Uploaded Successfully!']);
+        } else {
+            return response()->json(['error' => 'The file does not exist, is not readable, or is not an XLSX file']);
+        }
+    }
 
 }
