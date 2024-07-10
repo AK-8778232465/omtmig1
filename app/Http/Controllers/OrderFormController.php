@@ -154,14 +154,20 @@ class OrderFormController extends Controller
             $countyInfo = Null;
             $checklist = Null;
 
-            if ($orderData->city_id) {
+           if ($orderData->city_id) {
                 $countyData = DB::table('county_instructions')
                                             ->where('city_id', $orderData->city_id)
                                             ->where('county_id', $orderData->county_id)
                                             ->whereNotNull('county_id')
                                             ->where('lob_id', $orderData->lob_id)
                     ->first();
-                                    }
+            }else {
+                $countyData = DB::table('county_instructions')
+                    ->where('county_id', $orderData->county_id)
+                    ->whereNotNull('county_id')
+                    ->where('lob_id', $orderData->lob_id)
+                    ->first();
+                }
             
             if (!empty($countyData)) {
                 $countyInfo = json_decode($countyData->json, true);
