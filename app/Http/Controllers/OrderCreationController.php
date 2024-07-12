@@ -90,19 +90,7 @@ class OrderCreationController extends Controller
     
     public function getCities(Request $request)
     {
-        $lobData = DB::table('stl_item_description')
-                    ->select('lob_id')
-                    ->where('id', $request->process_id)
-                    ->first();
-
-        $cities = DB::table('county_instructions')->select('oms_city.id','oms_city.city')
-                    ->leftJoin('oms_city', 'county_instructions.city_id', '=', 'oms_city.id')
-                    ->leftJoin('oms_state', 'county_instructions.state_id', '=', 'oms_state.id')
-                    ->leftJoin('oms_county', 'county_instructions.county_id', '=', 'oms_county.id')
-                    ->where('county_instructions.lob_id', $lobData->lob_id)
-                    ->where('oms_state.id', $request->state_id)
-                    ->where('oms_county.id', $request->county_id)
-                    ->get();
+        $cities = City::select('id', 'city')->where('county_id', $request->county_id)->get();
 
         return response()->json($cities);
     }

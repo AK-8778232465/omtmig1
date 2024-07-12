@@ -17,6 +17,25 @@
             display: inline-block; /* Makes the element fit the content */
         }
 
+  #uploading-spinner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    z-index: 9999; /* Ensure it's on top of other content */
+}
+
+.spinner-border {
+    width: 6rem; /* Increase spinner size */
+    height: 6rem; /* Increase spinner size */
+}
+
+p {
+    font-size: 2rem; /* Increase text size */
+}
+
 </style>
 <div class="container-fluid mt-2">
     <div class="col-md-12 pl-1 mt-2 p-3 content-loaded">
@@ -75,11 +94,26 @@
     </div>
 </div>
 
+<div id="uploading-spinner" class="text-center d-none">
+    <div class="d-flex flex-column justify-content-center align-items-center" style="height: 100vh;">
+        <div class="spinner-border text-primary mb-2" role="status" style="width: 4rem; height: 4rem;"> <!-- Adjust size as needed -->
+            <span class="sr-only">Excel Uploading...</span>
+        </div>
+        <p class="mb-0" style="font-size: 1.5rem;">Excel Uploading...</p> <!-- Adjust font size as needed -->
+    </div>
+</div>
 
 <script>
 $(document).ready(function() {
       $('.select2dropdown').select2();
   });
+
+  
+  $(document).ready(function() {
+        $('.content-loaded').show();
+        $('.frame').addClass('d-none');
+    });
+
 // Js Dropify
 $(document).ready(function() {
         // Initialize Dropify
@@ -165,6 +199,7 @@ $('#lob_id').on('change', function () {
 
 $('#sdupload_id').on('submit', function(event){
         event.preventDefault();
+        $('#uploading-spinner').removeClass('d-none');
         $('.content-loaded').hide();
         $('.frame').removeClass('d-none');
         if ($('#sdupload_id').parsley().isValid()) {
@@ -175,6 +210,7 @@ $('#sdupload_id').on('submit', function(event){
                 processData: false,
                 contentType: false,
                 success: function (response) {
+                      $('#uploading-spinner').addClass('d-none');
                       $('.content-loaded').show();
                       $('.frame').addClass('d-none');
                       if (response.success == "Excel Uploaded Successfully!") {
@@ -194,6 +230,7 @@ $('#sdupload_id').on('submit', function(event){
                       }
                   },
                 error: function (response) {
+                    $('#uploading-spinner').addClass('d-none'); // Hide the spinner and text on error
                     $('#progressId').addClass('d-none');
                     $('.content-loaded').show();
                     $('.frame').addClass('d-none');
