@@ -503,8 +503,6 @@ document.getElementById('order_date').addEventListener('change', function() {
 
 $('#property_county').on('change', function () {
     var county_id = $(this).val();
-    var state_id = $('#property_state').val();
-    var process_id = $("#process_code").val();
     $("#city").html(''); // Clear previous options
 
     if (county_id) {
@@ -513,8 +511,6 @@ $('#property_county').on('change', function () {
             type: "POST",
             data: {
                 county_id: county_id,
-                state_id: state_id,
-                process_id: process_id,
                 _token: '{{ csrf_token() }}'
             },
             dataType: 'json',

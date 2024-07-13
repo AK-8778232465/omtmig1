@@ -81,11 +81,11 @@
                                 </select>
                             </div>
                         </div>
-                        @if(!is_null($orderData->city_id))
+                      
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="font-weight-bold">City/Municipality</div>
-                                <select id="city" name="city" class="form-control" data-parsley-required="true">
+                                <select id="city" name="city" class="form-control select2dropdown" data-parsley-required="true">
                                     <option value="">Select City/Municipality</option>
                                     @foreach($cityList as $city)
                                         <option value="{{ $city->id }}" {{ ($orderData->city_id == $city->id) ? 'selected' : '' }}>
@@ -94,7 +94,6 @@
                                 </select>
                             </div>
                         </div>
-                        @endif
                     </div>
                 </div>
                 @if(!@empty($countyInfo))

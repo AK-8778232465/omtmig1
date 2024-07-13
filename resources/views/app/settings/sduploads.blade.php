@@ -7,14 +7,14 @@
 
   #filename-display {
             margin-top: 10px;
-            font-size: 14px; /* Adjust the font size as needed */
-            color: #333; /* Change to the desired color */
-            font-weight: bold; /* Makes the text bold */
-            background-color: #f9f9f9; /* Light grey background */
-            padding: 5px 10px; /* Adds some padding */
-            border-radius: 5px; /* Rounds the corners */
-            border: 1px solid #ddd; /* Adds a light border */
-            display: inline-block; /* Makes the element fit the content */
+            font-size: 14px; 
+            color: #333; 
+            font-weight: bold;
+            background-color: #f9f9f9; 
+            padding: 5px 10px; 
+            border-radius: 5px; 
+            border: 1px solid #ddd; 
+            display: inline-block; 
         }
 
   #uploading-spinner {
@@ -23,17 +23,17 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
-    z-index: 9999; /* Ensure it's on top of other content */
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
 }
 
 .spinner-border {
-    width: 6rem; /* Increase spinner size */
-    height: 6rem; /* Increase spinner size */
+    width: 6rem; 
+    height: 6rem; 
 }
 
 p {
-    font-size: 2rem; /* Increase text size */
+    font-size: 2rem;
 }
 
 </style>
@@ -74,7 +74,7 @@ p {
                     <div class="col-3"></div>
                     <div class="col-6 mb-2">
                         <input type="file" id="file" name="file" class="form-control-file dropify" accept=".csv,.xlsx,.ods" required>
-                        <p id="filename-display" style="margin-top: 10px;"></p> <!-- Element to display the filename -->
+                        <p id="filename-display" style="margin-top: 10px;"></p> 
                     </div>
                     <div class="col-3"></div>
                     <div class="col-lg-12 mb-2 mt-3 text-center">
@@ -96,10 +96,10 @@ p {
 
 <div id="uploading-spinner" class="text-center d-none">
     <div class="d-flex flex-column justify-content-center align-items-center" style="height: 100vh;">
-        <div class="spinner-border text-primary mb-2" role="status" style="width: 4rem; height: 4rem;"> <!-- Adjust size as needed -->
+        <div class="spinner-border text-primary mb-2" role="status" style="width: 4rem; height: 4rem;"> 
             <span class="sr-only">Excel Uploading...</span>
         </div>
-        <p class="mb-0" style="font-size: 1.5rem;">Excel Uploading...</p> <!-- Adjust font size as needed -->
+        <p class="mb-0" style="font-size: 1.5rem;">Excel Uploading...</p> 
     </div>
 </div>
 
@@ -114,29 +114,26 @@ $(document).ready(function() {
         $('.frame').addClass('d-none');
     });
 
-// Js Dropify
 $(document).ready(function() {
-        // Initialize Dropify
+        
         $('.dropify').dropify();
-        // Event listener for file change
+       
         $('.dropify').on('change', function(event) {
             var input = event.target;
             if (input.files && input.files[0]) {
                 var fileName = input.files[0].name;
-            $('#filename-display').text('Selected file: ' + fileName).show(); // Show the element and set text
+            $('#filename-display').text('Selected file: ' + fileName).show(); 
             } else {
-            $('#filename-display').text('').hide(); // Clear text and hide the element
+            $('#filename-display').text('').hide(); 
             }
         });
 
-        // Event listener for Dropify's events (for example, file clear event)
         var drEvent = $('.dropify').dropify();
 
         drEvent.on('dropify.afterClear', function(event, element){
-        $('#filename-display').text('').hide(); // Clear text and hide the element
+        $('#filename-display').text('').hide(); 
     });
 
-    // Hide initially if it's empty
     if ($('#filename-display').text().trim() === '') {
         $('#filename-display').hide();
     }
@@ -213,28 +210,31 @@ $('#sdupload_id').on('submit', function(event){
                       $('#uploading-spinner').addClass('d-none');
                       $('.content-loaded').show();
                       $('.frame').addClass('d-none');
-                      if (response.success == "Excel Uploaded Successfully!") {
-                          new PNotify({
+
+                if (response.success) {
+                    Swal.fire({
                               title: 'Success',
                               text: response.success,
-                              type: 'success'
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        location.reload();
                           });
-                          setTimeout(function() {
-                              location.reload();
-                          }, 1000);
-                      } else if (response.error == "The file does not exist, is not readable, or is not an XLSX file") {
-                          new PNotify({
+                } else if (response.error) {
+                    Swal.fire({
                               title: 'Error',
                               text: response.error,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
                           });
                       }
                   },
                 error: function (response) {
-                    $('#uploading-spinner').addClass('d-none'); // Hide the spinner and text on error
-                    $('#progressId').addClass('d-none');
+                $('#uploading-spinner').addClass('d-none');
                     $('.content-loaded').show();
                     $('.frame').addClass('d-none');
                     Swal.fire({
+                    title: 'Error',
                         text: "File Upload Failed",
                         icon: "error",
                         confirmButtonText: "OK"
@@ -244,7 +244,8 @@ $('#sdupload_id').on('submit', function(event){
                 }
             });
         }
-    });
+});
+
 </script>
 
 @endsection
