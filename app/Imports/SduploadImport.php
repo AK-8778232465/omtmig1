@@ -103,7 +103,7 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
                 'ASSESSOR_PASSWORD'  => $row['ASSESSOR PASSWORD'] ?? null,
             ],
             'MUNICIPALITY' =>  [
-                'MUNICIPALITY' => $row['MUNICIPALITY'] ?? null,
+                'MUNICIPALITY' => $row['MUNICIPALITY'] ?? $row['Town/City/Municipality'] ?? null,
                 'STATE_COUNTY' => $row['STATE'] ?? null,
                 'STATE_COUNTY_TOWNSHIP' => $row['COUNTY'] ?? null,
             ]
