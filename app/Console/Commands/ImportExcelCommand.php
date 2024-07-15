@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Countyinstructions;
+use App\Models\CountyInstructions;
 use App\Models\State;
 use App\Models\County;
 use App\Models\City;
@@ -52,7 +52,7 @@ class ImportExcelCommand extends Command
             $processId = stlprocess::where('name', trim($entry['process']))->value('id');
 
 
-            Countyinstructions::create([
+            CountyInstructions::create([
                 'state_id' => $stateId,
                 'county_id' => $countyId,
                 'city_id' => $cityId,
