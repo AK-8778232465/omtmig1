@@ -150,10 +150,26 @@
                     <div class="form-group">
                         <div class="row d-none" id="assign_tab">
                             <div class="col-12 row">
-                                <div class="col-3"></div>
-                                <div class="col-4">
-                                        <select style="width: 100%;" required class="form-control form-control-sm" id="user_id" name="user_id">
-                                        <option selected disabled value=""> Select User</option>
+                                <div class="col-1"></div>
+                                <div class="col-3">
+                                    <select style="width: 100%;" class="form-control form-control-sm" id="user_id" name="user_id">
+                                        <option selected disabled value="">Select User</option>
+                                        @foreach ($processors as $processor)
+                                            <option value="{{ $processor->id }}">{{ $processor->username }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <select style="width: 100%;" class="form-control form-control-sm" id="qcer_id" name="qcer_id">
+                                        <option selected disabled value="">Select Qcer</option>
+                                        @foreach ($qcers as $qcer)
+                                            <option value="{{ $qcer->id }}">{{ $qcer->username }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-3" id="coversheetPrepDropdown">
+                                    <select style="width: 100%;"  class="form-control form-control-sm" id="cover_prep_id" name="cover_prep_id">
+                                    <option selected disabled value=""> Select coversheet-preparor</option>
                                     </select>
                                 </div>
                                 <div class="col-2">
@@ -287,8 +303,19 @@
         if ($("#user_id").data('select2') !== undefined) {
             $("#user_id").select2('destroy');
         }
+        if ($("#qcer_id").data('select2') !== undefined) {
+            $("#qcer_id").select2('destroy');
+        }
+
+        if ($("#cover_prep_id").data('select2') !== undefined) {
+            $("#cover_prep_id").select2('destroy');
+        }
         $('#user_id').prop('selectedIndex',0);
         $("#user_id").select2();
+        $('#qcer_id').prop('selectedIndex',0);
+        $("#qcer_id").select2();
+        $('#cover_prep_id').prop('selectedIndex',0);
+        $("#cover_prep_id").select2();
         $('input.check-all').prop('checked', false);
         $('.status-btn').removeClass('btn-primary').addClass('text-white');
         $(this).removeClass('btn-info');
@@ -304,8 +331,18 @@
         if ($("#user_id").data('select2') !== undefined) {
             $("#user_id").select2('destroy');
         }
+        if ($("#qcer_id").data('select2') !== undefined) {
+            $("#qcer_id").select2('destroy');
+        }
+        if ($("#cover_prep_id").data('select2') !== undefined) {
+            $("#cover_prep_id").select2('destroy');
+        }
         $('#user_id').prop('selectedIndex',0);
         $("#user_id").select2();
+        $('#qcer_id').prop('selectedIndex',0);
+        $("#qcer_id").select2();
+        $('#cover_prep_id').prop('selectedIndex',0);
+        $("#cover_prep_id").select2();
         $('input.check-all').prop('checked', false);
         task_status = $('#statusButtons').find('.btn-primary').attr('id');
         let status = task_status.replace("status_", "");
@@ -341,7 +378,18 @@
                 datatable.column(10).visible(true);
                 $('.status-dropdown').prop('disabled', true);
             } else {
+                datatable.column(10).visible(true);
+            }
+
+            if(status == 5 || status == 'All'){
+                $('.status-dropdown').prop('disabled', false);
                 datatable.column(10).visible(false);
+            }
+
+            if (status == 13) {
+            document.getElementById('coversheetPrepDropdown').style.display = 'block';
+            } else {
+                document.getElementById('coversheetPrepDropdown').style.display = 'none';
             }
         @endif
         // //
@@ -457,9 +505,9 @@ $(document).ready(function() {
             $('#assign_tab').removeClass('d-none');
             task_status = $('#statusButtons').find('.btn-primary').attr('id');
             let status = task_status.replace("status_", "");
-            if (status == 6) {
-            var userlist = (status == 6) ? <?php echo json_encode($processors); ?> : <?php echo json_encode($qcers); ?>;
-            } else if (status == 13) {
+            if (status != 13 && status != 6 ) {
+            var userlist = (status != status != 13 && status != 6) ? <?php echo json_encode($processors); ?> : <?php echo json_encode($qcers); ?>;
+            } else if (status == 13 || status == 6) {
                 userlist = <?php echo json_encode($processors); ?>;
             }  
             $('#user_id').empty().append('<option selected disabled value="">Select User</option>');
@@ -472,6 +520,79 @@ $(document).ready(function() {
     }
     });
 
+
+
+    $(document).on('change', 'input.check-all', function() {
+        var isChecked = $(this).prop('checked');
+        $('input.check-one').prop('checked', isChecked);
+
+        if (isChecked) {
+            $('#assign_tab').removeClass('d-none');
+            task_status = $('#statusButtons').find('.btn-primary').attr('id');
+            let status = task_status.replace("status_", "");
+            if (status != 13) {
+                var userlist = (status != 13) ? <?php echo json_encode($qcers); ?> : [];
+            } else if (status == 13) {
+                userlist = <?php echo json_encode($qcers); ?>;
+            }
+            $('#qcer_id').empty().append('<option selected disabled value="">Select Qcer</option>');
+            $.each(userlist, function(index, user) {
+                $('#qcer_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+            });
+        } else {
+            $('#assign_tab').addClass('d-none');
+            $('#qcer_id').empty();
+    }
+    });
+
+    $(document).on('change', 'input.check-all', function() {
+        var isChecked = $(this).prop('checked');
+        $('input.check-one').prop('checked', isChecked);
+
+        if (isChecked) {
+            $('#assign_tab').removeClass('d-none');
+            task_status = $('#statusButtons').find('.btn-primary').attr('id');
+            let status = task_status.replace("status_", "");
+            if (status != 13) {
+                var userlist = (status != 13) ? <?php echo json_encode($qcers); ?> : [];
+            } else if (status == 13) {
+                userlist = <?php echo json_encode($qcers); ?>;
+            }
+            $('#qcer_id').empty().append('<option selected disabled value="">Select Qcer</option>');
+            $.each(userlist, function(index, user) {
+                $('#qcer_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+            });
+        } else {
+            $('#assign_tab').addClass('d-none');
+            $('#qcer_id').empty();
+    }
+    });
+
+    $(document).on('change', 'input.check-all', function() {
+        var isChecked = $(this).prop('checked');
+        $('input.check-one').prop('checked', isChecked);
+
+        if (isChecked) {
+            $('#assign_tab').removeClass('d-none');
+            task_status = $('#statusButtons').find('.btn-primary').attr('id');
+            let status = task_status.replace("status_", "");
+          
+            if (status == 13) {
+                userlist = <?php echo json_encode($processors); ?>;
+            }
+           
+
+            $('#cover_prep_id').empty().append('<option selected disabled value="">Select Coversheet-preperor</option>');
+            $.each(userlist, function(index, user) {
+                $('#cover_prep_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+            });
+        } else {
+            $('#assign_tab').addClass('d-none');
+            $('#cover_prep_id').empty();
+    }
+    });
+
+
     $(document).on('change', 'input.check-one', function() {
     var allChecked = $('input.check-one').length === $('input.check-one:checked').length;
     $('input.check-all').prop('checked', allChecked);
@@ -481,15 +602,36 @@ $(document).ready(function() {
         var anyCheckboxChecked = $('input.check-one:checked').length > 0;
         if (anyCheckboxChecked) {
             $('#assign_tab').removeClass('d-none');
-            task_status = $('#statusButtons').find('.btn-primary').attr('id');
+        var task_status = $('#statusButtons').find('.btn-primary').attr('id');
             let status = task_status.replace("status_", "");
             var userlist = [];
 
-            if (status == 6) {
+       if (status == 13) {
                 userlist = <?php echo json_encode($processors); ?>;
-            } else if (status == 7) {
-                userlist = <?php echo json_encode($qcers); ?>;
-            }else if (status == 13) {
+        }
+
+        $('#cover_prep_id').empty();
+        $('#cover_prep_id').append('<option selected disabled value="">Select Coversheet-prep</option>');
+        $.each(userlist, function(index, user) {
+            $('#cover_prep_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+        });
+    } else {
+        $('#assign_tab').addClass('d-none');
+        $('#cover_prep_id').empty();
+    }
+});
+
+//mine
+
+$(document).on('change', 'input.check-one', function() {
+    var anyCheckboxChecked = $('input.check-one:checked').length > 0;
+    if (anyCheckboxChecked) {
+        $('#assign_tab').removeClass('d-none');
+        var task_status = $('#statusButtons').find('.btn-primary').attr('id');
+        let status = task_status.replace("status_", "");
+        var userlist = [];
+
+        if (status != null) {
                 userlist = <?php echo json_encode($processors); ?>;
             }
 
@@ -502,7 +644,32 @@ $(document).ready(function() {
             $('#assign_tab').addClass('d-none');
             $('#user_id').empty();
         }
+});
+
+$(document).on('change', 'input.check-one', function() {
+    var anyCheckboxChecked = $('input.check-one:checked').length > 0;
+    if (anyCheckboxChecked) {
+        $('#assign_tab').removeClass('d-none');
+        var task_status = $('#statusButtons').find('.btn-primary').attr('id');
+        let status = task_status.replace("status_", "");
+        var userlist = [];
+
+        if (status != 7 && status != 13) {
+            userlist = <?php echo json_encode($processors); ?>;
+        }
+            userlist = <?php echo json_encode($qcers); ?>;
+
+
+        $('#qcer_id').empty();
+        $('#qcer_id').append('<option selected disabled value="">Select Qcer</option>');
+        $.each(userlist, function(index, user) {
+            $('#qcer_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
     });
+    } else {
+        $('#assign_tab').addClass('d-none');
+        $('#qcer_id').empty();
+    }
+});
 
     $(document).on('change', '.status-dropdown', function() {
     var selectedStatus = $(this).val();
@@ -722,6 +889,8 @@ $(document).ready(function() {
             let status = task_status.replace("status_", "");
             let checkedOrdersArray = $('input[name="orders[]"]:checked');
             let user_id = $('#user_id').val();
+            let qcer_id = $('#qcer_id').val();
+            let cover_prep_id = $('#cover_prep_id').val();
 
             $.ajax({
                 type: "POST",
@@ -732,6 +901,8 @@ $(document).ready(function() {
                         return this.value;
                     }).get(),
                     user_id: user_id,
+                    qcer_id: qcer_id,
+                    cover_prep_id:cover_prep_id,
                     _token: '{{csrf_token()}}'
                 },
                 success: function (response) {
@@ -765,6 +936,9 @@ $(document).ready(function() {
         var elementId = $(this).attr('id');
         let order_id = elementId.split('_')[2];
         let user_id = "{!! Auth::id() !!}";
+        let qcer_id = "{!! Auth::id() !!}";
+        let cover_prep_id = "{!! Auth::id() !!}";
+
         let orders = [order_id];
         $.ajax({
             type: "POST",
@@ -773,6 +947,8 @@ $(document).ready(function() {
                 type_id: status,
                 orders: orders,
                 user_id: user_id,
+                qcer_id: qcer_id,
+                cover_prep_id: cover_prep_id,
                 _token: '{{csrf_token()}}'
             },
             success: function (response) {
