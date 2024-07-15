@@ -53,7 +53,7 @@ class SettingController extends Controller
     public function setting(Request $request)
     {
         if($request->is('settings/users') ||$request->is('settings') ){
-            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
+            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP') || Auth::user()->hasRole('SPOC')) {
                 $usersData = User::with('usertypes:id,usertype')->whereNotIn('user_type_id', [1,4])->get();
                 $userTypes = UserType::whereNotIn('id', [1,4])->get();
                 $exportCount = ServiceUserMapping::count();
@@ -74,7 +74,7 @@ class SettingController extends Controller
                 return view('app.settings.product',compact('lobData','clients','products'));
                 }
         }else if ($request->is('settings/sduploads')){
-            $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
+            $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->orderBy('client_no')->get();
             return view('app.settings.sduploads',compact('clients'));
         }
     }

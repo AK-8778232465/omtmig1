@@ -1,5 +1,5 @@
 <?php
-// testing sync
+
 namespace App\Http\Controllers;
 
 use DB;

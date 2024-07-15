@@ -2,7 +2,6 @@
 
 namespace App\Imports;
 
-
 use Illuminate\Support\Facades\Log;
 use App\Models\County;
 use App\Models\CountyInstructions;
@@ -44,7 +43,6 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
         $this->process_id = $process_id;
     }
 
-
     public function model(array $row)
     {
         $stateCode = strtoupper($row['STATE']);
@@ -72,7 +70,7 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
             Log::error($row);
             return null;
         }
-    
+
         $jsonData = [
             'TAX' => [
                 'TAX_SITE' => $row['TAX SITE'] ?? null,
@@ -100,27 +98,27 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
             'ASSESSOR' => [
                 'ASSESSOR_SITE' => $row['ASSESSOR SITE'] ?? null,
                 'ASSESSOR_USERNAME' => $row['ASSESSOR USERNAME'] ?? null,
-                'ASSESSOR_PASSWORD'  => $row['ASSESSOR PASSWORD'] ?? null,
+                'ASSESSOR_PASSWORD' => $row['ASSESSOR PASSWORD'] ?? null,
             ],
-            'MUNICIPALITY' =>  [
+            'MUNICIPALITY' => [
                 'MUNICIPALITY' => $row['MUNICIPALITY'] ?? $row['Town/City/Municipality'] ?? null,
                 'STATE_COUNTY' => $row['STATE'] ?? null,
                 'STATE_COUNTY_TOWNSHIP' => $row['COUNTY'] ?? null,
             ]
         ];
-    
+
         try {
             if (!$city) {
                 $existingEntry = CountyInstructions::where('state_id', $state->id)
-                ->where('county_id', $county->id)
-                ->first();
+                    ->where('county_id', $county->id)
+                    ->first();
             } else {
                 $existingEntry = CountyInstructions::where('state_id', $state->id)
-                ->where('county_id', $county->id)
-                ->where('city_id', $city->id)
-            ->first();
+                    ->where('county_id', $county->id)
+                    ->where('city_id', $city->id)
+                    ->first();
             }
-           
+
             if ($existingEntry) {
                 $existingJson = json_decode($existingEntry->json, true);
 
@@ -141,7 +139,7 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
                 $updatedJsonString = json_encode($existingJson);
 
                 $existingEntry->update(['json' => $updatedJsonString]);
-        } else {
+            } else {
                 if (!$city) {
                     DB::transaction(function () use ($state, $county, $jsonData) {
                         CountyInstructions::create([
@@ -156,23 +154,25 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
                 } else {
                     DB::transaction(function () use ($state, $county, $city, $jsonData) {
                         CountyInstructions::create([
-                    'client_id' => $this->client_id,
-                    'lob_id' => $this->lob_id,
-                    'process_id' => $this->process_id,
+                            'client_id' => $this->client_id,
+                            'lob_id' => $this->lob_id,
+                            'process_id' => $this->process_id,
                             'state_id' => $state->id,
                             'county_id' => $county->id,
                             'city_id' => $city->id,
                             'json' => json_encode($jsonData),
-                ]);
-            });
-        }
+                        ]);
+                    });
+                }
             }
-    } catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error importing row: ' . json_encode($row) . ' Error: ' . $e->getMessage());
             $this->skipRow(); 
+        }
+
+        $this->rows++;
     }
-    $this->rows++;
-    }
+
     public function batchSize(): int
     {
         return 1000; 

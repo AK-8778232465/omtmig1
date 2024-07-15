@@ -31,7 +31,7 @@
                                 <div>{{($orderData->process_name) ? $orderData->process_name : '-' }}</div>
                             </div>
                             <div class="col-md-3">
-                                <div class="font-weight-bold">Tier :</div>
+                                <div class="font-weight-bold">Tier</div>
                                 <select name="tier_id" id="tier_id" class="form-control">
                                     <option value="">Select Tier</option>
                                     @foreach($tierList as $tier)
@@ -42,7 +42,7 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <div class="font-weight-bold">Order Rec Date and Time:</div>
+                                <div class="font-weight-bold">Order Rec Date and Time</div>
                                 <div>
                                     {{ $orderData->order_date ? (($formattedDate = date('m/d/Y H:i', strtotime($orderData->order_date))) !== false ? $formattedDate : '-') : '-' }}
                                 </div>
@@ -84,9 +84,9 @@
                       
                         <div class="row">
                             <div class="col-md-3">
-                                <div class="font-weight-bold">City/Municipality</div>
+                                <div class="font-weight-bold">Municipality</div>
                                 <select id="city" name="city" class="form-control select2dropdown" data-parsley-required="true">
-                                    <option value="">Select City/Municipality</option>
+                                    <option value="">Select Municipality</option>
                                     @foreach($cityList as $city)
                                         <option value="{{ $city->id }}" {{ ($orderData->city_id == $city->id) ? 'selected' : '' }}>
                                             {{ $city->city }}</option>

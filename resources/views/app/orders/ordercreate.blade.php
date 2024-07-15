@@ -175,7 +175,7 @@
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Order ID<span style="color:red;">*</span></label>
                             <input type="text" id="order_id" name="order_id" class="form-control" placeholder="Enter Order ID" required
-                            data-parsley-pattern="^[a-zA-Z0-9]+$"
+                            data-parsley-pattern="^[a-zA-Z0-9-]+$"
                             data-parsley-error-message="Order ID should not be empty and No special characters are allowed."
                             data-parsley-trigger="focusout keyup"
                             maxlength="20">
@@ -221,9 +221,9 @@
                             </select>
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
-                            <label class="font-weight-bold">City/Municipality</label>
+                            <label class="font-weight-bold">Municipality</label>
                             <select id="city" name="city" class="form-control select2dropdown" style="width:100%" autocomplete="off"  data-parsley-trigger="focusout keyup">
-                                <option selected="" disabled="" value="">Select City/Municipality</option>
+                                <option selected="" disabled="" value="">Select Municipality</option>
                             </select>
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
@@ -469,37 +469,6 @@ document.getElementById('order_date').addEventListener('change', function() {
             }
         });
     });
-    ////
-//     $('#property_county').on('change', function () {
-//     var county_id = $(this).val();
-//     var state_id = $('#property_state').val();
-//     var process_id = $("#process_code").val();
-//     $("#city").html('');
-//     if (county_id) {
-//         $.ajax({
-//             url: "{{ route('getCities') }}",
-//             type: "POST",
-//             data: {
-//                 county_id: county_id,
-//                 state_id: state_id,
-//                 process_id: process_id,
-//                 _token: '{{ csrf_token() }}'
-//             },
-//             dataType: 'json',
-//             success: function (result) {
-//                 $('#city').html('<option value="">Select City</option>');
-//                 $.each(result.city, function (key, value) {
-//                     $("#city").append('<option value="' + value.id + '">' + value.city + '</option>');
-//                 });
-//             },
-//             error: function (xhr, status, error) {
-//                 // console.error(xhr.responseText);
-//             }
-//         });
-//     } else {
-//         $('#city').html('<option value="">Select City</option>');
-//     }
-// });
 
 $('#property_county').on('change', function () {
     var county_id = $(this).val();

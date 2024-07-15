@@ -78,7 +78,7 @@ p {
                     </div>
                     <div class="col-3"></div>
                     <div class="col-lg-12 mb-2 mt-3 text-center">
-                        <a class="btn btn-sm btn-info mx-2" href="{{ asset('/template/sample_template.xlsx') }}"><i class="fas fa-download"></i> Sample Format</a>
+                        <a class="btn btn-sm btn-info mx-2" href="{{ asset('/template/sample_template_for_sduploads.xlsx') }}"><i class="fas fa-download"></i> Sample Format</a>
                         <button type="submit" class="btn btn-sm btn-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="13" height="14" x="0" y="0" viewBox="0 0 459.904 459.904" style="enable-background: new 0 0 512 512" xml:space="preserve">
                                 <g>
@@ -195,55 +195,57 @@ $('#lob_id').on('change', function () {
 });
 
 $('#sdupload_id').on('submit', function(event){
-        event.preventDefault();
-        $('#uploading-spinner').removeClass('d-none');
-        $('.content-loaded').hide();
-        $('.frame').removeClass('d-none');
-        if ($('#sdupload_id').parsley().isValid()) {
-            $.ajax({
-                type: "POST",
-                url: "{{ route('sduploadfileImport') }}",
-                data: new FormData(this),
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                      $('#uploading-spinner').addClass('d-none');
-                      $('.content-loaded').show();
-                      $('.frame').addClass('d-none');
+    event.preventDefault();
+    $('#uploading-spinner').removeClass('d-none');
+    $('.content-loaded').hide();
+    $('.frame').removeClass('d-none');
+    
+    if ($('#sdupload_id').parsley().isValid()) {
+        $.ajax({
+            type: "POST",
+            url: "{{ route('sduploadfileImport') }}",
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                $('#uploading-spinner').addClass('d-none');
+                $('.content-loaded').show();
+                $('.frame').addClass('d-none');
 
                 if (response.success) {
                     Swal.fire({
-                              title: 'Success',
-                              text: response.success,
+                        title: 'Success',
+                        text: response.success,
                         icon: 'success',
                         confirmButtonText: 'OK'
                     }).then(() => {
                         location.reload();
-                          });
+                    });
                 } else if (response.error) {
                     Swal.fire({
-                              title: 'Error',
-                              text: response.error,
+                        title: 'Error',
+                        text: response.error,
                         icon: 'error',
                         confirmButtonText: 'OK'
-                          });
-                      }
-                  },
-                error: function (response) {
-                $('#uploading-spinner').addClass('d-none');
-                    $('.content-loaded').show();
-                    $('.frame').addClass('d-none');
-                    Swal.fire({
-                    title: 'Error',
-                        text: "File Upload Failed",
-                        icon: "error",
-                        confirmButtonText: "OK"
-                    }).then(() => {
-                        location.reload();
                     });
                 }
-            });
-        }
+            },
+            error: function (response) {
+                $('#uploading-spinner').addClass('d-none');
+                $('.content-loaded').show();
+                $('.frame').addClass('d-none');
+
+                Swal.fire({
+                    title: 'Error',
+                    text: "File Upload Failed",
+                    icon: "error",
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    location.reload();
+                });
+            }
+        });
+    }
 });
 
 </script>

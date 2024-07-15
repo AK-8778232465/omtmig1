@@ -149,32 +149,31 @@ class OrderFormController extends Controller
             if($orderData->client_id != 16) {
                 return view('app.orders.comingsoon');
             }
-
             $countyData = Null;
             $countyInfo = Null;
             $checklist = Null;
 
 
             if ($orderData->city_id) {
-           if ($orderData->city_id) {
-                $countyData = DB::table('county_instructions')
-                                            ->where('city_id', $orderData->city_id)
-                                            ->where('county_id', $orderData->county_id)
+                if ($orderData->city_id) {
+                    $countyData = DB::table('county_instructions')
+                                ->where('city_id', $orderData->city_id)
+                                ->where('county_id', $orderData->county_id)
                                 ->where('state_id', $orderData->property_state)
-                                            ->whereNotNull('county_id')
-                                            ->where('lob_id', $orderData->lob_id)
-                    ->first();
+                                ->whereNotNull('county_id')
+                                ->where('lob_id', $orderData->lob_id)
+                                ->first();
                         }
-            }else {
-                $countyData = DB::table('county_instructions')
-                    ->where('county_id', $orderData->county_id)
+                 }else {
+                     $countyData = DB::table('county_instructions')
+                         ->where('county_id', $orderData->county_id)
                          ->where('state_id', $orderData->property_state)
-                    ->whereNotNull('county_id')
-                    ->where('lob_id', $orderData->lob_id)
-                    ->first();
-                }
-            
-            if (!empty($countyData)) {
+                         ->whereNotNull('county_id')
+                         ->where('lob_id', $orderData->lob_id)
+                         ->first();
+                     }
+
+                if (!empty($countyData)) {
                     $countyDetailjson = json_decode($countyData->json, true);
                     $countyDetail = $this->removePlaceholders($countyDetailjson);
 
@@ -213,8 +212,8 @@ class OrderFormController extends Controller
                     
                 $countyInfo = mergeWithDefaults($countyDetail, $commonDetail);
                     
-                        }
-
+            }
+                    
             if(!empty($countyData->checklist_array)) {
                 $conditionIds = [explode(',', $countyData->checklist_array)];
                 $checklist = DB::table('checklist')->whereIn('id', explode(',', $countyData->checklist_array))->get();
@@ -282,7 +281,7 @@ class OrderFormController extends Controller
                 $countyList = County::select('id', 'county_name')->where('id', 0)->get();
             }
 
-
+    
             $cityList = City::select('id','city')->where('county_id',$orderData->property_county)->get();
 
             $productList = product::select('id','product_name')->get();
