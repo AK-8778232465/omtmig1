@@ -111,11 +111,17 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
             if (!$city) {
                 $existingEntry = CountyInstructions::where('state_id', $state->id)
                     ->where('county_id', $county->id)
+                    ->where('client_id', $this->client_id)
+                    ->where('process_id', $this->process_id)
+                    ->where('lob_id', $this->lob_id)
                     ->first();
             } else {
                 $existingEntry = CountyInstructions::where('state_id', $state->id)
                     ->where('county_id', $county->id)
                     ->where('city_id', $city->id)
+                    ->where('client_id', $this->client_id)
+                    ->where('process_id', $this->process_id)
+                    ->where('lob_id', $this->lob_id)
                     ->first();
             }
 
