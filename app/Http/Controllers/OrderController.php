@@ -1096,7 +1096,7 @@ class OrderController extends Controller
 
         $stateList = State::select('id', 'short_code')->get();
         $processors = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [6, 8, 9])->orderBy('emp_id')->get();
-        $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7, 8, 9])->orderBy('emp_id')->get();
+        $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7, 8])->orderBy('emp_id')->get();
         $statusList = Status::select('id', 'status')->get();
         $countyList = County::select('id', 'county_name')->get();
 
