@@ -54,13 +54,13 @@ p {
                             </select>
                         </div>
                         <div class="col-lg-3">
-                            <label class="font-weight-bold">Lob</label>
+                            <label class="font-weight-bold">Lob<span style="color: red;">*</span></label>
                             <select id="lob_id" name="lob_id" class="form-control select2dropdown" style="width: 100%" autocomplete="off" placeholder="Select Lob" data-parsley-trigger="focusout keyup">
                                 <option selected disabled value="">Select Lob</option>
                             </select>
                         </div>
                         <div class="col-lg-3">
-                            <label class="font-weight-bold">Process</label>
+                            <label class="font-weight-bold">Process<span style="color: red;">*</span></label>
                             <select id="process_id" name="process_id" class="form-control select2dropdown" style="width: 100%" autocomplete="off" placeholder="Select Lob" data-parsley-trigger="focusout keyup">
                                 <option selected disabled value="">Select process</option>
                             </select>
@@ -158,7 +158,6 @@ $('#client_id').on('change', function () {
                 });
             },
             error: function (xhr, status, error) {
-                console.error(xhr.responseText);
             }
         });
     } else {
@@ -186,7 +185,6 @@ $('#lob_id').on('change', function () {
                 });
             },
             error: function (xhr, status, error) {
-                console.error(xhr.responseText);
             }
         });
     } else {
@@ -223,7 +221,7 @@ $('#sdupload_id').on('submit', function(event){
                     });
                 } else if (response.error) {
                     Swal.fire({
-                        title: 'Error',
+                        title: 'Fill the Required Fields',
                         text: response.error,
                         icon: 'error',
                         confirmButtonText: 'OK'
@@ -236,8 +234,8 @@ $('#sdupload_id').on('submit', function(event){
                 $('.frame').addClass('d-none');
 
                 Swal.fire({
-                    title: 'Error',
-                    text: "File Upload Failed",
+                    title: 'Uploading Failed',
+                    text: 'Please fill the required fields OR Is not an XLSX file',
                     icon: "error",
                     confirmButtonText: "OK"
                 }).then(() => {

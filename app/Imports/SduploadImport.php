@@ -144,22 +144,24 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
 
                 $updatedJsonString = json_encode($existingJson);
 
-                $existingEntry->update(['json' => $updatedJsonString]);
+                $existingEntry->update(['json' => $updatedJsonString, 'last_updated_by' => $this->userid, 'updated_at' => now()]);
             } else {
                 if (!$city) {
                     DB::transaction(function () use ($state, $county, $jsonData) {
-                        CountyInstructions::create([
+                        CountyInstructions::insert([
                             'client_id' => $this->client_id,
                             'lob_id' => $this->lob_id,
                             'process_id' => $this->process_id,
                             'state_id' => $state->id,
                             'county_id' => $county->id,
                             'json' => json_encode($jsonData),
+                            'created_by' => $this->userid,
+                            'created_at' => now(),
                         ]);
                     });
                 } else {
                     DB::transaction(function () use ($state, $county, $city, $jsonData) {
-                        CountyInstructions::create([
+                        CountyInstructions::insert([
                             'client_id' => $this->client_id,
                             'lob_id' => $this->lob_id,
                             'process_id' => $this->process_id,
@@ -167,6 +169,8 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
                             'county_id' => $county->id,
                             'city_id' => $city->id,
                             'json' => json_encode($jsonData),
+                            'created_by' => $this->userid,
+                            'created_at' => now(),
                         ]);
                     });
                 }
