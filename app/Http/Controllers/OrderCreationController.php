@@ -9,6 +9,7 @@ use App\Models\OrderCreation;
 use App\Models\OrderCreationAudit;
 use App\Models\OrderTemp;
 use App\Models\State;
+use App\Models\City;
 use App\Models\Status;
 use App\Models\User;
 use App\Models\Product;
@@ -55,8 +56,8 @@ class OrderCreationController extends Controller
         }
         $processList = DB::table('stl_item_description')->where('is_approved', 1)->where('is_active', 1)->whereIn('id', $processIds)->select('id', 'process_name', 'project_code')->orderBy('project_code')->get();
         $stateList = State::select('id', 'short_code')->get();
-        $processors = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [6,8])->orderBy('emp_id')->get();
-        $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7,8])->orderBy('emp_id')->get();
+        $processors = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [6, 8, 9])->orderBy('emp_id')->get();
+        $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7, 8])->orderBy('emp_id')->get();
         $statusList = Status::select('id', 'status')->get();
         $countyList = County::select('id', 'county_name')->get();
         $exceldetail = OrderCreationAudit::with('users')->orderBy('created_at', 'desc')->get();
@@ -87,6 +88,13 @@ class OrderCreationController extends Controller
         return response()->json($productList);
     }
     
+    public function getCities(Request $request)
+    {
+        $cities = City::select('id', 'city')->where('county_id', $request->county_id)->get();
+        
+        return response()->json($cities);
+    }
+    
 
     public function exportFailedOrders($audit_id)
     {
@@ -114,6 +122,7 @@ class OrderCreationController extends Controller
             'process_id' => $input['process_code'],
             'state_id' => isset($input['property_state']) ? $input['property_state'] : NULL,
             'county_id' => isset($input['property_county']) ? $input['property_county'] : NULL,
+            'city_id' => isset($input['city']) ? $input['city'] : NULL,
             'status_id' => $input['order_status'],
             'assignee_user_id' => isset($input['assignee_user']) ? $input['assignee_user'] : NULL,
             'assignee_qa_id' => isset($input['assignee_qa']) ? $input['assignee_qa'] : NULL,

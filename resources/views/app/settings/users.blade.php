@@ -116,7 +116,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    @role('Super Admin')
+                                    @role('Super Admin|Business Head')
                                     <a href="#"><span class="edit_user ml-2"  data-id="{{ $users->id }}">
                                         <img class="menuicon tbl_editbtn" src="{{asset('assets/images/edit.svg')}}" >&nbsp;
                                     </span></a>
@@ -395,6 +395,12 @@
                 $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>' +
                 '<button id="assigneeUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#assigneeModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Assignee User</button><br />');
                 @endrole
+                @role('PM/TL')
+                $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
+                @endrole
+                @role('Business Head')
+                $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
+                @endrole
             }
             });
         });
@@ -538,6 +544,9 @@
                 } else if (role == 9) {
                     $('#edit_reporting_to').show();
                     reporting_users = 'getPM_TL';
+                }else if (role == 6 || role == 7 || role == 8) {
+                    $('#edit_reporting_to').show();
+                    reporting_users = 'getSOPC';
                 }
                 $.ajax({
                     url: "{{ route('getUserList') }}",
@@ -970,7 +979,5 @@
                 });
             }
         });
-
-
 </script>
 @endsection

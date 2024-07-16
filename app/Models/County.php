@@ -13,6 +13,7 @@ class County extends Model
     protected $fillable = [
         'stateId',
         'county_name',
+        'city_id',
         'agency_code',
         'fips_code',
         'calling',
@@ -20,4 +21,8 @@ class County extends Model
         'is_active',
     ];
 
+    public function cities()
+    {
+        return $this->hasMany(City::class, 'county_id', 'id');
+    }
 }

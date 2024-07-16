@@ -1095,8 +1095,8 @@ class OrderController extends Controller
 
 
         $stateList = State::select('id', 'short_code')->get();
-        $processors = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [6,8])->get();
-        $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7,8])->get();
+        $processors = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [6, 8, 9])->orderBy('emp_id')->get();
+        $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7, 8])->orderBy('emp_id')->get();
         $statusList = Status::select('id', 'status')->get();
         $countyList = County::select('id', 'county_name')->get();
 
@@ -1109,27 +1109,97 @@ class OrderController extends Controller
         return view('app.orders.orders_status', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList', 'selectedStatus'));
     }
 
+    // public function assignment_update(Request $request)
+    // {
+    //     $input = $request->all();
+    //     $validatedData = $request->validate([
+    //         'type_id' => 'required',
+    //         'user_id' => 'required',
+    //         'orders' => 'required',
+    //     ]);
+
+    //     if(count($request->input('orders')) > 0) {
+    //         $orderIds = $input['orders'];
+    //         if ($input['type_id'] == 6) {
+    //             OrderCreation::whereIn('id', $orderIds)->whereNull('assignee_user_id')->update(['assignee_user_id' => $input['user_id']]);
+    //         }
+    //         if ($input['type_id'] == 7) {
+    //             OrderCreation::whereIn('id', $orderIds)->whereNull('assignee_qa_id')->update(['assignee_qa_id' => $input['user_id']]);
+    //         }
+    //         if ($input['type_id'] == 13) {
+    //             OrderCreation::whereIn('id', $orderIds)->update(['associate_id' => $input['user_id']]);
+    //         }
+
+    //         return response()->json(['data' => 'success', 'msg' => 'Order Assigned Successfully']);
+    //     }
+    // }
+
     public function assignment_update(Request $request)
     {
         $input = $request->all();
         $validatedData = $request->validate([
             'type_id' => 'required',
-            'user_id' => 'required',
+          
             'orders' => 'required',
         ]);
 
-        if(count($request->input('orders')) > 0) {
+        if (count($request->input('orders')) > 0) {
             $orderIds = $input['orders'];
-            if ($input['type_id'] == 6) {
-                OrderCreation::whereIn('id', $orderIds)->whereNull('assignee_user_id')->update(['assignee_user_id' => $input['user_id']]);
-            }
+ 
             if ($input['type_id'] == 7) {
-                OrderCreation::whereIn('id', $orderIds)->whereNull('assignee_qa_id')->update(['assignee_qa_id' => $input['user_id']]);
+                OrderCreation::whereIn('id', $orderIds)
+                    ->whereNull('assignee_qa_id')
+                    ->update(['assignee_qa_id' => $input['user_id']]);
             }
-            if ($input['type_id'] == 13) {
-                OrderCreation::whereIn('id', $orderIds)->update(['associate_id' => $input['user_id']]);
+ 
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3])) {
+                if ($input['user_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update(['assignee_user_id' => $input['user_id']]);
+                } elseif ($input['qcer_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update(['assignee_qa_id' => $input['qcer_id']]);
+                } elseif ($input['cover_prep_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update(['associate_id' => $input['cover_prep_id']]);
+                }
+            }
+ 
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3]) && $input['user_id'] != null && $input['qcer_id'] != null && $input['cover_prep_id'] != null) {
+                OrderCreation::whereIn('id', $orderIds)
+                    ->update([
+                        'assignee_user_id' => $input['user_id'],
+                        'assignee_qa_id' => $input['qcer_id'],
+                        'associate_id' => $input['cover_prep_id']
+                    ]);
+            }
+ 
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3])) {
+                if ($input['user_id'] != null && $input['qcer_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'associate_id' => $input['cover_prep_id']
+                        ]);
+            }
+ 
+                if ($input['cover_prep_id'] != null && $input['qcer_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'associate_id' => $input['cover_prep_id']
+                        ]);
             }
 
+                if ($input['cover_prep_id'] != null && $input['user_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'associate_id' => $input['cover_prep_id']
+                        ]);
+                }
+            }
             return response()->json(['data' => 'success', 'msg' => 'Order Assigned Successfully']);
         }
     }
