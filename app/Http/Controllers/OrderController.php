@@ -1109,31 +1109,6 @@ class OrderController extends Controller
         return view('app.orders.orders_status', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList', 'selectedStatus'));
     }
 
-    // public function assignment_update(Request $request)
-    // {
-    //     $input = $request->all();
-    //     $validatedData = $request->validate([
-    //         'type_id' => 'required',
-    //         'user_id' => 'required',
-    //         'orders' => 'required',
-    //     ]);
-
-    //     if(count($request->input('orders')) > 0) {
-    //         $orderIds = $input['orders'];
-    //         if ($input['type_id'] == 6) {
-    //             OrderCreation::whereIn('id', $orderIds)->whereNull('assignee_user_id')->update(['assignee_user_id' => $input['user_id']]);
-    //         }
-    //         if ($input['type_id'] == 7) {
-    //             OrderCreation::whereIn('id', $orderIds)->whereNull('assignee_qa_id')->update(['assignee_qa_id' => $input['user_id']]);
-    //         }
-    //         if ($input['type_id'] == 13) {
-    //             OrderCreation::whereIn('id', $orderIds)->update(['associate_id' => $input['user_id']]);
-    //         }
-
-    //         return response()->json(['data' => 'success', 'msg' => 'Order Assigned Successfully']);
-    //     }
-    // }
-
     public function assignment_update(Request $request)
     {
         $input = $request->all();
@@ -1213,6 +1188,7 @@ class OrderController extends Controller
             'selectedStatus' => 'required|integer',
         ]);
 
+        $orderId = $input['rowId'];
         $statusId = $input['selectedStatus'];
 
         $updateData = ['status_id' => $statusId];
@@ -1223,10 +1199,44 @@ class OrderController extends Controller
             $updateData['completion_date'] = null;
         }
 
-        OrderCreation::where('id', $input['rowId'])->update($updateData);
+        $update_status = OrderCreation::where('id', $orderId)->update($updateData);
 
-        return response()->json(['data' => 'success', 'msg' => 'Status Updated Successfully']);
+        if ($update_status) {
+            $update_data = OrderCreation::select('tier_id', 'state_id', 'county_id', 'city_id')
+                ->where('id', $orderId)
+                ->first();
+    
+            if ($update_data) {
+                OrderCreation::where('id', $orderId)
+                    ->update([
+                        'tier_id' => $update_data->tier_id,
+                        'state_id' => $update_data->state_id,
+                        'county_id' => $update_data->county_id,
+                        'city_id' => $update_data->city_id,
+                    ]);
+    
+                $gethistorydata = DB::table('order_status_history')
+                    ->select('comment', 'checked_array')
+                    ->where('order_id', $orderId)
+                    ->orderBy('id','desc')->first();
+    
+                DB::table('order_status_history')->insert([
+                    'order_id' => $orderId,
+                    'status_id' => $statusId,
+                    'comment' => $gethistorydata ? $gethistorydata->comment : null,
+                    'checked_array' => $gethistorydata ? $gethistorydata->checked_array : null,
+                    'created_at' => now(),
+                ]);
+    
+                return response()->json(['success' => 'Status updated successfully']);
+            } else {
+                return response()->json(['error' => 'Order not found']);
+            }
+        } else {
+            return response()->json(['error' => 'Failed to update the status']);
     }
+    }
+    
 
     public function redirectwithfilter(Request $request)
     {   $user = Auth::user();

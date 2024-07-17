@@ -257,14 +257,6 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
-                    <div class="form-group row mb-4 pb-0 pl-3 pr-3">
-                        <div class="form-group col-lg-3 mb-0 pb-0">
-                                <label class="font-weight-bold">Lob</label>
-                                <select id="lob_id" name="lob_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Lob"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
-                                    <option selected="" disabled="" value="">Select lob</option>
-                                </select>
-                            </div>
                             <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Tier</label>
                             <select id="tier_id" name="tier_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Tier"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">

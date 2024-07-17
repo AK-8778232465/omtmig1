@@ -696,7 +696,7 @@ $(document).on('change', 'input.check-one', function() {
                     _token: '{{csrf_token()}}',
                 },
                 success: function(response) {
-                    if(response.data != undefined) {
+                    if(response.success != undefined) {
                         Swal.fire({
                             text: "Status Updated Successfully",
                             icon: "success",
