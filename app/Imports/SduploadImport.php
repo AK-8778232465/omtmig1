@@ -7,6 +7,12 @@ use App\Models\County;
 use App\Models\CountyInstructions;
 use App\Models\State;
 use App\Models\City;
+use App\Models\Client;
+use App\Models\stlprocess;
+use App\Models\Lob;
+use App\Models\CountyInstructionTemp;
+use App\Models\CountyInstructionAudit;
+use App\Models\User;
 use DB;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
@@ -23,6 +29,11 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterBatch;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
+use DateTime;
+
+
 HeadingRowFormatter::default('none');
 
 class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow, WithBatchInserts, WithCalculatedFormulas, WithChunkReading, SkipsEmptyRows, SkipsOnFailure
@@ -30,14 +41,19 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
     use Importable, SkipsFailures;
 
     protected $userid;
+    protected $auditId;
     protected $client_id;
     protected $lob_id;
     protected $process_id;
     protected $rows = 0;
+    protected $success_rows = 0;
+    protected $unsuccess_rows = 0;
 
-    public function __construct($userid, $client_id, $lob_id, $process_id)
+    public function __construct($userid, $auditId, $client_id, $lob_id, $process_id)
     {
+       
         $this->userid = $userid;
+        $this->auditId = $auditId;
         $this->client_id = $client_id;
         $this->lob_id = $lob_id;
         $this->process_id = $process_id;
@@ -45,17 +61,46 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
 
     public function model(array $row)
     {
-        $stateCode = strtoupper($row['STATE']);
-        $state = State::where('short_code', $stateCode)->first();
-        $county = null;
+        ++$this->rows;
 
+        $getLob = Lob::where('id', $this->lob_id)->first();
+        $getClient = Client::where('id', $this->client_id)->first();
+        $getProcess = stlprocess::where('id', $this->process_id)->first();
+        $getUser = User::where('id', $this->userid)->first();
+        $data = [
+            'client' => $getClient->client_name,
+            'lob' => $getLob->name,
+            'process' => $getProcess->name,
+            'state' => isset($row['STATE']) ? $row['STATE'] : null,
+            'county' => isset($row['COUNTY']) ? $row['COUNTY'] : null,
+            'city' => isset($row['Town/City/Municipality']) ? strtoupper($row['Town/City/Municipality']) : (isset($row['MUNICIPALITY']) ? strtoupper($row['MUNICIPALITY']) : null),
+            'created_at' => now(),
+            'created_by' => $getUser->username,
+            'audit_id' => $this->auditId,
+        ];
+
+        $state = null;
+        $stateCode = strtoupper($row['STATE']);
+       
+        if ($stateCode) {
+            $state = State::where('short_code', $stateCode)->first();
+        } else {
+            $data['comments'] = 'State is Invaild';
+            CountyInstructionTemp::insert($data);
+            ++$this->unsuccess_rows;
+            return null;
+        }
+
+        $county = null;
         $countyCode = strtoupper($row['COUNTY']);
         if ($state) {
             $county = County::where('county_name', $countyCode)
-                            ->where('stateId', $state->id)
-                            ->first();
+                ->where('stateId', $state->id)
+                ->first();
         } else {
-            Log::error($row);
+            $data['comments'] = 'County is Invaild';
+            CountyInstructionTemp::insert($data);
+            ++$this->unsuccess_rows;
             return null;
         }
 
@@ -64,10 +109,12 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
 
         if ($county) {
             $city = City::where('city', $cityCode)
-                            ->where('county_id', $county->id)
-                            ->first();
+                ->where('county_id', $county->id)
+                ->first();
         } else {
-            Log::error($row);
+            $data['comments'] = 'Municipality is Invaild';
+            CountyInstructionTemp::insert($data);
+            ++$this->unsuccess_rows;
             return null;
         }
 
@@ -131,12 +178,12 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
                 foreach ($jsonData as $key => $value) {
                     if (is_array($value)) {
                         foreach ($value as $subKey => $subValue) {
-                            if ($subValue !== null) {
+                            if ($subValue !== null && $subValue !== '' && $subValue !== '--') {
                                 $existingJson[$key][$subKey] = $subValue;
                             }
                         }
                     } else {
-                        if ($value !== null) {
+                        if ($value !== null && $value !== '' && $value !== '--') {
                             $existingJson[$key] = $value;
                         }
                     }
@@ -145,6 +192,7 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
                 $updatedJsonString = json_encode($existingJson);
 
                 $existingEntry->update(['json' => $updatedJsonString, 'last_updated_by' => $this->userid, 'updated_at' => now()]);
+                ++$this->success_rows;
             } else {
                 if (!$city) {
                     DB::transaction(function () use ($state, $county, $jsonData) {
@@ -174,41 +222,61 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
                         ]);
                     });
                 }
+                ++$this->success_rows;
             }
         } catch (\Exception $e) {
-            Log::error('Error importing row: ' . json_encode($row) . ' Error: ' . $e->getMessage());
-            $this->skipRow(); 
+            ++$this->unsuccess_rows;
+            return null; 
         }
-
-        $this->rows++;
     }
 
     public function batchSize(): int
     {
-        return 1000; 
+        return 1000;
     }
 
     public function chunkSize(): int
     {
-        return 1000; 
+        return 1000;
     }
 
     public function startRow(): int
     {
-        return 2; 
+        return 2;
     }
-
     public function registerEvents(): array
     {
+        $import = $this;
+
         return [
-            AfterBatch::class => function (AfterBatch $event) {
-                Log::info("Processed {$this->rows} rows in this batch."); 
-                $this->rows = 0; 
+            AfterBatch::class => function (AfterBatch $event) use ($import) {
+                $import->afterBatch($event);
             },
         ];
     }
 
-    public function skipRow() 
+    public function afterBatch(AfterBatch $event)
+    {
+        if ($this->auditId) {
+            try {
+                DB::beginTransaction();
+                $oldData = CountyInstructionAudit::lockForUpdate()->find($this->auditId);
+                CountyInstructionAudit::where('id', $oldData->id)->update([
+                    'successfull_rows' => $oldData->successfull_rows + $this->success_rows,
+                    'unsuccessfull_rows' => $oldData->unsuccessfull_rows + $this->unsuccess_rows,
+                ]);
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollback();
+                Log::error("Error updating OrderCreationAudit: " . $e->getMessage());
+            }
+        }
+    
+        return [];
+    }
+    
+
+    public function skipRow()
     {
         // Custom logic for skipping a row, if needed
     }

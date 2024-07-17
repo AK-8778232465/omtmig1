@@ -74,6 +74,8 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,S
     Route::any('/getlobId', 'getlobId')->name('getlobId');
     Route::any('/getprocessId', 'getprocessId')->name('getprocessId');
     Route::any('/sduploadfileImport', 'sduploadfileImport')->name('sduploadfileImport');
+    Route::any('exportCIFailedOrders/{id}', 'exportCIFailedOrders')->name('exportCIFailedOrders');
+
 
 
     Route::any('/import', 'import')->name('import');

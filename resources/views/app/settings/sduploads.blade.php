@@ -91,6 +91,42 @@ p {
                 </div>
             </div>
         </form>
+        <table id="datatable" class="table table-striped table-bordered p-2">
+            <thead>
+                <tr>
+                    <th>S.NO</th>
+                    <th>File Name</th>
+                    <th>Total</th>
+                    <th>Completed</th>
+                    <th>Failed</th>
+                    <th>Uploaded At</th>
+                    <th>Uploaded By</th>
+                </tr>
+        </thead>
+            <tbody>
+            @php $j = 1 @endphp
+                    @foreach($exceldetail as $detail)
+                    @if(!empty($detail->unsuccessfull_rows) || !empty($detail->successfull_rows))
+                        <tr>
+                            <td>{{ $j++ }}</td>
+                            <td>{{ $detail->file_name}}</td>
+                            <td>{{ $detail->total_rows}}</td>
+                            <td>{{ $detail->successfull_rows}}</td>
+                            <td style="font-weight:600">
+                                @if ($detail->unsuccessfull_rows > 0 && $detail->unsuccessfull_rows != "")
+                                    <a href="{{ route('exportCIFailedOrders', ['id' => $detail->id]) }}">
+                                        {{ $detail->unsuccessfull_rows }}
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                @endif
+                            </td>
+                            <td>{{ date('m/d/Y H:i:s', strtotime($detail->created_at)) }}</td>
+                            <td>{!! optional($detail->users)->emp_id . " (" . optional($detail->users)->username. ")" !!}</td>
+                        </tr>
+                    @endif
+                    @endforeach
+            </tbody>
+        </table>
     </div>
 </div>
 

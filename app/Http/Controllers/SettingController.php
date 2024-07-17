@@ -20,8 +20,11 @@ use App\Models\Status;
 use App\Models\SupportingDocs;
 use App\Models\User;
 use App\Models\UserType;
+use App\Models\CountyInstructionAudit;
+use App\Models\CountyInstructionTemp;
 use DB;
 use Hash;
+use App\Exports\FailedCIOrdersExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Imports\AssignImport;
@@ -75,7 +78,8 @@ class SettingController extends Controller
                 }
         }else if ($request->is('settings/sduploads')){
             $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->orderBy('client_no')->get();
-            return view('app.settings.sduploads',compact('clients'));
+            $exceldetail = CountyInstructionAudit::with('users')->orderBy('created_at', 'desc')->get();
+            return view('app.settings.sduploads',compact('clients', 'exceldetail'));
         }
     }
 
@@ -551,22 +555,35 @@ class SettingController extends Controller
 
             // Dispatch job for each split XLSX file
             $outputFilesPath = storage_path('app/Uploaded_Excel_Files/' . $output . '_*.xlsx');
-            
+            $auditId = CountyInstructionAudit::insertGetId([
+                'file_name' => $original_file_name,
+                'total_rows' => $totalRowCount,
+                'created_at' => now(),
+                'created_by' => Auth::id()
+            ]);
 
             if (file_exists(storage_path('app/Uploaded_Excel_Files/' . $filename))) {
                 unlink(storage_path('app/Uploaded_Excel_Files/' . $filename));
             }
 
             foreach (glob($outputFilesPath) as $file) {
-                Excel::import(new SduploadImport(Auth::id(),$request->client_id,
-                $request->lob_id,
-                $request->process_id), $file);
+                Excel::import(new SduploadImport(Auth::id(), $auditId, $request->client_id, $request->lob_id, $request->process_id), $file);
             }
 
-            return response()->json(['success' => 'Excel Uploaded Successfully!']);
+            return response()->json(['success' => 'Excel Uploaded Successfully!', 'bacthId' => $auditId]);
         } else {
             return response()->json(['error' => 'The file does not exist, is not readable, or is not an XLSX file']);
         }
+    }
+
+    public function exportCIFailedOrders($audit_id)
+    {
+        $failedOrders = CountyInstructionTemp::where('audit_id', $audit_id)->get();
+
+        $export = new FailedCIOrdersExport($failedOrders);
+        $exportFileName = 'failed_CI_orders_export_' . now()->format('YmdHis') . '.xlsx';
+
+        return Excel::download($export, $exportFileName);
     }
 
 }
