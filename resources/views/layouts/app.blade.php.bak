@@ -83,11 +83,6 @@
                                         Order Creation
                                     </a>
                                 </li>
-                                <li class="{{ (Request::is('Reports') || Request::is('Reports/*')) ? 'submenuactive' : '' }}">
-                                    <a href="{{ route('Reports') }}">
-                                        <i id="Reports-icon" class="dripicons-document {{ (Request::is('Reports') || Request::is('Reports/*')) ? 'submenuactivei' : '' }}"></i>Reports
-                                    </a>
-                                </li>
                                 <li class="{{ (Request::is('settings') || Request::is('settings/*')) ? 'submenuactive' : '' }}">
                                     <a href="{{ route('settings') }}">
                                         <i id="settings-icon" class="dripicons-gear {{ (Request::is('settings') || Request::is('settings/*')) ? 'submenuactivei' : '' }}"></i>Settings
