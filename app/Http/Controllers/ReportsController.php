@@ -54,24 +54,25 @@ class ReportsController extends Controller
 
         $statusCountsQuery = OrderCreation::query();
         $statusCountsQuery
-            ->whereNotNull('assignee_user_id')
-            ->where(function($datequery) use ($fromDate, $toDate) {
-                $datequery->whereDate('oms_order_creations.order_date', '>=', $fromDate)
-                          ->whereDate('oms_order_creations.order_date', '<=', $toDate);
-            })
             ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
             ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+            ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
             ->selectRaw('
                 CONCAT(oms_users.emp_id, " (", oms_users.username, ")") as userinfo,
                 SUM(CASE WHEN status_id = 1 THEN 1 ELSE 0 END) as `status_1`,
                 SUM(CASE WHEN status_id = 2 THEN 1 ELSE 0 END) as `status_2`,
                 SUM(CASE WHEN status_id = 3 THEN 1 ELSE 0 END) as `status_3`,
                 SUM(CASE WHEN status_id = 4 THEN 1 ELSE 0 END) as `status_4`,
-            SUM(CASE WHEN status_id = 5 AND DATE_FORMAT(completion_date, "%Y-%m-%d") BETWEEN ? AND ? THEN 1 ELSE 0 END) as `status_5`,
+                SUM(CASE WHEN status_id = 5 THEN 1 ELSE 0 END) as `status_5`,
                 SUM(CASE WHEN status_id = 13 THEN 1 ELSE 0 END) as `status_13`,
                 SUM(CASE WHEN status_id = 14 THEN 1 ELSE 0 END) as `status_14`,
-                COUNT(*) as `All`', [$fromDate, $toDate])
+                COUNT(*) as `All`')
+            ->whereNotNull('assignee_user_id')
             ->where('oms_order_creations.is_active', 1)
+            ->where('stl_client.is_approved', 1)
+            ->where('stl_item_description.is_approved', 1)
+            ->whereDate('order_date', '>=', $fromDate)
+            ->whereDate('order_date', '<=', $toDate)
             ->whereIn('oms_order_creations.process_id', $processIds)
             ->groupBy('oms_order_creations.assignee_user_id');
 
