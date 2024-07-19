@@ -10,6 +10,7 @@ use App\Models\Process;
 use App\Models\Tier;
 use App\Models\City;
 use App\Models\Product;
+use App\Models\PrimarySource;
 use App\Models\OrderCreation;
 use DB;
 use Illuminate\Http\Request;
@@ -290,10 +291,14 @@ class OrderFormController extends Controller
    
         $lobList = DB::table('stl_lob')->select('id', 'name')->get(); 
 
+            $primarySource = PrimarySource::select('id','source_name')->get();
+
+            $instructionId = $countyData->id;
+
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
-            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList'));
+            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId'));
         } else if(in_array($user->user_type_id, [1,2,3,4,5,9])) {
-            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList'));
+            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId'));
         } else {
             return redirect('/orders_status');
         }
@@ -370,6 +375,27 @@ class OrderFormController extends Controller
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
 
+                DB::table('order_status_history')->where('order_id',$orderId)->update([
+                    'comment' => $request->orderComment,
+                ]);
+
+                $getPrimaryName = DB::table('oms_primary_source')->where('id', $request->primarySource)->value('source_name');
+                $countyInstructionId = DB::table('county_instructions')
+                    ->where('id', $request->instructionId)
+                    ->first();
+
+                $jsonData = json_decode($countyInstructionId->json, true);
+
+                if (isset($jsonData['PRIMARY'])) {
+                    $jsonData['PRIMARY']['PRIMARY_SOURCE'] = $getPrimaryName;
+                }
+
+                $updatedJsonData = json_encode($jsonData);
+
+                DB::table('county_instructions')
+                    ->where('id', $request->instructionId) 
+                    ->update(['json' => $updatedJsonData]);
+
                 if($request->submit_type == 2) {
                     return response()->json(['redirect' => $request->orderId]);
                 }
@@ -404,6 +430,23 @@ class OrderFormController extends Controller
                 DB::table('order_status_history')->where('order_id',$orderId)->update([
                     'comment' => $request->orderComment,
                 ]);
+
+            $getPrimaryName = DB::table('oms_primary_source')->where('id', $request->primarySource)->value('source_name');
+            $countyInstructionId = DB::table('county_instructions')
+                ->where('id', $request->instructionId)
+                ->first();
+
+            $jsonData = json_decode($countyInstructionId->json, true);
+
+            if (isset($jsonData['PRIMARY'])) {
+                $jsonData['PRIMARY']['PRIMARY_SOURCE'] = $getPrimaryName;
+            }
+
+            $updatedJsonData = json_encode($jsonData);
+
+            DB::table('county_instructions')
+                ->where('id', $request->instructionId) 
+                ->update(['json' => $updatedJsonData]);
 
                 if($request->submit_type == 2) {
                     return response()->json(['redirect' => $request->orderId]);

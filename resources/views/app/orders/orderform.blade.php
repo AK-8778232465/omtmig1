@@ -97,6 +97,7 @@
                     </div>
                 </div>
                 @if(!@empty($countyInfo))
+                <input type="hidden" name="instructionId" id="instructionId" value="{{$instructionId}}">
                 <h6 class="font-weight-bold">Source Information :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
                     <div class="card-body">
@@ -204,6 +205,19 @@
                                     <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
                                 </div>
                                 <div class="col-lg-5 mx-5 mt-1">
+                                        <div class="row">
+                                        <div class="col-10 mb-2">
+                                            <div class="font-weight-bold mb-1 mt-1">Primary Source :</div>
+                                            @if(!empty($countyInfo))
+                                                <select id="primary_source" name="primary_source" class="form-control select2dropdown" data-parsley-required="true">
+                                                    <option value="">Select Primary Source</option>
+                                                    @foreach($primarySource as $source)
+                                                    <option value="{{ $source->id }}" {{ $source->source_name == $countyInfo['PRIMARY']['PRIMARY_SOURCE'] ? 'selected' : '' }}>{{ $source->source_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            @endif
+                                        </div>
+                                            <div class="col-10 mb-2">
                                     <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                         <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
                                             <option value="1" @if($orderData->status_id == 1) selected @endif>WIP</option>
@@ -214,6 +228,8 @@
                                             <option value="13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
                                             <option value="14" @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                         </select>
+                                    </div>
+                                </div>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-center my-4">
@@ -246,37 +262,6 @@ var changeCounty = false;
         }
         }).trigger('change');
     });
-
-
-// ///
-// $('#property_county').on('change', function () {
-//     var county_id = $(this).val();
-//     $("#city").html('');
-//     if (county_id) {
-//         $.ajax({
-//             url: "{{ route('getCities') }}",
-//             type: "POST",
-//             data: {
-//                 county_id: county_id,
-//                 _token: '{{ csrf_token() }}'
-//             },
-//             dataType: 'json',
-//             success: function (result) {
-//                 $('#city').html('<option value="">Select City</option>');
-//                 $.each(result.cities, function (key, value) {
-//                     $("#city").append('<option value="' + value.id + '">' + value.city + '</option>');
-//                 });
-//             },
-//             error: function (xhr, status, error) {
-//                 console.error(xhr.responseText);
-//             }
-//         });
-//     } else {
-//         $('#city').html('<option value="">Select City</option>');
-//     }
-// });
-
-/////
 
 $('#city').on('change', function () {
         changeCounty = true;
@@ -316,6 +301,8 @@ $('#city').on('change', function () {
         var propertystate = $("#property_state").val();
         var propertycounty = $("#property_county").val();
         var city = $("#city").val();
+        var primarySource = $("#primary_source").val();
+        var instructionId = $("#instructionId").val();
         var data = {
             orderId: orderId,
             checklistItems: checklistItems.join(),
@@ -327,6 +314,8 @@ $('#city').on('change', function () {
             countyId: propertycounty,
             tierId: tierId,
             productId: productId,
+            primarySource: primarySource,
+            instructionId: instructionId,
             submit_type: type,
             _token: '{{ csrf_token() }}'
         };
