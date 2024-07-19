@@ -123,8 +123,11 @@
                             <th style="width:10%">Order ID</th>
                             <th style="width:10%">Received Date</th>
                             <th style="width:10%">Product Code @for($i = 0; $i < 5; $i++) &nbsp; @endfor</th>
+                            <th style="width:10%">Client @for($i = 0; $i < 5; $i++) &nbsp; @endfor</th> 
                             <th style="width:10%">Lob</th>
-                            <th style="width:10%">Type</th>
+                            <th style="width:10%">Process</th>
+                            <th style="width:10%">Product</th>
+                            <th style="width:10%">Tier</th>
                             <th style="width:15%">State @for($i = 0; $i < 5; $i++) &nbsp; @endfor</th>
                             <th style="width:15%">County @for($i = 0; $i < 5; $i++) &nbsp; @endfor</th>
                             <th style="width:20%">Status @for($i = 0; $i < 17; $i++) &nbsp; @endfor</th>
@@ -246,8 +249,11 @@
                 { "data": "order_id", "name": "order_id" },
                 { "data": "order_date", "name": "order_date" },
                 { "data": "project_code", "name": "project_code" },
+                { "data": "client_name", "name": "client_name" },
                 { "data": "lob_name", "name": "lob_name" },
                 { "data": "process_name", "name": "process_name" },
+                { "data": "process", "name": "process" },
+                { "data": "tier_name", "name": "tier_name" },
                 { "data": "short_code", "name": "short_code" },
                 { "data": "county_name", "name": "county_name" },
                 { "data": "status", "name": "status" },
@@ -360,30 +366,30 @@
         if (status == 6 || status == 7 || status == 5) {
             $('.status-dropdown').prop('disabled', true);
             if (status == 6 || status == 7) {
-                datatable.column(10).visible(true);
+                datatable.column(13).visible(true);
                 $('.status-dropdown').prop('disabled', true);
             }
         } else {
             $('.status-dropdown').prop('disabled', false);
-            datatable.column(10).visible(false);
+            datatable.column(13).visible(false);
         }
         // //
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') )
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') ||Auth::user()->hasRole('SPOC') )
             if(status == 13){
                 $('.status-dropdown').prop('disabled', false);
-                datatable.column(10).visible(true);
+                datatable.column(13).visible(true);
             }
             else if(status == 6){
                 $('.status-dropdown').prop('disabled', false);
-                datatable.column(10).visible(true);
+                datatable.column(13).visible(true);
                 $('.status-dropdown').prop('disabled', true);
             } else {
-                datatable.column(10).visible(true);
+                datatable.column(13).visible(true);
             }
 
             if(status == 5 || status == 'All'){
                 $('.status-dropdown').prop('disabled', false);
-                datatable.column(10).visible(false);
+                datatable.column(13).visible(false);
             }
 
             if (status == 13) {
@@ -396,18 +402,18 @@
 
         @if(Auth::user()->hasRole('Process/Qcer'))
         if(status == 6){
-            datatable.column(10).visible(true);////
+            datatable.column(13).visible(true);////
         }else{
-            datatable.column(10).visible(false);
+            datatable.column(13).visible(false);
         }
         @endif
 
 
         if(status == 13){
             $('.status-dropdown').prop('disabled', false);
-            datatable.column(12).visible(true);
+            datatable.column(15).visible(true);
         } else {
-            datatable.column(12).visible(false);
+            datatable.column(15).visible(false);
         }
         @if(Auth::user()->hasRole('Qcer'))
         if(status == 1 || status == 2 || status == 5) {

@@ -1,6 +1,12 @@
 @extends('auth.layout')
 
 @section('content')
+<style>
+  .form-control {
+    /* Example input field styles */
+    border-color: blue;
+  }
+</style>
 <div class="container">
   <div class="row vh-100 ">
     <div class="col-12 align-self-center">
@@ -60,6 +66,12 @@
 
                         <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="Enter Password" required autocomplete="current-password">
 
+                        <div class="input-group-append">
+                          <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="fa fa-eye-slash" aria-hidden="true"></i>
+                          </button>
+                        </div>
+                    
                         @error('password')
                           <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -94,4 +106,28 @@
     </div>
   </div>
 </div>
+
+
+<script>
+  document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+
+    const eyeIcon = this.querySelector('i');
+    eyeIcon.classList.toggle('fa-eye-slash');
+    eyeIcon.classList.toggle('fa-eye');
+
+    const isPasswordVisible = type === 'text';
+    if (isPasswordVisible) {
+      this.classList.add('btn-outline-secondary');
+      this.classList.remove('btn-outline-blue');
+    } else {
+      this.classList.remove('btn-outline-secondary');
+      this.classList.add('btn-outline-blue');
+    }
+  });
+</script>
+
+
 @endsection

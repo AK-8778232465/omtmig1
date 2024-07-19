@@ -154,6 +154,7 @@ class OrderController extends Controller
             ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
             ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
             ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
+            ->leftJoin('oms_tier','oms_order_creations.tier_id', '=', 'oms_tier.id')
             ->select(
                 'oms_order_creations.id',
                 'oms_order_creations.order_id as order_id',
@@ -169,6 +170,9 @@ class OrderController extends Controller
                 'oms_order_creations.associate_id',
                 'stl_lob.name as lob_name',
                 'stl_process.name as process_name',
+                'stl_client.client_name',
+                'stl_item_description.process_name as process', 
+                'oms_tier.Tier_id as tier_name',
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
                 DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name')
@@ -861,6 +865,7 @@ class OrderController extends Controller
             ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
             ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
             ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
+            ->leftJoin('oms_tier','oms_order_creations.tier_id', '=', 'oms_tier.id')
             ->select(
                 'oms_order_creations.id',
                 'oms_order_creations.order_id as order_id',
@@ -876,6 +881,10 @@ class OrderController extends Controller
                 'oms_order_creations.associate_id',
                 'stl_lob.name as lob_name',
                 'stl_process.name as process_name',
+                'stl_client.client_name',
+                'stl_item_description.process_name as process', 
+                'oms_tier.Tier_id as tier_name',
+                
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
                 DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name')
@@ -939,8 +948,14 @@ class OrderController extends Controller
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
         ->filterColumn('order_id', function($order, $keyword) {
-            $sql = "oms_order_creations.order_id  like ?";
-            $order->whereRaw($sql, ["%{$keyword}%"]);
+            $keywords = explode(',', $keyword);
+            $placeholders = [];
+            foreach ($keywords as $key => $value) {
+                $placeholders[] = '?';
+            }
+            $sql = "oms_order_creations.order_id IN (" . implode(',', $placeholders) . ")";
+            
+            $order->whereRaw($sql, $keywords);
         })
         ->filterColumn('short_code', function($order, $keyword) {
             $sql = "oms_state.short_code  like ?";
@@ -954,6 +969,17 @@ class OrderController extends Controller
             $sql = 'CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")")  like ?';
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
+        //new  'stl_client.client_name',
+        ->filterColumn('client_name', function($query, $keyword) {
+            $query->whereRaw('stl_client.client_name like ?', ["%{$keyword}%"]);
+        })
+        ->filterColumn('process', function($query, $keyword) {
+            $query->whereRaw('stl_item_description.process_name like ?', ["%{$keyword}%"]);
+        })
+        ->filterColumn('tier_name', function($query, $keyword) {
+            $query->whereRaw('oms_tier.Tier_id like ?', ["%{$keyword}%"]);
+        })
+        
         ->filterColumn('assignee_qa', function($order, $keyword) {
             $sql = 'CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")")  like ?';
             $order->whereRaw($sql, ["%{$keyword}%"]);
