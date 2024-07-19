@@ -80,6 +80,12 @@ class SettingController extends Controller
             $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->orderBy('client_no')->get();
             $exceldetail = CountyInstructionAudit::with('users')->orderBy('created_at', 'desc')->get();
             return view('app.settings.sduploads',compact('clients', 'exceldetail'));
+
+        }else if ($request->is('settings/geoinformations')){
+
+            $stateList = State::select('id', 'short_code')->get();
+
+            return view('app.settings.geoinformation',compact('stateList'));
         }
     }
 

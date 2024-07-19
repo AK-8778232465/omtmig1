@@ -53,6 +53,8 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,S
     Route::get('settings/users', 'setting')->name('users');
     Route::get('settings/products', 'setting')->name('products');
     Route::get('settings/sduploads', 'setting')->name('sduploads');
+    Route::get('settings/geoinformations', 'setting')->name('geoinformations');
+
     // Users
     Route::post('/usersInsert', 'addUsers')->name('usersInsert');
     Route::post('edit_user', 'edit_user')->name('edit_user');
@@ -137,5 +139,8 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::get('Reports', 'Reports')->name('Reports');
     Route::post('Productdropdown', 'Productdropdown')->name('Productdropdown');
     Route::post('userwise_count', 'userwise_count')->name('userwise_count');
+
+    Route::post('getGeoCounty', 'getGeoCounty')->name('getGeoCounty');
+    Route::post('getGeoCities', 'getGeoCities')->name('getGeoCities');
 
 });

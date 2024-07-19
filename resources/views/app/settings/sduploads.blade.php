@@ -38,11 +38,12 @@ p {
 
 </style>
 <div class="container-fluid mt-2">
-    <div class="col-md-12 pl-1 mt-2 p-3 content-loaded">
+    @include('app.settings.index')
+    <div class="col-md-12 p-2 content-loaded">
         <form id="sdupload_id" enctype="multipart/form-data" method="post" name="sdupload_id">
             @csrf
             <div class="card">
-                <div class="card-body rounded shadow-sm" style="border-top: 3px solid #0e7c31">
+                <div class="card-body rounded shadow-sm" style="">
                     <div class="form-group row mb-4 pl-3 pr-3 mt-3">
                         <div class="col-lg-3">
                             <label class="font-weight-bold">Client<span style="color: red;">*</span></label>

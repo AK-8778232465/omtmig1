@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\user;
+use App\Models\State;
+use App\Models\County;
+use App\Models\City;
 use App\Models\OrderCreation;
 use Illuminate\Http\Request;
 use DB;
@@ -112,5 +115,18 @@ private function getProcessIdsBasedOnUserRole($user)
             $reportingUserIds = User::getAllLowerLevelUserIds(Auth::id());
             return DB::table('oms_user_service_mapping')->whereIn('user_id', $reportingUserIds)->where('is_active', 1)->pluck('service_id')->toArray();
         }
+    }
+    public function getGeoCounty(Request $request)
+    {
+        $getCounty['county'] = County::select('id', 'stateId', 'county_name')->where('stateId', $request->state_id)->get();
+ 
+        return response()->json($getCounty);
+    }
+ 
+    public function getGeoCities(Request $request)
+    {
+        $cities = City::select('id', 'city')->where('county_id', $request->county_id)->get();
+       
+        return response()->json($cities);
     }
 }
