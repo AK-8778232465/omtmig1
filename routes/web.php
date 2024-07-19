@@ -139,6 +139,7 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::get('Reports', 'Reports')->name('Reports');
     Route::post('Productdropdown', 'Productdropdown')->name('Productdropdown');
     Route::post('userwise_count', 'userwise_count')->name('userwise_count');
+    Route::post('newreports', 'newreports')->name('newreports');
 
     Route::post('getGeoCounty', 'getGeoCounty')->name('getGeoCounty');
     Route::post('getGeoCities', 'getGeoCities')->name('getGeoCities');

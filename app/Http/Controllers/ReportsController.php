@@ -116,10 +116,82 @@ private function getProcessIdsBasedOnUserRole($user)
             return DB::table('oms_user_service_mapping')->whereIn('user_id', $reportingUserIds)->where('is_active', 1)->pluck('service_id')->toArray();
         }
     }
+    //new reports
+    public function newreports(Request $request)
+    {
+        $user = Auth::user();
+        $processIds = $this->getProcessIdsBasedOnUserRole($user);
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $client_id = $request->input('client_id');
+        $project_id = $request->input('project_id');
+
+        $query = DB::table('oms_order_creations')
+            ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+            ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
+            ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
+            ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+            ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+            ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
+            ->leftJoin('county_instructions', function($join) {
+                $join->on('oms_order_creations.state_id', '=', 'county_instructions.state_id')
+                     ->on('oms_order_creations.county_id', '=', 'county_instructions.county_id')
+                     ->on('stl_item_description.client_id', '=', 'county_instructions.client_id')
+                     ->on('stl_item_description.process_id', '=', 'county_instructions.process_id')
+                     ->on('stl_item_description.lob_id', '=', 'county_instructions.lob_id');
+            })
+            ->leftJoin('order_status_history', function ($join) {
+                $join->on('oms_order_creations.id', '=', 'order_status_history.order_id')
+                    ->where('order_status_history.id', '=', DB::raw("(SELECT MAX(id) FROM order_status_history WHERE order_id = oms_order_creations.id)"));
+            })
+            ->select(
+                'oms_order_creations.order_id as order_id',
+                'oms_order_creations.order_date as order_date',
+                'oms_order_creations.completion_date as completion_date',
+                'stl_item_description.process_name as process',
+                'oms_state.short_code as short_code',
+                'county.county_name as county_name',
+                'oms_status.status as status',
+                'county_instructions.json as county_instruction_json',
+                 'order_status_history.comment as status_comment'
+            )
+            ->whereDate('order_date', '>=', $fromDate)
+            ->whereDate('order_date', '<=', $toDate)
+            ->whereIn('oms_order_creations.process_id', $processIds)
+            ->where('oms_order_creations.is_active', 1)
+            ->whereIn('oms_order_creations.status_id', [1, 2, 3, 4, 5, 13, 14])
+            ->where('stl_item_description.is_approved', 1)
+            ->where('stl_client.is_approved', 1);
+
+        if (!empty($client_id) && $client_id[0] !== 'All') {
+            $query->whereIn('stl_item_description.client_id', $client_id);
+        }
+        if (!empty($project_id) && $project_id[0] !== 'All') {
+            $query->whereIn('oms_order_creations.process_id', $project_id);
+        }
+        $results = $query->orderBy('oms_order_creations.id', 'desc')->get();
+        $results = $results->map(function($item) {
+            $json = json_decode($item->county_instruction_json, true);
+            $primarySource = $json['PRIMARY']['PRIMARY_SOURCE'] ?? null;
+            return [
+                'process' => $item->process,
+                'order_date' => $item->order_date,
+                'completion_date' => $item->completion_date,
+                'order_id' => $item->order_id,
+                'short_code' => $item->short_code,
+                'county_name' => $item->county_name,
+                'status' => $item->status,
+                 'status_comment' => $item->status_comment,
+                'primary_source' => $primarySource,
+            ];
+        });
+
+        return Datatables::of($results)->toJson();
+    }
+
     public function getGeoCounty(Request $request)
     {
-        $getCounty['county'] = County::select('id', 'stateId', 'county_name')->where('stateId', $request->state_id)->get();
- 
+        $getCounty['county'] = County::select('id', 'stateId', 'county_name')->where('stateId', $request->state_id)->get(); 
         return response()->json($getCounty);
     }
  

@@ -337,14 +337,30 @@ class OrderFormController extends Controller
     public function orderSubmit(Request $request) {
         if(!empty($request->orderId) && !empty($request->orderStatus)) {
             $orderId = $request->orderId;
+            $statusId = $request->orderStatus;
+
+
+            if ($statusId == 5) {
             $update_status = OrderCreation::find($orderId)
             ->update([
                 'status_id' => $request->orderStatus,
                 'tier_id' => $request->tierId,
                 'state_id' => $request->stateId,
                 'county_id' => $request->countyId,
-                'city_id' => $request->cityId
+                'city_id' => $request->cityId,
+                'completion_date' => Carbon::now(),
             ]);
+            } else {
+                $update_status = OrderCreation::find($orderId)
+                ->update([
+                    'status_id' => $request->orderStatus,
+                    'tier_id' => $request->tierId,
+                    'state_id' => $request->stateId,
+                    'county_id' => $request->countyId,
+                    'city_id' => $request->cityId,
+                    'completion_date' => null,
+                ]);
+            }
             if($update_status) {
                 DB::table('order_status_history')->insert([
                     'order_id' => $orderId,
@@ -364,13 +380,27 @@ class OrderFormController extends Controller
         } else {
             if(!empty($request->orderId)){
                 $orderId = $request->orderId;
+                $statusId = $request->orderStatus;
+
+            if ($statusId == 5) {
                 $update_status = OrderCreation::find($orderId)
                 ->update([
                     'tier_id' => $request->tierId,
                     'state_id' => $request->stateId,
                     'county_id' => $request->countyId,
-                    'city_id' => $request->cityId
+                    'city_id' => $request->cityId,
+                    'completion_date' => Carbon::now(),
                 ]);
+            }else{
+                    $update_status = OrderCreation::find($orderId)
+                    ->update([
+                        'tier_id' => $request->tierId,
+                        'state_id' => $request->stateId,
+                        'county_id' => $request->countyId,
+                        'city_id' => $request->cityId,
+                        'completion_date' => null,
+                ]);
+            }
                 DB::table('order_status_history')->where('order_id',$orderId)->update([
                     'comment' => $request->orderComment,
                 ]);
@@ -407,10 +437,21 @@ class OrderFormController extends Controller
     {
         if(!empty($request->orderId) && !empty($request->orderStatus)) {
             $orderId = $request->orderId;
+            $statusId = $request->orderStatus;
+
+            if($statusId == 5){
+                $update_status = OrderCreation::find($orderId)
+            ->update([
+                'status_id' => $request->orderStatus,
+                'completion_date' => Carbon::now(),
+            ]);
+            }else{
             $update_status = OrderCreation::find($orderId)
             ->update([
                 'status_id' => $request->orderStatus,
+                'completion_date' => null,
             ]);
+            }
 
             return response()->json(['success' => 'Order Status Updated Successfully']);
         } else {

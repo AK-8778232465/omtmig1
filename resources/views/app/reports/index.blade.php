@@ -1,48 +1,11 @@
 @extends('layouts.app')
 @section('title', config('app.name') . ' | Reports')
-@section('content')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<link rel="shortcut icon" href="{{asset('assets/images/favicon.ico')}}">
-<link href="{{asset('plugins/daterangepicker/daterangepicker.css')}}" rel="stylesheet" />
-<link href="{{asset('plugins/select2/select2.min.css')}}" rel="stylesheet" type="text/css" />
-<link href="{{asset('plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.css')}}" rel="stylesheet" type="text/css" />
-<link href="{{asset('plugins/bootstrap-touchspin/css/jquery.bootstrap-touchspin.min.css')}}" rel="stylesheet" />
-<link href="{{asset('plugins/nestable/jquery.nestable.min.css')}}" rel="stylesheet" />
-<link href="{{asset('plugins/sweet-alert2/sweetalert2.min.css')}}" rel="stylesheet" type="text/css">
-<link href="{{asset('plugins/animate/animate.css')}}" rel="stylesheet" type="text/css">
-<link href="{{asset('plugins/dropify/css/dropify.min.css')}}" rel="stylesheet">
-<link href="{{asset('plugins/jvectormap/jquery-jvectormap-2.0.2.css')}}" rel="stylesheet">
-<link href="{{asset('plugins/jquery-steps/jquery.steps.css')}}">
-<link href="{{asset('plugins/sweet-alert2/sweetalert2.min.css')}}" rel="stylesheet" type="text/css">
-<link href="{{asset('plugins/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet" type="text/css" />
-<link href="{{asset('plugins/datatables/buttons.bootstrap4.min.css')}}" rel="stylesheet" type="text/css" />
-<link href="{{asset('plugins/datatables/responsive.bootstrap4.min.css')}}" rel="stylesheet" type="text/css" />
-<link href="{{asset('assets/css/jquery-ui.min.css')}}" rel="stylesheet">
-<link href="{{asset('assets/css/bootstrap.min.css')}}" rel="stylesheet" type="text/css" />
-<link href="{{asset('assets/css/icons.min.css')}}" rel="stylesheet" type="text/css" />
-<link href="{{asset('assets/css/metisMenu.min.css')}}" rel="stylesheet" type="text/css" />
-<link href="{{asset('assets/css/app.min.css')}}" rel="stylesheet" type="text/css" />
-<link href="{{asset('assets/css/custom.css')}}" rel="stylesheet" type="text/css" />
-<link href="{{asset('assets/css/style.css')}}" rel="stylesheet" type="text/css" />
-<script src="{{asset('assets/js/jquery.min.js')}}"></script>
-<script src="{{asset('assets/js/jquery-ui.min.js')}}"></script>
-<link rel="stylesheet" type="text/css" href="{{asset('assets/css/pnotify.custom.css')}}">
-<script type="text/javascript" src="{{asset('assets/js/pnotify.custom.js')}}"></script>
-<link href="{{asset('assets/css/client_style.css')}}" rel="stylesheet" type="text/css" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 @php
     $currentDate = \Carbon\Carbon::now()->toDateString();
-@endphp
+    @endphp
+@section('content')
 <style>
-.reports{
-    padding-top: 7%;
-}
-.reports-content {
-            display: none;
-            margin-top: 10px;
-        }
+
         * {
         margin: 0;
         padding: 0;
@@ -50,38 +13,40 @@
     }
 
     .left-menu {
-        position: fixed;
         top: 10%;
         height: 100%;
         padding: 20px;
     }
+    .reports{
+        padding-top: 1rem;
+    }
 
 
-.left-menu h6 {
+    .left-menu h6 {
     font-size: 18px;
     font-weight: bold;
     color: #333333;
     border-bottom: 1px solid #e0e0e0;
     margin-bottom: 10px;
-}
+    }
 
-.left-menu ul {
+    .left-menu ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
-}
+    }
 
-.left-menu li {
+    .left-menu li {
     padding: 8px 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-}
+    }
 
-.left-menu li:hover {
+    .left-menu li:hover {
     background-color: #d1d0d0;
-}
+    }
 
-@keyframes fadeIn {
+    @keyframes fadeIn {
     from {
         opacity: 0;
     }
@@ -104,6 +69,7 @@
         <h6 class="mt-2">List of Reports</h6>
         <ul>
             <li id="userwise-reports" class="report-item active">Userwise Reports</li>
+            <li id="new-reports" class="report-item">New Reports</li>
             <li id="clientwise-reports" class="report-item">Clientwise Reports</li>
             <li id="txn-revenue-details" class="report-item">TXN Revenue Details</li>
             <li id="fte-revenue-details" class="report-item">FTE Revenue Details</li>
@@ -113,7 +79,7 @@
     <div class="col-md-12">
         <div class="col-md-9 row justify-content-center">
             <div class="card">
-                <div class="card-body" id="reports-content">
+                <div class="card-body" id="reports-content mt-1">
                     <h5 id="reports-heading">Reports - Userwise Reports</h5>
                 </div>
             </div>
@@ -177,10 +143,89 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card col-md-10 mt-5 newreports" id="newreports_table" style="font-size: 12px;">
+                <h4 class="text-center mt-3">Report Details</h4>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table id="newreports_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                            <thead class="text-center" style="font-size: 12px;">
+                                <tr>
+                                    <th width="12%">S.No</th>
+                                    <th width="11%">Product Type</th>
+                                    <th width="11%">Order Received</th>
+                                    <th width="11%">Production Date</th>
+                                    <th width="11%">Order Number</th>
+                                    <th width="11%">State</th>
+                                    <th width="11%">County</th>
+                                    <th width="11%">Status</th>
+                                    <th width="11%">Comments</th>
+                                    <th width="11%">Primary Source</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center" style="font-size: 12px;"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script src="{{asset('./assets/js/jquery.min.js')}}"></script>
 <script>
+
+    //new reports
+
+    function newreports() {
+        var fromDate = $('#fromDate_dcf').val();
+        var toDate = $('#toDate_dcf').val();
+        var client_id = $('#client_id_dcf').val();
+        var project_id = $('#project_id_dcf').val();
+
+        $('#newreports_datatable').DataTable({
+        destroy: true,
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ route('newreports') }}",
+            type: 'POST',
+            data: function(d) {
+                d.to_date = toDate;
+                d.from_date = fromDate;
+                d.client_id = client_id;
+                d.project_id = project_id;
+                d._token = '{{ csrf_token() }}';
+            },
+            dataSrc: 'data'
+        },
+        columns: [
+            {
+                data: null,
+                name: 's_no',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row, meta) {
+                    return meta.row + 1;
+                }
+            },
+            { data: 'process', name: 'process' },
+            { data: 'order_date', name: 'order_date' },
+            { data: 'completion_date', name: 'completion_date' },
+            { data: 'order_id', name: 'order_id' },
+            { data: 'short_code', name: 'short_code' },
+            { data: 'county_name', name: 'county_name' },
+            { data: 'status', name: 'status' },
+             { data: 'status_comment', name: 'status_comment' },
+            { data: 'primary_source', name: 'primary_source' }
+        ]
+    });
+}
+
+$('#newreports_datatable').on('draw.dt', function () {
+    $('#newreports_table').removeClass('d-none');
+});
+
 
     function fetchProData(client_id) {
         $.ajax({
@@ -258,6 +303,7 @@ $("#filterButton").on('click', function() {
     let client_id = $("#client_id_dcf").val();
     let project_id = $("#project_id_dcf").val();
     userwise_datatable(fromDate, toDate, client_id, project_id);
+    newreports(fromDate, toDate, client_id, project_id);
 
     $('#client_id_dcf').on('change', function () {
         console.log('2');
@@ -273,9 +319,11 @@ $(document).ready(function() {
         $("#project_id").select2();
         $("#project_id_dcf").select2();
         $("#client_id_dcf").select2();
-        $("#billing_id_dcf").select2();
+
     $('.select2-basic-multiple').select2();
     userwise_datatable();
+    newreports();
+
 
     $('#client_id_dcf').on('change', function () {
         console.log('2');
@@ -292,10 +340,12 @@ $(document).ready(function() {
         $('#reports-heading').text('Reports - ' + reportType);
         $('.report-item').removeClass('active');
         $('#' + reportType.toLowerCase().replace(/ /g, '-')).addClass('active');
+        $('#userwise_table').hide();
+        $('#newreports_table').hide();
         if (reportType === 'Userwise Reports') {
             $('#userwise_table').show();
-        } else {
-            $('#userwise_table').hide();
+        } else if (reportType === 'New Reports') {
+            $('#newreports_table').show();
         }
     }
     showReport('Userwise Reports');
@@ -332,6 +382,7 @@ document.getElementById('fromDate_dcf').addEventListener('change', function() {
     }
 });
 
-
-
 </script>
+
+@endsection
+
