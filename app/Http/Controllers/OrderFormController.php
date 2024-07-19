@@ -293,7 +293,7 @@ class OrderFormController extends Controller
 
             $primarySource = PrimarySource::select('id','source_name')->get();
 
-            $instructionId = $countyData->id;
+            $instructionId = !empty($countyData->id) ? $countyData->id : '' ;
 
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId'));
