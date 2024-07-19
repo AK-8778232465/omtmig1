@@ -380,6 +380,8 @@ class OrderFormController extends Controller
                 ]);
 
                 $getPrimaryName = DB::table('oms_primary_source')->where('id', $request->primarySource)->value('source_name');
+
+                if(!empty($request->instructionId)) {
                 $countyInstructionId = DB::table('county_instructions')
                     ->where('id', $request->instructionId)
                     ->first();
@@ -395,6 +397,7 @@ class OrderFormController extends Controller
                 DB::table('county_instructions')
                     ->where('id', $request->instructionId) 
                     ->update(['json' => $updatedJsonData]);
+                }
 
                 if($request->submit_type == 2) {
                     return response()->json(['redirect' => $request->orderId]);
@@ -432,6 +435,7 @@ class OrderFormController extends Controller
                 ]);
 
             $getPrimaryName = DB::table('oms_primary_source')->where('id', $request->primarySource)->value('source_name');
+            if(!empty($request->instructionId)) {
             $countyInstructionId = DB::table('county_instructions')
                 ->where('id', $request->instructionId)
                 ->first();
@@ -447,6 +451,7 @@ class OrderFormController extends Controller
             DB::table('county_instructions')
                 ->where('id', $request->instructionId) 
                 ->update(['json' => $updatedJsonData]);
+            }
 
                 if($request->submit_type == 2) {
                     return response()->json(['redirect' => $request->orderId]);
