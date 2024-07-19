@@ -37,17 +37,30 @@
 <script type="text/javascript">
      $(document).ready(function() {
         $('.select2dropdown').select2();
+
+        var datatable = $('#datatable').DataTable({
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "lengthChange": true,
+            "pageLength": 10,
+            "language": {
+                "paginate": {
+                    "previous": "Previous",
+                    "next": "Next"
+                }
+            }
     });
 
     $('#property_state').on('change', function () {
         var state_id = $("#property_state").val();
         $("#property_county").html('');
         $.ajax({
-            url: "{{url('getGeoCounty')}}",
+                url: "{{ url('getGeoCounty') }}",
             type: "POST",
             data: {
                 state_id: state_id,
-                _token: '{{csrf_token()}}'
+                    _token: '{{ csrf_token() }}'
             },
             dataType: 'json',
             success: function (result) {
@@ -61,15 +74,15 @@
                     tableRows += '<td class="text-center">' + (value.municipality || '-') + '</td>';
                     tableRows += '</tr>';
                 });
-                $('#datatable tbody').html(tableRows);
+                    datatable.clear().rows.add($(tableRows)).draw();
             }
         });
     });
 
     $('#property_county').on('change', function () {
         var county_id = $(this).val();
-        $("#city").html(''); // Clear previous options
-        var tableRows = ''; // Initialize table rows
+            $("#city").html('');
+            var tableRows = '';
 
         if (county_id) {
             $.ajax({
@@ -92,12 +105,12 @@
                             tableRows += '</tr>';
                         });
                     } else {
-                        $('#city').html('<option value="">No Cities Found</option>');
+                        $('#city').html('<option value="">No Municipality Found</option>');
                         tableRows += '<tr>';
-                        tableRows += '<td class="text-center" colspan="3">No Cities Found</td>';
+                        tableRows += '<td class="text-center" colspan="3">No Municipality Found</td>';
                         tableRows += '</tr>';
                     }
-                    $('#datatable tbody').html(tableRows); // Update table body
+                        datatable.clear().rows.add($(tableRows)).draw();
                 },
                 error: function (xhr, status, error) {
                     console.error(xhr.responseText);
@@ -108,8 +121,9 @@
             tableRows += '<tr>';
             tableRows += '<td class="text-center" colspan="3">No Cities Found</td>';
             tableRows += '</tr>';
-            $('#datatable tbody').html(tableRows); // Update table body
+                datatable.clear().rows.add($(tableRows)).draw();
         }
+        });
     });
 </script>
 @endsection
