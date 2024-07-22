@@ -49,7 +49,18 @@
                     "previous": "Previous",
                     "next": "Next"
                 }
-            }
+            },
+            "columns": [
+                { 
+                    "data": null, 
+                    "class": "text-center",
+                    "render": function (data, type, row, meta) {
+                        return meta.row + 1; // Serial number
+                    }
+                }, // S.NO
+                { "data": "county_name", "class": "text-center" }, // County
+                { "data": "municipality", "class": "text-center Mhide" } // Municipality
+            ]
     });
 
     $('#property_state').on('change', function () {
@@ -65,16 +76,15 @@
             dataType: 'json',
             success: function (result) {
                 $('#property_county').html('<option value="">Select County</option>');
-                var tableRows = '';
+                    var tableData = [];
                 $.each(result.county, function (key, value) {
                     $("#property_county").append('<option value="' + value.id + '">' + value.county_name + '</option>');
-                    tableRows += '<tr>';
-                    tableRows += '<td class="text-center">' + (key + 1) + '</td>';
-                    tableRows += '<td class="text-center">' + value.county_name + '</td>';
-                    tableRows += '<td class="text-center">' + (value.municipality || '-') + '</td>';
-                    tableRows += '</tr>';
+                        tableData.push({
+                            "county_name": value.county_name,
+                            "municipality": value.municipality || '-'
                 });
-                    datatable.clear().rows.add($(tableRows)).draw();
+                    });
+                    datatable.clear().rows.add(tableData).draw();
             }
         });
     });
@@ -82,7 +92,7 @@
     $('#property_county').on('change', function () {
         var county_id = $(this).val();
             $("#city").html('');
-            var tableRows = '';
+            var tableData = [];
 
         if (county_id) {
             $.ajax({
@@ -98,19 +108,25 @@
                         $('#city').html('<option value="">Select City</option>');
                         $.each(result, function (key, value) {
                             $("#city").append('<option value="' + value.id + '">' + value.city + '</option>');
-                            tableRows += '<tr>';
-                            tableRows += '<td class="text-center">' + (key + 1) + '</td>';
-                            tableRows += '<td class="text-center">' + $('#property_county option:selected').text() + '</td>';
-                            tableRows += '<td class="text-center">' + (value.city || '-') + '</td>';
-                            tableRows += '</tr>';
+                                tableData.push({
+                                    "county_name": $('#property_county option:selected').text(),
+                                    "municipality": value.city || '-'
+                                });
                         });
                     } else {
                         $('#city').html('<option value="">No Municipality Found</option>');
-                        tableRows += '<tr>';
-                        tableRows += '<td class="text-center" colspan="3">No Municipality Found</td>';
-                        tableRows += '</tr>';
+                            tableData.push({
+                                "county_name": $('#property_county option:selected').text(),
+                                "municipality": 'No Municipality Found'
+                            });
+                            swal.fire({
+                                title: 'No Municipality Found',
+                                text: 'No municipality from selected county',
+                                icon: 'warning',
+                                confirmButtonText: 'OK'
+                            });
                     }
-                        datatable.clear().rows.add($(tableRows)).draw();
+                        datatable.clear().rows.add(tableData).draw();
                 },
                 error: function (xhr, status, error) {
                     console.error(xhr.responseText);
@@ -118,10 +134,11 @@
             });
         } else {
             $('#city').html('<option value="">Select City</option>');
-            tableRows += '<tr>';
-            tableRows += '<td class="text-center" colspan="3">No Cities Found</td>';
-            tableRows += '</tr>';
-                datatable.clear().rows.add($(tableRows)).draw();
+                tableData.push({
+                    "county_name": '',
+                    "municipality": 'No Cities Found'
+                });
+                datatable.clear().rows.add(tableData).draw();
         }
         });
     });
