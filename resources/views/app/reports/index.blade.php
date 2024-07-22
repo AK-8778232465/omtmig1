@@ -147,7 +147,7 @@
             <div class="card col-md-10 mt-5 newreports" id="newreports_table" style="font-size: 12px;">
                 <h4 class="text-center mt-3">Report Details</h4>
                 <div class="card-body">
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <div class="table-responsive">
                         <table id="newreports_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
                                 <tr>
@@ -210,15 +210,51 @@
                 }
             },
             { data: 'process', name: 'process' },
-            { data: 'order_date', name: 'order_date' },
-            { data: 'completion_date', name: 'completion_date' },
+            {
+                data: 'order_date',
+                name: 'order_date',
+                render: function(data, type, row) {
+                    if (data) {
+                        var date = new Date(data);
+                        var month = ('0' + (date.getMonth() + 1)).slice(-2);
+                        var day = ('0' + date.getDate()).slice(-2);
+                        var year = date.getFullYear();
+                        var hours = ('0' + date.getHours()).slice(-2);
+                        var minutes = ('0' + date.getMinutes()).slice(-2);
+                        var seconds = ('0' + date.getSeconds()).slice(-2);
+                        return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+                    }
+                    return '';
+                }
+            },
+            {
+                data: 'completion_date',
+                name: 'completion_date',
+                render: function(data, type, row) {
+                    if (data) {
+                        var date = new Date(data);
+                        var month = ('0' + (date.getMonth() + 1)).slice(-2);
+                        var day = ('0' + date.getDate()).slice(-2);
+                        var year = date.getFullYear();
+                        var hours = ('0' + date.getHours()).slice(-2);
+                        var minutes = ('0' + date.getMinutes()).slice(-2);
+                        var seconds = ('0' + date.getSeconds()).slice(-2);
+                        return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+                    }
+                    return '';
+                }
+            },
             { data: 'order_id', name: 'order_id' },
             { data: 'short_code', name: 'short_code' },
             { data: 'county_name', name: 'county_name' },
             { data: 'status', name: 'status' },
              { data: 'status_comment', name: 'status_comment' },
             { data: 'primary_source', name: 'primary_source' }
-        ]
+        ],
+        dom: 'l<"toolbar">Bfrtip',
+        buttons: [
+            'excel'
+        ],
     });
 }
 
@@ -355,23 +391,26 @@ $(document).ready(function() {
     });
 });
 
-
-
-    let currentDate12 = new Date('<?php echo $currentDate; ?>');
-    document.getElementById('toDate_dcf').valueAsDate = currentDate12;
-    var currentDate = new Date('<?php echo $currentDate; ?>');
-    var firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
-    var formattedDate = firstDayOfMonth.toISOString().split('T')[0];
-    document.getElementById('fromDate_dcf').value = formattedDate;
-    function isFutureDate(date) {
+let currentDate12 = new Date('<?php echo $currentDate; ?>');
+document.getElementById('toDate_dcf').valueAsDate = currentDate12;
+var currentDate = new Date('<?php echo $currentDate; ?>');
+var firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
+var formattedDate = firstDayOfMonth.toISOString().split('T')[0];
+document.getElementById('fromDate_dcf').value = formattedDate;
+function isFutureDate(date) {
     var currentDate = new Date('<?php echo $currentDate; ?>');
     return date > currentDate;
 }
 document.getElementById('toDate_dcf').addEventListener('change', function() {
     var selectedDate = new Date(this.value);
+    var fromDate = new Date(document.getElementById('fromDate_dcf').value);
+
     if (isFutureDate(selectedDate)) {
         alert("You cannot select a future date.");
         this.valueAsDate = currentDate12;
+    } else if (selectedDate < fromDate) {
+        alert("According to your 'From Date', you cannot choose a earlier than the 'From Date'.");
+        this.valueAsDate = fromDate;
     }
 });
 document.getElementById('fromDate_dcf').addEventListener('change', function() {
@@ -379,6 +418,12 @@ document.getElementById('fromDate_dcf').addEventListener('change', function() {
         if (isFutureDate(selectedDate)) {
         alert("You cannot select a future date.");
         this.valueAsDate = currentDate12;
+    } else {
+        var toDate = new Date(document.getElementById('toDate_dcf').value);
+        if (toDate < selectedDate) {
+            alert("According to your 'From Date', you cannot choose a 'To Date' earlier than the 'From Date'.");
+            document.getElementById('toDate_dcf').valueAsDate = selectedDate;
+        }
     }
 });
 
