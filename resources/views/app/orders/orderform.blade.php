@@ -208,14 +208,15 @@
                                         <div class="row">
                                         <div class="col-10 mb-2">
                                             <div class="font-weight-bold mb-1 mt-1">Primary Source :</div>
-                                            @if(!empty($countyInfo))
                                                 <select id="primary_source" name="primary_source" class="form-control select2dropdown" data-parsley-required="true">
                                                     <option value="">Select Primary Source</option>
                                                     @foreach($primarySource as $source)
-                                                    <option value="{{ $source->id }}" {{ $source->source_name == $countyInfo['PRIMARY']['PRIMARY_SOURCE'] ? 'selected' : '' }}>{{ $source->source_name }}</option>
+                                                        <option value="{{ $source->id }}" 
+                                                            {{ isset($countyInfo['PRIMARY']) && $source->source_name == ($countyInfo['PRIMARY']['PRIMARY_SOURCE'] ?? '') ? 'selected' : '' }}>
+                                                            {{ $source->source_name }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
-                                            @endif
                                         </div>
                                             <div class="col-10 mb-2">
                                     <div class="font-weight-bold mb-1 mt-1">Status :</div>

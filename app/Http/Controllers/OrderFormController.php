@@ -375,10 +375,6 @@ class OrderFormController extends Controller
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
 
-                DB::table('order_status_history')->where('order_id',$orderId)->update([
-                    'comment' => $request->orderComment,
-                ]);
-
                 $getPrimaryName = DB::table('oms_primary_source')->where('id', $request->primarySource)->value('source_name');
 
                 if(!empty($request->instructionId)) {
@@ -430,9 +426,6 @@ class OrderFormController extends Controller
                         'completion_date' => null,
                 ]);
             }
-                DB::table('order_status_history')->where('order_id',$orderId)->update([
-                    'comment' => $request->orderComment,
-                ]);
 
             $getPrimaryName = DB::table('oms_primary_source')->where('id', $request->primarySource)->value('source_name');
             if(!empty($request->instructionId)) {
