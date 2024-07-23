@@ -331,7 +331,7 @@ $('#city').on('change', function () {
 
             if (response.redirect) {
                 if (response.redirect === 'orders') {
-                    if(changeState || changeCounty) {
+                    if (changeState || changeCounty) {
                         location.reload();
                     } else {
                         window.location.href = '{{ url("orders_status") }}';
@@ -339,8 +339,7 @@ $('#city').on('change', function () {
                 } else {
                     window.location.href = '{{ url("/coversheet-prep") }}/' + response.redirect;
                 }
-                }
-                else if(response.success) {
+            } else if (response.success) {
                     Swal.fire({
                         title: "Success",
                         text: response.success,
@@ -350,25 +349,53 @@ $('#city').on('change', function () {
                             location.reload();
                         }
                     });
-                }
-                else if(response.error) {
+            } else if (response.error) {
                     Swal.fire({
                         title: "Error",
                         text: response.error,
                         icon: "error"
                     });
+            } else if (response.errors) {
+                let errorMessages = "";
+                for (let key in response.errors) {
+                    if (response.errors.hasOwnProperty(key)) {
+                        errorMessages += response.errors[key].join(" ") + "\n";
+                    }
+                }
+                Swal.fire({
+                    title: "Required",
+                    text: errorMessages,
+                    icon: "error"
+                });
                 }
             },
             error: function(xhr, status, error) {
                 console.error(xhr.responseText);
+            let errorResponse = JSON.parse(xhr.responseText);
+            if (errorResponse.message) {
                 Swal.fire({
-                    title: "Error",
-                    text: 'Error submitting order. Please try again later.',
+                    title: "Required",
+                    text: errorResponse.message,
                     icon: "error"
                 });
             }
+            if (errorResponse.errors) {
+                let errorMessages = "";
+                for (let key in errorResponse.errors) {
+                    if (errorResponse.errors.hasOwnProperty(key)) {
+                        errorMessages += errorResponse.errors[key].join(" ") + "\n";
+                    }
+                }
+                Swal.fire({
+                    title: "Required",
+                    text: errorMessages,
+                    icon: "error"
         });
     }
+        }
+    });
+}
+
 
     $('#property_state').on('change', function () {
         var state_id = $("#property_state").val();
