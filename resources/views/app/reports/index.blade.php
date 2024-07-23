@@ -68,9 +68,9 @@
     <div class="col-md-2 text-center left-menu">
         <h6 class="mt-2">List of Reports</h6>
         <ul>
-            <li id="userwise-reports" class="report-item active">Userwise Reports</li>
-            <li id="new-reports" class="report-item">New Reports</li>
-            <li id="clientwise-reports" class="report-item">Clientwise Reports</li>
+            <li id="userwise-details" class="report-item active">Userwise Details</li>
+            <li id="orderwise-details" class="report-item">Orderwise Details</li>
+            <li id="clientwise-details" class="report-item">Clientwise Details</li>
             <li id="txn-revenue-details" class="report-item">TXN Revenue Details</li>
             <li id="fte-revenue-details" class="report-item">FTE Revenue Details</li>
         </ul>
@@ -173,17 +173,16 @@
 </div>
 
 <script src="{{asset('./assets/js/jquery.min.js')}}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
 <script>
-
-    //new reports
-
-    function newreports() {
+function newreports() {
         var fromDate = $('#fromDate_dcf').val();
         var toDate = $('#toDate_dcf').val();
         var client_id = $('#client_id_dcf').val();
         var project_id = $('#project_id_dcf').val();
 
-        $('#newreports_datatable').DataTable({
+    var table = $('#newreports_datatable').DataTable({
         destroy: true,
         processing: true,
         serverSide: true,
@@ -206,7 +205,8 @@
                 orderable: false,
                 searchable: false,
                 render: function(data, type, row, meta) {
-                    return meta.row + 1;
+                    var pageInfo = meta.settings.oInstance.api().page.info();
+                    return pageInfo.start + meta.row + 1;
                 }
             },
             { data: 'process', name: 'process' },
@@ -214,34 +214,14 @@
                 data: 'order_date',
                 name: 'order_date',
                 render: function(data, type, row) {
-                    if (data) {
-                        var date = new Date(data);
-                        var month = ('0' + (date.getMonth() + 1)).slice(-2);
-                        var day = ('0' + date.getDate()).slice(-2);
-                        var year = date.getFullYear();
-                        var hours = ('0' + date.getHours()).slice(-2);
-                        var minutes = ('0' + date.getMinutes()).slice(-2);
-                        var seconds = ('0' + date.getSeconds()).slice(-2);
-                        return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
-                    }
-                    return '';
+                    return data ? formatExcelDate(data) : '';
                 }
             },
             {
                 data: 'completion_date',
                 name: 'completion_date',
                 render: function(data, type, row) {
-                    if (data) {
-                        var date = new Date(data);
-                        var month = ('0' + (date.getMonth() + 1)).slice(-2);
-                        var day = ('0' + date.getDate()).slice(-2);
-                        var year = date.getFullYear();
-                        var hours = ('0' + date.getHours()).slice(-2);
-                        var minutes = ('0' + date.getMinutes()).slice(-2);
-                        var seconds = ('0' + date.getSeconds()).slice(-2);
-                        return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
-                    }
-                    return '';
+                    return data ? formatExcelDate(data) : '';
                 }
             },
             { data: 'order_id', name: 'order_id' },
@@ -253,9 +233,63 @@
         ],
         dom: 'l<"toolbar">Bfrtip',
         buttons: [
-            'excel'
-        ],
+            {
+                extend: 'excel',
+                action: function (e, dt, button, config) {
+                    $.ajax({
+                        url: "{{ route('newreports') }}",
+                        type: 'POST',
+                        data: {
+                            to_date: toDate,
+                            from_date: fromDate,
+                            client_id: client_id,
+                            project_id: project_id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            var data = response.data;
+
+                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Short Code", "County Name", "Status", "Status Comment", "Primary Source"];
+                            var exportData = data.map((row, index) => [
+                                index + 1,
+                                row.process,
+                                formatExcelDate(row.order_date),
+                                formatExcelDate(row.completion_date),
+                                row.order_id,
+                                row.short_code,
+                                row.county_name,
+                                row.status,
+                                row.status_comment,
+                                row.primary_source
+                            ]);
+
+                            var wb = XLSX.utils.book_new();
+                            var ws = XLSX.utils.aoa_to_sheet([headers].concat(exportData));
+                            XLSX.utils.book_append_sheet(wb, ws, "New Reports");
+                            XLSX.writeFile(wb, "newreports.xlsx");
+                        }
+                    });
+                }
+            }
+        ]
     });
+
+    function formatExcelDate(dateString) {
+        if (dateString) {
+            var date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                return dateString; // If date parsing fails, return original string
+            }
+            var month = ('0' + (date.getMonth() + 1)).slice(-2);
+            var day = ('0' + date.getDate()).slice(-2);
+            var year = date.getFullYear();
+            var hour = ('0' + date.getHours()).slice(-2);
+            var minute = ('0' + date.getMinutes()).slice(-2);
+            var second = ('0' + date.getSeconds()).slice(-2);
+            return `${month}/${day}/${year} ${hour}:${minute}:${second}`;
+        }
+        return '';
+    }
 }
 
 $('#newreports_datatable').on('draw.dt', function () {
@@ -376,15 +410,31 @@ $(document).ready(function() {
         $('#reports-heading').text('Reports - ' + reportType);
         $('.report-item').removeClass('active');
         $('#' + reportType.toLowerCase().replace(/ /g, '-')).addClass('active');
+
+        // Hide all tables initially
         $('#userwise_table').hide();
-        $('#newreports_table').hide();
-        if (reportType === 'Userwise Reports') {
+        $('#newreports_table').hide(); // Fixed table ID
+        $('#clientwise_table').hide();
+        $('#txn_revenue_table').hide();
+        $('#fte_revenue_table').hide();
+
+        // Show the selected table
+        if (reportType === 'Userwise Details') {
             $('#userwise_table').show();
-        } else if (reportType === 'New Reports') {
+        } else if (reportType === 'Orderwise Details') {
             $('#newreports_table').show();
+        } else if (reportType === 'Clientwise Details') {
+            $('#clientwise_table').show();
+        } else if (reportType === 'TXN Revenue Details') {
+            $('#txn_revenue_table').show();
+        } else if (reportType === 'FTE Revenue Details') {
+            $('#fte_revenue_table').show();
         }
     }
-    showReport('Userwise Reports');
+
+    // Set default report
+    showReport('Userwise Details');
+
     $('.report-item').click(function() {
         var reportType = $(this).text();
         showReport(reportType);

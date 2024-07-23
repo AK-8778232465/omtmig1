@@ -133,11 +133,14 @@ private function getProcessIdsBasedOnUserRole($user)
             ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
             ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
             ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
-            ->leftJoin('county_instructions', function($join) {
+            >leftJoin('county_instructions', function($join) {
                 $join->on('oms_order_creations.state_id', '=', 'county_instructions.state_id')
                      ->on('oms_order_creations.county_id', '=', 'county_instructions.county_id')
+                     ->on(function($query) {
+                         $query->on('oms_order_creations.city_id', '=', 'county_instructions.city_id')
+                               ->orWhereNull('county_instructions.city_id');
+                     })
                      ->on('stl_item_description.client_id', '=', 'county_instructions.client_id')
-                     ->on('stl_item_description.process_id', '=', 'county_instructions.process_id')
                      ->on('stl_item_description.lob_id', '=', 'county_instructions.lob_id');
             })
             ->leftJoin('order_status_history', function ($join) {
