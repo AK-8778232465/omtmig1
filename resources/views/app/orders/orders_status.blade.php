@@ -3,6 +3,18 @@
 @section('content')
 @include('app.orders.style')
 
+<style>
+    #searchInputs {
+    width: 200px;
+    padding: 10px;
+    font-size: 14px; /* Adjusted font size */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    height: 33px;
+}
+
+</style>
+
 {{-- Edit Model Order --}}
 <div class="modal fade" id="myModalEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -115,7 +127,60 @@
                     <button id="status_All" class="btn btn-info status-btn" >All<span id="status_All_count"></span></button>
                 </div>
             </div>
-            <div class="p-0 mx-2">
+            <div class="p-0 mx-2" id="filter_search">
+                {{-- <p style="text-align:right;color:Red;">*(While Searching OrderID, Use Comma separator)</p> --}}
+                <div class="row ml-5">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="search_fromDate">From Date:</label>
+                            <input type="date" class="form-control" id="search_fromDate" name="search_fromDate">
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="search_toDate">To Date:</label>
+                            <input type="date" class="form-control" id="search_toDate" name="search_toDate">
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="searchType">Search Type:</label>
+                            <select class="form-control" id="searchType" name="searchType">
+                                <option value="" selected disabled>Select Search Type</option>
+                                <option value="1" id="search_orderid">Order Id</option>
+                                <option value="2" id="search_productcode">Product Code</option>
+                                <option value="3" id="search_client">Client</option>
+                                <option value="4" id="search_lob">Lob</option>
+                                <option value="5" id="search_process">Process</option>
+                                <option value="6" id="search_product">Product</option>
+                                <option value="7" id="search_tier">Tier</option>
+                                <option value="8" id="search_state">State</option>
+                                <option value="9" id="search_County">County</option>
+                                <option value="10" id="search_user">User</option>
+                                <option value="11" id="search_qa">QA</option>
+                            </select>
+                        </div>
+            
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="searchInputs">Search:</label>
+                            <input type="text" class="form-control" id="searchInputs" >
+                            <p id="orderIdTip" class="red-text" style="display:none; color:red;">Use Comma separator for multiple search</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2 mt-4">
+                        <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
+                    </div>
+                    
+                    
+                </div>
+                
+                
                 <form id="assignmentForm" method="POST" data-parsley-validate>
                     <table id="order_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead>
@@ -189,6 +254,21 @@
 </div>
 <script type="text/javascript">
 
+$(document).ready(function() {
+        // Function to show/hide the paragraph based on dropdown selection
+        $('#searchType').change(function() {
+            var selectedValue = $(this).val();
+
+            // Check if "Order Id" (value 1) is selected
+            if (selectedValue === "1") {
+                $('#orderIdTip').show(); // Show the paragraph
+            } else {
+                $('#orderIdTip').hide(); // Hide the paragraph
+            }
+        });
+    });
+
+
     $(function () {
         @if(Session::has('success'))
         new PNotify({
@@ -217,6 +297,48 @@
     let sessionfilter = false;
     $(function () {
         let defaultStatus = null;
+
+        $('.status-btn').click(function() {
+        // Get the id of the clicked button
+        let buttonId = $(this).attr('id');
+
+        switch (buttonId) {
+            case 'status_6':
+                defaultStatus = 6;
+                break;
+            case 'status_7':
+                defaultStatus = 7;
+                break;
+            case 'status_1':
+                defaultStatus = 1;
+                break;
+            case 'status_13':
+                defaultStatus = 13;
+                break;
+            case 'status_14':
+                defaultStatus = 14;
+                break;
+            case 'status_4':
+                defaultStatus = 4;
+                break;
+            case 'status_2':
+                defaultStatus = 2;
+                break;
+            case 'status_5':
+                defaultStatus = 5;
+                break;
+            case 'status_3':
+                defaultStatus = 3;
+                break;
+            case 'status_All':
+                defaultStatus = 'All'; // Adjust if 'All' should be treated differently
+                break;
+            default:
+                defaultStatus = null; // Set a default fallback
+                break;
+        }
+    }
+)
         var currentURI = window.location.href;
         var match = currentURI.match(/\/orders_status\/(\d+|All)/);
         if (match) {
@@ -236,13 +358,17 @@
             serverSide: true,
             scrollX: true,
             lengthMenu: [10, 25, 50, 100, 200, 500],
+            dom: 'lrtip',
             ajax: {
                 url: '{{ route("getOrderData") }}',
                 type: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    status: defaultStatus,
-                    sessionfilter : sessionfilter
+                data: function (d) {
+                d._token = '{{ csrf_token() }}';
+                d.status = defaultStatus;
+                d.fromDate = $('#search_fromDate').val();
+                d.toDate = $('#search_toDate').val();
+                d.searchType = $('#searchType').val();
+                d.searchInputs = $('#searchInputs').val(); 
                 }
             },
             "columns": [
@@ -289,6 +415,9 @@
                     }
                 }
             });
+            $('#filterButton').on('click', function () {
+        datatable.ajax.reload();
+    });
 
         $('.status-btn').removeClass('btn-primary').addClass('text-white');
         $('#status_' + defaultStatus).removeClass('btn-info').addClass('btn-primary');

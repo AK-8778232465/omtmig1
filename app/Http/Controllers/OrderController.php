@@ -142,6 +142,10 @@ class OrderController extends Controller
     {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
+        $fromDate = $request->input('fromDate');
+        $toDate = $request->input('toDate');
+        $searchType = $request->input('searchType');
+        $searchInputs = $request->input('searchInputs');
 
         $query = DB::table('oms_order_creations')
             ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
@@ -165,6 +169,8 @@ class OrderController extends Controller
                 'stl_item_description.tat_value as tat_value',
                 'oms_state.short_code as short_code',
                 'county.county_name as county_name',
+                'assignee_users.username',
+                'assignee_qas.username',
                 'oms_order_creations.assignee_user_id',
                 'oms_order_creations.assignee_qa_id',
                 'oms_order_creations.associate_id',
@@ -923,6 +929,65 @@ class OrderController extends Controller
         }
     }
     $query->whereIn('oms_order_creations.process_id', $processIds);
+
+    if ($fromDate) {
+        $query->whereDate('oms_order_creations.order_date', '>=', $fromDate);
+    }
+
+    if ($toDate) {
+        $query->whereDate('oms_order_creations.order_date', '<=', $toDate);
+    }
+
+    if ($searchType == 1 && !empty($searchInputs)) {
+
+        $searchArray = explode(',', $searchInputs);
+    
+        $searchArray = array_map('trim', $searchArray);
+    
+        $query->where(function ($query) use ($searchArray) {
+            foreach ($searchArray as $searchTerm) {
+                $query->orWhere('oms_order_creations.order_id', 'like', '%' . $searchTerm . '%');
+            }
+        });
+    }
+    
+   
+    if ($searchType == 2 && !empty($searchInputs)) {
+        $query->where('stl_item_description.project_code', 'like', '%' . $searchInputs . '%');
+    }
+
+    if ($searchType == 3 && !empty($searchInputs)) {
+        $query->where('stl_client.client_name', 'like', '%' . $searchInputs . '%');
+    }
+
+    if ($searchType == 4 && !empty($searchInputs)) {
+        $query->where('stl_lob.name', 'like', '%' . $searchInputs . '%');
+    }
+
+    if ($searchType == 5 && !empty($searchInputs)) {
+        $query->where('stl_process.name', 'like', '%' . $searchInputs . '%');
+    }
+    if ($searchType == 6 && !empty($searchInputs)) {
+        $query->where( 'stl_item_description.process_name', 'like', '%' . $searchInputs . '%');
+    }
+
+    if ($searchType == 7 && !empty($searchInputs)) {
+        $query->where('oms_tier.Tier_id', 'like', '%' . $searchInputs . '%');
+    }
+    if ($searchType == 8 && !empty($searchInputs)) {
+        $query->where('oms_state.short_code', 'like', '%' . $searchInputs . '%');
+    }
+    if ($searchType == 9 && !empty($searchInputs)) {
+        $query->where('county.county_name', 'like', '%' . $searchInputs . '%');
+    }
+    if ($searchType == 10 && !empty($searchInputs)) {
+        $query->where('assignee_users.username', 'like', '%' . $searchInputs . '%');
+    }
+    if ($searchType == 11 && !empty($searchInputs)) {
+        $query->where('assignee_qas.username', 'like', '%' . $searchInputs . '%');
+    }
+
+
 
         return DataTables::of($query)
         ->addColumn('checkbox', function ($order) use ($user){
