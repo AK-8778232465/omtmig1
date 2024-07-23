@@ -145,7 +145,7 @@
             </div>
 
             <div class="card col-md-10 mt-5 newreports" id="newreports_table" style="font-size: 12px;">
-                <h4 class="text-center mt-3">Report Details</h4>
+                <h4 class="text-center mt-3">Orderwise Details</h4>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="newreports_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
