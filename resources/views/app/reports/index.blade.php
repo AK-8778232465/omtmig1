@@ -320,14 +320,54 @@ $('#newreports_datatable').on('draw.dt', function () {
     }
 
 
-function userwise_datatable(fromDate, toDate, client_id, projectId){
-        fromDate = $('#fromDate_dcf').val();
-        toDate = $('#toDate_dcf').val();
-        client_id = $('#client_id_dcf').val();
-        project_id = $('#project_id_dcf').val();
+// function userwise_datatable(fromDate, toDate, client_id, projectId){
+//         fromDate = $('#fromDate_dcf').val();
+//         toDate = $('#toDate_dcf').val();
+//         client_id = $('#client_id_dcf').val();
+//         project_id = $('#project_id_dcf').val();
 
 
-        datatable = $('#userwise_datatable').DataTable({
+//         datatable = $('#userwise_datatable').DataTable({
+//             destroy: true,
+//             processing: true,
+//             serverSide: true,
+//             ajax: {
+//                 url: "{{ route('userwise_count') }}",
+//                 type: 'POST',
+//                 data: function(d) {
+//                         d.to_date = toDate;
+//                         d.from_date = fromDate;
+//                         d.client_id = client_id;
+//                         d.project_id = project_id;
+//                         d._token = '{{csrf_token()}}';
+//                     },
+//                 dataSrc: 'data'
+//             },
+//             columns: [
+//                 { data: 'userinfo', name: 'userinfo', class: 'text-left' },
+//                 { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
+//                 { data: 'status_13', name: 'status_13' },
+//                 { data: 'status_14', name: 'status_14' },
+//                 { data: 'status_4', name: 'status_4' },
+//                 { data: 'status_2', name: 'status_2' },
+//                 { data: 'status_3', name: 'status_3' },
+//                 { data: 'status_5', name: 'status_5' },
+//                 { data: 'All', name: 'All' },
+//             ],
+//             dom: 'l<"toolbar">Bfrtip',
+//         buttons: [
+//             'excel'
+//         ],
+//         });
+//     }
+
+function userwise_datatable() {
+    var fromDate = $('#fromDate_dcf').val();
+    var toDate = $('#toDate_dcf').val();
+    var client_id = $('#client_id_dcf').val();
+    var project_id = $('#project_id_dcf').val();
+
+    var table = $('#userwise_datatable').DataTable({
             destroy: true,
             processing: true,
             serverSide: true,
@@ -339,7 +379,7 @@ function userwise_datatable(fromDate, toDate, client_id, projectId){
                         d.from_date = fromDate;
                         d.client_id = client_id;
                         d.project_id = project_id;
-                        d._token = '{{csrf_token()}}';
+                d._token = '{{ csrf_token() }}';
                     },
                 dataSrc: 'data'
             },
@@ -352,14 +392,50 @@ function userwise_datatable(fromDate, toDate, client_id, projectId){
                 { data: 'status_2', name: 'status_2' },
                 { data: 'status_3', name: 'status_3' },
                 { data: 'status_5', name: 'status_5' },
-                { data: 'All', name: 'All' },
+            { data: 'All', name: 'All' }
             ],
             dom: 'l<"toolbar">Bfrtip',
         buttons: [
-            'excel'
-        ],
+            {
+                extend: 'excel',
+                action: function (e, dt, button, config) {
+                    $.ajax({
+                        url: "{{ route('userwise_count') }}",
+                        type: 'POST',
+                        data: {
+                            to_date: toDate,
+                            from_date: fromDate,
+                            client_id: client_id,
+                            project_id: project_id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            var data = response.data;
+
+                            var headers = ["Users", "WIP", "Coversheet Prep", "Clarification", "Send For Qc", "Hold", "Cancelled", "Completed", "All"];
+                            var exportData = data.map(row => [
+                                row.userinfo,
+                                row.status_1,
+                                row.status_13,
+                                row.status_14,
+                                row.status_4,
+                                row.status_2,
+                                row.status_3,
+                                row.status_5,
+                                row.All
+                            ]);
+
+                            var wb = XLSX.utils.book_new();
+                            var ws = XLSX.utils.aoa_to_sheet([headers].concat(exportData));
+                            XLSX.utils.book_append_sheet(wb, ws, "Userwise Data");
+                            XLSX.writeFile(wb, "userwise_data.xlsx");
+                        }
         });
     }
+            }
+        ]
+    });
+}
 
 
     $('#userwise_datatable').on('draw.dt', function () {
