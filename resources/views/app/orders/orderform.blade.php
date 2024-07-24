@@ -208,8 +208,8 @@
                                         <div class="row">
                                         <div class="col-10 mb-2">
                                             <div class="font-weight-bold mb-1 mt-1"><span style="color:red;">*</span>Primary Source :</div>
-                                                <select id="primary_source" name="primary_source" class="form-control select2dropdown" data-parsley-required="true">
-                                                    <option value="">Select Primary Source</option>
+                                                <select id="primary_source" name="primary_source" class="form-control select2dropdown required-field" data-parsley-required="true">
+                                                    <option disabled selected value="">Select Primary Source</option>
                                                     @foreach($primarySource as $source)
                                                         <option value="{{ $source->id }}" 
                                                             {{ isset($countyInfo['PRIMARY']) && $source->source_name == ($countyInfo['PRIMARY']['PRIMARY_SOURCE'] ?? '') ? 'selected' : '' }}>
@@ -265,6 +265,7 @@ var changeCounty = false;
     });
 
 $('#city').on('change', function () {
+        $('#primary_source').removeClass('required-field');
         changeCounty = true;
         $('#ordersubmit').click();
 });
@@ -304,6 +305,18 @@ $('#city').on('change', function () {
         var city = $("#city").val();
         var primarySource = $("#primary_source").val();
         var instructionId = $("#instructionId").val();
+
+    if($('#primary_source').hasClass('required-field')) {
+        if($('#primary_source').val() == null)  {
+            Swal.fire({
+                title: "Error",
+                text: "Please select Primary Source field",
+                icon: "error"
+            });
+            return false;
+        }
+    }
+
         var data = {
             orderId: orderId,
             checklistItems: checklistItems.join(),
@@ -389,11 +402,13 @@ $('#city').on('change', function () {
                 });
             }
         });
+        $('#primary_source').removeClass('required-field');
         changeState = true;
         $('#ordersubmit').click();
     });
 
     $('#property_county').on('change', function () {
+        $('#primary_source').removeClass('required-field');
         changeCounty = true;
         $('#ordersubmit').click();
     });
