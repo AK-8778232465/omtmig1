@@ -207,7 +207,7 @@
                                 <div class="col-lg-5 mx-5 mt-1">
                                         <div class="row">
                                         <div class="col-10 mb-2">
-                                            <div class="font-weight-bold mb-1 mt-1">Primary Source :</div>
+                                            <div class="font-weight-bold mb-1 mt-1"><span style="color:red;">*</span>Primary Source :</div>
                                                 <select id="primary_source" name="primary_source" class="form-control select2dropdown" data-parsley-required="true">
                                                     <option value="">Select Primary Source</option>
                                                     @foreach($primarySource as $source)
