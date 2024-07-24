@@ -340,10 +340,6 @@ class OrderFormController extends Controller
     }
 
     public function orderSubmit(Request $request) {
-        $validatedData = $request->validate([
-            'primarySource' => 'required',
-           ]);
-
         if(!empty($request->orderId) && !empty($request->orderStatus)) {
             $orderId = $request->orderId;
             $statusId = $request->orderStatus;
