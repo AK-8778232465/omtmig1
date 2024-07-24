@@ -133,7 +133,8 @@ private function getProcessIdsBasedOnUserRole($user)
             ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
             ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
             ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
-            >leftJoin('county_instructions', function($join) {
+            ->leftJoin('oms_city', 'oms_order_creations.city_id', '=', 'oms_city.id')
+            ->leftJoin('county_instructions', function($join) {
                 $join->on('oms_order_creations.state_id', '=', 'county_instructions.state_id')
                      ->on('oms_order_creations.county_id', '=', 'county_instructions.county_id')
                      ->on(function($query) {
@@ -152,14 +153,16 @@ private function getProcessIdsBasedOnUserRole($user)
                 'oms_order_creations.order_date as order_date',
                 'oms_order_creations.completion_date as completion_date',
                 'stl_item_description.process_name as process',
+                'oms_order_creations.city_id as city',
                 'oms_state.short_code as short_code',
                 'county.county_name as county_name',
                 'oms_status.status as status',
                 'county_instructions.json as county_instruction_json',
                  'order_status_history.comment as status_comment'
             )
-            ->whereDate('order_date', '>=', $fromDate)
-            ->whereDate('order_date', '<=', $toDate)
+            ->whereNotNull('oms_order_creations.assignee_user_id')
+            ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
+            ->whereDate('oms_order_creations.order_date', '<=', $toDate)
             ->whereIn('oms_order_creations.process_id', $processIds)
             ->where('oms_order_creations.is_active', 1)
             ->whereIn('oms_order_creations.status_id', [1, 2, 3, 4, 5, 13, 14])
