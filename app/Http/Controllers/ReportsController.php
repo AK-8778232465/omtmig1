@@ -139,7 +139,8 @@ private function getProcessIdsBasedOnUserRole($user)
                      ->on('oms_order_creations.county_id', '=', 'county_instructions.county_id')
                      ->on(function($query) {
                          $query->on('oms_order_creations.city_id', '=', 'county_instructions.city_id')
-                               ->orWhereNull('county_instructions.city_id');
+                               ->orWhereNull('oms_order_creations.city_id')
+                               ->whereNull('county_instructions.city_id');
                      })
                      ->on('stl_item_description.client_id', '=', 'county_instructions.client_id')
                      ->on('stl_item_description.lob_id', '=', 'county_instructions.lob_id');

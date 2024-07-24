@@ -169,7 +169,7 @@ class OrderFormController extends Controller
                      $countyData = DB::table('county_instructions')
                          ->where('county_id', $orderData->county_id)
                          ->where('state_id', $orderData->property_state)
-                         ->whereNotNull('county_id')
+                         ->whereNull('city_id')
                          ->where('lob_id', $orderData->lob_id)
                          ->first();
                      }
