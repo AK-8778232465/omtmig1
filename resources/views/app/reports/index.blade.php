@@ -535,8 +535,12 @@ document.getElementById('toDate_dcf').addEventListener('change', function() {
         alert("You cannot select a future date.");
         this.valueAsDate = currentDate12;
     } else if (selectedDate < fromDate) {
-        alert("According to your 'From Date', you cannot choose a earlier than the 'From Date'.");
-        this.valueAsDate = fromDate;
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'According to your "From Date", you cannot choose a oldestdate  than the "From Date".'
+        });
+        this.valueAsDate = fromDate  ;
     }
 });
 document.getElementById('fromDate_dcf').addEventListener('change', function() {

@@ -532,11 +532,19 @@ document.getElementById('toDate_dcf').addEventListener('change', function() {
     var fromDate = new Date(document.getElementById('fromDate_dcf').value);
 
     if (isFutureDate(selectedDate)) {
-        alert("You cannot select a future date.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'You cannot select a future date.'
+        });
         this.valueAsDate = currentDate12;
     } else if (selectedDate < fromDate) {
-        alert("According to your 'From Date', you cannot choose a earlier than the 'From Date'.");
-        this.valueAsDate = fromDate;
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'According to your "From Date", you cannot choose a oldestdate  than the "From Date".'
+        });
+        this.valueAsDate = fromDate ;
     }
 });
 document.getElementById('fromDate_dcf').addEventListener('change', function() {
