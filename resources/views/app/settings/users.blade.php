@@ -2,20 +2,36 @@
 @section('title', config('app.name') . ' | Users')
 @section('content')
 <style>
-        #style-10::-webkit-scrollbar-track
+    .modal-body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .scrollable-col {
+        height: calc(100vh - 10px); /* Adjust based on header height */
+        overflow-y: auto;
+        padding: 0 15px; /* Optional: for better padding */
+    }
+
+    .scroll-content {
+        height: 100%;
+    }
+
+    .scrollable-col::-webkit-scrollbar-track
         {
             -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
             background-color: #F5F5F5;
             border-radius: 10px;
         }
 
-        #style-10::-webkit-scrollbar
+        .scrollable-col::-webkit-scrollbar
         {
             width: 10px;
             background-color: #F5F5F5;
         }
 
-        #style-10::-webkit-scrollbar-thumb
+        .scrollable-col::-webkit-scrollbar-thumb
         {
             background-color: #AAA;
             border-radius: 10px;
@@ -295,44 +311,15 @@
 					</button>
 				</div>
                 <div class="modal-body">
-                    <div class="row d-flex assinged_row">
+                    <div class="row d-flex assigned_row">
                         <div class="col-6">
-                            <div class="scrollbar"  id="style-10" style="height: 400px; overflow-y: auto;">
-                                <table id="available_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                    <thead>
-                                        <tr>
-                                            <th class="text-center">
-                                                <div class="checkbox-container">
-                                                    <input type="checkbox" id="assignAll" class="assignAll">
-                                                    <label for="checkbox"><strong>Available List</strong></label>
-                                                </div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Your available services data rows go here -->
-                                    </tbody>
-                                </table>
+                            <div class="d-flex justify-content-end mb-3">
+                                <button type="button" class="btn btn-primary" id="confirmButton">Confirm</button>
                             </div>
+                        <div id="jstree"  class="scrollable-col"></div>
                         </div>
                         <div class="col-6">
-                            <div class="scrollbar"  id="style-10" style="height: 400px; overflow-y: auto;">
-                                <table id="assigned_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                    <thead>
-                                        <tr>
-                                            <th class="text-center">
-                                                <div class="checkbox-container">
-                                                    <input type="checkbox" id="removeAll" class="removeAll">
-                                                    <strong>Mapped List</strong>
-                                                </div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Your assigned services data rows go here -->
-                                    </tbody>
-                                </table>
-                            </div>
+                            <div id="jstreestatic" class="scrollable-col mt-5"></div>
                         </div>
                     </div>
                 </div>
@@ -575,54 +562,12 @@
 		});
 	});
 
-    // Project Mapping
-
-   $(document).ready(function() {
-        $('#assignAll').on('change', function() {
-            var checkboxes = $('.assign-checkbox');
-            var removeAllCheckbox = $('#removeAll');
-
-            if ($(this).is(':checked')) {
-                $('.assignall_addIcons').hide();
-                $('#assignSelected').show();
-                checkboxes.show();
-                checkboxes.prop('checked', true);
-                removeAllCheckbox.prop('readonly', true);
-            } else {
-                $('.assignall_addIcons').show();
-
-                $('#assignSelected').hide();
-                checkboxes.hide();
-                checkboxes.prop('checked', false);
-                removeAllCheckbox.removeAttr('readonly');
-            }
-        });
-    });
-
-    $(document).ready(function() {
-        $('#removeAll').on('change', function() {
-            var removeCheckboxes = $('.remove-checkbox');
-           var assignAllCheckbox = $('#assignAll');
-            if ($(this).is(':checked')) {
-                $('.removeall_addIcons').hide();
-                $('#removeSelected').show();
-                removeCheckboxes.show();
-                removeCheckboxes.prop('checked', true);
-                assignAllCheckbox.prop('readonly', true);
-            } else {
-                $('.removeall_addIcons').show();
-                $('#removeSelected').hide();
-                removeCheckboxes.hide();
-                removeCheckboxes.prop('checked', false);
-                assignAllCheckbox.removeAttr('readonly');
-            }
-        });
-    });
 
 
-    var available_table, assigned_table;
 
-    function assignService(userID) {
+function assignService(userID) {
+
+    function fetchMappingData() {
         $.ajax({
             url: '{{ route("mappingData") }}',
             type: 'POST',
@@ -630,233 +575,156 @@
                 id: userID,
                 _token: "{{ csrf_token() }}"
             },
-            success: function (response) {
+            success: function(response) {
+                var allServicesData = response.allService;
+                var assignedServices = response.assignedServiceData;
+                var assignedServicesData = response.assignedService;
+                var unassignedServicesData = response.assignedService;
 
+                var treeData = allServicesData.map(function(lob) {
+                    return {
+                        'text': lob.lob_name,
+                        'children': lob.items.map(function(item) {
+                            return {
+                                'text': item.project_code + ': ' + item.process_name,
+                                'id': item.id,
+                                'checkbox': true,
+                                'state': {
+                                    'selected': assignedServicesData.includes(item.id) // Check if the item is in the assigned services
+                                }
+                            };
+                        }),
+                        'state': {
+                            'opened': true // Optionally open the parent nodes
+                        }
+                    };
+                });
 
+                var statictreeData = assignedServices.map(function(lob) {
+                    return {
+                        'text': lob.lob_name,
+                        'children': lob.items.map(function(item) {
+                            return {
+                                'text': item.project_code + ': ' + item.process_name,
+                                'id': item.id,
+                            };
+                        }),
+                        'state': {
+                            'opened': true // Optionally open the parent nodes
+                        }
+                    };
+                });
 
-                $('#user_id_service').val(userID);
-
-                function renderIconWithText(iconSvg, text, rowID, action, checkbox) {
-                    const checkboxSpan = checkbox === 'assignall' ?
-                            `<span class="assign-checkbox" style="display:none; width: 16px; height: 16px; margin-right: 8px;">
-                                <input type="checkbox" class="checkbox" data-row-id="${rowID}" checked>
-                            </span>`
-                            : (checkbox === 'removeall' ?
-                                `<span class="remove-checkbox" style="display:none; width: 16px; height: 16px; margin-right: 8px;">
-                                    <input type="checkbox" class="checkbox" data-row-id="${rowID}" checked>
-                                </span>`
-                                : '');
-
-                        return `<a href="#" class="action-icon" data-row-id="${rowID}" data-action="${action}">
-                                    <div style="display: flex; align-items: center;">
-                                        <span class="${checkbox}_addIcons" style="width: 16px; height: 16px; margin-right: 8px;">
-                                            ${iconSvg}
-                                        </span>
-                                        ${checkboxSpan}
-                                        <div class="project_codes">
-                                            ${text}
-                                        </div>
-                                    </div>
-                                </a>`;
+                var jsTreeInstance = $('#jstree').jstree(true);
+                if (jsTreeInstance) {
+                    jsTreeInstance.destroy(); // Destroy the existing tree
                 }
 
-                var addIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 512 512"><g><path fill="#4bae4f" fill-rule="evenodd" d="M256 0C114.8 0 0 114.8 0 256s114.8 256 256 256 256-114.8 256-256S397.2 0 256 0z" clip-rule="evenodd" opacity="1"></path><path fill="#ffffff" d="M116 279.6v-47.3c0-4.8 3.9-8.8 8.8-8.8h98.9v-98.8c0-4.8 3.9-8.8 8.8-8.8h47.3c4.8 0 8.7 3.9 8.7 8.8v98.9h98.8c4.8 0 8.8 3.9 8.8 8.8v47.3c0 4.8-3.9 8.7-8.8 8.7h-98.9v98.8c0 4.8-3.9 8.8-8.7 8.8h-47.3c-4.8 0-8.8-3.9-8.8-8.8v-98.9h-98.8c-4.9.1-8.8-3.9-8.8-8.7z" opacity="1"></path></g></svg>';
-                var removeIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 496.158 496.158"><g><path d="M0 248.085C0 111.063 111.069.003 248.075.003c137.013 0 248.083 111.061 248.083 248.082 0 137.002-111.07 248.07-248.083 248.07C111.069 496.155 0 385.087 0 248.085z" fill="#e04f5f"></path><path d="M383.546 206.286H112.612a7.2 7.2 0 0 0-7.199 7.2v69.187a7.2 7.2 0 0 0 7.199 7.199h270.934a7.2 7.2 0 0 0 7.199-7.199v-69.187c0-3.975-3.224-7.2-7.199-7.2z" fill="#ffffff"></path></g></svg>';
+                var jsTreeInstancestatic = $('#jstreestatic').jstree(true);
+                if (jsTreeInstancestatic) {
+                    jsTreeInstancestatic.destroy(); // Destroy the existing tree
+                }
 
-                // DataTable for Available Table
-                var available_table = $('#available_table').DataTable({
-                    destroy: true,
-                    searching: false,
-                    ordering: false,
-                    paging:false,
-                    data: response.unassignedService,
-                    dom: 'l<"toolbars">Bfrtip',
-                    buttons: [],
-                    columns: [
-                        { data: 'id', render: (data, type, row) => renderIconWithText(addIconSvg, `${row.project_code} (${row.process_name})`, data, 'add','assignall') },
-                ],
-                    initComplete: function(){
-                        $("div.toolbars").html('<button id="assignSelected" type="button" class="ml-2 btn btn-primary float-right mx-2" style="display:none;">&nbsp;Assign Selected</button><br />');
-                    }
-                });
 
-                // DataTable for Assigned Table
-                var assigned_table = $('#assigned_table').DataTable({
-                    destroy: true,
-                    searching: false,
-                    ordering: false,
-                    paging:false,
-                    data: response.assignedService,
-                    dom: 'l<"tool">Bfrtip',
-                    buttons: [],
-                    columns: [
-                        { data: 'id', render: (data, type, row) => renderIconWithText(removeIconSvg, `${row.project_code} (${row.process_name})`, data, 'remove','removeall') },
-                    ],
-                    initComplete: function(){
-                        $("div.tool").html('<button id="removeSelected" type="button" class="ml-2 btn btn-danger float-right mx-2" style="display:none;">&nbsp;Remove Selected</button><br />');
-                    }
-                });
-
-                // Redraw the DataTables
-                available_table.draw();
-                assigned_table.draw();
-
-        var addIconClickHandler = function () {
-                var $closestTr = $(this).closest('tr');
-                var row = available_table.row($(this).closest('tr')).data();
-                var rowID = $(this).data('row-id');
-
-                $.ajax({
-                    url: '/addMapping',
-                    type: 'POST',
-                    data: {
-                        userID: userID,
-                        rowID: rowID,
-                        _token: "{{ csrf_token() }}"
+                $('#jstree').jstree({
+                    'core': {
+                        'data': treeData
                     },
-                    success: function (response) {
-                        if (response.data === 'success') {
-                            assigned_table.row.add(row).draw();
-                            available_table.row($closestTr).remove().draw();
-                        } else {
-                            console.error("Failed to remove service. Please try again.");
-                        }
-                    },
-                    error: function () {
-                        console.error("Failed to add service. Please try again.");
-                    }
+                    'plugins': ["checkbox"]
                 });
 
-        };
-
-        $('#assignSelected').on('click', function() {
-            var checkedRowIDs = [];
-            $('.assign-checkbox input[type="checkbox"]:checked').each(function() {
-                var rowID = $(this).data('row-id');
-                checkedRowIDs.push(rowID);
-            });
-            $.ajax({
-                url: '/addMapping',
-                type: 'POST',
-                data: {
-                    userID: userID,
-                    rowID: checkedRowIDs,
-                    _token: "{{ csrf_token() }}"
+                $('#jstreestatic').jstree({
+                    'core': {
+                        'data': statictreeData
                 },
-                success: function(response) {
-                     $('#assignServiceModal').modal('hide');
-                     new PNotify({
-                        title: 'Success',
-                        text:  'Selected Project Mapped Sucessfully',
-                        type: 'success',
-                        delay: 1000
+                    'plugins': [] // No checkboxes
                     });
 
-                    $('#assignAll').prop('checked', false);
-
-                    $('#removeAll').prop('readonly', false);
+                // Show the modal
                 },
                 error: function() {
-                    // Handle error
-                    console.error("Failed to send IDs of checked rows to the server.");
-                }
-            });
-        });
-
-        $('#removeSelected').on('click', function() {
-            var checkedRowIDs = [];
-            $('.remove-checkbox input[type="checkbox"]:checked').each(function() {
-                var rowID = $(this).data('row-id');
-                checkedRowIDs.push(rowID);
-            });
-            $.ajax({
-                url: '/removeMapping',
-                type: 'POST',
-                data: {
-                    userID: userID,
-                    rowID: checkedRowIDs,
-                    _token: "{{ csrf_token() }}"
-                },
-                success: function(response) {
-                    $('#assignServiceModal').modal('hide');
-                     new PNotify({
-                        title: 'Success',
-                        text:  'Selected Project Removed Sucessfully',
-                        type: 'success',
-                        delay: 1000
-                    });
-
-                    $('#removeAll').prop('checked', false);
-                    $('#assignAll').prop('readonly', false);
-
-                },
-                error: function() {
-                    // Handle error
-                    console.error("Failed to send IDs of checked rows to the server.");
-                }
-            });
-        });
-
-
-                var removeIconClickHandler = function () {
-                    var $closestTr = $(this).closest('tr');
-                    var row = assigned_table.row($(this).closest('tr')).data();
-                    var rowID = $(this).data('row-id');
-
-                    $.ajax({
-                        url: '/removeMapping',
-                        type: 'POST',
-                        data: {
-                            userID: userID,
-                            rowID: rowID,
-                            _token: "{{ csrf_token() }}"
-                        },
-                        success: function (response) {
-                            available_table.row.add(row).draw();
-                            assigned_table.row($closestTr).remove().draw();
-                        },
-                        error: function () {
-                            console.error("Failed to remove service. Please try again.");
-                        }
-                    });
-                };
-
-                // Bind the click event with the stored references
-                $('#available_table tbody').on('click', '.action-icon[data-action="add"]', function(event) {
-                    var $actionIcon = $(this);
-                    if ($('.assign-checkbox:visible').length === 0) {
-                        addIconClickHandler.call($actionIcon);
-                    } else {
-
-                    }
-                });
-
-                $('#assigned_table tbody').on('click', '.action-icon[data-action="remove"]', function(event) {
-                    var $actionIcons = $(this);
-                    if ($('.remove-checkbox:visible').length === 0) {
-                        removeIconClickHandler.call($actionIcons);
-                    } else {
-
-                    }
-                });
-
-                // $('#assigned_table tbody').on('click', '.action-icon[data-action="remove"]', removeIconClickHandler);
-
-            },
-            error: function () {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: 'Failed to fetch assignment data. Please try again.',
                 });
-            }
-        });
-
-        setTimeout(function () {
-            $('#assignServiceModal').modal('show');
-        }, 500);
+                }
+            });
     }
 
+    $('#assignServiceModal').modal('show');
+    fetchMappingData();
+
+    $('#confirmButton').on('click', function() {
+        var selectedNodes = $('#jstree').jstree('get_checked'); // Get the IDs of selected nodes
+        var selectedIDs = selectedNodes
+            .map(function(id) { return parseInt(id, 10); })
+            .filter(function(id) { return !isNaN(id); });
+
+        // Fetch previously assigned IDs from the server or another source
+            $.ajax({
+            url: '{{ route("getPreviouslyAssignedIDs") }}',
+            type: 'GET',
+                data: {
+                    userID: userID,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+
+                console.log(response);
+
+                var previouslyAssignedIDs = response.assignedServiceIDs; // Make sure this matches the response structure
+
+                // Determine which services need to be added and which need to be removed
+                var toAdd = selectedIDs.filter(id => !previouslyAssignedIDs.includes(id));
+                var toRemove = previouslyAssignedIDs.filter(id => !selectedIDs.includes(id));
+
+                // Optionally, ensure that previously assigned services are reactivated if they are unchecked
+                var toReactivate = previouslyAssignedIDs.filter(id => selectedIDs.includes(id) && id in previouslyAssignedIDs);
+
+                    $.ajax({
+                    url: '{{ route("updateMapping") }}',
+                        type: 'POST',
+                        data: {
+                            userID: userID,
+                        add: toAdd,
+                        remove: toRemove,
+                        reactivate: toReactivate,
+                            _token: "{{ csrf_token() }}"
+                        },
+                    success: function(response) {
+                        if (response.data === 'success') {
+                            fetchMappingData();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Failed to update services. Please try again.',
+                    });
+                    }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while updating services. Please try again.',
+                });
+                    }
+                });
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to fetch previously assigned services. Please try again.',
+                });
+            }
+        });
+    });
+
+
+
+}
 
 
 
@@ -980,4 +848,10 @@
             }
         });
 </script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- jsTree JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 @endsection

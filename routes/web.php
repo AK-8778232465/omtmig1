@@ -63,6 +63,8 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,S
     Route::post('/mappingData', 'mappingData')->name('mappingData');
     Route::any('/addMapping', 'addMapping')->name('addMapping');
     Route::post('/removeMapping', 'removeMapping')->name('removeMapping');
+    Route::post('/updateMapping', 'updateMapping')->name('updateMapping');
+    Route::get('/getPreviouslyAssignedIDs', 'getPreviouslyAssignedIDs')->name('getPreviouslyAssignedIDs');
     Route::post('/show_user', 'showUser')->name('show_user');
     Route::post('/getUserList', 'getUserList')->name('getUserList');
     //products

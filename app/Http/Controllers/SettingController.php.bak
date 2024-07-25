@@ -286,148 +286,39 @@ class SettingController extends Controller
         $assignedServiceIds = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
         $unassignedServiceIds = array_diff($serviceIds, $assignedServiceIds);
 
-        $unassignedService = DB::table('stl_item_description')
-                ->whereIn('stl_item_description.id', $unassignedServiceIds)
-                ->join('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
-                ->select(
-                    'stl_lob.id as lob_id',
-                    'stl_lob.name as lob_name',
-                    'stl_item_description.id',
-                    'stl_item_description.project_code',
-                    'stl_item_description.process_name'
-                )
-                ->orderBy('stl_lob.name')
-                ->get();
-
-            $groupedServices = $unassignedService->groupBy('lob_name');
-
-            $groupedunassignedServiceServicesArray = $groupedServices->map(function ($items, $lob_name) {
-                return [
-                    'lob_name' => $lob_name,
-                    'items' => $items->map(function ($item) {
-                        return [
-                            'id' => $item->id,
-                            'project_code' => $item->project_code,
-                            'process_name' => $item->process_name,
-                        ];
-                    })->values(),
-                ];
-            })->values();
-
-
-        $assignedService = DB::table('stl_item_description')
-            ->whereIn('stl_item_description.id', $assignedServiceIds)
-            ->join('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
-            ->select(
-                'stl_lob.id as lob_id',
-                'stl_lob.name as lob_name',
-                'stl_item_description.id',
-                'stl_item_description.project_code',
-                'stl_item_description.process_name'
-            )
-            ->orderBy('stl_lob.name')
-            ->get();
-
-
-
-        $groupedAssignedServices = $assignedService->groupBy('lob_name');
-
-        $groupedAssignedServicesArray = $groupedAssignedServices->map(function ($items, $lob_name) {
-            return [
-                'lob_name' => $lob_name,
-                'items' => $items->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'project_code' => $item->project_code,
-                        'process_name' => $item->process_name,
-                    ];
-                })->values(),
-            ];
-        })->values();
-
-        $allService = DB::table('stl_item_description')
-                ->join('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
-                ->select(
-                    'stl_lob.name as lob_name',
-                    'stl_item_description.id',
-                    'stl_item_description.project_code',
-                    'stl_item_description.process_name'
-                )
-                ->orderBy('stl_lob.name')
-                ->get();
-
-            // Group the services by lob_name
-            $groupedAllServices = $allService->groupBy('lob_name');
-
-            // Transform the data into the desired format
-            $groupedAllServicesArray = $groupedAllServices->map(function ($items, $lob_name) {
-                return [
-                    'lob_name' => $lob_name,
-                    'items' => $items->map(function ($item) {
-                        return [
-                            'id' => $item->id,
-                            'project_code' => $item->project_code,
-                            'process_name' => $item->process_name,
-                        ];
-                    })->values(),
-                ];
-            })->values();
+        $unassignedService = DB::table('stl_item_description')->whereIn('id', $unassignedServiceIds)->select('id', 'project_code','process_name')->get();
+        $assignedService = DB::table('stl_item_description')->whereIn('id', $assignedServiceIds)->select('id', 'project_code','process_name')->get();
+        $allService = DB::table('stl_item_description')->select('id', 'project_code','process_name')->get();
 
         $response = [
-            'unassignedService' => $unassignedServiceIds ?? [],
-            'assignedService' => $assignedServiceIds ?? [],
-            'assignedServiceData' => $groupedAssignedServicesArray ?? [],
-            'allService' => $groupedAllServicesArray ?? [],
+            'unassignedService' => $unassignedService ?? [],
+            'assignedService' => $assignedService ?? [],
+            'allService' => $allService ?? [],
         ];
 
         return response()->json($response);
     }
 
-    public function getPreviouslyAssignedIDs(Request $request) {
-        $userID = $request->userID;
-
-        $assignedServices = ServiceUserMapping::where('user_id', $userID)
-            ->where('is_active', 1)
-            ->pluck('service_id');
-
-        return response()->json(['assignedServiceIDs' => $assignedServices]);
-    }
 
 
-    public function updateMapping(Request $request) {
-        $addIDs = (array) $request->add;
-        $removeIDs = (array) $request->remove;
-        $reactivateIDs = (array) $request->reactivate;
+    public function addMapping(Request $request) {
+        $serviceIDs = (array) $request->rowID;
+        if (!empty($request->userID)) {
             $userID = $request->userID;
 
-        if (!empty($userID)) {
-            // Add services
-            if (is_array($addIDs) && count($addIDs) > 0) {
-                foreach ($addIDs as $serviceID) {
+            if (is_array($serviceIDs) && count($serviceIDs) > 0) {
+                foreach ($serviceIDs as $serviceID) {
+
                     ServiceUserMapping::updateOrInsert(
                         ['service_id' => $serviceID, 'user_id' => $userID],
                         ['is_active' => 1]
                     );
                 }
-            }
-
-            // Remove services
-            if (is_array($removeIDs) && count($removeIDs) > 0) {
-                foreach ($removeIDs as $serviceID) {
-                    ServiceUserMapping::where('service_id', $serviceID)
-                        ->where('user_id', $userID)
-                        ->update(['is_active' => 0]);
-                }
-            }
-
-            // Reactivate services (if necessary)
-            if (is_array($reactivateIDs) && count($reactivateIDs) > 0) {
-                foreach ($reactivateIDs as $serviceID) {
+            } else {
                 ServiceUserMapping::updateOrInsert(
-                        ['service_id' => $serviceID, 'user_id' => $userID],
+                    ['service_id' => $serviceIDs, 'user_id' => $userID],
                     ['is_active' => 1]
                 );
-            }
             }
 
             return response()->json(['data' => 'success']);
@@ -436,6 +327,29 @@ class SettingController extends Controller
         return response()->json(['data' => 'error']);
     }
 
+
+
+    public function removeMapping(Request $request) {
+        $serviceIDs = (array) $request->rowID;
+        $userID = $request->userID;
+        if (!empty($userID) && count($serviceIDs) > 0) {
+            if (count($serviceIDs) === 1) {
+
+                ServiceUserMapping::where('service_id', $serviceIDs[0])
+                    ->where('user_id', $userID)
+                    ->update(['is_active' => 0]);
+            } else {
+
+                foreach ($serviceIDs as $serviceID) {
+                    ServiceUserMapping::where('service_id', $serviceID)
+                        ->where('user_id', $userID)
+                        ->update(['is_active' => 0]);
+                }
+            }
+            return response()->json(['data' => 'success']);
+        }
+        return response()->json(['data' => 'error']);
+    }
 
 
     public function getUserList(Request $request)
