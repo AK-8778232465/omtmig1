@@ -565,7 +565,7 @@ $(document).ready(function() {
             @endif
         }
 
-        @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
+        @if(Auth::user()->hasRole('Process'))
         var allStatusValues = [];
         $('.status-dropdown').each(function() {
             var value = $(this).val();
@@ -576,9 +576,25 @@ $(document).ready(function() {
         });
         @endif
 
+        @if(Auth::user()->hasRole('Process/Qcer'))
+        var allStatusValues = [];
+        $('.status-dropdown').each(function() {
+            var value = $(this).val();
+            if (value !== '1' && value !== '3' && value !== '4') {
+                    $(this).prop('disabled', true);
+            }
+            allStatusValues.push(value);
+        });
+        @endif
+
 
         if (status == 4 || status == 2) {
-            @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
+            @if(Auth::user()->hasRole('Process'))
+                $('.status-dropdown').prop('disabled', true);
+            @endif
+        }
+        if (status == 2) {
+            @if(Auth::user()->hasRole('Process/Qcer'))
                 $('.status-dropdown').prop('disabled', true);
             @endif
         }

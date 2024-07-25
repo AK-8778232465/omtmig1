@@ -79,8 +79,7 @@ class OrderController extends Controller
             })
             ->count();
         $yetToAssignQa = OrderCreation::with('process', 'client')
-            ->where('assignee_qa_id')
-            ->where('assignee_user_id')
+            ->whereNull('assignee_qa_id')
             ->where('status_id', 4)
             ->where('is_active', 1)
             ->whereIn('process_id', $processIds)
@@ -127,10 +126,10 @@ class OrderController extends Controller
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
             $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
             $statusCounts[6] = $yetToAssignUser;
-            $statusCounts[7] = $yetToAssignQa;
+            // $statusCounts[7] = $yetToAssignQa;
         } else {
             $statusCounts[6] = in_array($user->user_type_id, [6, 8]) ? $yetToAssignUser : 0;
-            $statusCounts[7] = in_array($user->user_type_id, [7, 8]) ? $yetToAssignQa : 0;
+            // $statusCounts[7] = in_array($user->user_type_id, [7, 8]) ? $yetToAssignQa : 0;
             $statusCounts[13] = $user_coverSheet;
         }
 
@@ -1129,8 +1128,26 @@ class OrderController extends Controller
 
                     }
 
+        $user = Auth::user();
 
-            return '<select style="width:100%" class="status-dropdown form-control" data-row-id="' . $order->id . '">' .
+        $disabled = "";
+        $makedisable = "";
+
+        if($user->user_type_id == 8){
+            if ($order->status_id == 1 && $user->user_type_id == 8 && $order->assignee_qa_id != Auth::id()) {
+                $disabled = '';
+                $makedisable = '';
+            } elseif (($order->status_id == 4 && $user->user_type_id == 8 && $order->assignee_user_id != Auth::id() && $order->assignee_qa_id == Auth::id()) ||
+                          ($order->status_id == 4 && $user->user_type_id == 8 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id ==  Auth::id()) || ($order->status_id == 4 && $user->user_type_id == 8 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == null)) {
+                $disabled = '';
+                $makedisable = '';
+            } else {
+                $disabled = 'readonly';
+                $makedisable = 'select-disabled';
+            }
+        }
+
+        return '<select style="width:100%" class="status-dropdown ' . $makedisable . ' form-control" data-row-id="' . $order->id . '" ' . $disabled . '>' .
             collect($statusMapping)->map(function ($value, $key) use ($order) {
                 return '<option value="' . $key . '" ' . ($key == $order->status_id ? 'selected' : '') . '>' . $value . '</option>';
             })->join('') .
