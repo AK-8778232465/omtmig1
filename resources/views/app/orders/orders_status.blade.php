@@ -12,6 +12,11 @@
     border-radius: 5px;
     height: 33px;
 }
+.select-disabled {
+    pointer-events: none; 
+    cursor: not-allowed; 
+}
+
 
 </style>
 
