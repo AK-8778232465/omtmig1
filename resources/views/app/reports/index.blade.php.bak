@@ -542,20 +542,12 @@ document.getElementById('toDate_dcf').addEventListener('change', function() {
 document.getElementById('fromDate_dcf').addEventListener('change', function() {
     var selectedDate = new Date(this.value);
         if (isFutureDate(selectedDate)) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'You cannot select a future date.'
-        });
+        alert("You cannot select a future date.");
         this.valueAsDate = currentDate12;
     } else {
         var toDate = new Date(document.getElementById('toDate_dcf').value);
         if (toDate < selectedDate) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'According to your "From Date", you cannot choose a "To Date" earlier than the "From Date".'
-            });
+            alert("According to your 'From Date', you cannot choose a 'To Date' earlier than the 'From Date'.");
             document.getElementById('toDate_dcf').valueAsDate = selectedDate;
         }
     }

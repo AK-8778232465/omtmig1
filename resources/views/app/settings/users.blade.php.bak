@@ -694,12 +694,6 @@ function assignService(userID) {
                         },
                     success: function(response) {
                         if (response.data === 'success') {
-                        new PNotify({
-                            title: 'Success',
-                            text: 'Product Updated Successfully',
-                            type: 'success',
-                            delay: 1000
-                        });
                             fetchMappingData();
                         } else {
                             Swal.fire({
