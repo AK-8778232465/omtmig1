@@ -196,8 +196,15 @@ class OrderController extends Controller
                 if ($request->status == 1) {
                     if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
-                    } else {
+                    } elseif(in_array($user->user_type_id, [6, 7])) {
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
+                    }else{
+                        $query->where('oms_order_creations.status_id', $request->status)
+                            ->where(function ($optionalquery) use ($user) {
+                                $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
+                                    ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
+                            });
+                        // $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
                     }
                 } elseif($request->status == 4) {
                     if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
