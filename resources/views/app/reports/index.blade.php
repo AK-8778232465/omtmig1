@@ -532,7 +532,11 @@ document.getElementById('toDate_dcf').addEventListener('change', function() {
     var fromDate = new Date(document.getElementById('fromDate_dcf').value);
 
     if (isFutureDate(selectedDate)) {
-        alert("You cannot select a future date.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'You cannot select a future date.'
+        });
         this.valueAsDate = currentDate12;
     } else if (selectedDate < fromDate) {
         Swal.fire({
