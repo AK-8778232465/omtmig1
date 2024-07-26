@@ -1028,7 +1028,13 @@ class OrderController extends Controller
         $query->where('county.county_name', 'like', '%' . $searchInputs . '%');
     }
     if ($searchType == 10 && !empty($searchInputs)) {
-        $query->where('assignee_users.username', 'like', '%' . $searchInputs . '%');
+        preg_match('/\((.*?)\)/', $searchInputs, $matches);
+        $contentInsideParentheses = $matches[1] ?? $searchInputs; // Use the extracted content or the entire input
+
+        $query->where(function($q) use ($contentInsideParentheses) {
+            $q->where('assignee_users.username', 'like', '%' . $contentInsideParentheses . '%')
+              ->orWhere(DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")")'), 'like', '%' . $contentInsideParentheses . '%');
+        });
     }
     if ($searchType == 11 && !empty($searchInputs)) {
         $query->where('assignee_qas.username', 'like', '%' . $searchInputs . '%');
