@@ -12,6 +12,55 @@
     border-radius: 5px;
     height: 33px;
 }
+
+#customfromRange {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* Align items vertically centered */
+    gap: 15px; /* Space between items */
+}
+
+#customfromRange label {
+    font-weight: bold;
+    color: #007bff; /* Change to your preferred color */
+}
+
+#customfromRange input[type="date"] {
+    border: 1px solid #007bff; /* Match the border color with the label color */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+#customfromRange .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between label and input */
+}
+
+#customToRange {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* Align items vertically centered */
+    gap: 15px; /* Space between items */
+}
+
+#customToRange label {
+    font-weight: bold;
+    color: #007bff; /* Change to your preferred color */
+}
+
+#customToRange input[type="date"] {
+    border: 1px solid #007bff; /* Match the border color with the label color */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+#customToRange .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between label and input */
+}
+
 .select-disabled {
     pointer-events: none; 
     cursor: not-allowed; 
@@ -137,23 +186,42 @@
                 <div class="row ml-5">
                     <div class="col-md-2">
                         <div class="form-group">
-                            <label for="search_fromDate">From Date:</label>
-                            <input type="date" class="form-control" id="search_fromDate" name="search_fromDate">
+                            <label for="dateFilter"><b>Select Date Range:</b></label>
+                            <select class="form-control" id="dateFilter" onchange="selectDateFilter(this.value)" style="border:1px solid blue;">
+                                <option value="" selected >Select Date Range</option>
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="last_week">Last 7 Days</option>
+                                <option value="last_30_days">Last 30 Days</option>
+                                <option value="this_month">This Month</option>
+                                <option value="last_month">Last Month</option>
+                                <option value="custom">Custom Range</option>
+
+                            </select>
+                        </div>
+                        <div class ="mt-0" id="selectedDate"></div>
+                    </div>
+
+                    {{-- From to --}}
+                    <div class="col-md-2 mt-4"  id="customfromRange"  style="display: none;">
+                        <div class="input-group">
+                            <span class="input-group-text">From:</span>
+                            <input type="date" class="form-control" id="fromDate_range">
                         </div>
                     </div>
 
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label for="search_toDate">To Date:</label>
-                            <input type="date" class="form-control" id="search_toDate" name="search_toDate">
+                    <div class="col-md-2 mt-4"  id="customToRange"  style="display: none;">
+                        <div class="input-group">
+                            <span class="input-group-text">To:</span>
+                            <input type="date" class="form-control" id="toDate_range">
                         </div>
                     </div>
-
+                    {{--  --}}
                     <div class="col-md-2">
                         <div class="form-group">
-                            <label for="searchType">Search Type:</label>
-                            <select class="form-control" id="searchType" name="searchType">
-                                <option value="" selected disabled>Select Search Type</option>
+                            <label for="searchType"><b>Search Type:</b></label>
+                            <select class="form-control " id="searchType" name="searchType" style="border:1px solid blue;">
+                                <option value="" selected >Select Search Type</option>
                                 <option value="1" id="search_orderid">Order Id</option>
                                 <option value="2" id="search_productcode">Product Code</option>
                                 <option value="3" id="search_client">Client</option>
@@ -172,8 +240,8 @@
 
                     <div class="col-md-2">
                         <div class="form-group">
-                            <label for="searchInputs">Search:</label>
-                            <input type="text" class="form-control" id="searchInputs" >
+                            <label for="searchInputs"><b>Search</b>:</label>
+                            <input type="text" class="form-control" id="searchInputs" style="border:1px solid blue;">
                             <p id="orderIdTip" class="red-text" style="display:none; color:red;">Use Comma separator for multiple search</p>
                         </div>
                     </div>
@@ -258,6 +326,164 @@
     </div>
 </div>
 <script type="text/javascript">
+
+//date validation
+
+
+document.addEventListener('DOMContentLoaded', function() {
+        var fromDateInput = document.getElementById('fromDate_range');
+        var toDateInput = document.getElementById('toDate_range');
+
+        // Add change event listener to fromDateInput
+        fromDateInput.addEventListener('change', function() {
+            var fromDate = new Date(fromDateInput.value);
+            var today = new Date();
+
+            // Check if fromDate is greater than today
+            if (fromDate > today) {
+                alert('From Date cannot be a future date.');
+                fromDateInput.value = ''; // Reset fromDate if invalid
+            }
+        });
+
+        // Add change event listener to toDateInput
+        toDateInput.addEventListener('change', function() {
+            var toDate = new Date(toDateInput.value);
+            var today = new Date();
+
+            // Check if toDate is greater than today
+            if (toDate > today) {
+                alert('To Date cannot be greater than today.');
+                toDateInput.value = ''; // Reset toDate if invalid
+            }
+
+            // Check if toDate is less than fromDate
+            var fromDate = new Date(fromDateInput.value);
+            if (toDate <= fromDate) {
+                alert('To Date must be greater than From Date.');
+                toDateInput.value = ''; // Reset toDate if invalid
+            }
+        });
+    });
+
+
+let selectedDateFilter = ''; // Global variable to hold selected date filter
+
+function selectDateFilter(value) {
+    let dateDisplay = document.getElementById('selectedDate');
+    let customRangeDiv1 = document.getElementById('customfromRange');
+    let customRangeDiv2 = document.getElementById('customToRange');
+
+    // Reset custom range inputs before processing new selection
+    customRangeDiv1.style.display = 'none';
+    customRangeDiv2.style.display = 'none';
+
+    switch (value) {
+        case 'today':
+            selectedDateFilter = getTodayDate();
+            break;
+        case 'yesterday':
+            selectedDateFilter = getYesterdayDate();
+            break;
+        case 'last_week':
+            selectedDateFilter = getLastWeekDate();
+            break;
+        case 'last_30_days':
+            selectedDateFilter = getLast30DaysDate();
+            break;
+        case 'this_month':
+            selectedDateFilter = getCurrentMonthDate();
+            break;
+        case 'last_month':
+            selectedDateFilter = getLastMonthDate();
+            break;
+        case 'custom':
+            selectedDateFilter = ' '; // This will be handled separately
+            customRangeDiv1.style.display = 'block';
+            customRangeDiv2.style.display = 'block'; // Show custom range inputs
+            break;
+        default:
+            selectedDateFilter = '';
+    }
+
+    dateDisplay.textContent = selectedDateFilter;
+}
+
+// Example functions to get dynamic date ranges
+function getTodayDate() {
+    let  StartDate = new Date();
+    return `Selected: ${formatDate(StartDate)}`;
+}
+
+function getYesterdayDate() {
+    let StartDate = new Date();
+    StartDate.setDate(StartDate.getDate() - 1);
+    return `Selected: ${formatDate(StartDate)}`;
+}
+
+function getLastWeekDate() {
+    let today = new Date();
+    let StartDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
+    let EndDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+function getLast30DaysDate() {
+    let EndDate = new Date();
+    let StartDate = new Date(EndDate.getFullYear(), EndDate.getMonth(), EndDate.getDate() - 30);
+    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+function getCurrentMonthDate() {
+    let today = new Date();
+    let StartDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    let EndDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+function getLastMonthDate() {
+    let today = new Date();
+    let StartDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    let EndDate = new Date(today.getFullYear(), today.getMonth(), 0);
+    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+function formatDate(date) {
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    return `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}-${year}`;
+
+
+    var customRangeDiv1 = document.getElementById('customfromRange');
+    var customRangeDiv2 = document.getElementById('customToRange');
+   
+
+    // Hide customRangeDiv by default
+    customRangeDiv1.style.display = 'none';
+    customRangeDiv2.style.display = 'none';
+
+   
+    switch (value) {
+        case 'custom':
+            customRangeDiv1.style.display = 'block';
+            customRangeDiv2.style.display = 'block';
+
+            break;
+        default:
+            resetDateInputs();
+            break;
+    }
+}
+
+
+
+function resetDateInputs() {
+    document.getElementById('fromDate').value = '';
+    document.getElementById('toDate').value = '';
+}
+
+
 
 $(document).ready(function() {
         // Function to show/hide the paragraph based on dropdown selection
@@ -370,10 +596,14 @@ $(document).ready(function() {
                 data: function (d) {
                 d._token = '{{ csrf_token() }}';
                 d.status = defaultStatus;
-                d.fromDate = $('#search_fromDate').val();
-                d.toDate = $('#search_toDate').val();
                 d.searchType = $('#searchType').val();
                 d.searchInputs = $('#searchInputs').val(); 
+                d.selectedDateFilter = selectedDateFilter; 
+               d.fromDate_range = $('#fromDate_range').val();
+               d.toDate_range = $('#toDate_range').val();
+
+
+              
                 }
             },
             "columns": [

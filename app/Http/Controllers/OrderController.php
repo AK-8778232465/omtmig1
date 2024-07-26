@@ -141,10 +141,51 @@ class OrderController extends Controller
     {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
-        $fromDate = $request->input('fromDate');
-        $toDate = $request->input('toDate');
         $searchType = $request->input('searchType');
         $searchInputs = $request->input('searchInputs');
+    $selectedDateFilter = $request->input('selectedDateFilter');
+    $fromDateRange = $request->input('fromDate_range');
+    $toDateRange = $request->input('toDate_range');
+
+    // Initialize default dates
+    $fromDate = null;
+    $toDate = null;
+
+    // Check if fromDate_range and toDate_range are provided
+    if ($fromDateRange && $toDateRange) {
+        // Format and assign the provided date ranges using Carbon
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        // Define a regex pattern to match dates in the format 'MM-DD-YYYY'
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+
+        // Check if the selectedDateFilter is not empty and contains 'to'
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            // Split the date range string into two parts
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+
+            // Trim any extra spaces
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+
+            // Extract dates using regex
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+
+            // Assign and format the extracted dates using Carbon
+            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            // If no 'to' is found, assume it's a single date and use it for both fromDate and toDate
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+
+            // Assign and format the extracted date using Carbon
+            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $toDate = $fromDate; // Use the same date for both
+        }
+    }
+ 
 
         $query = DB::table('oms_order_creations')
             ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
