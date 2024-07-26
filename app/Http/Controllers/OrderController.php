@@ -1141,7 +1141,7 @@ class OrderController extends Controller
         $makedisable = "";
 
         if($user->user_type_id == 8){
-            if ($order->status_id == 1 && $user->user_type_id == 8 && $order->assignee_qa_id != Auth::id()) {
+            if (($order->status_id == 1 && $user->user_type_id == 8 && $order->assignee_qa_id != Auth::id()) || ($order->status_id == 1 && $user->user_type_id == 8 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == Auth::id())) {
                 $disabled = '';
                 $makedisable = '';
             } elseif (($order->status_id == 4 && $user->user_type_id == 8 && $order->assignee_user_id != Auth::id() && $order->assignee_qa_id == Auth::id()) ||
