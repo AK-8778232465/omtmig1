@@ -148,15 +148,16 @@ class OrderController extends Controller
     $toDateRange = $request->input('toDate_range');
 
     // Initialize default dates
-    $fromDate = null;
-    $toDate = null;
+ 
 
     // Check if fromDate_range and toDate_range are provided
     if ($fromDateRange && $toDateRange) {
+        
         // Format and assign the provided date ranges using Carbon
         $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
         $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
     } else {
+       
         // Define a regex pattern to match dates in the format 'MM-DD-YYYY'
         $datePattern = '/(\d{2}-\d{2}-\d{4})/';
 
@@ -227,6 +228,14 @@ class OrderController extends Controller
             ->where('stl_item_description.is_approved', 1)
             ->where('stl_client.is_approved', 1);
 
+            if ($fromDate) {
+                $query->whereDate('oms_order_creations.order_date', '>=', $fromDate);
+            }
+        
+            if ($toDate) {
+                $query->whereDate('oms_order_creations.order_date', '<=', $toDate);
+            }
+            
             if (
                 isset($request->status) &&
                 in_array($request->status, [1, 2, 3, 4, 5, 13, 14]) &&
@@ -977,13 +986,6 @@ class OrderController extends Controller
     }
     $query->whereIn('oms_order_creations.process_id', $processIds);
 
-    if ($fromDate) {
-        $query->whereDate('oms_order_creations.order_date', '>=', $fromDate);
-    }
-
-    if ($toDate) {
-        $query->whereDate('oms_order_creations.order_date', '<=', $toDate);
-    }
 
     if ($searchType == 1 && !empty($searchInputs)) {
 

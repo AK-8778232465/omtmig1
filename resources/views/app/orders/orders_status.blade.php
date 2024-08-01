@@ -181,6 +181,8 @@
                     <button id="status_All" class="btn btn-info status-btn" >All<span id="status_All_count"></span></button>
                 </div>
             </div>
+           
+            
             <div class="p-0 mx-2" id="filter_search">
                 {{-- <p style="text-align:right;color:Red;">*(While Searching OrderID, Use Comma separator)</p> --}}
                 <div class="row ml-5">
@@ -216,6 +218,7 @@
                             <input type="date" class="form-control" id="toDate_range">
                         </div>
                     </div>
+                    
                     {{--  --}}
                     <div class="col-md-2">
                         <div class="form-group">
@@ -252,7 +255,7 @@
                     
                     
                 </div>
-                
+            </div>
                 
                 <form id="assignmentForm" method="POST" data-parsley-validate>
                     <table id="order_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -578,6 +581,8 @@ $(document).ready(function() {
             @if(Session::has('dashboardfilters') && Session::get('dashboardfilters') == true)
                 sessionfilter = true;
                 $('#statusButtons').hide();
+                $('#filter_search').hide();
+                
             @endif
         } else {
             defaultStatus = @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) 1 @else 6 @endif;
