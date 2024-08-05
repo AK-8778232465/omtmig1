@@ -109,6 +109,8 @@ Route::middleware('auth:web')->controller(OrderFormController::class)->group(fun
 
     Route::post('Product_dropdown', 'getProduct_dropdown')->name('Product_dropdown');
     Route::any('coversheet_submit', 'coversheet_submit')->name('coversheet_submit');
+    Route::any('updateClickTime', 'updateClickTime')->name('updateClickTime');
+
 
 });
 
@@ -145,5 +147,7 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
 
     Route::post('getGeoCounty', 'getGeoCounty')->name('getGeoCounty');
     Route::post('getGeoCities', 'getGeoCities')->name('getGeoCities');
+    Route::post('get_timetaken', 'get_timetaken')->name('get_timetaken');
+
 
 });
