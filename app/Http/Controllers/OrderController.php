@@ -79,7 +79,7 @@ class OrderController extends Controller
             })
             ->count();
         $yetToAssignQa = OrderCreation::with('process', 'client')
-            ->whereNull('assignee_qa_id')
+            ->where('assignee_qa_id', null)
             ->where('status_id', 4)
             ->where('is_active', 1)
             ->whereIn('process_id', $processIds)
@@ -124,7 +124,7 @@ class OrderController extends Controller
 
         if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
-            $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
+            // $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
             $statusCounts[6] = $yetToAssignUser;
             // $statusCounts[7] = $yetToAssignQa;
         } else {
