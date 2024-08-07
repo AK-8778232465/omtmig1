@@ -85,10 +85,34 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="fromDate_dcf">From Date</label>
-                    <input type="date" class="form-control" id="fromDate_dcf" name="fromDate_dcf">
+            <div class="col-md-4" style="width: 350px!important;">
+                <div class="form-group" >
+                    <label for="dateFilter" required>Select Date Range:</label>
+                    <select class="form-control" style=" width: 250px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
+                        <option value="" >Select Date Range</option>
+                        <option value="last_week">Last Week</option>
+                        <option value="current_week">current week</option>
+                        <option value="last_month">Last Month</option>
+                        <option value="current_month" selected>Current Month</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <div class="d-flex">
+                        <div class="col-md-6 mt-3 p-0 m-0"  id="customfromRange" >
+                            <div class="input-group">
+                                <span class="input-group-text">From:</span>
+                                <input type="date" class="form-control" id="fromDate_range">
+                            </div>
+                        </div>
+
+                    <div class="col-md-6 mt-3 " id="customToRange" >
+                        <div class="input-group">
+                            <span class="input-group-text">To:</span>
+                            <input type="date" class="form-control" id="toDate_range">
+                        </div>
+                    </div>
+                    <b class="mt-0" id="selectedDate"></b>
                 </div>
             </div>
             <div class="col-md-2">
@@ -155,7 +179,7 @@
                                     <th width="11%">Product Type</th>
                                     <th width="11%">Order Received</th>
                                     <th width="11%">Production Date</th>
-                                    <th width="11%">Order Number</th>
+                                    <th width="11%">Order Id</th>
                                     <th width="11%">State</th>
                                     <th width="11%">County</th>
                                     <th width="11%">Status</th>
@@ -176,6 +200,166 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
 <script>
+
+
+     
+
+
+
+
+
+
+
+
+let selectedDateFilter = '';
+document.addEventListener('DOMContentLoaded', function() {
+    selectDateFilter('');
+});
+function selectDateFilter(value) {
+    let dateDisplay = document.getElementById('selectedDate');
+    let customRangeDiv1 = document.getElementById('customfromRange');
+    let customRangeDiv2 = document.getElementById('customToRange');
+    let fromDateInput = document.getElementById('fromDate_range');
+    let toDateInput = document.getElementById('toDate_range');
+
+    // Hide custom date range by default
+    customRangeDiv1.style.display = 'none';
+    customRangeDiv2.style.display = 'none';
+
+    // Clear the custom date inputs if changing to a predefined date range
+    if (value !== 'custom') {
+        fromDateInput.value = '';
+        toDateInput.value = '';
+    }
+
+    switch (value) {
+    case 'last_week':
+        selectedDateFilter = getLastWeekDate();
+        break;
+    case 'current_week':
+        selectedDateFilter = getCurrentWeekDate();
+        break;
+    case 'current_month':
+        selectedDateFilter = getCurrentMonthDate();
+        break;
+    case 'last_month':
+        selectedDateFilter = getLastMonthDate();
+        break;
+    case 'yearly':
+        selectedDateFilter = getYearlyDate();
+        break;
+    case 'custom':
+        selectedDateFilter = '';
+        customRangeDiv1.style.display = 'block';
+        customRangeDiv2.style.display = 'block';
+        break;
+    default:
+        selectedDateFilter = getCurrentMonthDate();
+        value = 'current_month';
+}
+
+    dateDisplay.textContent = selectedDateFilter;
+}
+function getTodayDate() {
+    let StartDate = new Date();
+    return `Selected: ${formatDate(StartDate)}`;
+}
+
+function getYesterdayDate() {
+    let StartDate = new Date();
+    StartDate.setDate(StartDate.getDate() - 1);
+    return `Selected: ${formatDate(StartDate)}`;
+}
+
+
+function getLastWeekDate() {
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${month}-${day}-${year}`;
+    }
+
+    let today = new Date();
+    let dayOfWeek = today.getDay();
+    let currentWeekStart = new Date(today);
+    currentWeekStart.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+    let StartDate = new Date(currentWeekStart);
+    StartDate.setDate(currentWeekStart.getDate() - 7);
+    let EndDate = new Date(StartDate);
+    EndDate.setDate(StartDate.getDate() + 6);
+    return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
+}
+
+function getCurrentMonthDate() {
+    let today = new Date();
+    let StartDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    let EndDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+function getLastMonthDate() {
+    let today = new Date();
+    let StartDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    let EndDate = new Date(today.getFullYear(), today.getMonth(), 0);
+    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+function getCurrentWeekDate() {
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${month}-${day}-${year}`;
+}
+let EndDate = new Date();
+let dayOfWeek = EndDate.getDay(); // Sunday is 0, Monday is 1, ..., Saturday is 6
+let StartDate = new Date(EndDate);
+StartDate.setDate(EndDate.getDate() - dayOfWeek + 1);
+if (dayOfWeek === 0) {
+    StartDate.setDate(StartDate.getDate() - 6);
+}
+return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
+}
+
+
+function getYearlyDate() {
+    let today = new Date();
+    let startOfYear = new Date(today.getFullYear(), 0, 1);
+    let endOfYear = new Date(today.getFullYear() + 1, 0, 0);
+
+    return `Selected: ${formatDate(startOfYear)} to ${formatDate(endOfYear)}`;
+}
+
+function formatDate(date) {
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    return `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}-${year}`;
+
+    var customRangeDiv1 = document.getElementById('customfromRange');
+    var customRangeDiv2 = document.getElementById('customToRange');
+
+
+    // Hide customRangeDiv by default
+    customRangeDiv1.style.display = 'none';
+    customRangeDiv2.style.display = 'none';
+
+
+    switch (value) {
+        case 'custom':
+            customRangeDiv1.style.display = 'block';
+            customRangeDiv2.style.display = 'block';
+
+            break;
+        default:
+            resetDateInputs();
+            break;
+    }
+}
+
+
+
 function newreports() {
         var fromDate = $('#fromDate_dcf').val();
         var toDate = $('#toDate_dcf').val();
