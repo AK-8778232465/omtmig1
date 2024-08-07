@@ -192,14 +192,12 @@
                             <label for="dateFilter"><b>Select Date Range:</b></label>
                             <select class="form-control" id="dateFilter" onchange="selectDateFilter(this.value)" style="border:1px solid blue;">
                                 <option value="" selected >Select Date Range</option>
-                                <option value="today">Today</option>
-                                <option value="yesterday">Yesterday</option>
-                                <option value="last_week">Last 7 Days</option>
-                                <option value="last_30_days">Last 30 Days</option>
-                                <option value="this_month">This Month</option>
-                                <option value="last_month">Last Month</option>
+                                <option value="last_week">Last week</option>
+                                <option value="this_week">Current week</option>
+                                <option value="last_30_days">Last Month</option>
+                                <option value="this_month">Current Month</option>
+                                <option value="yearly">Yearly</option>
                                 <option value="custom">Custom Range</option>
-
                             </select>
                         </div>
                         <div class ="mt-0" id="selectedDate"></div>
@@ -383,12 +381,6 @@ function selectDateFilter(value) {
     customRangeDiv2.style.display = 'none';
 
     switch (value) {
-        case 'today':
-            selectedDateFilter = getTodayDate();
-            break;
-        case 'yesterday':
-            selectedDateFilter = getYesterdayDate();
-            break;
         case 'last_week':
             selectedDateFilter = getLastWeekDate();
             break;
@@ -398,8 +390,8 @@ function selectDateFilter(value) {
         case 'this_month':
             selectedDateFilter = getCurrentMonthDate();
             break;
-        case 'last_month':
-            selectedDateFilter = getLastMonthDate();
+        case 'yearly':
+            selectedDateFilter = getYearlyDate();
             break;
         case 'custom':
             selectedDateFilter = ' '; // This will be handled separately
