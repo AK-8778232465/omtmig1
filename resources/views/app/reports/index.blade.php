@@ -87,7 +87,7 @@
         <div class="row">
             <div class="col-md-4" style="width: 350px!important;">
                 <div class="form-group" >
-                    <label for="dateFilter" required>Selected received date range:</label>
+                    <label for="dateFilter" required>Select Date Range:</label>
                     <select class="form-control" style=" width: 250px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
                         <option value="" >Select Date Range</option>
                         <option value="last_week">Last Week</option>
@@ -144,14 +144,10 @@
             <div class="col-md-2 mt-4">
                 <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
             </div>
-        </div>
-        <div class="card col-md-9 mt-5 tabledetails" id="userwise_table" style="font-size: 12px;">
-            <h4 class="text-center mt-3">Userwise Details</h4>
+            <div class="card col-md-9 mt-5 tabledetails " id="userwise_table" style="font-size: 12px;">
+                <h4 class="text-center mt-3" >Userwise Details</h4>
                 <div class="card-body">
                     <div class="p-0">
-                    <div class="order-count mb-3" style="font-size: 14px; font-weight: bold;">
-                        <span>Total No of users: <span id="order-count">0</span></span>
-                    </div>
                         <table id="userwise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
                                 <tr>
@@ -171,13 +167,10 @@
                     </div>
                 </div>
             </div>
+
             <div class="card col-md-10 mt-5 newreports" id="newreports_table" style="font-size: 12px;">
                 <h4 class="text-center mt-3">Orderwise Details</h4>
                 <div class="card-body">
-                <div class="p-0">
-                    <div class="order-count mb-3" style="font-size: 14px; font-weight: bold;">
-                        <span>Total No of Orders: <span id="order-count-newreports">0</span></span>
-                    </div>
                     <div class="table-responsive">
                         <table id="newreports_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
@@ -192,31 +185,6 @@
                                     <th width="11%">Status</th>
                                     <th width="11%">Comments</th>
                                     <th width="11%">Primary Source</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-center" style="font-size: 12px;"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-            <div class="card col-md-9 mt-5 tabledetails " id="timetaken_table" style="font-size: 12px;">
-                <h4 class="text-center mt-3" >Userwise Details</h4>
-                <div class="card-body">
-                    <div class="p-0">
-                        <table id="timetaken_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                            <thead class="text-center" style="font-size: 12px;">
-                                <tr>
-                                    <th width="12%">Users</th>
-                                    <th width="12%">No Of Orders</th>
-                                    <th width="11%">WIP</th>
-                                    <th width="11%">Coversheet Prep</th>
-                                    <th width="11%">Clarification</th>
-                                    <th width="11%">Send For Qc</th>
-                                    <th width="11%">Hold</th>
-                                    <th width="11%">Completed</th>
-                                    <th width="11%">Avg Time</th>
                                 </tr>
                             </thead>
                             <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -320,7 +288,7 @@ function getLastWeekDate() {
     StartDate.setDate(currentWeekStart.getDate() - 7);
     let EndDate = new Date(StartDate);
     EndDate.setDate(StartDate.getDate() + 6);
-    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+    return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
 }
 
 function getCurrentMonthDate() {
@@ -339,7 +307,7 @@ let endDateOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
 let EndDate = today > endDateOfMonth ? endDateOfMonth : today;
 
-return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
 }
 
 function getLastMonthDate() {
@@ -363,7 +331,7 @@ StartDate.setDate(EndDate.getDate() - dayOfWeek + 1);
 if (dayOfWeek === 0) {
     StartDate.setDate(StartDate.getDate() - 6);
 }
-return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
 }
 
 
@@ -402,6 +370,8 @@ function formatDate(date) {
     }
 }
 
+
+
 function newreports() {
         var fromDate = $('#fromDate_dcf').val();
         var toDate = $('#toDate_dcf').val();
@@ -420,19 +390,9 @@ function newreports() {
                 d.from_date = fromDate;
                 d.client_id = client_id;
                 d.project_id = project_id;
-                d.selectedDateFilter = selectedDateFilter;
                 d._token = '{{ csrf_token() }}';
             },
-            dataSrc: function(response) {
-                // Calculate total number of orders
-                var totalOrders = response.recordsTotal; // Use recordsTotal from server response
-
-                // Update the total orders count
-                $('#order-count-newreports').text(totalOrders);
-
-                // Return data for DataTables
-                return response.data;
-            }
+            dataSrc: 'data'
         },
         columns: [
             {
@@ -480,7 +440,6 @@ function newreports() {
                             from_date: fromDate,
                             client_id: client_id,
                             project_id: project_id,
-                            selectedDateFilter: selectedDateFilter,
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
@@ -529,8 +488,6 @@ function newreports() {
     }
 }
 
-
-
 $('#newreports_datatable').on('draw.dt', function () {
     $('#newreports_table').removeClass('d-none');
 });
@@ -558,9 +515,51 @@ $('#newreports_datatable').on('draw.dt', function () {
         });
     }
 
-    function userwise_datatable() {
-    var fromDate =  $('#fromDate_range').val();
-    var toDate = $('#toDate_range').val();
+
+// function userwise_datatable(fromDate, toDate, client_id, projectId){
+//         fromDate = $('#fromDate_dcf').val();
+//         toDate = $('#toDate_dcf').val();
+//         client_id = $('#client_id_dcf').val();
+//         project_id = $('#project_id_dcf').val();
+
+
+//         datatable = $('#userwise_datatable').DataTable({
+//             destroy: true,
+//             processing: true,
+//             serverSide: true,
+//             ajax: {
+//                 url: "{{ route('userwise_count') }}",
+//                 type: 'POST',
+//                 data: function(d) {
+//                         d.to_date = toDate;
+//                         d.from_date = fromDate;
+//                         d.client_id = client_id;
+//                         d.project_id = project_id;
+//                         d._token = '{{csrf_token()}}';
+//                     },
+//                 dataSrc: 'data'
+//             },
+//             columns: [
+//                 { data: 'userinfo', name: 'userinfo', class: 'text-left' },
+//                 { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
+//                 { data: 'status_13', name: 'status_13' },
+//                 { data: 'status_14', name: 'status_14' },
+//                 { data: 'status_4', name: 'status_4' },
+//                 { data: 'status_2', name: 'status_2' },
+//                 { data: 'status_3', name: 'status_3' },
+//                 { data: 'status_5', name: 'status_5' },
+//                 { data: 'All', name: 'All' },
+//             ],
+//             dom: 'l<"toolbar">Bfrtip',
+//         buttons: [
+//             'excel'
+//         ],
+//         });
+//     }
+
+function userwise_datatable() {
+    var fromDate = $('#fromDate_dcf').val();
+    var toDate = $('#toDate_dcf').val();
     var client_id = $('#client_id_dcf').val();
     var project_id = $('#project_id_dcf').val();
 
@@ -580,26 +579,15 @@ $('#newreports_datatable').on('draw.dt', function () {
                     },
                 dataSrc: 'data'
             },
-            dataSrc: function(response) {
-                // Calculate total unique users
-                var userCount = response.data.length;
-
-                // Update the total users count
-                $('#order-count').text(userCount);
-
-                // Return data for DataTables
-                return response.data;
-            }
-        },
-        columns: [
-            { data: 'userinfo', name: 'userinfo', class: 'text-left' },
-            { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
-            { data: 'status_13', name: 'status_13' },
-            { data: 'status_14', name: 'status_14' },
-            { data: 'status_4', name: 'status_4' },
-            { data: 'status_2', name: 'status_2' },
-            { data: 'status_3', name: 'status_3' },
-            { data: 'status_5', name: 'status_5' },
+            columns: [
+                { data: 'userinfo', name: 'userinfo', class: 'text-left' },
+                { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
+                { data: 'status_13', name: 'status_13' },
+                { data: 'status_14', name: 'status_14' },
+                { data: 'status_4', name: 'status_4' },
+                { data: 'status_2', name: 'status_2' },
+                { data: 'status_3', name: 'status_3' },
+                { data: 'status_5', name: 'status_5' },
             { data: 'All', name: 'All' }
             ],
             dom: 'l<"toolbar">Bfrtip',
@@ -643,7 +631,6 @@ $('#newreports_datatable').on('draw.dt', function () {
             }
         ]
     });
-
 }
 
 
