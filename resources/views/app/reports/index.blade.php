@@ -292,22 +292,10 @@ function getLastWeekDate() {
 }
 
 function getCurrentMonthDate() {
-function formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${month}-${day}-${year}`;
-}
-
-let today = new Date();
-
-let StartDate = new Date(today.getFullYear(), today.getMonth(), 1);
-
-let endDateOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
-let EndDate = today > endDateOfMonth ? endDateOfMonth : today;
-
-return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
+    let today = new Date();
+    let StartDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    let EndDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
 }
 
 function getLastMonthDate() {
