@@ -3,6 +3,7 @@
 @section('content')
 @include('app.orders.style')
 
+
 <style>
     #searchInputs {
     width: 200px;

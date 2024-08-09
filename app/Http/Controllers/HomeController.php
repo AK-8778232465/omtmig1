@@ -1779,6 +1779,7 @@ public function revenue_detail_client_fte(Request $request){
                 $groupedOutput[$clientName] = 0;
             }
             $groupedOutput[$clientName] += floatval(str_replace(',', '', $record['revenue_selected']));
+            
         }
 
         $finalOutput = [];

@@ -23,6 +23,7 @@
     .card{
         /* border: 1px solid #f5eea7 !important; */
         transition: box-shadow 0.3s !important;
+
         }
         .card:hover {
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
@@ -37,6 +38,7 @@
             align-items: center;
             justify-content: center;
             margin: 20px;
+            
         }
 
         /* The actual switch (hidden) */
