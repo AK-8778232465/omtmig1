@@ -44,39 +44,39 @@ class HomeController extends Controller
      * @return \Illuminate\Contracts\Support\Renderable
      */
 
+    //  public function index(Request $request)
+    //  {
+    //     return view('app.orders.comingsoon');
+    //  }
+
+
      public function index(Request $request)
      {
-        return view('app.orders.comingsoon');
+        $user = User::where('id', Auth::id())->first();
+        $processList=[];
+        if ($user->is_active == 1) {
+            session(['uid' => Auth::id()]);
+            session(['user_type_id' => $user->user_type_id]);
+            session(['company_id' => isset($user->company_id) ? $user->company_id : 0]);
+            $reportingUserIds = User::getAllLowerLevelUserIds(Auth::id());
+            if (Auth::user()->hasRole('Super Admin')) {
+                $processIds = DB::table('stl_item_description')->where('is_approved', 1)->where('is_active', 1)->pluck('id')->toArray();
+            } else {
+                $processIds = DB::table('oms_user_service_mapping')->whereIn('user_id', $reportingUserIds)->where('is_active', 1)->pluck('service_id')->toArray();
      }
+            $processList = DB::table('stl_item_description')->where('is_approved', 1)->where('is_active', 1)->whereIn('id', $processIds)->select('id', 'process_name', 'project_code')->get();
+
+            $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
 
 
-    // public function index(Request $request)
-    // {
-    //     $user = User::where('id', Auth::id())->first();
-    //     $processList=[];
-    //     if ($user->is_active == 1) {
-    //         session(['uid' => Auth::id()]);
-    //         session(['user_type_id' => $user->user_type_id]);
-    //         session(['company_id' => isset($user->company_id) ? $user->company_id : 0]);
-    //         $reportingUserIds = User::getAllLowerLevelUserIds(Auth::id());
-    //         if (Auth::user()->hasRole('Super Admin')) {
-    //             $processIds = DB::table('stl_item_description')->where('is_approved', 1)->where('is_active', 1)->pluck('id')->toArray();
-    //         } else {
-    //             $processIds = DB::table('oms_user_service_mapping')->whereIn('user_id', $reportingUserIds)->where('is_active', 1)->pluck('service_id')->toArray();
-    //         }
-    //         $processList = DB::table('stl_item_description')->where('is_approved', 1)->where('is_active', 1)->whereIn('id', $processIds)->select('id', 'process_name', 'project_code')->get();
+        } else {
+            Auth::logout();
 
-    //         $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
+            return redirect('/');
+        }
 
-
-    //     } else {
-    //         Auth::logout();
-
-    //         return redirect('/');
-    //     }
-
-    //     return view('app.dashboard.index', compact('processList','clients'));
-    // }
+        return view('app.dashboard.index', compact('processList','clients'));
+    }
 
 
     public function profileupdate(Request $request)
@@ -1779,6 +1779,7 @@ public function revenue_detail_client_fte(Request $request){
                 $groupedOutput[$clientName] = 0;
             }
             $groupedOutput[$clientName] += floatval(str_replace(',', '', $record['revenue_selected']));
+            
         }
 
         $finalOutput = [];

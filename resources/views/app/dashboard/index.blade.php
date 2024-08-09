@@ -23,6 +23,7 @@
     .card{
         /* border: 1px solid #f5eea7 !important; */
         transition: box-shadow 0.3s !important;
+
         }
         .card:hover {
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
@@ -37,6 +38,7 @@
             align-items: center;
             justify-content: center;
             margin: 20px;
+            
         }
 
         /* The actual switch (hidden) */
@@ -145,7 +147,7 @@
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Process Wise Detail</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Product Wise Detail</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
@@ -594,7 +596,7 @@
                     </table>
                 </div>
                 <div class="p-0 process_wise w-75 mx-auto">
-                    <h5 class="text-center"> Process Wise Details </h5>
+                    <h5 class="text-center"> Product Wise Details </h5>
                     <table id="revenueTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
@@ -642,7 +644,7 @@
 
         <div class="card-body" id="fteProject">
             <div class="p-0 w-100 mx-auto" id="fteProjectTable">
-                <h5 class="text-center"> Process Wise Details </h5>
+                <h5 class="text-center"> Product Wise Details </h5>
                 <table id="fterevenueProjectTable" class="table table-bordered nowrap mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                 <thead class="text-center">
                 <tr>
@@ -1132,10 +1134,7 @@ $('#datewise_datatable').on('draw.dt', function() {
         });
 
 
-
-        function processwiseDetail(fromDate, toDate,client_id){
-
-
+        function processwiseDetail(fromDate, toDate, client_id) {
                 datatable = $('#revenueTable').DataTable({
                 destroy: true,
                 processing: true,
@@ -1155,8 +1154,7 @@ $('#datewise_datatable').on('draw.dt', function() {
                         $.each(data.data, function (index, value) {
                             var date = moment(value['Date']).format('MM/DD/YYYY');
                             var row = {
-
-                                'Product Code': '<a href="#" id="' + value['id'] + '" class="project-link">' + value['Product Code'] + ' (' + value['Process Name'] + ')</a>',
+                                    'Product Code': '<a href="#" id="' + value['id'] + '" class="project-link">' + value['Project Code'] + ' (' + value['Process Name'] + ')</a>',
                                 'No of orders completed': value['No of orders completed'],
                                 'Unit cost': value['Unit cost'],
                                 'Total': value['Total']
@@ -1167,14 +1165,14 @@ $('#datewise_datatable').on('draw.dt', function() {
                     }
                 },
                 columns: [
-                    { data: 'Project Code', name: 'Project Code' },
+                        { data: 'Product Code', name: 'Product Code',className:'text-left' },
                     { data: 'No of orders completed', name: 'No of orders completed' },
-                    { data: 'Unit cost', name: 'Unit cost' },
-                    { data: 'Total', name: 'Total' }
+                        { data: 'Unit cost', name: 'Unit cost',render: function (data){return '$' + data;} },
+                        { data: 'Total', name: 'Total',render: function (data){return '$' + data;} }
                 ],
             });
+            }
 
-        }
         $('#revenueTable').on('draw.dt', function () {
             $('#revenueTable').removeClass('d-none');
         });
@@ -1259,9 +1257,11 @@ $('#datewise_datatable').on('draw.dt', function() {
                     }
                 },
                 columns: [
-                    { data: 'Client', name: 'Client' },
+                    { data: 'Client', name: 'Client',className:'text-left' },
                     { data: 'No of orders completed', name: 'No of orders completed' },
-                    { data: 'Total', name: 'Total' },
+                    { data: 'Total', name: 'Total',render: function (data) {
+						return '$' + data;
+					} },
                 ],
                 createdRow: function (row, data, dataIndex) {
                     $(row).find('.client-link').on('click', function () {
@@ -1387,7 +1387,9 @@ $(document).ready(function() {
                 },
                 columns: [
                     { data: 'client_name', name: 'client_name', className: "text-left" },
-                    { data: 'total_revenue_selected', name: 'total_revenue_selected', className: "text-center" },
+                    { data: 'total_revenue_selected', name: 'total_revenue_selected', className: "text-center",render: function (data) {
+						return '$' + data;
+					} },
                 ],
             });
 
@@ -1450,13 +1452,19 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
 
             name: 'project_code', className: "text-left"
                 },
-            { data: 'unit_cost', name: 'unit_cost', className: "text-center" },
+            { data: 'unit_cost', name: 'unit_cost', className: "text-center",render: function (data) {
+					return '$' + data;
+			} },
             { data: 'no_of_resources', name: 'no_of_resources', className: "text-center" },
-            { data: 'expected_revenue', name: 'expected_revenue', className: "text-center" },
+            { data: 'expected_revenue', name: 'expected_revenue', className: "text-center",render: function (data) {
+					return '$' + data;
+			} },
             { data: 'start_date', name: 'start_date', className: "text-center" },
             { data: 'end_date', name: 'end_date', className: "text-center" },
             { data: 'days', name: 'days', className: "text-center" },
-            { data: 'revenue_selected', name: 'revenue_selected', className: "text-center" },
+            { data: 'revenue_selected', name: 'revenue_selected', className: "text-center",render: function (data) {
+					return '$' + data;
+			} },
         ],
     });
     }
@@ -1512,8 +1520,12 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
                             columns: [
                                 { data: 'Date', name: 'Date' },
                                 { data: 'No of Resources', name: 'No of Resources' },
-                                { data: 'Unit cost', name: 'Unit cost' },
-                                { data: 'Total', name: 'Total' }
+                                { data: 'Unit cost', name: 'Unit cost',render: function (data) {
+                                	return '$' + data;
+                                } },
+                                { data: 'Total', name: 'Total',render: function (data) {
+									return '$' + data;
+								} }
                             ],
                         });
 
