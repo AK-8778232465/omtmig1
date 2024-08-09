@@ -1165,10 +1165,10 @@ $('#datewise_datatable').on('draw.dt', function() {
                     }
                 },
                 columns: [
-                        { data: 'Product Code', name: 'Product Code' },
+                        { data: 'Product Code', name: 'Product Code',className:'text-left' },
                     { data: 'No of orders completed', name: 'No of orders completed' },
-                    { data: 'Unit cost', name: 'Unit cost' },
-                    { data: 'Total', name: 'Total' }
+                        { data: 'Unit cost', name: 'Unit cost',render: function (data){return '$' + data;} },
+                        { data: 'Total', name: 'Total',render: function (data){return '$' + data;} }
                 ],
             });
             }
@@ -1257,9 +1257,11 @@ $('#datewise_datatable').on('draw.dt', function() {
                     }
                 },
                 columns: [
-                    { data: 'Client', name: 'Client' },
+                    { data: 'Client', name: 'Client',className:'text-left' },
                     { data: 'No of orders completed', name: 'No of orders completed' },
-                    { data: 'Total', name: 'Total' },
+                    { data: 'Total', name: 'Total',render: function (data) {
+						return '$' + data;
+					} },
                 ],
                 createdRow: function (row, data, dataIndex) {
                     $(row).find('.client-link').on('click', function () {
@@ -1385,7 +1387,9 @@ $(document).ready(function() {
                 },
                 columns: [
                     { data: 'client_name', name: 'client_name', className: "text-left" },
-                    { data: 'total_revenue_selected', name: 'total_revenue_selected', className: "text-center" },
+                    { data: 'total_revenue_selected', name: 'total_revenue_selected', className: "text-center",render: function (data) {
+						return '$' + data;
+					} },
                 ],
             });
 
@@ -1448,13 +1452,19 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
 
             name: 'project_code', className: "text-left"
                 },
-            { data: 'unit_cost', name: 'unit_cost', className: "text-center" },
+            { data: 'unit_cost', name: 'unit_cost', className: "text-center",render: function (data) {
+					return '$' + data;
+			} },
             { data: 'no_of_resources', name: 'no_of_resources', className: "text-center" },
-            { data: 'expected_revenue', name: 'expected_revenue', className: "text-center" },
+            { data: 'expected_revenue', name: 'expected_revenue', className: "text-center",render: function (data) {
+					return '$' + data;
+			} },
             { data: 'start_date', name: 'start_date', className: "text-center" },
             { data: 'end_date', name: 'end_date', className: "text-center" },
             { data: 'days', name: 'days', className: "text-center" },
-            { data: 'revenue_selected', name: 'revenue_selected', className: "text-center" },
+            { data: 'revenue_selected', name: 'revenue_selected', className: "text-center",render: function (data) {
+					return '$' + data;
+			} },
         ],
     });
     }
@@ -1510,8 +1520,12 @@ function fterevenueProjectWise(fromDate, toDate, client_id) {
                             columns: [
                                 { data: 'Date', name: 'Date' },
                                 { data: 'No of Resources', name: 'No of Resources' },
-                                { data: 'Unit cost', name: 'Unit cost' },
-                                { data: 'Total', name: 'Total' }
+                                { data: 'Unit cost', name: 'Unit cost',render: function (data) {
+                                	return '$' + data;
+                                } },
+                                { data: 'Total', name: 'Total',render: function (data) {
+									return '$' + data;
+								} }
                             ],
                         });
 
