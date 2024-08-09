@@ -147,7 +147,7 @@
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Process Wise Detail</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Product Wise Detail</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
@@ -596,7 +596,7 @@
                     </table>
                 </div>
                 <div class="p-0 process_wise w-75 mx-auto">
-                    <h5 class="text-center"> Process Wise Details </h5>
+                    <h5 class="text-center"> Product Wise Details </h5>
                     <table id="revenueTable" class="table table-bordered nowrap mt-0 d-none" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
@@ -644,7 +644,7 @@
 
         <div class="card-body" id="fteProject">
             <div class="p-0 w-100 mx-auto" id="fteProjectTable">
-                <h5 class="text-center"> Process Wise Details </h5>
+                <h5 class="text-center"> Product Wise Details </h5>
                 <table id="fterevenueProjectTable" class="table table-bordered nowrap mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                 <thead class="text-center">
                 <tr>
@@ -1134,10 +1134,7 @@ $('#datewise_datatable').on('draw.dt', function() {
         });
 
 
-
-        function processwiseDetail(fromDate, toDate,client_id){
-
-
+        function processwiseDetail(fromDate, toDate, client_id) {
                 datatable = $('#revenueTable').DataTable({
                 destroy: true,
                 processing: true,
@@ -1157,8 +1154,7 @@ $('#datewise_datatable').on('draw.dt', function() {
                         $.each(data.data, function (index, value) {
                             var date = moment(value['Date']).format('MM/DD/YYYY');
                             var row = {
-
-                                'Product Code': '<a href="#" id="' + value['id'] + '" class="project-link">' + value['Product Code'] + ' (' + value['Process Name'] + ')</a>',
+                                    'Product Code': '<a href="#" id="' + value['id'] + '" class="project-link">' + value['Project Code'] + ' (' + value['Process Name'] + ')</a>',
                                 'No of orders completed': value['No of orders completed'],
                                 'Unit cost': value['Unit cost'],
                                 'Total': value['Total']
@@ -1169,14 +1165,14 @@ $('#datewise_datatable').on('draw.dt', function() {
                     }
                 },
                 columns: [
-                    { data: 'Project Code', name: 'Project Code' },
+                        { data: 'Product Code', name: 'Product Code' },
                     { data: 'No of orders completed', name: 'No of orders completed' },
                     { data: 'Unit cost', name: 'Unit cost' },
                     { data: 'Total', name: 'Total' }
                 ],
             });
+            }
 
-        }
         $('#revenueTable').on('draw.dt', function () {
             $('#revenueTable').removeClass('d-none');
         });

@@ -602,6 +602,7 @@ $(document).ready(function() {
                 d.selectedDateFilter = selectedDateFilter; 
                d.fromDate_range = $('#fromDate_range').val();
                d.toDate_range = $('#toDate_range').val();
+               d.sessionfilter = sessionfilter;
 
 
               
@@ -660,14 +661,16 @@ $(document).ready(function() {
         $('.status-dropdown').prop('disabled', true);
         updateStatusCounts();
         
+        if (!sessionfilter) {
         var lastOrderStatus = localStorage.getItem("lastOrderStatus");
 
-        if(lastOrderStatus) {
-            $('#'+lastOrderStatus).click();
+        if (lastOrderStatus) {
+            $('#' + lastOrderStatus).click();
         }
 
         lastOrderStatus = null;
-    });
+    }
+});
 
     $(document).on('click', '.status-btn', function () {
         $('#assign_tab').addClass('d-none');
