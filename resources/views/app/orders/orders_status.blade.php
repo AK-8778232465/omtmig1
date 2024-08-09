@@ -424,24 +424,7 @@ function getLastWeekDate() {
     return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
 }
 
-function getYearlyDate() {
-    let today = new Date();
-    let startOfYear = new Date(today.getFullYear(), 0, 1);
-    let endOfYear = new Date(today.getFullYear() + 1, 0, 0);
-
-    return `Selected: ${formatDate(startOfYear)} to ${formatDate(endOfYear)}`;
-}
-
-
-function getThisWeekDate() {
-    
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${month}-${day}-${year}`;
-    }
-
+function getLast30DaysDate() {
     let EndDate = new Date();
     let StartDate = new Date(EndDate.getFullYear(), EndDate.getMonth(), EndDate.getDate() - 30);
     return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
