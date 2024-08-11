@@ -326,16 +326,11 @@ public function get_timetaken(Request $request)
     $statusCountsdetails = $statusCountsQuery->get();
 
     $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use($fromDate, $toDate){
-        $assignedOrders = DB::table('oms_order_creations')
-            ->whereDate('order_date', '>=', $fromDate)
-            ->whereDate('order_date', '<=', $toDate)
-            ->where('assignee_user_id', $userid)
-            ->count();
-    
     
             $completedCount = DB::table('oms_order_creations')
             ->whereDate('order_date', '>=', $fromDate)
             ->whereDate('order_date', '<=', $toDate)
+            ->where('oms_order_creations.is_active', 1)
                 ->where('status_id', 5)
                 ->where('assignee_user_id', $userid)
                 ->count();
@@ -372,7 +367,7 @@ public function get_timetaken(Request $request)
             return [
                 'emp_id' => $orders->first()->empid,
                 'Users' => $orders->first()->username,
-            'NO_OF_ASSIGNED_ORDERS' => $assignedOrders,
+            'NO_OF_ASSIGNED_ORDERS' => $orders->count(),
                 'NO_OF_COMPLETED_ORDERS' => $completedCount,
                 'TOTAL_TIME_TAKEN_FOR_COMPLETED_ORDERS' => $totalTimeTakenHours,
                 'AVG_TIME_TAKEN_FOR_COMPLETED_ORDERS' => $avgTimeTakenHours,
