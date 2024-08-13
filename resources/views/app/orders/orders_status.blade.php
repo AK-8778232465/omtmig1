@@ -187,7 +187,7 @@
             <div class="p-0 mx-2" id="filter_search">
                 {{-- <p style="text-align:right;color:Red;">*(While Searching OrderID, Use Comma separator)</p> --}}
                 <div class="row ml-5">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="form-group">
                             <label for="dateFilter"><b>Select Date Range:</b></label>
                             <select class="form-control" id="dateFilter" onchange="selectDateFilter(this.value)" style="border:1px solid blue;">
@@ -201,7 +201,7 @@
 
                             </select>
                         </div>
-                        <b class ="mt-0 ml-2 mb-1" id="selectedDate"></b>
+                        <div class ="mt-0 ml-2 mb-1" id="selectedDate"></div>
                     </div>
 
                     {{-- From to --}}
@@ -234,8 +234,12 @@
                                 <option value="7" id="search_tier">Tier</option>
                                 <option value="8" id="search_state">State</option>
                                 <option value="9" id="search_County">County</option>
+                                @if(!Auth::user()->hasRole('Process'))
                                 <option value="10" id="search_user">User</option>
+                                @endif
+                                @if(!Auth::user()->hasRole('Qcer'))
                                 <option value="11" id="search_qa">QA</option>
+                                @endif
                             </select>
                         </div>
             
@@ -249,7 +253,7 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-1 mt-4">
+                    <div class="col-md-2 mt-4">
                         <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
                     </div>
                     
@@ -362,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Check if toDate is less than fromDate
             var fromDate = new Date(fromDateInput.value);
-            if (toDate <= fromDate) {
+            if (toDate < fromDate) {
                 alert('To Date must be greater than From Date.');
                 toDateInput.value = ''; // Reset toDate if invalid
             }
@@ -416,13 +420,13 @@ function selectDateFilter(value) {
 // Example functions to get dynamic date ranges
 function getTodayDate() {
     let  StartDate = new Date();
-    return `Selected:${formatDate(StartDate)}`;
+    return `[${formatDate(StartDate)}]`;
 }
 
 function getYesterdayDate() {
     let StartDate = new Date();
     StartDate.setDate(StartDate.getDate() - 1);
-    return `Selected:${formatDate(StartDate)}`;
+    return `[${formatDate(StartDate)}]`;
 }
 
 function getLastWeekDate() {
@@ -449,7 +453,7 @@ function getLastWeekDate() {
     let EndDate = new Date(StartDate);
     EndDate.setDate(StartDate.getDate() + 6);
 
-    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+    return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
 }
 
 function getYearlyDate() {
@@ -491,7 +495,7 @@ function getThisWeekDate() {
     }
 
 
-    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+    return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
 }
 
 function getLastMonthDate() {
@@ -513,7 +517,7 @@ function getLastMonthDate() {
 
     let StartDate = new Date(EndDate.getFullYear(), EndDate.getMonth(), 1);
 
-    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+    return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
 }
 
 function getCurrentMonthDate() {
@@ -532,7 +536,7 @@ function getCurrentMonthDate() {
 
     let EndDate = today > endDateOfMonth ? endDateOfMonth : today;
 
-    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+    return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
 }
 
 function formatDate(date) {
@@ -1149,6 +1153,25 @@ $(document).on('change', 'input.check-one', function() {
     }
 });
 
+$(document).on('click', '.status-dropdown', function() {
+    var selectedStatus = $(this).val();
+    var rowId = $(this).data('row-id');
+
+    $.ajax({
+        url: '{{ route('updateClickTime') }}',
+        type: 'POST',
+        data: {
+            order_id: rowId,
+            status: selectedStatus,
+        },
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+    });
+});
+
+
+
     $(document).on('change', '.status-dropdown', function() {
     var selectedStatus = $(this).val();
     var rowId = $(this).data('row-id');
@@ -1459,12 +1482,26 @@ $(document).on('change', 'input.check-one', function() {
         var elementId = $(this).attr('id');
         let order_id = elementId.split('_')[1];
         localStorage.setItem("lastOrderStatus", task_status);
+
+    $.ajax({
+        url: '{{ route('updateClickTime') }}',
+        type: 'POST',
+        data: {
+            order_id: order_id,
+            status: status,
+        },
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+    });
+
     if (status == 13) {
             window.location.href = "{{ url('coversheet-prep/') }}/" + order_id;
         } else {
             window.location.href = "{{ url('orderform/') }}/" + order_id;
         }
-    });
+});
+
 
 
 </script>

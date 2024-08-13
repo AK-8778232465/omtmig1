@@ -54,6 +54,7 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,S
     Route::get('settings/products', 'setting')->name('products');
     Route::get('settings/sduploads', 'setting')->name('sduploads');
     Route::get('settings/geoinformations', 'setting')->name('geoinformations');
+    Route::get('settings/clients', 'setting')->name('clients');
 
     // Users
     Route::post('/usersInsert', 'addUsers')->name('usersInsert');
@@ -79,6 +80,19 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,S
     Route::any('/getprocessId', 'getprocessId')->name('getprocessId');
     Route::any('/sduploadfileImport', 'sduploadfileImport')->name('sduploadfileImport');
     Route::any('exportCIFailedOrders/{id}', 'exportCIFailedOrders')->name('exportCIFailedOrders');
+
+    //Client
+    Route::get('/addClient', 'addClient')->name('addClient');
+    Route::post('/clientInsert', 'clientInsert')->name('clientInsert');
+    // Route::post('/edit_client/{clientid?}', 'edit_client')->name('edit_client');
+    Route::post('/getStateid', 'getState')->name('getStateid');
+    Route::post('/getcountyid', 'getCounty')->name('getcountyid');
+    Route::get('edit_client/{clientid?}', 'edit_client')->name('edit_client');
+
+    
+
+
+
 
 
 
@@ -109,6 +123,8 @@ Route::middleware('auth:web')->controller(OrderFormController::class)->group(fun
 
     Route::post('Product_dropdown', 'getProduct_dropdown')->name('Product_dropdown');
     Route::any('coversheet_submit', 'coversheet_submit')->name('coversheet_submit');
+    Route::any('updateClickTime', 'updateClickTime')->name('updateClickTime');
+
 
 });
 

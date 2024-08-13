@@ -122,8 +122,8 @@
         <ul>
             <li id="userwise-details" class="report-item active">Userwise Details</li>
             <li id="orderwise-details" class="report-item">Orderwise Details</li>
-            {{-- <li id="timetaken-details" class="report-item">Average Time Taken</li>
-            <li id="txn-revenue-details" class="report-item">TXN Revenue Details</li>
+            <li id="timetaken-details" class="report-item">Average Time Taken</li>
+            {{-- <li id="txn-revenue-details" class="report-item">TXN Revenue Details</li>
             <li id="fte-revenue-details" class="report-item">FTE Revenue Details</li> --}}
         </ul>
     </div>
@@ -246,9 +246,10 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="card col-md-10 mt-5 tabledetails " id="timetaken_table" style="font-size: 12px;">
-                <h4 class="text-center mt-3" >Userwise Details</h4>
+            <div class="card col-md-10 mt-5 tabledetails" id="timetaken_table" style="font-size: 12px;">
+                <h4 class="text-center mt-3" >Order completion details</h4>
                 <div class="card-body">
                     <div class="p-0">
                         <table id="timetaken_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -657,8 +658,11 @@ $('#newreports_datatable').on('draw.dt', function () {
                 d._token = '{{ csrf_token() }}';
             },
             dataSrc: function(response) {
+                // Calculate total unique users
+                var userCount = response.data.length;
+
                 // Update the total users count
-                $('#order-count').text(response.recordsTotal);
+                $('#order-count').text(userCount);
 
                 // Return data for DataTables
                 return response.data;
@@ -730,8 +734,6 @@ $("#filterButton").on('click', function() {
     let toDate = $("#toDate_range").val();
     let client_id = $("#client_id_dcf").val();
     let project_id = $("#project_id_dcf").val();
-    userwise_datatable(fromDate, toDate, client_id, project_id);
-    newreports(fromDate, toDate, client_id, project_id);
 
     if (fromDate && toDate) {
         userwise_datatable(fromDate, toDate, client_id, project_id);
@@ -767,7 +769,6 @@ $('#client_id_dcf').on('change', function () {
 
 $(document).ready(function() {
     fetchProData('All');
-    console.log('1');
         $("#project_id").select2();
         $("#project_id_dcf").select2();
         $("#client_id_dcf").select2();
@@ -797,7 +798,7 @@ $(document).ready(function() {
         // Hide all tables initially
         $('#userwise_table').hide();
         $('#newreports_table').hide(); // Fixed table ID
-        $('#clientwise_table').hide();
+        $('#timetaken_table').hide();
         $('#txn_revenue_table').hide();
         $('#fte_revenue_table').hide();
         $('#orderwise_timetaken_table').hide();
@@ -827,18 +828,18 @@ $(document).ready(function() {
 
 function isFutureDate(date) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0); 
     return date > today;
 }
 
 function normalizeDate(date) {
     const normalized = new Date(date);
-    normalized.setHours(0, 0, 0, 0);
+    normalized.setHours(0, 0, 0, 0); 
     return normalized;
 }
 
 function setDateToInput(inputElement, date) {
-    inputElement.value = date.toISOString().split('T')[0];
+    inputElement.value = date.toISOString().split('T')[0]; 
 }
 
 const currentDate = normalizeDate(new Date());
@@ -853,7 +854,7 @@ document.getElementById('toDate_range').addEventListener('change', function() {
             title: 'Oops...',
             text: 'You cannot select a future date.'
         });
-        setDateToInput(this, currentDate);
+        setDateToInput(this, currentDate); 
     } else if (selectedDate < fromDate) {
         Swal.fire({
             icon: 'error',
@@ -874,7 +875,7 @@ document.getElementById('fromDate_range').addEventListener('change', function() 
             title: 'Oops...',
             text: 'You cannot select a future date.'
         });
-        setDateToInput(this, currentDate);
+        setDateToInput(this, currentDate); 
     } else if (toDate < selectedDate) {
         Swal.fire({
             icon: 'error',
