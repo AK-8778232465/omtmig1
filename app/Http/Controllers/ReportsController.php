@@ -290,115 +290,6 @@ private function getProcessIdsBasedOnUserRole($user)
             }
         }
     
-        $statusCountsQuery = OrderCreation::query()
-            ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
-            ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
-            ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
-            ->select(
-                'oms_users.id as userid',
-                'oms_users.emp_id as empid',
-                'oms_users.username as username',
-                'oms_order_creations.id as orderid'
-            )
-            ->whereNotNull('assignee_user_id')
-            ->where('oms_order_creations.is_active', 1)
-            ->where('stl_client.is_approved', 1)
-            ->where('stl_item_description.is_approved', 1);
-    
-        if ($fromDate && $toDate) {
-            $statusCountsQuery->whereDate('order_date', '>=', $fromDate)
-                              ->whereDate('order_date', '<=', $toDate);
-        }
-    
-        if (!empty($processIds)) {
-            $statusCountsQuery->whereIn('oms_order_creations.process_id', $processIds);
-        }
-    
-        if (!empty($projectId) && $projectId[0] !== 'All') {
-            $statusCountsQuery->whereIn('oms_order_creations.process_id', $projectId);
-        }
-    
-        if (!empty($clientId) && $clientId[0] !== 'All') {
-            $statusCountsQuery->whereIn('stl_item_description.client_id', $clientId);
-        }
-    
-        $statusCounts = $statusCountsQuery->get();
-    
-        $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) {
-            $completedCount = DB::table('oms_order_creations')
-                ->where('status_id', 5)
-                ->where('assignee_user_id', $userid)
-                ->count();
-    
-            $totalTimeTakenSeconds = 0;
-            foreach ($orders as $order) {
-                $orderStartTime = DB::table('order_status_history')->select('created_at')
-                    ->where('order_id', $order->orderid)
-                    ->where('status_id', 1)
-                    ->orderBy('created_at', 'asc')
-                    ->first();
-    
-                $orderEndTime = DB::table('order_status_history')->select('created_at')
-                    ->where('order_id', $order->orderid)
-                    ->where('status_id', 5)
-                    ->orderBy('created_at', 'asc')
-                    ->first();
-    
-                if ($orderStartTime && $orderEndTime) {
-                    $totalTimeTakenSeconds += Carbon::parse($orderEndTime->created_at)->diffInSeconds(Carbon::parse($orderStartTime->created_at));
-                }
-            }
-    
-            $totalTimeTakenHours = gmdate('H:i:s', $totalTimeTakenSeconds);
-            $avgTimeTakenSeconds = $completedCount > 0 ? $totalTimeTakenSeconds / $completedCount : 0;
-            $avgTimeTakenHours = gmdate('H:i:s', $avgTimeTakenSeconds);
-    
-            return [
-                'emp_id' => $orders->first()->empid,
-                'Users' => $orders->first()->username,
-                'NO_OF_ASSIGNED_ORDERS' => $orders->count(),
-                'NO_OF_COMPLETED_ORDERS' => $completedCount,
-                'TOTAL_TIME_TAKEN_FOR_COMPLETED_ORDERS' => $totalTimeTakenHours,
-                'AVG_TIME_TAKEN_FOR_COMPLETED_ORDERS' => $avgTimeTakenHours,
-            ];
-        });
-    
-        return Datatables::of($dataForDataTables)->toJson();
-    }
-
-    
-    public function orderTimeTaken(Request $request) {
-        $user = Auth::user();
-        $processIds = $this->getProcessIdsBasedOnUserRole($user);
-        $clientId = $request->input('client_id');
-        $projectId = $request->input('project_id');
-        $selectedDateFilter = $request->input('selectedDateFilter');
-        $fromDateRange = $request->input('fromDate_range');
-        $toDateRange = $request->input('toDate_range');
-   
-        $fromDate = null;
-        $toDate = null;
-   
-        if ($fromDateRange && $toDateRange) {
-            $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
-            $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
-        } else {
-            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
-            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
-                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
-                $fromDateText = trim($fromDateText);
-                $toDateText = trim($toDateText);
-                preg_match($datePattern, $fromDateText, $fromDateMatches);
-                preg_match($datePattern, $toDateText, $toDateMatches);
-                $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
-                $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
-            } else {
-                preg_match($datePattern, $selectedDateFilter, $dateMatches);
-                $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
-                $toDate = $fromDate;
-            }
-        }
-   
    
         $statusCountsQuery = OrderCreation::query()
             ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
@@ -406,11 +297,10 @@ private function getProcessIdsBasedOnUserRole($user)
             ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
             ->select(
                 'oms_users.id as userid',
-                'oms_users.emp_id as empid',
                 'oms_users.username as username',
                 'oms_order_creations.id as orderid'
             )
-            // ->where('oms_order_creations.status_id', 5)
+            ->where('oms_order_creations.status_id', 5)
             ->whereNotNull('assignee_user_id')
             ->where('oms_order_creations.is_active', 1)
             ->where('stl_client.is_approved', 1)
@@ -441,7 +331,6 @@ private function getProcessIdsBasedOnUserRole($user)
     
         $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) {
             $userDurations = [
-                'Emp ID' => $orders->first()->empid,
                 'Users' => $orders->first()->username,
                 'NO OF ORDERS' => $orders->count(),
                 'WIP' => 0,

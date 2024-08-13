@@ -247,45 +247,22 @@
                 </div>
             </div>
 
-            <div class="card col-md-10 mt-5 tabledetails " id="timetaken_table" style="font-size: 12px;">
+            <div class="card col-md-9 mt-5 tabledetails " id="timetaken_table" style="font-size: 12px;">
                 <h4 class="text-center mt-3" >Userwise Details</h4>
                 <div class="card-body">
                     <div class="p-0">
                         <table id="timetaken_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
                                 <tr>
-                                    <th width="12%">Emp ID</th>
                                     <th width="12%">Users</th>
-                                    <th width="12%">No Of Assigned Orders</th>
-                                    <th width="12%">No Of Completed Orders</th>
-                                    <th width="11%">Total Time Taken For Completed Orders</th>
-                                    <th width="11%">Avg Time Taken For Completed Orders</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-center" style="font-size: 12px;"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card col-md-10 mt-2 tabledetails" id="orderwise_timetaken_table" style="font-size: 12px; overflow-x: auto;">
-                <h4 class="text-center mt-3">Orderwise Details</h4>
-                <div class="card-body">
-                    <div class="p-0">
-                        <table id="orderwise_timetaken_datatable" class="table table-bordered" style="border-collapse: collapse; width: 100%;">
-                            <thead class="text-center" style="font-size: 12px;">
-                                <tr>
-                                    <th>Emp ID</th>
-                                    <th>User</th>
-                                    <th>Assigned Orders</th>
-                                    <th>No. of Orders Moved (WIP)</th>
-                                    <th>Total Time Taken (WIP)</th>
-                                    <th>No. of Orders Moved (Coversheet Prep)</th>
-                                    <th>Total Time Taken (Coversheet Prep)</th>
-                                    <th>No. of Orders Moved (Clarification)</th>
-                                    <th>Total Time Taken (Clarification)</th>
-                                    <th>No. of Orders Moved (Send for QC)</th>
-                                    <th>Total Time Taken (Send for QC)</th>
+                                    <th width="12%">No Of Orders</th>
+                                    <th width="11%">WIP</th>
+                                    <th width="11%">Coversheet Prep</th>
+                                    <th width="11%">Clarification</th>
+                                    <th width="11%">Send For Qc</th>
+                                    <th width="11%">Hold</th>
+                                    <th width="11%">Completed</th>
+                                    <th width="11%">Avg Time</th>
                                 </tr>
                             </thead>
                             <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -729,8 +706,7 @@ $("#filterButton").on('click', function() {
     if (fromDate && toDate) {
         userwise_datatable(fromDate, toDate, client_id, project_id);
         newreports(fromDate, toDate, client_id, project_id);
-        userTimeTaken_datatable(fromDate, toDate, client_id, project_id);
-        orderTimeTaken_datatable(fromDate, toDate, client_id, project_id);
+        wipTimeTaken_datatable(fromDate, toDate, client_id, project_id);
     } else if ($("#dateFilter").val() === 'custom') {
         if (!fromDate || !toDate) {
             Swal.fire({
@@ -741,14 +717,12 @@ $("#filterButton").on('click', function() {
         } else {
             userwise_datatable(fromDate, toDate, client_id, project_id);
             newreports(fromDate, toDate, client_id, project_id);
-            userTimeTaken_datatable(fromDate, toDate, client_id, project_id);
-            orderTimeTaken_datatable(fromDate, toDate, client_id, project_id);
+            wipTimeTaken_datatable(fromDate, toDate, client_id, project_id);
         }
     } else {
         userwise_datatable(fromDate, toDate, client_id, project_id);
         newreports(fromDate, toDate, client_id, project_id);
-        userTimeTaken_datatable(fromDate, toDate, client_id, project_id);
-        orderTimeTaken_datatable(fromDate, toDate, client_id, project_id);
+        wipTimeTaken_datatable(fromDate, toDate, client_id, project_id);
     }
 });
 
@@ -767,8 +741,7 @@ $(document).ready(function() {
 
     $('.select2-basic-multiple').select2();
     userwise_datatable();
-    userTimeTaken_datatable();
-    orderTimeTaken_datatable();
+    wipTimeTaken_datatable();
     newreports();
 
 
@@ -793,7 +766,6 @@ $(document).ready(function() {
         $('#timetaken_table').hide();
         $('#txn_revenue_table').hide();
         $('#fte_revenue_table').hide();
-        $('#orderwise_timetaken_table').hide();
 
         // Show the selected table based on ID
         if (reportId === 'userwise-details') {
@@ -802,7 +774,6 @@ $(document).ready(function() {
             $('#newreports_table').show();
         } else if (reportId === 'timetaken-details') {
             $('#timetaken_table').show();
-            $('#orderwise_timetaken_table').show();
         // } else if (reportId === 'txn-revenue-details') {
         //     $('#txn_revenue_table').show();
         // } else if (reportId === 'fte-revenue-details') {
@@ -879,11 +850,13 @@ document.getElementById('fromDate_range').addEventListener('change', function() 
 });
 
 
-function userTimeTaken_datatable() {
+
+function wipTimeTaken_datatable() {
     var fromDate = $('#fromDate_range').val();
     var toDate = $('#toDate_range').val();
     var client_id = $('#client_id_dcf').val();
     var project_id = $('#project_id_dcf').val();
+    // var selectedDateFilter = $('#selectedDateFilter').val();
 
     $('#timetaken_datatable').DataTable({
         destroy: true,
@@ -897,54 +870,12 @@ function userTimeTaken_datatable() {
                     fromDate_range: fromDate,
                     client_id: client_id,
                     project_id: project_id,
-                selectedDateFilter: selectedDateFilter,
+                    selectedDateFilter : selectedDateFilter,
                     _token: '{{ csrf_token() }}'
             },
             dataSrc: 'data'
         },
         columns: [
-            { data: 'emp_id', name: 'emp_id', class: 'text-left' },
-            { data: 'Users', name: 'Users', class: 'text-left' },
-            { data: 'NO_OF_ASSIGNED_ORDERS', name: 'NO_OF_ASSIGNED_ORDERS' },
-            { data: 'NO_OF_COMPLETED_ORDERS', name: 'NO_OF_COMPLETED_ORDERS' },
-            { data: 'TOTAL_TIME_TAKEN_FOR_COMPLETED_ORDERS', name: 'TOTAL_TIME_TAKEN_FOR_COMPLETED_ORDERS' },
-            { data: 'AVG_TIME_TAKEN_FOR_COMPLETED_ORDERS', name: 'AVG_TIME_TAKEN_FOR_COMPLETED_ORDERS' }
-        ],
-        dom: 'lBfrtip',
-        buttons: [
-            'excel',
-        ],
-        lengthMenu: [ 10, 25, 50, 75, 100 ]
-    });
-}
-
-
-function orderTimeTaken_datatable() {
-    var fromDate = $('#fromDate_range').val();
-    var toDate = $('#toDate_range').val();
-    var client_id = $('#client_id_dcf').val();
-    var project_id = $('#project_id_dcf').val();
-    var selectedDateFilter = $('#selectedDateFilter').val(); // Assuming you have an element for this
-
-    $('#orderwise_timetaken_datatable').DataTable({
-        destroy: true,
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: "{{ route('orderTimeTaken') }}",
-            type: 'POST',
-            data: {
-                fromDate_range: fromDate,
-                toDate_range: toDate,
-                client_id: client_id,
-                project_id: project_id,
-                selectedDateFilter: selectedDateFilter,
-                _token: '{{ csrf_token() }}'
-            },
-            dataSrc: ''
-        },
-        columns: [
-            { data: 'Emp ID', name: 'Emp ID', class: 'text-left' },
             { data: 'Users', name: 'Users', class: 'text-left' },
             { data: 'NO OF ORDERS', name: 'NO OF ORDERS' },
             { data: 'WIP', name: 'WIP' },
@@ -954,13 +885,7 @@ function orderTimeTaken_datatable() {
             { data: 'HOLD', name: 'HOLD' },
             { data: 'COMPLETED', name: 'COMPLETED' },
             { data: 'COMPLETED_AVG', name: 'COMPLETED_AVG' }
-        ],
-        dom: 'lBfrtip',
-        buttons: [
-            'excel',
-        ],
-        lengthMenu: [10, 25, 50, 75, 100],
-        order: [[0, 'asc']] // Optional: Order by the first column (Emp ID)
+        ]
     });
 }
 
