@@ -500,43 +500,4 @@ class OrderFormController extends Controller
         }
     }
 
-
-    public function updateClickTime(Request $request)
-    {
-    $request->validate([
-        'order_id' => 'required|integer',
-        'status' => 'required|integer',
-    ]);
-
-    $orderId = $request->input('order_id');
-    $statusId = $request->input('status');
-
-    if ($statusId == 1) {
-        $order = DB::table('oms_order_creations')
-            ->where('id', $orderId)
-            ->where('status_id', 1)
-            ->where('assignee_user_id', Auth::id())
-            ->first();
-
-        if ($order) {
-            $existingHistory = DB::table('order_status_history')->where('order_id', $orderId)->first();
-            if (!$existingHistory) {
-                DB::table('order_status_history')->insert([
-                    'order_id' => $orderId,
-                    'status_id' => $statusId,
-                    'comment' => null,
-                    'checked_array' => null,
-                    'created_at' => Carbon::now(),
-                ]);
-                return response()->json(['message' => 'Time duration updated successfully.']);
-            } else {
-                return response()->json(['message' => 'Order status history already exists.'], 409);
-            }
-        } else {
-            return response()->json(['message' => 'Failed to update time duration.'], 500);
-        }
-    } else {
-        return response()->json(['message' => 'Invalid status ID.'], 400);
-    }
-    }
 }

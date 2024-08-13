@@ -122,8 +122,8 @@
         <ul>
             <li id="userwise-details" class="report-item active">Userwise Details</li>
             <li id="orderwise-details" class="report-item">Orderwise Details</li>
-            <li id="timetaken-details" class="report-item">Average Time Taken</li>
-            {{-- <li id="txn-revenue-details" class="report-item">TXN Revenue Details</li>
+            {{-- <li id="timetaken-details" class="report-item">Average Time Taken</li>
+            <li id="txn-revenue-details" class="report-item">TXN Revenue Details</li>
             <li id="fte-revenue-details" class="report-item">FTE Revenue Details</li> --}}
         </ul>
     </div>
@@ -239,30 +239,6 @@
                                     <th width="11%">Status</th>
                                     <th width="11%">Comments</th>
                                     <th width="11%">Primary Source</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-center" style="font-size: 12px;"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card col-md-9 mt-5 tabledetails " id="timetaken_table" style="font-size: 12px;">
-                <h4 class="text-center mt-3" >Userwise Details</h4>
-                <div class="card-body">
-                    <div class="p-0">
-                        <table id="timetaken_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                            <thead class="text-center" style="font-size: 12px;">
-                                <tr>
-                                    <th width="12%">Users</th>
-                                    <th width="12%">No Of Orders</th>
-                                    <th width="11%">WIP</th>
-                                    <th width="11%">Coversheet Prep</th>
-                                    <th width="11%">Clarification</th>
-                                    <th width="11%">Send For Qc</th>
-                                    <th width="11%">Hold</th>
-                                    <th width="11%">Completed</th>
-                                    <th width="11%">Avg Time</th>
                                 </tr>
                             </thead>
                             <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -706,7 +682,6 @@ $("#filterButton").on('click', function() {
     if (fromDate && toDate) {
         userwise_datatable(fromDate, toDate, client_id, project_id);
         newreports(fromDate, toDate, client_id, project_id);
-        wipTimeTaken_datatable(fromDate, toDate, client_id, project_id);
     } else if ($("#dateFilter").val() === 'custom') {
         if (!fromDate || !toDate) {
             Swal.fire({
@@ -717,12 +692,10 @@ $("#filterButton").on('click', function() {
         } else {
             userwise_datatable(fromDate, toDate, client_id, project_id);
             newreports(fromDate, toDate, client_id, project_id);
-            wipTimeTaken_datatable(fromDate, toDate, client_id, project_id);
         }
     } else {
         userwise_datatable(fromDate, toDate, client_id, project_id);
         newreports(fromDate, toDate, client_id, project_id);
-        wipTimeTaken_datatable(fromDate, toDate, client_id, project_id);
     }
 });
 
@@ -741,7 +714,6 @@ $(document).ready(function() {
 
     $('.select2-basic-multiple').select2();
     userwise_datatable();
-    wipTimeTaken_datatable();
     newreports();
 
 
@@ -763,7 +735,7 @@ $(document).ready(function() {
         // Hide all tables initially
         $('#userwise_table').hide();
         $('#newreports_table').hide(); // Fixed table ID
-        $('#timetaken_table').hide();
+        $('#clientwise_table').hide();
         $('#txn_revenue_table').hide();
         $('#fte_revenue_table').hide();
 
@@ -774,6 +746,7 @@ $(document).ready(function() {
             $('#newreports_table').show();
         } else if (reportId === 'timetaken-details') {
             $('#timetaken_table').show();
+            $('#orderwise_timetaken_table').show();
         // } else if (reportId === 'txn-revenue-details') {
         //     $('#txn_revenue_table').show();
         // } else if (reportId === 'fte-revenue-details') {
@@ -791,18 +764,18 @@ $(document).ready(function() {
 
 function isFutureDate(date) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); 
+    today.setHours(0, 0, 0, 0);
     return date > today;
 }
 
 function normalizeDate(date) {
     const normalized = new Date(date);
-    normalized.setHours(0, 0, 0, 0); 
+    normalized.setHours(0, 0, 0, 0);
     return normalized;
 }
 
 function setDateToInput(inputElement, date) {
-    inputElement.value = date.toISOString().split('T')[0]; 
+    inputElement.value = date.toISOString().split('T')[0];
 }
 
 const currentDate = normalizeDate(new Date());
@@ -817,7 +790,7 @@ document.getElementById('toDate_range').addEventListener('change', function() {
             title: 'Oops...',
             text: 'You cannot select a future date.'
         });
-        setDateToInput(this, currentDate); 
+        setDateToInput(this, currentDate);
     } else if (selectedDate < fromDate) {
         Swal.fire({
             icon: 'error',
@@ -838,7 +811,7 @@ document.getElementById('fromDate_range').addEventListener('change', function() 
             title: 'Oops...',
             text: 'You cannot select a future date.'
         });
-        setDateToInput(this, currentDate); 
+        setDateToInput(this, currentDate);
     } else if (toDate < selectedDate) {
         Swal.fire({
             icon: 'error',
@@ -848,50 +821,6 @@ document.getElementById('fromDate_range').addEventListener('change', function() 
         setDateToInput(document.getElementById('toDate_range'), selectedDate);
     }
 });
-
-
-
-function wipTimeTaken_datatable() {
-    var fromDate = $('#fromDate_range').val();
-    var toDate = $('#toDate_range').val();
-    var client_id = $('#client_id_dcf').val();
-    var project_id = $('#project_id_dcf').val();
-    var selectedDateFilter = $('#selectedDateFilter').val();
-
-    $('#timetaken_datatable').DataTable({
-        destroy: true,
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: "{{ route('get_timetaken') }}",
-            type: 'POST',
-            data: function(d) {
-                d.toDate_range = toDate;
-                d.fromDate_range = fromDate;
-                d.client_id = client_id;
-                d.project_id = project_id;
-                d.selectedDateFilter = selectedDateFilter;
-                d._token = '{{ csrf_token() }}';
-            },
-            dataSrc: 'data'
-        },
-        columns: [
-            { data: 'Users', name: 'Users', class: 'text-left' },
-            { data: 'NO OF ORDERS', name: 'NO OF ORDERS' },
-            { data: 'WIP', name: 'WIP' },
-            { data: 'COVERSHEET PRP', name: 'COVERSHEET PRP' },
-            { data: 'CLARIFICATION', name: 'CLARIFICATION' },
-            { data: 'SEND FOR QC', name: 'SEND FOR QC' },
-            { data: 'HOLD', name: 'HOLD' },
-            { data: 'COMPLETED', name: 'COMPLETED' },
-            { data: 'COMPLETED_AVG', name: 'COMPLETED_AVG' }
-        ]
-    });
-}
-
-
-
-
 
 </script>
 
