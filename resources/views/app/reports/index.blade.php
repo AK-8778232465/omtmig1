@@ -268,7 +268,7 @@
                 </div>
             </div>
             
-            <div class="card col-md-10 mt-2 tabledetails" id="orderwise_timetaken_table" style="font-size: 12px; overflow-x: auto;">
+            <div class="card col-md-10 mt-2 tabledetails d-none" id="orderwise_timetaken_table" style="font-size: 12px; overflow-x: auto;">
                 <h4 class="text-center mt-3">Orderwise Details</h4>
                 <div class="card-body">
                     <div class="p-0">
