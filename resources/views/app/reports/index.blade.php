@@ -268,31 +268,24 @@
                 </div>
             </div>
             
-            <div class="card col-md-10 mt-2 tabledetails" id="orderwise_timetaken_table" style="font-size: 12px; overflow-x: auto;">
-                <h4 class="text-center mt-3">Order Progress Details</h4>
+            <div class="card col-md-10 mt-2 tabledetails d-none" id="orderwise_timetaken_table" style="font-size: 12px; overflow-x: auto;">
+                <h4 class="text-center mt-3">Orderwise Details</h4>
                 <div class="card-body">
                     <div class="p-0">
                         <table id="orderwise_timetaken_datatable" class="table table-bordered" style="border-collapse: collapse; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
                                 <tr>
-                                    <th colspan="3">Emp Details</th>
-                                    <th colspan="2">WIP</th>
-                                    <th colspan="2">Coversheet Prep</th>
-                                    <th colspan="2">Clarification</th>
-                                    <th colspan="2">Send for QC</th>
-                                </tr>
-                                <tr>
                                     <th>Emp ID</th>
                                     <th>User</th>
                                     <th>Assigned Orders</th>
-                                    <th># of Orders Transferred</th>
-                                    <th>Time Taken</th>
-                                    <th># of Orders Transferred</th>
-                                    <th>Time Taken</th>
-                                    <th># of Orders Transferred</th>
-                                    <th>Time Taken</th>
-                                    <th># of Orders Transferred</th>
-                                    <th>Time Taken</th>
+                                    <th>No. of Orders Moved (WIP)</th>
+                                    <th>Total Time Taken (WIP)</th>
+                                    <th>No. of Orders Moved (Coversheet Prep)</th>
+                                    <th>Total Time Taken (Coversheet Prep)</th>
+                                    <th>No. of Orders Moved (Clarification)</th>
+                                    <th>Total Time Taken (Clarification)</th>
+                                    <th>No. of Orders Moved (Send for QC)</th>
+                                    <th>Total Time Taken (Send for QC)</th>
                                 </tr>
                             </thead>
                             <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -931,6 +924,7 @@ function orderTimeTaken_datatable() {
     var toDate = $('#toDate_range').val();
     var client_id = $('#client_id_dcf').val();
     var project_id = $('#project_id_dcf').val();
+    var selectedDateFilter = $('#selectedDateFilter').val(); // Assuming you have an element for this
 
     $('#orderwise_timetaken_datatable').DataTable({
         destroy: true,
@@ -940,37 +934,33 @@ function orderTimeTaken_datatable() {
             url: "{{ route('orderTimeTaken') }}",
             type: 'POST',
             data: {
-                toDate_range: toDate,
                 fromDate_range: fromDate,
+                toDate_range: toDate,
                 client_id: client_id,
                 project_id: project_id,
                 selectedDateFilter: selectedDateFilter,
                 _token: '{{ csrf_token() }}'
             },
-            dataSrc: function (json) {
-                return json.data; // Access the data array
-            },
-            error: function (xhr, status, error) {
-                alert('Failed to load data. Please try again.');
-            }
+            dataSrc: ''
         },
         columns: [
             { data: 'Emp ID', name: 'Emp ID', class: 'text-left' },
             { data: 'Users', name: 'Users', class: 'text-left' },
-            { data: 'Assigned Orders', name: 'Assigned Orders' },
-            { data: 'WIP.count', name: 'WIP.count' },
-            { data: 'WIP.time', name: 'WIP.time' },
-            { data: 'COVERSHEET PRP.count', name: 'COVERSHEET PRP.count' },
-            { data: 'COVERSHEET PRP.time', name: 'COVERSHEET PRP.time' },
-            { data: 'CLARIFICATION.count', name: 'CLARIFICATION.count' },
-            { data: 'CLARIFICATION.time', name: 'CLARIFICATION.time' },
-            { data: 'SEND FOR QC.count', name: 'SEND FOR QC.count' },
-            { data: 'SEND FOR QC.time', name: 'SEND FOR QC.time' },
+            { data: 'NO OF ORDERS', name: 'NO OF ORDERS' },
+            { data: 'WIP', name: 'WIP' },
+            { data: 'COVERSHEET PRP', name: 'COVERSHEET PRP' },
+            { data: 'CLARIFICATION', name: 'CLARIFICATION' },
+            { data: 'SEND FOR QC', name: 'SEND FOR QC' },
+            { data: 'HOLD', name: 'HOLD' },
+            { data: 'COMPLETED', name: 'COMPLETED' },
+            { data: 'COMPLETED_AVG', name: 'COMPLETED_AVG' }
         ],
         dom: 'lBfrtip',
-        buttons: ['excel'],
+        buttons: [
+            'excel',
+        ],
         lengthMenu: [10, 25, 50, 75, 100],
-        order: [[0, 'asc']]
+        order: [[0, 'asc']] // Optional: Order by the first column (Emp ID)
     });
 }
 
