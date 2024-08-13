@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Auth;
 use DataTables;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 
 
 class ReportsController extends Controller
@@ -324,77 +323,51 @@ private function getProcessIdsBasedOnUserRole($user)
         }
     
         $statusCounts = $statusCountsQuery->get();
-    $statusCountsdetails = $statusCountsQuery->get();
-
-    $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use($fromDate, $toDate){
-        $assignedOrders = DB::table('oms_order_creations')
-            ->whereDate('order_date', '>=', $fromDate)
-            ->whereDate('order_date', '<=', $toDate)
-            ->where('assignee_user_id', $userid)
-            ->count();
     
-    
+        $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) {
             $completedCount = DB::table('oms_order_creations')
-            ->whereDate('order_date', '>=', $fromDate)
-            ->whereDate('order_date', '<=', $toDate)
                 ->where('status_id', 5)
                 ->where('assignee_user_id', $userid)
                 ->count();
     
             $totalTimeTakenSeconds = 0;
             foreach ($orders as $order) {
-            $orderStartTime = DB::table('order_status_history')
+                $orderStartTime = DB::table('order_status_history')->select('created_at')
                     ->where('order_id', $order->orderid)
                     ->where('status_id', 1)
                     ->orderBy('created_at', 'asc')
                     ->first();
     
-            $orderEndTime = DB::table('order_status_history')
+                $orderEndTime = DB::table('order_status_history')->select('created_at')
                     ->where('order_id', $order->orderid)
                     ->where('status_id', 5)
                     ->orderBy('created_at', 'asc')
                     ->first();
     
                 if ($orderStartTime && $orderEndTime) {
-                
-                $startTime = Carbon::parse($orderStartTime->created_at);
-                $endTime = Carbon::parse($orderEndTime->created_at);
-    
-                $timeTakenSeconds = $endTime->diffInSeconds($startTime);
-                $totalTimeTakenSeconds += $timeTakenSeconds;
+                    $totalTimeTakenSeconds += Carbon::parse($orderEndTime->created_at)->diffInSeconds(Carbon::parse($orderStartTime->created_at));
                 }
             }
     
-        $totalTimeTakenHours = $this->formatSecondsToHours($totalTimeTakenSeconds);
-        $avgTimeTakenSeconds = $completedCount > 0 ? ($totalTimeTakenSeconds / $completedCount) : 0;
-        $avgTimeTakenHours = $this->formatSecondsToHours($avgTimeTakenSeconds);
-    
+            $totalTimeTakenHours = gmdate('H:i:s', $totalTimeTakenSeconds);
+            $avgTimeTakenSeconds = $completedCount > 0 ? $totalTimeTakenSeconds / $completedCount : 0;
+            $avgTimeTakenHours = gmdate('H:i:s', $avgTimeTakenSeconds);
     
             return [
                 'emp_id' => $orders->first()->empid,
                 'Users' => $orders->first()->username,
-            'NO_OF_ASSIGNED_ORDERS' => $assignedOrders,
+                'NO_OF_ASSIGNED_ORDERS' => $orders->count(),
                 'NO_OF_COMPLETED_ORDERS' => $completedCount,
                 'TOTAL_TIME_TAKEN_FOR_COMPLETED_ORDERS' => $totalTimeTakenHours,
                 'AVG_TIME_TAKEN_FOR_COMPLETED_ORDERS' => $avgTimeTakenHours,
-            'TOTAL_TIME_TAKEN_SECONDS' => $totalTimeTakenSeconds, 
-            'AVG_TIME_TAKEN_SECONDS' => $avgTimeTakenSeconds, 
             ];
         });
     
         return Datatables::of($dataForDataTables)->toJson();
+    }
 
-}
     
-private function formatSecondsToHours($seconds)
-{
-    $hours = floor($seconds / 3600);
-    $minutes = floor(($seconds % 3600) / 60);
-    $seconds = $seconds % 60; 
-    return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds); 
-}
-   
-public function orderTimeTaken(Request $request) {
+    public function orderTimeTaken(Request $request) {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $clientId = $request->input('client_id');
