@@ -982,11 +982,11 @@ class HomeController extends Controller
              ->whereNotIn('status_id', [1, 13]);
     }
     if ($user->user_type_id == 8) {
-        $statusCountsQuery->where('oms_order_creations.assignee_qa_id', $user->id)
-        ->orWhere('oms_order_creations.assignee_user_id', $user->id)
-        ->whereIn('oms_order_creations.process_id', $processIds);
-
-    }
+        $statusCountsQuery->where(function($query) use ($user) {
+            $query->where('oms_order_creations.assignee_qa_id', $user->id)
+                  ->orWhere('oms_order_creations.assignee_user_id', $user->id);
+        });
+    }    
 
     // Apply client_id condition
     if (!empty($client_id) && $client_id[0] !== 'All') {
