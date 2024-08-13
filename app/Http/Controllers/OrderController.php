@@ -1234,7 +1234,11 @@ class OrderController extends Controller
                             ($order->status_id == 4 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == Auth::id()) || 
                             ($order->status_id == 4 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == null)) {
                     $orderId = $order->id ?? '';
-                } else {
+                } elseif (($order->status_id == 13 && $order->associate_id != null) ||($order->status_id == 13 && $order->associate_id == null)
+                ) {
+                        $orderId = $order->id ?? '';
+                    } 
+                else {
                     $orderId = '';
                 }
             } else {
