@@ -147,7 +147,9 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
 
     Route::post('getGeoCounty', 'getGeoCounty')->name('getGeoCounty');
     Route::post('getGeoCities', 'getGeoCities')->name('getGeoCities');
-    Route::post('get_timetaken', 'get_timetaken')->name('get_timetaken');
+    Route::any('get_timetaken', 'get_timetaken')->name('get_timetaken');
+    Route::any('orderTimeTaken', 'orderTimeTaken')->name('orderTimeTaken');
+
 
 
 });
