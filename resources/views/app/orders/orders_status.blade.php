@@ -1149,6 +1149,25 @@ $(document).on('change', 'input.check-one', function() {
     }
 });
 
+$(document).on('click', '.status-dropdown', function() {
+    var selectedStatus = $(this).val();
+    var rowId = $(this).data('row-id');
+
+    $.ajax({
+        url: '{{ route('updateClickTime') }}',
+        type: 'POST',
+        data: {
+            order_id: rowId,
+            status: selectedStatus,
+        },
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+    });
+});
+
+
+
     $(document).on('change', '.status-dropdown', function() {
     var selectedStatus = $(this).val();
     var rowId = $(this).data('row-id');
@@ -1459,12 +1478,26 @@ $(document).on('change', 'input.check-one', function() {
         var elementId = $(this).attr('id');
         let order_id = elementId.split('_')[1];
         localStorage.setItem("lastOrderStatus", task_status);
+
+    $.ajax({
+        url: '{{ route('updateClickTime') }}',
+        type: 'POST',
+        data: {
+            order_id: order_id,
+            status: status,
+        },
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+    });
+
     if (status == 13) {
             window.location.href = "{{ url('coversheet-prep/') }}/" + order_id;
         } else {
             window.location.href = "{{ url('orderform/') }}/" + order_id;
         }
-    });
+});
+
 
 
 </script>

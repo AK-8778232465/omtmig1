@@ -109,6 +109,8 @@ Route::middleware('auth:web')->controller(OrderFormController::class)->group(fun
 
     Route::post('Product_dropdown', 'getProduct_dropdown')->name('Product_dropdown');
     Route::any('coversheet_submit', 'coversheet_submit')->name('coversheet_submit');
+    Route::any('updateClickTime', 'updateClickTime')->name('updateClickTime');
+
 
 });
 
