@@ -122,8 +122,8 @@
         <ul>
             <li id="userwise-details" class="report-item active">Userwise Details</li>
             <li id="orderwise-details" class="report-item">Orderwise Details</li>
-            <li id="timetaken-details" class="report-item">Average Time Taken</li>
-            {{-- <li id="txn-revenue-details" class="report-item">TXN Revenue Details</li>
+            {{-- <li id="timetaken-details" class="report-item">Average Time Taken</li>
+            <li id="txn-revenue-details" class="report-item">TXN Revenue Details</li>
             <li id="fte-revenue-details" class="report-item">FTE Revenue Details</li> --}}
         </ul>
     </div>
@@ -268,7 +268,7 @@
                 </div>
             </div>
             
-            <div class="card col-md-10 mt-2 tabledetails" id="orderwise_timetaken_table" style="font-size: 12px; overflow-x: auto;">
+            <div class="card col-md-10 mt-2 tabledetails d-none" id="orderwise_timetaken_table" style="font-size: 12px; overflow-x: auto;">
                 <h4 class="text-center mt-3">Order Progress Details</h4>
                 <div class="card-body">
                     <div class="p-0">
@@ -797,7 +797,7 @@ $(document).ready(function() {
         // Hide all tables initially
         $('#userwise_table').hide();
         $('#newreports_table').hide(); // Fixed table ID
-        $('#timetaken_table').hide();
+        $('#clientwise_table').hide();
         $('#txn_revenue_table').hide();
         $('#fte_revenue_table').hide();
         $('#orderwise_timetaken_table').hide();
@@ -827,18 +827,18 @@ $(document).ready(function() {
 
 function isFutureDate(date) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); 
+    today.setHours(0, 0, 0, 0);
     return date > today;
 }
 
 function normalizeDate(date) {
     const normalized = new Date(date);
-    normalized.setHours(0, 0, 0, 0); 
+    normalized.setHours(0, 0, 0, 0);
     return normalized;
 }
 
 function setDateToInput(inputElement, date) {
-    inputElement.value = date.toISOString().split('T')[0]; 
+    inputElement.value = date.toISOString().split('T')[0];
 }
 
 const currentDate = normalizeDate(new Date());
@@ -853,7 +853,7 @@ document.getElementById('toDate_range').addEventListener('change', function() {
             title: 'Oops...',
             text: 'You cannot select a future date.'
         });
-        setDateToInput(this, currentDate); 
+        setDateToInput(this, currentDate);
     } else if (selectedDate < fromDate) {
         Swal.fire({
             icon: 'error',
@@ -874,7 +874,7 @@ document.getElementById('fromDate_range').addEventListener('change', function() 
             title: 'Oops...',
             text: 'You cannot select a future date.'
         });
-        setDateToInput(this, currentDate); 
+        setDateToInput(this, currentDate);
     } else if (toDate < selectedDate) {
         Swal.fire({
             icon: 'error',
