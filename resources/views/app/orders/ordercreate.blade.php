@@ -157,6 +157,8 @@
                 transform: scale(1);
       }
     }
+
+  
 </style>
 <div class="container-fluid mt-2">
     <div class="frame d-flex align-items-center justify-content-center" style="height: 100%; width: 100%;">
@@ -180,11 +182,13 @@
                             data-parsley-trigger="focusout keyup"
                             maxlength="20">
                         </div>
-                {{--new changes--}}
+                       {{--new changes--}}
                         <div class="form-group col-lg-3 mb-0 pb-0">
-                    <label for="order_date" class="font-weight-bold">Order Received Date and Time<span style="color:red;">*</span></label>
+                            <label for="order_date" class="font-weight-bold">Order Received Date and Time<span style="color:red;">*</span></label>
                             <br>
-                    <input type="datetime-local" id="order_date" class="form-control" step="1" name="order_date" required data-parsley-trigger="focusout keyup" data-parsley-error-message="Order Received Date and Time should not be empty" format="MM-DD-YYYY THH:mm" hour24="true">
+                            <div class="input-container">
+                            <input type="datetime-local" id="order_date" class="form-control" step="1" name="order_date" required data-parsley-trigger="focusout keyup" data-parsley-error-message="Order Received Date and Time should not be empty" format="MM-DD-YYYY THH:mm" hour24="true">
+                            </div>
                         </div>
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Product<span style="color:red;">*</span></label><br>
@@ -382,6 +386,80 @@
         @endif
     });
 
+    document.getElementById('order_date').addEventListener('copy', function(event) {
+    var dateValue = this.value;
+
+    if (dateValue) {
+        var date = new Date(dateValue);
+
+        // Extract date and time components
+        var month = ('0' + (date.getMonth() + 1)).slice(-2);
+        var day = ('0' + date.getDate()).slice(-2);
+        var year = date.getFullYear();
+        var hours24 = date.getHours();
+        var minutes = ('0' + date.getMinutes()).slice(-2);
+        var seconds = ('0' + date.getSeconds()).slice(-2);
+
+        // Convert to 12-hour format
+        var ampm = hours24 >= 12 ? 'PM' : 'AM';
+        var hours12 = hours24 % 12;
+        hours12 = hours12 ? hours12 : 12; // the hour '0' should be '12'
+        hours12 = ('0' + hours12).slice(-2);
+
+        // Construct the formatted date string
+        var formattedDate = `${month}-${day}-${year} ${hours12}:${minutes}:${seconds} ${ampm}`;
+
+        // Set the clipboard data
+        event.clipboardData.setData('text/plain', formattedDate);
+        event.preventDefault(); // Prevent the default copy action
+    }
+});
+
+document.getElementById('order_date').addEventListener('paste', function(event) {
+    event.preventDefault();
+
+    // Get the pasted data
+    var pastedData = event.clipboardData.getData('text');
+    
+    // Convert the pasted data to the format YYYY-MM-DDTHH:MM
+    var parsedDate = parseDate(pastedData);
+
+    if (parsedDate) {
+        // Set the formatted date to the input field
+        this.value = parsedDate;
+    } else {
+        alert('The pasted date format is invalid.');
+    }
+});
+
+function parseDate(dateString) {
+    // Example input format: "08-08-2024 02:18:37 PM"
+    var datePattern = /(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2}) (AM|PM)/;
+    var match = dateString.match(datePattern);
+
+    if (match) {
+        var month = match[1];
+        var day = match[2];
+        var year = match[3];
+        var hours = parseInt(match[4], 10);
+        var minutes = match[5];
+        var seconds = match[6];
+        var ampm = match[7];
+        
+        // Convert 12-hour format to 24-hour format
+        if (ampm === 'PM' && hours !== 12) hours += 12;
+        if (ampm === 'AM' && hours === 12) hours = 0;
+
+        // Pad single digit hours and minutes
+        hours = ('0' + hours).slice(-2);
+        minutes = ('0' + minutes).slice(-2);
+        seconds = ('0' + seconds).slice(-2);
+
+        // Return the formatted string for the datetime-local input
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    return null;
+}
 
 // const orderDateInput = document.getElementById('order_date');
 
