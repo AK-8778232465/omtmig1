@@ -464,8 +464,8 @@ public function orderTimeTaken(Request $request) {
     $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use ($fromDate, $toDate) {
     
             $userDurations = [
-                'Emp ID' => $orders->first()->empid,
-                'Users' => $orders->first()->username,
+            'Emp ID' => $orders->first()->empid,
+            'Users' => $orders->first()->username,
             'Assigned Orders' => $orders->count(),
             'WIP' => ['count' => 0, 'time' => 0],
             'COVERSHEET PRP' => ['count' => 0, 'time' => 0],
