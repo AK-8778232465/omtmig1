@@ -856,7 +856,7 @@ function wipTimeTaken_datatable() {
     var toDate = $('#toDate_range').val();
     var client_id = $('#client_id_dcf').val();
     var project_id = $('#project_id_dcf').val();
-    // var selectedDateFilter = $('#selectedDateFilter').val();
+    var selectedDateFilter = $('#selectedDateFilter').val();
 
     $('#timetaken_datatable').DataTable({
         destroy: true,
@@ -865,13 +865,13 @@ function wipTimeTaken_datatable() {
         ajax: {
             url: "{{ route('get_timetaken') }}",
             type: 'POST',
-            data: {
-                    toDate_range: toDate,
-                    fromDate_range: fromDate,
-                    client_id: client_id,
-                    project_id: project_id,
-                    selectedDateFilter : selectedDateFilter,
-                    _token: '{{ csrf_token() }}'
+            data: function(d) {
+                d.toDate_range = toDate;
+                d.fromDate_range = fromDate;
+                d.client_id = client_id;
+                d.project_id = project_id;
+                d.selectedDateFilter = selectedDateFilter;
+                d._token = '{{ csrf_token() }}';
             },
             dataSrc: 'data'
         },
