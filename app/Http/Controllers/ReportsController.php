@@ -257,8 +257,7 @@ private function getProcessIdsBasedOnUserRole($user)
         return response()->json($cities);
     }
 
-
-    public function get_timetaken(Request $request)
+public function get_timetaken(Request $request)
     {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
@@ -437,7 +436,6 @@ public function orderTimeTaken(Request $request) {
                 'oms_users.username as username',
                 'oms_order_creations.id as orderid'
             )
-            // ->where('oms_order_creations.status_id', 5)
             ->whereNotNull('assignee_user_id')
             ->where('oms_order_creations.is_active', 1)
             ->where('stl_client.is_approved', 1)
@@ -461,48 +459,47 @@ public function orderTimeTaken(Request $request) {
             $statusCountsQuery->whereIn('stl_item_description.client_id', $clientId);
         }
     
+    $statusCounts = $statusCountsQuery->get();
 
+    $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use ($fromDate, $toDate) {
     
-      
-        $statusCounts = $statusCountsQuery->get();
-    
-        $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) {
             $userDurations = [
                 'Emp ID' => $orders->first()->empid,
                 'Users' => $orders->first()->username,
-                'NO OF ORDERS' => $orders->count(),
-                'WIP' => 0,
-                'COVERSHEET PRP' => 0,
-                'CLARIFICATION' => 0,
-                'SEND FOR QC' => 0,
-                'HOLD' => 0,
-                'COMPLETED' => 0,
-                'COMPLETED_AVG' => 0
+            'Assigned Orders' => $orders->count(),
+            'WIP' => ['count' => 0, 'time' => 0],
+            'COVERSHEET PRP' => ['count' => 0, 'time' => 0],
+            'CLARIFICATION' => ['count' => 0, 'time' => 0],
+            'SEND FOR QC' => ['count' => 0, 'time' => 0],
             ];
     
             foreach ($orders as $order) {
                 $orderStatusHistory = DB::table('order_status_history')
                     ->where('order_id', $order->orderid)
-                    ->orderBy('created_at')
+                ->orderBy('created_at', 'desc')
+                ->get();
+            $getFirstWipStatusHistory = DB::table('order_status_history')
+                ->where('order_id', $order->orderid)
+                ->orderBy('created_at', 'asc')
                     ->get();
     
-                $statusOrder = [1, 13, 14, 4, 2, 5];
+            $statusOrder = [1, 13, 14, 4];
                 $statusDurations = [
                     1 => 0,
                     13 => 0,
                     14 => 0,
                     4 => 0,
-                    2 => 0,
-                    5 => 0,
                 ];
     
                 for ($i = 0; $i < count($statusOrder) - 1; $i++) {
                     $currentStatus = $statusOrder[$i];
                     $nextStatus = $statusOrder[$i + 1];
     
-                    $currentStatusEntry = $orderStatusHistory->firstWhere('status_id', $currentStatus);
+                $currentStatusEntry = $getFirstWipStatusHistory->firstWhere('status_id', $currentStatus);
     
                     if ($currentStatusEntry) {
+                    $userDurations[$this->getStatusLabel($currentStatus)]['count']++;
+
                         $nextStatusEntry = $orderStatusHistory->firstWhere('status_id', $nextStatus);
     
                         if (!$nextStatusEntry) {
@@ -517,43 +514,33 @@ public function orderTimeTaken(Request $request) {
                         if ($nextStatusEntry) {
                             $duration = strtotime($nextStatusEntry->created_at) - strtotime($currentStatusEntry->created_at);
                             $statusDurations[$currentStatus] += $duration;
+                        $userDurations[$this->getStatusLabel($currentStatus)]['time'] += $duration;
+                    }
                         }
                     }
                 }
     
-                $userDurations['WIP'] += $statusDurations[1];
-                $userDurations['COVERSHEET PRP'] += $statusDurations[13];
-                $userDurations['CLARIFICATION'] += $statusDurations[14];
-                $userDurations['SEND FOR QC'] += $statusDurations[4];
-                $userDurations['HOLD'] += $statusDurations[2];
-                $userDurations['COMPLETED'] += $statusDurations[5];
+        foreach ($userDurations as $status => &$data) {
+            if (is_array($data)) {
+                $data['time'] = gmdate('H:i:s', $data['time']);
+            }
             }
 
-    
-            $userDurations['COMPLETED_AVG'] = ($userDurations['WIP'] + $userDurations['COVERSHEET PRP'] + $userDurations['CLARIFICATION'] + $userDurations['SEND FOR QC'] + $userDurations['HOLD']) / 5;
-            $totalDuration = $userDurations['WIP'] + $userDurations['COVERSHEET PRP'] + $userDurations['CLARIFICATION'] + $userDurations['SEND FOR QC'] + $userDurations['HOLD'];
-
-            $userDurations['WIP'] = gmdate('H:i:s', $userDurations['WIP']);
-            $userDurations['COVERSHEET PRP'] = gmdate('H:i:s', $userDurations['COVERSHEET PRP']);
-            $userDurations['CLARIFICATION'] = gmdate('H:i:s', $userDurations['CLARIFICATION']);
-            $userDurations['SEND FOR QC'] = gmdate('H:i:s', $userDurations['SEND FOR QC']);
-            $userDurations['HOLD'] = gmdate('H:i:s', $userDurations['HOLD']);
-            $userDurations['COMPLETED'] = gmdate('H:i:s', $totalDuration);
-            $userDurations['COMPLETED_AVG'] = gmdate('H:i:s', $userDurations['COMPLETED_AVG']);
-    
             return $userDurations;
         })->values();
     
         return Datatables::of($dataForDataTables)->toJson();
-    }
+}
 
-    
-    
+private function getStatusLabel($statusId) {
+    $statusLabels = [
+        1 => 'WIP',
+        13 => 'COVERSHEET PRP',
+        14 => 'CLARIFICATION',
+        4 => 'SEND FOR QC',
+    ];
 
-    
-
-    
-
-
+    return $statusLabels[$statusId] ?? 'UNKNOWN STATUS';
+}
 
 }
