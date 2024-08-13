@@ -6,7 +6,7 @@
 @section('content')
 <style>
 
-        * {
+    * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
@@ -16,34 +16,34 @@
         top: 10%;
         height: 100%;
         padding: 20px;
-    }
+        }
     .reports{
         padding-top: 1rem;
     }
 
 
     .left-menu h6 {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333333;
-    border-bottom: 1px solid #e0e0e0;
-    margin-bottom: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333333;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 10px;
     }
 
     .left-menu ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
     }
 
     .left-menu li {
-    padding: 8px 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+        padding: 8px 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 
     .left-menu li:hover {
-    background-color: #d1d0d0;
+        background-color: #d1d0d0;
     }
 
     @keyframes fadeIn {
@@ -63,6 +63,58 @@
     background-color: #28a745;
     color: white;
 }
+
+
+#customfromRange {
+    flex-wrap: wrap;
+    align-items: center; /* Align items vertically centered */
+    gap: 15px; /* Space between items */
+}
+
+#customfromRange label {
+    font-weight: bold;
+    color: #007bff; /* Change to your preferred color */
+}
+
+#customfromRange input[type="date"] {
+    border: 1px solid #007bff; /* Match the border color with the label color */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+#customfromRange .input-group-text {
+    font-weight: bold;
+    color: #007bff; /* Change to your preferred color */
+}
+
+
+#customfromRange .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between label and input */
+}
+
+#customToRange {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* Align items vertically centered */
+    gap: 15px; /* Space between items */
+}
+
+
+#customToRange .input-group-text {
+    font-weight: bold;
+    color: #007bff;
+     /* Change to your preferred color */
+}
+
+#customToRange input[type="date"] {
+    border: 1px solid #007bff; /* Match the border color with the label color */
+    padding: 5px;
+    border-radius: 4px;
+    width: 100px;
+}
+
 </style>
 <div class="container-fluid d-flex reports">
     <div class="col-md-2 text-center left-menu">
@@ -70,9 +122,9 @@
         <ul>
             <li id="userwise-details" class="report-item active">Userwise Details</li>
             <li id="orderwise-details" class="report-item">Orderwise Details</li>
-            <li id="clientwise-details" class="report-item">Clientwise Details</li>
+            {{-- <li id="timetaken-details" class="report-item">Average Time Taken</li>
             <li id="txn-revenue-details" class="report-item">TXN Revenue Details</li>
-            <li id="fte-revenue-details" class="report-item">FTE Revenue Details</li>
+            <li id="fte-revenue-details" class="report-item">FTE Revenue Details</li> --}}
         </ul>
     </div>
 
@@ -80,24 +132,42 @@
         <div class="col-md-9 row justify-content-center">
             <div class="card">
                 <div class="card-body" id="reports-content mt-1">
-                    <h5 id="reports-heading">Reports - Userwise Reports</h5>
+                    <h5 id="reports-heading">Reports - Userwise Details</h5>
                 </div>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="fromDate_dcf">From Date</label>
-                    <input type="date" class="form-control" id="fromDate_dcf" name="fromDate_dcf">
+            <div class="col-md-4" style="width: 350px!important;">
+                <div class="form-group" >
+                    <label for="dateFilter" required>Selected received date range:</label>
+                    <select class="form-control" style=" width: 250px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
+                        <option value="" >Select Date Range</option>
+                        <option value="last_week">Last Week</option>
+                        <option value="current_week">current week</option>
+                        <option value="last_month">Last Month</option>
+                        <option value="current_month" selected>Current Month</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <div class="d-flex">
+                        <div class="col-md-6 mt-3 p-0 m-0"  id="customfromRange" >
+                            <div class="input-group">
+                                <span class="input-group-text">From:</span>
+                                <input type="date" class="form-control" id="fromDate_range">
+                            </div>
+                        </div>
+
+                    <div class="col-md-6 mt-3 " id="customToRange" >
+                        <div class="input-group">
+                            <span class="input-group-text">To:</span>
+                            <input type="date" class="form-control" id="toDate_range">
+                        </div>
+                    </div>
+                    <b class="mt-0" id="selectedDate"></b>
                 </div>
             </div>
             <div class="col-md-2">
-                <div class="form-group">
-                    <label for="toDate_dcf">To Date</label>
-                    <input type="date" class="form-control" id="toDate_dcf" name="toDate_dcf">
-                </div>
-            </div>
-            <div class="col-md-3">
                 <div class="form-group">
                     <label for="client">Client</label>
                     <select class="form-control select2-basic-multiple" name="dcf_client_id[]" id="client_id_dcf" multiple="multiple">
@@ -109,7 +179,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <div class="form-group">
                     <label for="project">Product</label>
                     <select class="form-control select2-basic-multiple" style="width:100%" name="dcf_project_id[]" id="project_id_dcf" multiple="multiple">
@@ -120,10 +190,14 @@
             <div class="col-md-2 mt-4">
                 <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
             </div>
-            <div class="card col-md-9 mt-5 tabledetails " id="userwise_table" style="font-size: 12px;">
-                <h4 class="text-center mt-3" >Userwise Details</h4>
+        </div>
+        <div class="card col-md-10 mt-5 tabledetails" id="userwise_table" style="font-size: 12px;">
+            <h4 class="text-center mt-3">Userwise Details</h4>
                 <div class="card-body">
                     <div class="p-0">
+                    <div class="order-count mb-3" style="font-size: 14px; font-weight: bold;">
+                        <span><strong>Total No of users:</strong> <span id="order-count" style="font-weight: normal;">0</span></span>
+                    </div>
                         <table id="userwise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
                                 <tr>
@@ -147,6 +221,10 @@
             <div class="card col-md-10 mt-5 newreports" id="newreports_table" style="font-size: 12px;">
                 <h4 class="text-center mt-3">Orderwise Details</h4>
                 <div class="card-body">
+                <div class="p-0">
+                    <div class="order-count mb-3" style="font-size: 14px; font-weight: bold;">
+                        <span><strong>Total No of Orders:</strong> <span id="order-count-newreports" style="font-weight: normal;">0</span></span>
+                    </div>
                     <div class="table-responsive">
                         <table id="newreports_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
@@ -155,7 +233,7 @@
                                     <th width="11%">Product Type</th>
                                     <th width="11%">Order Received</th>
                                     <th width="11%">Production Date</th>
-                                    <th width="11%">Order Number</th>
+                                    <th width="11%">Order Id</th>
                                     <th width="11%">State</th>
                                     <th width="11%">County</th>
                                     <th width="11%">Status</th>
@@ -176,11 +254,184 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
 <script>
+
+$(document).ready(function() {
+        $('#orderwise_timetaken_datatable').DataTable();
+    });
+
+let selectedDateFilter = '';
+document.addEventListener('DOMContentLoaded', function() {
+    selectDateFilter('');
+});
+function selectDateFilter(value) {
+    let dateDisplay = document.getElementById('selectedDate');
+    let customRangeDiv1 = document.getElementById('customfromRange');
+    let customRangeDiv2 = document.getElementById('customToRange');
+    let fromDateInput = document.getElementById('fromDate_range');
+    let toDateInput = document.getElementById('toDate_range');
+
+    // Hide custom date range by default
+    customRangeDiv1.style.display = 'none';
+    customRangeDiv2.style.display = 'none';
+
+    // Clear the custom date inputs if changing to a predefined date range
+    if (value !== 'custom') {
+        fromDateInput.value = '';
+        toDateInput.value = '';
+    }
+
+    switch (value) {
+    case 'last_week':
+        selectedDateFilter = getLastWeekDate();
+        break;
+    case 'current_week':
+        selectedDateFilter = getCurrentWeekDate();
+        break;
+    case 'current_month':
+        selectedDateFilter = getCurrentMonthDate();
+        break;
+    case 'last_month':
+        selectedDateFilter = getLastMonthDate();
+        break;
+    case 'yearly':
+        selectedDateFilter = getYearlyDate();
+        break;
+    case 'custom':
+        selectedDateFilter = '';
+        customRangeDiv1.style.display = 'block';
+        customRangeDiv2.style.display = 'block';
+        break;
+    default:
+        selectedDateFilter = getCurrentMonthDate();
+        value = 'current_month';
+}
+
+    dateDisplay.textContent = selectedDateFilter;
+}
+function getTodayDate() {
+    let StartDate = new Date();
+    return `Selected: ${formatDate(StartDate)}`;
+}
+
+function getYesterdayDate() {
+    let StartDate = new Date();
+    StartDate.setDate(StartDate.getDate() - 1);
+    return `Selected: ${formatDate(StartDate)}`;
+}
+
+
+function getLastWeekDate() {
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${month}-${day}-${year}`;
+    }
+
+    let today = new Date();
+    let dayOfWeek = today.getDay();
+    let currentWeekStart = new Date(today);
+    currentWeekStart.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+    let StartDate = new Date(currentWeekStart);
+    StartDate.setDate(currentWeekStart.getDate() - 7);
+    let EndDate = new Date(StartDate);
+    EndDate.setDate(StartDate.getDate() + 6);
+    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+function getCurrentMonthDate() {
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${month}-${day}-${year}`;
+}
+
+let today = new Date();
+
+let StartDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+let endDateOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+let EndDate = today > endDateOfMonth ? endDateOfMonth : today;
+
+return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+function getLastMonthDate() {
+    let today = new Date();
+    let StartDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    let EndDate = new Date(today.getFullYear(), today.getMonth(), 0);
+    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+function getCurrentWeekDate() {
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${month}-${day}-${year}`;
+}
+let EndDate = new Date();
+let dayOfWeek = EndDate.getDay(); // Sunday is 0, Monday is 1, ..., Saturday is 6
+let StartDate = new Date(EndDate);
+StartDate.setDate(EndDate.getDate() - dayOfWeek + 1);
+if (dayOfWeek === 0) {
+    StartDate.setDate(StartDate.getDate() - 6);
+}
+return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+
+function getYearlyDate() {
+    let today = new Date();
+    let startOfYear = new Date(today.getFullYear(), 0, 1);
+    let endOfYear = today; // Set endOfYear to today's date
+
+    return `Selected: ${formatDate(startOfYear)} to ${formatDate(endOfYear)}`;
+}
+
+// Example formatDate function to format dates as 'YYYY-MM-DD'
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+
+function formatDate(date) {
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    return `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}-${year}`;
+
+    var customRangeDiv1 = document.getElementById('customfromRange');
+    var customRangeDiv2 = document.getElementById('customToRange');
+
+
+    // Hide customRangeDiv by default
+    customRangeDiv1.style.display = 'none';
+    customRangeDiv2.style.display = 'none';
+
+
+    switch (value) {
+        case 'custom':
+            customRangeDiv1.style.display = 'block';
+            customRangeDiv2.style.display = 'block';
+
+            break;
+        default:
+            resetDateInputs();
+            break;
+    }
+}
+
 function newreports() {
-        var fromDate = $('#fromDate_dcf').val();
-        var toDate = $('#toDate_dcf').val();
-        var client_id = $('#client_id_dcf').val();
-        var project_id = $('#project_id_dcf').val();
+    var fromDate = $('#fromDate_range').val();
+    var toDate = $('#toDate_range').val();
+    var client_id = $('#client_id_dcf').val();
+    var project_id = $('#project_id_dcf').val();
 
     var table = $('#newreports_datatable').DataTable({
         destroy: true,
@@ -190,13 +441,23 @@ function newreports() {
             url: "{{ route('newreports') }}",
             type: 'POST',
             data: function(d) {
-                d.to_date = toDate;
-                d.from_date = fromDate;
+                d.fromDate_range  = fromDate;
+                d.toDate_range = toDate;
                 d.client_id = client_id;
                 d.project_id = project_id;
+                d.selectedDateFilter = selectedDateFilter;
                 d._token = '{{ csrf_token() }}';
             },
-            dataSrc: 'data'
+            dataSrc: function(response) {
+                // Calculate total number of orders
+                var totalOrders = response.recordsTotal; // Use recordsTotal from server response
+
+                // Update the total orders count
+                $('#order-count-newreports').text(totalOrders);
+
+                // Return data for DataTables
+                return response.data;
+            }
         },
         columns: [
             {
@@ -240,10 +501,11 @@ function newreports() {
                         url: "{{ route('newreports') }}",
                         type: 'POST',
                         data: {
-                            to_date: toDate,
-                            from_date: fromDate,
+                            toDate_range: toDate,
+                            fromDate_range: fromDate,
                             client_id: client_id,
                             project_id: project_id,
+                            selectedDateFilter: selectedDateFilter,
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
@@ -319,82 +581,50 @@ $('#newreports_datatable').on('draw.dt', function () {
         });
     }
 
-
-// function userwise_datatable(fromDate, toDate, client_id, projectId){
-//         fromDate = $('#fromDate_dcf').val();
-//         toDate = $('#toDate_dcf').val();
-//         client_id = $('#client_id_dcf').val();
-//         project_id = $('#project_id_dcf').val();
-
-
-//         datatable = $('#userwise_datatable').DataTable({
-//             destroy: true,
-//             processing: true,
-//             serverSide: true,
-//             ajax: {
-//                 url: "{{ route('userwise_count') }}",
-//                 type: 'POST',
-//                 data: function(d) {
-//                         d.to_date = toDate;
-//                         d.from_date = fromDate;
-//                         d.client_id = client_id;
-//                         d.project_id = project_id;
-//                         d._token = '{{csrf_token()}}';
-//                     },
-//                 dataSrc: 'data'
-//             },
-//             columns: [
-//                 { data: 'userinfo', name: 'userinfo', class: 'text-left' },
-//                 { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
-//                 { data: 'status_13', name: 'status_13' },
-//                 { data: 'status_14', name: 'status_14' },
-//                 { data: 'status_4', name: 'status_4' },
-//                 { data: 'status_2', name: 'status_2' },
-//                 { data: 'status_3', name: 'status_3' },
-//                 { data: 'status_5', name: 'status_5' },
-//                 { data: 'All', name: 'All' },
-//             ],
-//             dom: 'l<"toolbar">Bfrtip',
-//         buttons: [
-//             'excel'
-//         ],
-//         });
-//     }
-
-function userwise_datatable() {
-    var fromDate = $('#fromDate_dcf').val();
-    var toDate = $('#toDate_dcf').val();
+    function userwise_datatable() {
+    var fromDate =  $('#fromDate_range').val();
+    var toDate = $('#toDate_range').val();
     var client_id = $('#client_id_dcf').val();
     var project_id = $('#project_id_dcf').val();
 
     var table = $('#userwise_datatable').DataTable({
-            destroy: true,
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('userwise_count') }}",
-                type: 'POST',
-                data: function(d) {
-                        d.to_date = toDate;
-                        d.from_date = fromDate;
-                        d.client_id = client_id;
-                        d.project_id = project_id;
+        destroy: true,
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ route('userwise_count') }}",
+            type: 'POST',
+            data: function(d) {
+                d.toDate_range = toDate;
+                d.fromDate_range = fromDate;
+                d.client_id = client_id;
+                d.project_id = project_id;
+                d.selectedDateFilter = selectedDateFilter;
                 d._token = '{{ csrf_token() }}';
-                    },
-                dataSrc: 'data'
             },
-            columns: [
-                { data: 'userinfo', name: 'userinfo', class: 'text-left' },
-                { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
-                { data: 'status_13', name: 'status_13' },
-                { data: 'status_14', name: 'status_14' },
-                { data: 'status_4', name: 'status_4' },
-                { data: 'status_2', name: 'status_2' },
-                { data: 'status_3', name: 'status_3' },
-                { data: 'status_5', name: 'status_5' },
+            dataSrc: function(response) {
+                // Calculate total unique users
+                var userCount = response.data.length;
+
+                // Update the total users count
+                $('#order-count').text(userCount);
+
+                // Return data for DataTables
+                return response.data;
+            }
+        },
+        columns: [
+            { data: 'userinfo', name: 'userinfo', class: 'text-left' },
+            { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
+            { data: 'status_13', name: 'status_13' },
+            { data: 'status_14', name: 'status_14' },
+            { data: 'status_4', name: 'status_4' },
+            { data: 'status_2', name: 'status_2' },
+            { data: 'status_3', name: 'status_3' },
+            { data: 'status_5', name: 'status_5' },
             { data: 'All', name: 'All' }
-            ],
-            dom: 'l<"toolbar">Bfrtip',
+        ],
+        dom: 'l<"toolbar">Bfrtip',
         buttons: [
             {
                 extend: 'excel',
@@ -403,10 +633,11 @@ function userwise_datatable() {
                         url: "{{ route('userwise_count') }}",
                         type: 'POST',
                         data: {
-                            to_date: toDate,
-                            from_date: fromDate,
+                            toDate_range: toDate,
+                            fromDate_range: fromDate,
                             client_id: client_id,
                             project_id: project_id,
+                            selectedDateFilter : selectedDateFilter,
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
@@ -430,8 +661,8 @@ function userwise_datatable() {
                             XLSX.utils.book_append_sheet(wb, ws, "Userwise Data");
                             XLSX.writeFile(wb, "userwise_data.xlsx");
                         }
-        });
-    }
+                    });
+                }
             }
         ]
     });
@@ -444,19 +675,37 @@ function userwise_datatable() {
 
 
 $("#filterButton").on('click', function() {
-    let fromDate = $("#fromDate_dcf").val();
-    let toDate = $("#toDate_dcf").val();
+    let fromDate = $("#fromDate_range").val();
+    let toDate = $("#toDate_range").val();
     let client_id = $("#client_id_dcf").val();
     let project_id = $("#project_id_dcf").val();
     userwise_datatable(fromDate, toDate, client_id, project_id);
     newreports(fromDate, toDate, client_id, project_id);
 
-    $('#client_id_dcf').on('change', function () {
-        console.log('2');
-       let getproject_id = $("#client_id_dcf").val();
-       $("#project_id_dcf").html('All');
-        fetchProData(getproject_id);
-    });
+    if (fromDate && toDate) {
+        userwise_datatable(fromDate, toDate, client_id, project_id);
+        newreports(fromDate, toDate, client_id, project_id);
+    } else if ($("#dateFilter").val() === 'custom') {
+        if (!fromDate || !toDate) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Date Range',
+                text: 'Please select both "From Date" and "To Date" before filtering.'
+            });
+        } else {
+            userwise_datatable(fromDate, toDate, client_id, project_id);
+            newreports(fromDate, toDate, client_id, project_id);
+        }
+    } else {
+        userwise_datatable(fromDate, toDate, client_id, project_id);
+        newreports(fromDate, toDate, client_id, project_id);
+    }
+});
+
+$('#client_id_dcf').on('change', function () {
+    let getproject_id = $("#client_id_dcf").val();
+    $("#project_id_dcf").html('<option selected value="All">All Products</option>');
+    fetchProData(getproject_id);
 });
 
 $(document).ready(function() {
@@ -472,7 +721,6 @@ $(document).ready(function() {
 
 
     $('#client_id_dcf').on('change', function () {
-        console.log('2');
        let getproject_id = $("#client_id_dcf").val();
        $("#project_id_dcf").html('All');
         fetchProData(getproject_id);
@@ -482,10 +730,10 @@ $(document).ready(function() {
 
 
 $(document).ready(function() {
-    function showReport(reportType) {
-        $('#reports-heading').text('Reports - ' + reportType);
+    function showReport(reportId) {
+        $('#reports-heading').text('Reports - ' + $('#' + reportId).text());
         $('.report-item').removeClass('active');
-        $('#' + reportType.toLowerCase().replace(/ /g, '-')).addClass('active');
+        $('#' + reportId).addClass('active');
 
         // Hide all tables initially
         $('#userwise_table').hide();
@@ -494,42 +742,50 @@ $(document).ready(function() {
         $('#txn_revenue_table').hide();
         $('#fte_revenue_table').hide();
 
-        // Show the selected table
-        if (reportType === 'Userwise Details') {
+        // Show the selected table based on ID
+        if (reportId === 'userwise-details') {
             $('#userwise_table').show();
-        } else if (reportType === 'Orderwise Details') {
+        } else if (reportId === 'orderwise-details') {
             $('#newreports_table').show();
-        } else if (reportType === 'Clientwise Details') {
-            $('#clientwise_table').show();
-        } else if (reportType === 'TXN Revenue Details') {
-            $('#txn_revenue_table').show();
-        } else if (reportType === 'FTE Revenue Details') {
-            $('#fte_revenue_table').show();
+        } else if (reportId === 'timetaken-details') {
+            $('#timetaken_table').show();
+            $('#orderwise_timetaken_table').show();
+        // } else if (reportId === 'txn-revenue-details') {
+        //     $('#txn_revenue_table').show();
+        // } else if (reportId === 'fte-revenue-details') {
+        //     $('#fte_revenue_table').show();
         }
     }
 
-    // Set default report
-    showReport('Userwise Details');
+    showReport('userwise-details');
 
     $('.report-item').click(function() {
-        var reportType = $(this).text();
-        showReport(reportType);
+        var reportId = $(this).attr('id');
+        showReport(reportId);
     });
 });
 
-let currentDate12 = new Date('<?php echo $currentDate; ?>');
-document.getElementById('toDate_dcf').valueAsDate = currentDate12;
-var currentDate = new Date('<?php echo $currentDate; ?>');
-var firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
-var formattedDate = firstDayOfMonth.toISOString().split('T')[0];
-document.getElementById('fromDate_dcf').value = formattedDate;
 function isFutureDate(date) {
-    var currentDate = new Date('<?php echo $currentDate; ?>');
-    return date > currentDate;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date > today;
 }
-document.getElementById('toDate_dcf').addEventListener('change', function() {
-    var selectedDate = new Date(this.value);
-    var fromDate = new Date(document.getElementById('fromDate_dcf').value);
+
+function normalizeDate(date) {
+    const normalized = new Date(date);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
+}
+
+function setDateToInput(inputElement, date) {
+    inputElement.value = date.toISOString().split('T')[0];
+}
+
+const currentDate = normalizeDate(new Date());
+
+document.getElementById('toDate_range').addEventListener('change', function() {
+    const selectedDate = normalizeDate(new Date(this.value));
+    const fromDate = normalizeDate(new Date(document.getElementById('fromDate_range').value || currentDate));
 
     if (isFutureDate(selectedDate)) {
         Swal.fire({
@@ -537,35 +793,35 @@ document.getElementById('toDate_dcf').addEventListener('change', function() {
             title: 'Oops...',
             text: 'You cannot select a future date.'
         });
-        this.valueAsDate = currentDate12;
+        setDateToInput(this, currentDate);
     } else if (selectedDate < fromDate) {
         Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'According to your "From Date", you cannot choose a oldestdate  than the "From Date".'
+            text: 'The "To Date" cannot be earlier than the "From Date".'
         });
-        this.valueAsDate = fromDate  ;
+        setDateToInput(this, fromDate); // Set the value back to the "From Date"
     }
 });
-document.getElementById('fromDate_dcf').addEventListener('change', function() {
-    var selectedDate = new Date(this.value);
-        if (isFutureDate(selectedDate)) {
+
+document.getElementById('fromDate_range').addEventListener('change', function() {
+    const selectedDate = normalizeDate(new Date(this.value));
+    const toDate = normalizeDate(new Date(document.getElementById('toDate_range').value || currentDate));
+
+    if (isFutureDate(selectedDate)) {
         Swal.fire({
             icon: 'error',
             title: 'Oops...',
             text: 'You cannot select a future date.'
         });
-        this.valueAsDate = currentDate12;
-    } else {
-        var toDate = new Date(document.getElementById('toDate_dcf').value);
-        if (toDate < selectedDate) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'According to your "From Date", you cannot choose a "To Date" earlier than the "From Date".'
-            });
-            document.getElementById('toDate_dcf').valueAsDate = selectedDate;
-        }
+        setDateToInput(this, currentDate);
+    } else if (toDate < selectedDate) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'The "From Date" cannot be later than the "To Date".'
+        });
+        setDateToInput(document.getElementById('toDate_range'), selectedDate);
     }
 });
 

@@ -12,6 +12,7 @@ use DB;
 use Illuminate\Support\Facades\Auth;
 use DataTables;
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 
 class ReportsController extends Controller
@@ -50,10 +51,33 @@ class ReportsController extends Controller
     {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
-        $fromDate = $request->input('from_date');
-        $toDate = $request->input('to_date');
         $client_id = $request->input('client_id');
         $project_id = $request->input('project_id');
+        $selectedDateFilter = $request->input('selectedDateFilter');
+        $fromDateRange = $request->input('fromDate_range');
+        $toDateRange = $request->input('toDate_range');
+
+        $fromDate = null;
+        $toDate = null;
+        if ($fromDateRange && $toDateRange) {
+            $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+            $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+        } else {
+            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                $fromDateText = trim($fromDateText);
+                $toDateText = trim($toDateText);
+                preg_match($datePattern, $fromDateText, $fromDateMatches);
+                preg_match($datePattern, $toDateText, $toDateMatches);
+                $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            } else {
+                preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                $toDate = $fromDate;
+            }
+        }
 
         $statusCountsQuery = OrderCreation::query();
         $statusCountsQuery
@@ -121,10 +145,33 @@ private function getProcessIdsBasedOnUserRole($user)
     {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
-        $fromDate = $request->input('from_date');
-        $toDate = $request->input('to_date');
         $client_id = $request->input('client_id');
         $project_id = $request->input('project_id');
+        $selectedDateFilter = $request->input('selectedDateFilter');
+        $fromDateRange = $request->input('fromDate_range');
+        $toDateRange = $request->input('toDate_range');
+
+        $fromDate = null;
+        $toDate = null;
+        if ($fromDateRange && $toDateRange) {
+            $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+            $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+        } else {
+            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                $fromDateText = trim($fromDateText);
+                $toDateText = trim($toDateText);
+                preg_match($datePattern, $fromDateText, $fromDateMatches);
+                preg_match($datePattern, $toDateText, $toDateMatches);
+                $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            } else {
+                preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                $toDate = $fromDate;
+            }
+        }
 
         $query = DB::table('oms_order_creations')
             ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
