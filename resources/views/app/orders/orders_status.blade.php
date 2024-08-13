@@ -187,22 +187,21 @@
             <div class="p-0 mx-2" id="filter_search">
                 {{-- <p style="text-align:right;color:Red;">*(While Searching OrderID, Use Comma separator)</p> --}}
                 <div class="row ml-5">
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label for="dateFilter"><b>Select Date Range:</b></label>
                             <select class="form-control" id="dateFilter" onchange="selectDateFilter(this.value)" style="border:1px solid blue;">
                                 <option value="" selected >Select Date Range</option>
-                                <option value="today">Today</option>
-                                <option value="yesterday">Yesterday</option>
-                                <option value="last_week">Last 7 Days</option>
-                                <option value="last_30_days">Last 30 Days</option>
-                                <option value="this_month">This Month</option>
-                                <option value="last_month">Last Month</option>
+                                <option value="last_week">Last week</option>
+                                <option value="this_week">Current week</option>
+                                <option value="last_30_days">Last Month</option>
+                                <option value="this_month">Current Month</option>
+                                <option value="yearly">Yearly</option>
                                 <option value="custom">Custom Range</option>
 
                             </select>
                         </div>
-                        <div class ="mt-0" id="selectedDate"></div>
+                        <b class ="mt-0 ml-2 mb-1" id="selectedDate"></b>
                     </div>
 
                     {{-- From to --}}
@@ -250,7 +249,7 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-2 mt-4">
+                    <div class="col-md-1 mt-4">
                         <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
                     </div>
                     
@@ -377,32 +376,33 @@ function selectDateFilter(value) {
     let dateDisplay = document.getElementById('selectedDate');
     let customRangeDiv1 = document.getElementById('customfromRange');
     let customRangeDiv2 = document.getElementById('customToRange');
+    let fromDateInput = $('#fromDate_range');
+    let toDateInput = $('#toDate_range');
 
     // Reset custom range inputs before processing new selection
+    fromDateInput.val('');
+    toDateInput.val('');
     customRangeDiv1.style.display = 'none';
     customRangeDiv2.style.display = 'none';
 
     switch (value) {
-        case 'today':
-            selectedDateFilter = getTodayDate();
-            break;
-        case 'yesterday':
-            selectedDateFilter = getYesterdayDate();
-            break;
         case 'last_week':
             selectedDateFilter = getLastWeekDate();
             break;
+        case 'this_week':
+            selectedDateFilter = getThisWeekDate();
+            break;
         case 'last_30_days':
-            selectedDateFilter = getLast30DaysDate();
+            selectedDateFilter = getLastMonthDate();
             break;
         case 'this_month':
             selectedDateFilter = getCurrentMonthDate();
             break;
-        case 'last_month':
-            selectedDateFilter = getLastMonthDate();
+        case 'yearly':
+            selectedDateFilter = getYearlyDate();
             break;
         case 'custom':
-            selectedDateFilter = ' '; // This will be handled separately
+            selectedDateFilter = ''; // This will be handled separately
             customRangeDiv1.style.display = 'block';
             customRangeDiv2.style.display = 'block'; // Show custom range inputs
             break;
@@ -416,40 +416,123 @@ function selectDateFilter(value) {
 // Example functions to get dynamic date ranges
 function getTodayDate() {
     let  StartDate = new Date();
-    return `Selected: ${formatDate(StartDate)}`;
+    return `Selected:${formatDate(StartDate)}`;
 }
 
 function getYesterdayDate() {
     let StartDate = new Date();
     StartDate.setDate(StartDate.getDate() - 1);
-    return `Selected: ${formatDate(StartDate)}`;
+    return `Selected:${formatDate(StartDate)}`;
 }
 
 function getLastWeekDate() {
+    // Helper function to format the date in YYYY-MM-DD format
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${month}-${day}-${year}`;
+    }
+
     let today = new Date();
-    let StartDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
-    let EndDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
-    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+    let dayOfWeek = today.getDay(); // Sunday is 0, Monday is 1, ..., Saturday is 6
+
+    // Calculate the start of the current week (Monday)
+    let currentWeekStart = new Date(today);
+    currentWeekStart.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+
+    // Calculate the start of the previous week
+    let StartDate = new Date(currentWeekStart);
+    StartDate.setDate(currentWeekStart.getDate() - 7);
+
+    // Calculate the end of the previous week (Sunday)
+    let EndDate = new Date(StartDate);
+    EndDate.setDate(StartDate.getDate() + 6);
+
+    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
 }
 
-function getLast30DaysDate() {
+function getYearlyDate() {
+    let today = new Date();
+    let startOfYear = new Date(today.getFullYear(), 0, 1);
+    let endOfYear = today; // Set endOfYear to today's date
+
+    return `Selected: ${formatDate(startOfYear)} to ${formatDate(endOfYear)}`;
+}
+
+// Example formatDate function to format dates as 'YYYY-MM-DD'
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+
+function getThisWeekDate() {
+
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${month}-${day}-${year}`;
+    }
+
     let EndDate = new Date();
-    let StartDate = new Date(EndDate.getFullYear(), EndDate.getMonth(), EndDate.getDate() - 30);
-    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
-}
+    let dayOfWeek = EndDate.getDay(); // Sunday is 0, Monday is 1, ..., Saturday is 6
 
-function getCurrentMonthDate() {
-    let today = new Date();
-    let StartDate = new Date(today.getFullYear(), today.getMonth(), 1);
-    let EndDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+
+    let StartDate = new Date(EndDate);
+    StartDate.setDate(EndDate.getDate() - dayOfWeek + 1);
+
+
+    if (dayOfWeek === 0) {
+        StartDate.setDate(StartDate.getDate() - 6);
+    }
+
+
+    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
 }
 
 function getLastMonthDate() {
+
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${month}-${day}-${year}`;
+    }
+
     let today = new Date();
-    let StartDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    let EndDate = new Date(today.getFullYear(), today.getMonth(), 0);
-    return `Selected: ${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+
+
+    let firstDayOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    let EndDate = new Date(firstDayOfCurrentMonth - 1);
+
+
+    let StartDate = new Date(EndDate.getFullYear(), EndDate.getMonth(), 1);
+
+    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
+}
+
+function getCurrentMonthDate() {
+
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${month}-${day}-${year}`;
+    }
+
+    let today = new Date();
+    let StartDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    let endDateOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    let EndDate = today > endDateOfMonth ? endDateOfMonth : today;
+
+    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
 }
 
 function formatDate(date) {
@@ -603,8 +686,8 @@ $(document).ready(function() {
                 d._token = '{{ csrf_token() }}';
                 d.status = defaultStatus;
                 d.searchType = $('#searchType').val();
-                d.searchInputs = $('#searchInputs').val(); 
-                d.selectedDateFilter = selectedDateFilter; 
+                d.searchInputs = $('#searchInputs').val();
+                d.selectedDateFilter = selectedDateFilter;
                d.fromDate_range = $('#fromDate_range').val();
                d.toDate_range = $('#toDate_range').val();
                d.sessionfilter = sessionfilter;
