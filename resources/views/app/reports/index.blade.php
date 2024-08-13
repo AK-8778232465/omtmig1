@@ -246,9 +246,10 @@
                     </div>
                 </div>
             </div>
+        </div>
 
             <div class="card col-md-10 mt-5 tabledetails " id="timetaken_table" style="font-size: 12px;">
-                <h4 class="text-center mt-3" >Userwise Details</h4>
+                <h4 class="text-center mt-3" >Order completion details</h4>
                 <div class="card-body">
                     <div class="p-0">
                         <table id="timetaken_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -657,8 +658,11 @@ $('#newreports_datatable').on('draw.dt', function () {
                 d._token = '{{ csrf_token() }}';
             },
             dataSrc: function(response) {
+                // Calculate total unique users
+                var userCount = response.data.length;
+
                 // Update the total users count
-                $('#order-count').text(response.recordsTotal);
+                $('#order-count').text(userCount);
 
                 // Return data for DataTables
                 return response.data;
@@ -730,8 +734,6 @@ $("#filterButton").on('click', function() {
     let toDate = $("#toDate_range").val();
     let client_id = $("#client_id_dcf").val();
     let project_id = $("#project_id_dcf").val();
-    userwise_datatable(fromDate, toDate, client_id, project_id);
-    newreports(fromDate, toDate, client_id, project_id);
 
     if (fromDate && toDate) {
         userwise_datatable(fromDate, toDate, client_id, project_id);
@@ -767,7 +769,6 @@ $('#client_id_dcf').on('change', function () {
 
 $(document).ready(function() {
     fetchProData('All');
-    console.log('1');
         $("#project_id").select2();
         $("#project_id_dcf").select2();
         $("#client_id_dcf").select2();
