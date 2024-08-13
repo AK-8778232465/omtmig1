@@ -603,11 +603,8 @@ $('#newreports_datatable').on('draw.dt', function () {
                 d._token = '{{ csrf_token() }}';
             },
             dataSrc: function(response) {
-                // Calculate total unique users
-                var userCount = response.data.length;
-
                 // Update the total users count
-                $('#order-count').text(userCount);
+                $('#order-count').text(response.recordsTotal);
 
                 // Return data for DataTables
                 return response.data;
