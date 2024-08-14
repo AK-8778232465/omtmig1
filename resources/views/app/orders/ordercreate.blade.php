@@ -386,81 +386,121 @@
         @endif
     });
 
+
+    // Event listener for copy action to format date string
     document.getElementById('order_date').addEventListener('copy', function(event) {
-    var dateValue = this.value;
+        var dateValue = this.value;
 
-    if (dateValue) {
-        var date = new Date(dateValue);
+        if (dateValue) {
+            var date = new Date(dateValue);
 
-        // Extract date and time components
-        var month = ('0' + (date.getMonth() + 1)).slice(-2);
-        var day = ('0' + date.getDate()).slice(-2);
-        var year = date.getFullYear();
-        var hours24 = date.getHours();
-        var minutes = ('0' + date.getMinutes()).slice(-2);
-        var seconds = ('0' + date.getSeconds()).slice(-2);
+            // Extract date and time components
+            var month = ('0' + (date.getMonth() + 1)).slice(-2);
+            var day = ('0' + date.getDate()).slice(-2);
+            var year = date.getFullYear();
+            var hours24 = date.getHours();
+            var minutes = ('0' + date.getMinutes()).slice(-2);
+            var seconds = ('0' + date.getSeconds()).slice(-2);
 
-        // Convert to 12-hour format
-        var ampm = hours24 >= 12 ? 'PM' : 'AM';
-        var hours12 = hours24 % 12;
-        hours12 = hours12 ? hours12 : 12; // the hour '0' should be '12'
-        hours12 = ('0' + hours12).slice(-2);
+            // Convert to 12-hour format
+            var ampm = hours24 >= 12 ? 'PM' : 'AM';
+            var hours12 = hours24 % 12;
+            hours12 = hours12 ? hours12 : 12; // the hour '0' should be '12'
+            hours12 = ('0' + hours12).slice(-2);
 
-        // Construct the formatted date string
-        var formattedDate = `${month}-${day}-${year} ${hours12}:${minutes}:${seconds} ${ampm}`;
+            // Construct the formatted date string
+            var formattedDate = `${month}-${day}-${year} ${hours12}:${minutes}:${seconds} ${ampm}`;
 
-        // Set the clipboard data
-        event.clipboardData.setData('text/plain', formattedDate);
-        event.preventDefault(); // Prevent the default copy action
-    }
-});
+            // Set the clipboard data
+            event.clipboardData.setData('text/plain', formattedDate);
+            event.preventDefault(); // Prevent the default copy action
+        }
+    });
 
-document.getElementById('order_date').addEventListener('paste', function(event) {
-    event.preventDefault();
+    // Event listener for paste action to validate the format
+    document.getElementById('order_date').addEventListener('paste', function(event) {
+        // Prevent the default paste action
+        event.preventDefault();
 
-    // Get the pasted data
-    var pastedData = event.clipboardData.getData('text');
-    
-    // Convert the pasted data to the format YYYY-MM-DDTHH:MM
-    var parsedDate = parseDate(pastedData);
-
-    if (parsedDate) {
-        // Set the formatted date to the input field
-        this.value = parsedDate;
-    } else {
-        alert('The pasted date format is invalid.');
-    }
-});
-
-function parseDate(dateString) {
-    // Example input format: "08-08-2024 02:18:37 PM"
-    var datePattern = /(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2}) (AM|PM)/;
-    var match = dateString.match(datePattern);
-
-    if (match) {
-        var month = match[1];
-        var day = match[2];
-        var year = match[3];
-        var hours = parseInt(match[4], 10);
-        var minutes = match[5];
-        var seconds = match[6];
-        var ampm = match[7];
+        // Get the pasted data
+        var pastedData = event.clipboardData.getData('text').trim();
         
-        // Convert 12-hour format to 24-hour format
-        if (ampm === 'PM' && hours !== 12) hours += 12;
-        if (ampm === 'AM' && hours === 12) hours = 0;
+        // Check if the pasted data matches the expected format
+        if (isValidFormat(pastedData)) {
+            var parsedDate = parseDate(pastedData);
 
-        // Pad single digit hours and minutes
-        hours = ('0' + hours).slice(-2);
-        minutes = ('0' + minutes).slice(-2);
-        seconds = ('0' + seconds).slice(-2);
+            if (parsedDate) {
+                var currentDate = new Date();
+                var pastedDateObject = new Date(parsedDate + ':00'); // Append seconds for full date-time
 
-        // Return the formatted string for the datetime-local input
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
+                // Check if the pasted date is in the future
+                if (pastedDateObject > currentDate) {
+                    alert('The pasted date is in the future date.');
+                } else {
+                    // Set the formatted date to the input field
+                    this.value = parsedDate;
+                }
+            } else {
+                alert('Error parsing date. Please use MM-DD-YYYY HH:MM:SS AM/PM format.');
+            }
+        } else {
+            alert('Invalid format. Please use MM-DD-YYYY HH:MM:SS AM/PM format.');
+        }
+    });
+
+    // Function to parse and format the pasted date string
+    function parseDate(dateString) {
+        // Example input format: "08-15-2024 12:11:37 PM"
+        var datePattern = /^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2}) (AM|PM)$/;
+        var match = dateString.match(datePattern);
+
+        if (match) {
+            var month = match[1];
+            var day = match[2];
+            var year = match[3];
+            var hours = parseInt(match[4], 10);
+            var minutes = match[5];
+            var seconds = match[6];
+            var ampm = match[7];
+            
+            // Convert 12-hour format to 24-hour format
+            if (ampm === 'PM' && hours !== 12) hours += 12;
+            if (ampm === 'AM' && hours === 12) hours = 0;
+
+            // Pad single digit hours and minutes
+            hours = ('0' + hours).slice(-2);
+            minutes = ('0' + minutes).slice(-2);
+            seconds = ('0' + seconds).slice(-2);
+
+            // Return the formatted string for the datetime-local input
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+        return null;
     }
-    return null;
-}
 
+    // Function to check if the date string matches the expected format
+    function isValidFormat(dateString) {
+        // Expected format: "MM-DD-YYYY HH:MM:SS AM/PM"
+        var datePattern = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2} (AM|PM)$/;
+        var isValid = datePattern.test(dateString);
+
+        if (!isValid) {
+            return false; // Invalid format if it doesn't match the pattern
+        }
+
+        // Additional check for valid month and day
+        var parts = dateString.split(' ');
+        var dateParts = parts[0].split('-');
+        var month = parseInt(dateParts[0], 10);
+        var day = parseInt(dateParts[1], 10);
+
+        // Validate month (1-12) and day (1-31)
+        if (month < 1 || month > 12 || day < 1 || day > 31) {
+            return false;
+        }
+
+        return true;
+    }
 // const orderDateInput = document.getElementById('order_date');
 
 document.getElementById('order_date').addEventListener('change', function() {
