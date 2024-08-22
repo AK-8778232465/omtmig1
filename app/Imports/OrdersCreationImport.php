@@ -95,7 +95,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
 
         if (!$order_date ) {
-            $data['comments'] = 'Invalid Data Format';
+            $data['comments'] = 'Invalid Date Format';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
@@ -142,25 +142,32 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             }
         }
 
-        // Status
         $Status = trim($row['Status']);
         if (!$Status) {
             $data['comments'] = 'Status should not be empty';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
+        }
+
+        if ($Status == 'WIP') {
+            $statusRecord = Status::where('status', $Status)->first();
+
+            if ($statusRecord) {
+                $Status = $statusRecord->id;
         } else {
-            $Status = Status::where('status', $Status)->first();
-            if (!$Status) {
-                $data['comments'] = 'Status not matched with database records';
+                $data['comments'] = 'The status WIP does not match the records in the database';
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;
                 return null;
             }
+        } else {
+            $data['comments'] = 'The status is not WIP';
+            OrderTemp::insert($data);
+            ++$this->unsuccess_rows;
+            return null;
         }
 
-
-        //  Assignee
         $assignee_user = trim($row['Emp ID-Order Assigned']);
         if ($assignee_user) {
             $assignee_user = User::where('emp_id', $assignee_user)->whereIn('user_type_id', [6,8])->first();
@@ -252,7 +259,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 'process_id' => $processOrg->id,
                 'state_id' => isset($state) ? $state->id : null,
                 'county_id' => isset($county) ? $county->id : null,
-                'status_id' => $Status->id,
+                'status_id' => $Status,
                 'assignee_user_id' => isset($assignee_user->id) ? $assignee_user->id : null,
                 'assignee_qa_id' => isset($assignee_qa->id) ? $assignee_qa->id : null,
                 'created_by' => $this->userid,

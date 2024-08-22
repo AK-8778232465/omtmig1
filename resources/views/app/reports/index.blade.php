@@ -56,12 +56,12 @@
 }
 .report-item:hover {
     background-color: #28a745;
-    color: white;
+    color: black;
     cursor: pointer;
 }
 .report-item.active {
     background-color: #28a745;
-    color: white;
+    color: black;
 }
 
 
@@ -115,16 +115,20 @@
     width: 100px;
 }
 
+    #orderwise_timetaken_datatable th {
+    border: 1px solid rgb(230, 230, 230); /* Light and slightly transparent cement color border */
+}
+
 </style>
 <div class="container-fluid d-flex reports">
     <div class="col-md-2 text-center left-menu">
         <h6 class="mt-2">List of Reports</h6>
-        <ul>
+        <ul style="padding-left: 0; text-align: left; list-style-type: none;">
             <li id="userwise-details" class="report-item active">Userwise Details</li>
             <li id="orderwise-details" class="report-item">Orderwise Details</li>
-            <li id="timetaken-details" class="report-item">Average Time Taken</li>
-            {{-- <li id="txn-revenue-details" class="report-item">TXN Revenue Details</li>
-            <li id="fte-revenue-details" class="report-item">FTE Revenue Details</li> --}}
+            <li id="ordercompletion-details" class="report-item">Order Completion Details</li>
+            <li id="orderprogress-details" class="report-item">Order Progress Details</li>
+            <li id="attendance-details" class="report-item">Attendance Details</li>
         </ul>
     </div>
 
@@ -136,7 +140,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="hidefilter">
             <div class="col-md-4" style="width: 350px!important;">
                 <div class="form-group" >
                     <label for="dateFilter" required>Selected received date range:</label>
@@ -191,6 +195,19 @@
                 <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
             </div>
         </div>
+        <div class="mb-4" id="datepicker">
+            <div class="col-3 mb-2" >
+                <div class="input-group">
+                    <div class="row">
+                        <span style="color: grey;">Select Date:</span>
+                        <input type="date" class="form-control" id="defultDate">
+                    </div>
+                    <div class="col-md-2 mt-3 p-3">
+                        <button type="submit" id="filterButton2" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="card col-md-10 mt-5 tabledetails" id="userwise_table" style="font-size: 12px;">
             <h4 class="text-center mt-3">Userwise Details</h4>
                 <div class="card-body">
@@ -217,13 +234,12 @@
                     </div>
                 </div>
             </div>
-
-            <div class="card col-md-10 mt-5 newreports" id="newreports_table" style="font-size: 12px;">
+            <div class="card col-md-10 mt-5 orderWise" id="newreports_table" style="font-size: 12px;">
                 <h4 class="text-center mt-3">Orderwise Details</h4>
                 <div class="card-body">
                 <div class="p-0">
                     <div class="order-count mb-3" style="font-size: 14px; font-weight: bold;">
-                        <span><strong>Total No of Orders:</strong> <span id="order-count-newreports" style="font-weight: normal;">0</span></span>
+                        <span><strong>Total No of Orders:</strong> <span id="order-count-orderWise" style="font-weight: normal;">0</span></span>
                     </div>
                     <div class="table-responsive">
                         <table id="newreports_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -249,14 +265,16 @@
         </div>
 
             <div class="card col-md-10 mt-5 tabledetails" id="timetaken_table" style="font-size: 12px;">
-                <h4 class="text-center mt-3" >Order completion details</h4>
+            <h4 class="text-center mt-3">Order completion details</h4>
                 <div class="card-body">
                     <div class="p-0">
+                    <div style="overflow-x: auto;">
                         <table id="timetaken_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
                                 <tr>
                                     <th width="12%">Emp ID</th>
                                     <th width="12%">Users</th>
+                                    <th width="12%">Product Type</th>
                                     <th width="12%">No Of Assigned Orders</th>
                                     <th width="12%">No Of Completed Orders</th>
                                     <th width="11%">Total Time Taken For Completed Orders</th>
@@ -268,15 +286,15 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="card col-md-10 mt-2 tabledetails d-none" id="orderwise_timetaken_table" style="font-size: 12px; overflow-x: auto;">
+        </div>
+        <div class="card col-md-10 mt-2 tabledetails" id="orderwise_timetaken_table" style="font-size: 12px; overflow-x: auto;">
                 <h4 class="text-center mt-3">Order Progress Details</h4>
                 <div class="card-body">
                     <div class="p-0">
-                        <table id="orderwise_timetaken_datatable" class="table table-bordered" style="border-collapse: collapse; width: 100%;">
-                            <thead class="text-center" style="font-size: 12px;">
+            <table id="orderwise_timetaken_datatable" class="table table-bordered" style="border-collapse: collapse; width: 100%; background-color: #f5f5f5;">
+                <thead class="text-center" style="font-size: 12px; background-color: ;">
                                 <tr>
-                                    <th colspan="3">Emp Details</th>
+                        <th colspan="4">Emp Details</th>
                                     <th colspan="2">WIP</th>
                                     <th colspan="2">Coversheet Prep</th>
                                     <th colspan="2">Clarification</th>
@@ -285,18 +303,36 @@
                                 <tr>
                                     <th>Emp ID</th>
                                     <th>User</th>
-                                    <th>Assigned Orders</th>
-                                    <th># of Orders Transferred</th>
+                        <th>Product Type</th>
+                        <th>No Assigned Orders</th>
+                        <th>No of Orders Transferred</th>
                                     <th>Time Taken</th>
-                                    <th># of Orders Transferred</th>
+                        <th>No of Orders Transferred</th>
                                     <th>Time Taken</th>
-                                    <th># of Orders Transferred</th>
+                        <th>No of Orders Transferred</th>
                                     <th>Time Taken</th>
-                                    <th># of Orders Transferred</th>
+                        <th>No of Orders Transferred</th>
                                     <th>Time Taken</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-center" style="font-size: 12px;"></tbody>
+                <tbody class="text-center" style="font-size: 12px; background-color: #ffffff;"></tbody>
+            </table>
+        </div>
+    </div>
+            </div>
+            <div class="card col-md-10 mt-2 tabledetails" id="attendance_report" style="font-size: 12px; overflow-x: auto;">
+                <h4 class="text-center mt-3">Attendance Report</h4>
+                <div class="card-body">
+                    <div class="p-0">
+                        <table id="attendance_datatable" class="table table-bordered" style="border-collapse: collapse; width: 100%; background-color: #f5f5f5;">
+                            <thead class="text-center" style="font-size: 12px; background-color: ;">
+                                <tr>
+                                    <th>Emp ID</th>
+                                    <th>Emp Name</th>
+                                    <th>Total Time Spent </th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center" style="font-size: 12px; background-color: #ffffff;"></tbody>
                         </table>
                     </div>
                 </div>
@@ -312,6 +348,7 @@
 
 $(document).ready(function() {
         $('#orderwise_timetaken_datatable').DataTable();
+        $('#filterButton2').click();
     });
 
 let selectedDateFilter = '';
@@ -482,7 +519,7 @@ function formatDate(date) {
     }
 }
 
-function newreports() {
+function orderWise() {
     var fromDate = $('#fromDate_range').val();
     var toDate = $('#toDate_range').val();
     var client_id = $('#client_id_dcf').val();
@@ -493,7 +530,7 @@ function newreports() {
         processing: true,
         serverSide: true,
         ajax: {
-            url: "{{ route('newreports') }}",
+            url: "{{ route('orderWise') }}",
             type: 'POST',
             data: function(d) {
                 d.fromDate_range  = fromDate;
@@ -508,7 +545,7 @@ function newreports() {
                 var totalOrders = response.recordsTotal; // Use recordsTotal from server response
 
                 // Update the total orders count
-                $('#order-count-newreports').text(totalOrders);
+                $('#order-count-orderWise').text(totalOrders);
 
                 // Return data for DataTables
                 return response.data;
@@ -553,7 +590,7 @@ function newreports() {
                 extend: 'excel',
                 action: function (e, dt, button, config) {
                     $.ajax({
-                        url: "{{ route('newreports') }}",
+                        url: "{{ route('orderWise') }}",
                         type: 'POST',
                         data: {
                             toDate_range: toDate,
@@ -583,7 +620,7 @@ function newreports() {
                             var wb = XLSX.utils.book_new();
                             var ws = XLSX.utils.aoa_to_sheet([headers].concat(exportData));
                             XLSX.utils.book_append_sheet(wb, ws, "New Reports");
-                            XLSX.writeFile(wb, "newreports.xlsx");
+                            XLSX.writeFile(wb, "orderWise.xlsx");
                         }
                     });
                 }
@@ -658,8 +695,11 @@ $('#newreports_datatable').on('draw.dt', function () {
                 d._token = '{{ csrf_token() }}';
             },
             dataSrc: function(response) {
+                // Calculate total unique users
+                var userCount = response.data.length;
+
                 // Update the total users count
-                $('#order-count').text(response.recordsTotal);
+                $('#order-count').text(userCount);
 
                 // Return data for DataTables
                 return response.data;
@@ -734,7 +774,7 @@ $("#filterButton").on('click', function() {
 
     if (fromDate && toDate) {
         userwise_datatable(fromDate, toDate, client_id, project_id);
-        newreports(fromDate, toDate, client_id, project_id);
+        orderWise(fromDate, toDate, client_id, project_id);
         userTimeTaken_datatable(fromDate, toDate, client_id, project_id);
         orderTimeTaken_datatable(fromDate, toDate, client_id, project_id);
     } else if ($("#dateFilter").val() === 'custom') {
@@ -746,13 +786,13 @@ $("#filterButton").on('click', function() {
             });
         } else {
             userwise_datatable(fromDate, toDate, client_id, project_id);
-            newreports(fromDate, toDate, client_id, project_id);
+            orderWise(fromDate, toDate, client_id, project_id);
             userTimeTaken_datatable(fromDate, toDate, client_id, project_id);
             orderTimeTaken_datatable(fromDate, toDate, client_id, project_id);
         }
     } else {
         userwise_datatable(fromDate, toDate, client_id, project_id);
-        newreports(fromDate, toDate, client_id, project_id);
+        orderWise(fromDate, toDate, client_id, project_id);
         userTimeTaken_datatable(fromDate, toDate, client_id, project_id);
         orderTimeTaken_datatable(fromDate, toDate, client_id, project_id);
     }
@@ -774,7 +814,8 @@ $(document).ready(function() {
     userwise_datatable();
     userTimeTaken_datatable();
     orderTimeTaken_datatable();
-    newreports();
+    attendance_report();
+    orderWise();
 
 
     $('#client_id_dcf').on('change', function () {
@@ -799,19 +840,33 @@ $(document).ready(function() {
         $('#txn_revenue_table').hide();
         $('#fte_revenue_table').hide();
         $('#orderwise_timetaken_table').hide();
+        $('#attendance_report').hide();
+        $('#datepicker').hide();
+
+
 
         // Show the selected table based on ID
         if (reportId === 'userwise-details') {
             $('#userwise_table').show();
+            $('#datepicker').hide();
+            $('#hidefilter').show();
         } else if (reportId === 'orderwise-details') {
             $('#newreports_table').show();
-        } else if (reportId === 'timetaken-details') {
+            $('#datepicker').hide();
+            $('#hidefilter').show();
+        } else if (reportId === 'ordercompletion-details') {
             $('#timetaken_table').show();
+            $('#datepicker').hide();
+            $('#hidefilter').show();
+        } else if (reportId === 'orderprogress-details') {
             $('#orderwise_timetaken_table').show();
-        // } else if (reportId === 'txn-revenue-details') {
-        //     $('#txn_revenue_table').show();
-        // } else if (reportId === 'fte-revenue-details') {
-        //     $('#fte_revenue_table').show();
+            $('#datepicker').hide();
+            $('#hidefilter').show();
+        } else if (reportId === 'attendance-details') {
+            $('#attendance_report').show();
+            $('#hidefilter').hide();
+            $('#datepicker').show();
+            $('#filterButton2').click();
         }
     }
 
@@ -905,11 +960,23 @@ function userTimeTaken_datatable() {
                 selectedDateFilter: selectedDateFilter,
                     _token: '{{ csrf_token() }}'
             },
-            dataSrc: 'data'
+            dataSrc: function (json) {
+                if (Array.isArray(project_id) && project_id.includes('All')) {
+                    json.data.forEach(function (item) {
+                        item.Product_Type = 'All Products';
+                    });
+                } else if (project_id === 'All') {
+                    json.data.forEach(function (item) {
+                        item.Product_Type = 'All';
+                    });
+                }
+                return json.data; 
+            },
         },
         columns: [
             { data: 'emp_id', name: 'emp_id', class: 'text-left' },
             { data: 'Users', name: 'Users', class: 'text-left' },
+            { data: 'Product_Type', name: 'Product_Type', class: 'text-left' },
             { data: 'NO_OF_ASSIGNED_ORDERS', name: 'NO_OF_ASSIGNED_ORDERS' },
             { data: 'NO_OF_COMPLETED_ORDERS', name: 'NO_OF_COMPLETED_ORDERS' },
             { data: 'TOTAL_TIME_TAKEN_FOR_COMPLETED_ORDERS', name: 'TOTAL_TIME_TAKEN_FOR_COMPLETED_ORDERS' },
@@ -917,7 +984,10 @@ function userTimeTaken_datatable() {
         ],
         dom: 'lBfrtip',
         buttons: [
-            'excel',
+            {
+                extend: 'excelHtml5',
+                title: 'ordercompletion details'  // Set the filename here
+            }
         ],
         lengthMenu: [ 10, 25, 50, 75, 100 ]
     });
@@ -946,15 +1016,22 @@ function orderTimeTaken_datatable() {
                 _token: '{{ csrf_token() }}'
             },
             dataSrc: function (json) {
-                return json.data; // Access the data array
+                if (Array.isArray(project_id) && project_id.includes('All')) {
+                    json.data.forEach(function (item) {
+                        item.Product_Type = 'All  Products';
+                    });
+                } else if (project_id === 'All') {
+                    json.data.forEach(function (item) {
+                        item.Product_Type = 'All';
+                    });
+                }
+                return json.data; 
             },
-            error: function (xhr, status, error) {
-                alert('Failed to load data. Please try again.');
-            }
         },
         columns: [
             { data: 'Emp ID', name: 'Emp ID', class: 'text-left' },
             { data: 'Users', name: 'Users', class: 'text-left' },
+            { data: 'Product_Type', name: 'Product_Type' },
             { data: 'Assigned Orders', name: 'Assigned Orders' },
             { data: 'WIP.count', name: 'WIP.count' },
             { data: 'WIP.time', name: 'WIP.time' },
@@ -964,6 +1041,65 @@ function orderTimeTaken_datatable() {
             { data: 'CLARIFICATION.time', name: 'CLARIFICATION.time' },
             { data: 'SEND FOR QC.count', name: 'SEND FOR QC.count' },
             { data: 'SEND FOR QC.time', name: 'SEND FOR QC.time' },
+        ],
+        dom: 'lBfrtip',
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                title: 'orderprogress details'  // Set the filename here
+            }
+        ],
+        lengthMenu: [10, 25, 50, 75, 100],
+        order: [[0, 'asc']]
+    });
+}
+
+$(document).ready(function() {
+    // Function to set the default date to today
+    function setDefaultDate() {
+        var today = new Date();
+        var yyyy = today.getFullYear();
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        var dd = String(today.getDate()).padStart(2, '0');
+        var todayFormatted = yyyy + '-' + mm + '-' + dd; // Format as yyyy-mm-dd
+
+        $("#defultDate").val(todayFormatted); // Set today's date in the input field
+    }
+
+    // Call the function to set the default date when the page loads
+    setDefaultDate();
+    var selectedDate = $('#defultDate').val(); // Capture the selected date
+    attendance_report(selectedDate);
+    // Event listener for the filter button click
+    $('#filterButton2').on('click', function () {
+        var selectedDate = $('#defultDate').val(); // Capture the selected date
+        attendance_report(selectedDate); // Pass the selected date to the function
+    });
+});
+
+function attendance_report(selectedDate) {
+    $('#attendance_datatable').DataTable({
+        destroy: true,
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ route('attendance_report') }}",
+            type: 'POST',
+            data: {
+                selectDate: selectedDate, // Send the selected date
+                _token: '{{ csrf_token() }}'
+            },
+            dataSrc: function (json) {
+                return json.data; // Access the data array
+            },
+            error: function (xhr, status, error) {
+                alert('Failed to load data. Please try again.');
+            }
+        },
+        columns: [
+            { data: 'Emp ID', name: 'Emp ID', class: 'text-left' },
+            { data: 'Emp Name', name: 'Emp Name', class: 'text-left' },
+            { data: 'Total Time Spent', name: 'Total Time Spent' },
         ],
         dom: 'lBfrtip',
         buttons: ['excel'],

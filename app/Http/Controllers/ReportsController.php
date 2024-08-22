@@ -142,7 +142,7 @@ private function getProcessIdsBasedOnUserRole($user)
         }
     }
     //new reports
-    public function newreports(Request $request)
+    public function orderWise(Request $request)
     {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
@@ -298,6 +298,8 @@ public function get_timetaken(Request $request)
                 'oms_users.id as userid',
                 'oms_users.emp_id as empid',
                 'oms_users.username as username',
+                'stl_item_description.process_name as process_name',
+                'stl_item_description.project_code as project_code',
                 'oms_order_creations.id as orderid'
             )
             ->whereNotNull('assignee_user_id')
@@ -322,10 +324,19 @@ public function get_timetaken(Request $request)
             $statusCountsQuery->whereIn('stl_item_description.client_id', $clientId);
         }
     
-        $statusCounts = $statusCountsQuery->get();
-    $statusCountsdetails = $statusCountsQuery->get();
+       
 
-    $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use($fromDate, $toDate){
+        if(!empty($projectId) && $projectId[0] !== 'All'){
+        $statusCounts = $statusCountsQuery->get();
+            $statusCounts = $statusCounts->groupBy('process_name');
+        }else{
+            $statusCounts = $statusCountsQuery->get();
+            $statusCounts = $statusCounts->groupBy('userid');
+        }
+
+        $dataForDataTables = $statusCounts->map(function ($orders, $userid) use($fromDate, $toDate, $projectId, $clientId){
+        $completedCount = 0;
+        if (!empty($projectId) && $projectId[0] !== 'All') {
     
             $completedCount = DB::table('oms_order_creations')
             ->whereDate('order_date', '>=', $fromDate)
@@ -333,8 +344,29 @@ public function get_timetaken(Request $request)
             ->where('oms_order_creations.is_active', 1)
                 ->where('status_id', 5)
                 ->where('assignee_user_id', $userid)
+                ->whereIn('oms_order_creations.process_id', $projectId)
                 ->count();
-    
+        }elseif(!empty($clientId) && $clientId[0] !== 'All') {
+            $completedCount = DB::table('oms_order_creations')
+                ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
+                ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+                ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+                ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
+                ->whereDate('oms_order_creations.order_date', '<=', $toDate)
+                ->where('oms_order_creations.is_active', 1)
+                ->where('oms_order_creations.status_id', 5)
+                ->where('oms_order_creations.assignee_user_id', $userid)
+                ->whereIn('stl_item_description.client_id', $clientId)
+                ->count();
+        }else{
+            $completedCount = DB::table('oms_order_creations')
+                ->whereDate('order_date', '>=', $fromDate)
+                ->whereDate('order_date', '<=', $toDate)
+                ->where('oms_order_creations.is_active', 1)
+                ->where('status_id', 5)
+                ->where('assignee_user_id', $userid)
+                ->count();
+        }
             $totalTimeTakenSeconds = 0;
             foreach ($orders as $order) {
             $orderStartTime = DB::table('order_status_history')
@@ -367,6 +399,7 @@ public function get_timetaken(Request $request)
             return [
                 'emp_id' => $orders->first()->empid,
                 'Users' => $orders->first()->username,
+                'Product_Type' => $orders->first()->project_code . ' (' . $orders->first()->process_name . ')',
             'NO_OF_ASSIGNED_ORDERS' => $orders->count(),
                 'NO_OF_COMPLETED_ORDERS' => $completedCount,
                 'TOTAL_TIME_TAKEN_FOR_COMPLETED_ORDERS' => $totalTimeTakenHours,
@@ -429,6 +462,8 @@ public function orderTimeTaken(Request $request) {
                 'oms_users.id as userid',
                 'oms_users.emp_id as empid',
                 'oms_users.username as username',
+                'stl_item_description.process_name as process_name',
+                'stl_item_description.project_code as project_code',
                 'oms_order_creations.id as orderid'
             )
             ->whereNotNull('assignee_user_id')
@@ -454,62 +489,80 @@ public function orderTimeTaken(Request $request) {
             $statusCountsQuery->whereIn('stl_item_description.client_id', $clientId);
         }
     
+        if(!empty($projectId) && $projectId[0] !== 'All'){
+            $statusCounts = $statusCountsQuery->get();
+            $statusCounts = $statusCounts->groupBy('process_name');
+        }else{
     $statusCounts = $statusCountsQuery->get();
-
-    $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use ($fromDate, $toDate) {
+            $statusCounts = $statusCounts->groupBy('userid');
+        }
+    $statusOrder = [1, 13, 14, 4, 5];
+    $dataForDataTables = $statusCounts->map(function ($orders, $userid) use ($fromDate, $toDate, $statusOrder) {
     
             $userDurations = [
             'Emp ID' => $orders->first()->empid,
             'Users' => $orders->first()->username,
+            'Product_Type' => $orders->first()->project_code . ' (' . $orders->first()->process_name . ')',
             'Assigned Orders' => $orders->count(),
             'WIP' => ['count' => 0, 'time' => 0],
             'COVERSHEET PRP' => ['count' => 0, 'time' => 0],
             'CLARIFICATION' => ['count' => 0, 'time' => 0],
             'SEND FOR QC' => ['count' => 0, 'time' => 0],
+            'COMPLETED' => ['count' => 0, 'time' => 0],
             ];
     
             foreach ($orders as $order) {
-                $orderStatusHistory = DB::table('order_status_history')
-                    ->where('order_id', $order->orderid)
-                ->orderBy('created_at', 'desc')
-                ->get();
             $getFirstWipStatusHistory = DB::table('order_status_history')
                 ->where('order_id', $order->orderid)
+                ->where('status_id', 1) // Assuming 1 represents 'WIP'
+                ->first();
+    
+            if ($getFirstWipStatusHistory) {
+                $orderStatusHistory = DB::table('order_status_history')
+                    ->where('order_id', $order->orderid)
+                    ->whereIn('status_id', $statusOrder)
                 ->orderBy('created_at', 'asc')
                     ->get();
     
-            $statusOrder = [1, 13, 14, 4];
-                $statusDurations = [
-                    1 => 0,
-                    13 => 0,
-                    14 => 0,
-                    4 => 0,
+                $statusorder = [
+                    1 => 1, // WIP
+                    2 => 13, // COVERSHEET PRP
+                    3 => 14, // CLARIFICATION
+                    4 => 4, // SEND FOR QC
+                    5 => 5, // COMPLETED
                 ];
     
-                for ($i = 0; $i < count($statusOrder) - 1; $i++) {
-                    $currentStatus = $statusOrder[$i];
-                    $nextStatus = $statusOrder[$i + 1];
+                $statusDurations = [
+                    1 => 'WIP',
+                    2 => 'COVERSHEET PRP',
+                    3 => 'CLARIFICATION',
+                    4 => 'SEND FOR QC',
+                    5 => 'COMPLETED',
+                ];
     
-                $currentStatusEntry = $getFirstWipStatusHistory->firstWhere('status_id', $currentStatus);
+                foreach ($statusorder as $currentStatus => $statusId) {
+                    $currentStatusEntry = $orderStatusHistory->firstWhere('status_id', $statusId);
     
                     if ($currentStatusEntry) {
-                    $userDurations[$this->getStatusLabel($currentStatus)]['count']++;
 
-                        $nextStatusEntry = $orderStatusHistory->firstWhere('status_id', $nextStatus);
-    
-                        if (!$nextStatusEntry) {
-                            for ($j = $i + 1; $j < count($statusOrder); $j++) {
-                                $nextStatusEntry = $orderStatusHistory->firstWhere('status_id', $statusOrder[$j]);
+                        // Find the next status entry that has a value
+                        $nextStatusEntry = null;
+                        foreach ($statusorder as $nextStatus => $nextStatusId) {
+                            if ($nextStatus > $currentStatus) {
+                                $nextStatusEntry = $orderStatusHistory->firstWhere('status_id', $nextStatusId);
                                 if ($nextStatusEntry) {
-                                    break;
+                                    $userDurations[$statusDurations[$currentStatus]]['count']++;
+                                    break; // Stop if a valid next status entry is found
                                 }
                             }
                         }
     
                         if ($nextStatusEntry) {
-                            $duration = strtotime($nextStatusEntry->created_at) - strtotime($currentStatusEntry->created_at);
-                            $statusDurations[$currentStatus] += $duration;
-                        $userDurations[$this->getStatusLabel($currentStatus)]['time'] += $duration;
+                            $timeDifference = Carbon::parse($nextStatusEntry->created_at)
+                                                    ->diffInSeconds(Carbon::parse($currentStatusEntry->created_at));
+                            
+                            $userDurations[$statusDurations[$currentStatus]]['time'] += $timeDifference;
+                        }
                     }
                         }
                     }
@@ -517,7 +570,10 @@ public function orderTimeTaken(Request $request) {
     
         foreach ($userDurations as $status => &$data) {
             if (is_array($data)) {
-                $data['time'] = gmdate('H:i:s', $data['time']);
+                $hours = floor($data['time'] / 3600);
+                $minutes = floor(($data['time'] % 3600) / 60);
+                $seconds = $data['time'] % 60;
+                $data['time'] = sprintf("%d:%02d:%02d", $hours, $minutes, $seconds);
             }
             }
 
@@ -528,14 +584,107 @@ public function orderTimeTaken(Request $request) {
 }
 
 private function getStatusLabel($statusId) {
-    $statusLabels = [
+$statusLabels = [
         1 => 'WIP',
-        13 => 'COVERSHEET PRP',
-        14 => 'CLARIFICATION',
+    2 => 'COVERSHEET PRP',
+    3 => 'CLARIFICATION',
         4 => 'SEND FOR QC',
-    ];
+    5 => 'COMPLETED',
+];
 
-    return $statusLabels[$statusId] ?? 'UNKNOWN STATUS';
+return $statusLabels[$statusId] ?? 'UNKNOWN STATUS';
+}
+
+
+public function attendance_report(Request $request)
+{
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+    $selectedDate = $request->input('selectDate');
+
+    $statusCountsQuery = OrderCreation::query()
+        ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
+        ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->select(
+            'oms_users.id as userid',
+            'oms_users.emp_id as empid',
+            'oms_users.username as username',
+            'stl_item_description.process_name as process_name',
+            'stl_item_description.project_code as project_code',
+            'oms_order_creations.id as orderid'
+        )
+        ->whereNotNull('assignee_user_id')
+        ->where('oms_order_creations.is_active', 1)
+        ->where('stl_client.is_approved', 1)
+        ->where('stl_item_description.is_approved', 1);
+
+    if ($selectedDate) {
+        $statusCountsQuery->whereDate('order_date', '=', $selectedDate);
+    }
+
+    if (!empty($processIds)) {
+        $statusCountsQuery->whereIn('oms_order_creations.process_id', $processIds);
+    }
+
+    $statusCounts = $statusCountsQuery->get();
+    $statusOrder = [1, 13, 14, 4, 5];
+    
+    $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use ($statusOrder) {
+
+        $totalTimeSpent = 0;
+
+        foreach ($orders as $order) {
+            $orderStatusHistory = DB::table('order_status_history')
+                ->where('order_id', $order->orderid)
+                ->whereIn('status_id', $statusOrder)
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            $statusorder = [
+                1 => 1, // WIP
+                2 => 13, // COVERSHEET PRP
+                3 => 14, // CLARIFICATION
+                4 => 4, // SEND FOR QC
+                5 => 5, // COMPLETED
+            ];
+
+            foreach ($statusorder as $currentStatus => $statusId) {
+                $currentStatusEntry = $orderStatusHistory->firstWhere('status_id', $statusId);
+
+                if ($currentStatusEntry) {
+                    $nextStatusEntry = null;
+                    foreach ($statusorder as $nextStatus => $nextStatusId) {
+                        if ($nextStatus > $currentStatus) {
+                            $nextStatusEntry = $orderStatusHistory->firstWhere('status_id', $nextStatusId);
+                            if ($nextStatusEntry) {
+                                break; 
+                            }
+                        }
+                    }
+
+                    if ($nextStatusEntry) {
+                        $timeDifference = Carbon::parse($nextStatusEntry->created_at)
+                                                ->diffInSeconds(Carbon::parse($currentStatusEntry->created_at));
+                        
+                        $totalTimeSpent += $timeDifference;
+                    }
+                }
+            }
+        }
+
+        $hours = floor($totalTimeSpent / 3600);
+        $minutes = floor(($totalTimeSpent % 3600) / 60);
+        $seconds = $totalTimeSpent % 60;
+
+        return [
+            'Emp ID' => $orders->first()->empid,
+            'Emp Name' => $orders->first()->username,
+            'Total Time Spent' => sprintf("%d:%02d:%02d", $hours, $minutes, $seconds)
+    ];
+    })->values();
+
+    return Datatables::of($dataForDataTables)->toJson();
 }
 
 }

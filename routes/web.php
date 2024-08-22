@@ -88,6 +88,7 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,S
     Route::post('/getStateid', 'getState')->name('getStateid');
     Route::post('/getcountyid', 'getCounty')->name('getcountyid');
     Route::get('edit_client/{clientid?}', 'edit_client')->name('edit_client');
+    Route::post('/clientupdate', 'clientupdate')->name('clientupdate');
 
     
 
@@ -157,12 +158,14 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::get('Reports', 'Reports')->name('Reports');
     Route::post('Productdropdown', 'Productdropdown')->name('Productdropdown');
     Route::post('userwise_count', 'userwise_count')->name('userwise_count');
-    Route::post('newreports', 'newreports')->name('newreports');
+    Route::post('orderWise', 'orderWise')->name('orderWise');
 
     Route::post('getGeoCounty', 'getGeoCounty')->name('getGeoCounty');
     Route::post('getGeoCities', 'getGeoCities')->name('getGeoCities');
     Route::any('get_timetaken', 'get_timetaken')->name('get_timetaken');
     Route::any('orderTimeTaken', 'orderTimeTaken')->name('orderTimeTaken');
+    Route::any('attendance_report', 'attendance_report')->name('attendance_report');
+
 
 
 

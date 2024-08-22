@@ -185,9 +185,8 @@
            
             
             <div class="p-0 mx-2" id="filter_search">
-                {{-- <p style="text-align:right;color:Red;">*(While Searching OrderID, Use Comma separator)</p> --}}
                 <div class="row ml-5">
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label for="dateFilter"><b>Select Date Range:</b></label>
                             <select class="form-control" id="dateFilter" onchange="selectDateFilter(this.value)" style="border:1px solid blue;">
@@ -201,7 +200,7 @@
 
                             </select>
                         </div>
-                        <div class ="mt-0 ml-2 mb-1" id="selectedDate"></div>
+                        <b class ="mt-0 ml-2 mb-1" id="selectedDate"></b>
                     </div>
 
                     {{-- From to --}}
@@ -253,7 +252,7 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-2 mt-4">
+                    <div class="col-md-1 mt-4">
                         <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
                     </div>
                     
@@ -420,13 +419,13 @@ function selectDateFilter(value) {
 // Example functions to get dynamic date ranges
 function getTodayDate() {
     let  StartDate = new Date();
-    return `[${formatDate(StartDate)}]`;
+    return `Selected:${formatDate(StartDate)}`;
 }
 
 function getYesterdayDate() {
     let StartDate = new Date();
     StartDate.setDate(StartDate.getDate() - 1);
-    return `[${formatDate(StartDate)}]`;
+    return `Selected:${formatDate(StartDate)}`;
 }
 
 function getLastWeekDate() {
@@ -453,7 +452,7 @@ function getLastWeekDate() {
     let EndDate = new Date(StartDate);
     EndDate.setDate(StartDate.getDate() + 6);
 
-    return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
+    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
 }
 
 function getYearlyDate() {
@@ -495,7 +494,7 @@ function getThisWeekDate() {
     }
 
 
-    return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
+    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
 }
 
 function getLastMonthDate() {
@@ -517,7 +516,7 @@ function getLastMonthDate() {
 
     let StartDate = new Date(EndDate.getFullYear(), EndDate.getMonth(), 1);
 
-    return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
+    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
 }
 
 function getCurrentMonthDate() {
@@ -536,7 +535,7 @@ function getCurrentMonthDate() {
 
     let EndDate = today > endDateOfMonth ? endDateOfMonth : today;
 
-    return `[${formatDate(StartDate)} to ${formatDate(EndDate)}]`;
+    return `Selected:${formatDate(StartDate)} to ${formatDate(EndDate)}`;
 }
 
 function formatDate(date) {
