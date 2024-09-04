@@ -14,7 +14,7 @@ class OrderCreation extends Model
     protected $table = 'oms_order_creations';
 
     protected $fillable = [
-        'id', 'order_id', 'order_date', 'process_id', 'state_id', 'county_id','city_id' ,'status_id', 'assignee_user_id', 'assignee_qa_id', 'associate_id', 'lob_id','tier_id','product_id','product_id','created_by', 'is_active', 'completion_date'
+        'id', 'order_id', 'order_date', 'process_id', 'typist_qc_id','typist_id','state_id', 'county_id','city_id' ,'status_id', 'assignee_user_id', 'assignee_qa_id', 'associate_id', 'lob_id','tier_id','product_id','product_id','created_by', 'is_active', 'completion_date'
     ];
 
     public function process()

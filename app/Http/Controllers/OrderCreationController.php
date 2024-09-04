@@ -63,8 +63,12 @@ class OrderCreationController extends Controller
         $exceldetail = OrderCreationAudit::with('users')->orderBy('created_at', 'desc')->get();
 
         $tierList = Tier::select('id','Tier_id')->get();
+        $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 10)->get();
+        $typist_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 11)->get();
 
-        return view('app.orders.ordercreate', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList','exceldetail','tierList'));
+
+
+        return view('app.orders.ordercreate', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList','exceldetail','tierList','typists','typist_qcs'));
     }
 
     public function getlob(Request $request){
@@ -128,6 +132,8 @@ class OrderCreationController extends Controller
             'assignee_qa_id' => isset($input['assignee_qa']) ? $input['assignee_qa'] : NULL,
             'lob_id' => isset($input['lob_id']) ? $input['lob_id'] : NULL,
             'tier_id' => isset($input['tier_id']) ? $input['tier_id'] : NULL,
+            'typist_id' => isset($input['typist_id']) ? $input['typist_id'] : NULL,
+            'typist_qc_id' => isset($input['typist_qc_id']) ? $input['typist_qc_id'] : NULL,
             'created_by' => Auth::id(),
         ];
 

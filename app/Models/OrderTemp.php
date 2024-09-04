@@ -18,6 +18,8 @@ class OrderTemp extends Model
         'order_status',
         'assignee',
         'comments',
+        'typist_id',
+        'typist_qc_id',
         'created_by'
     ];
 

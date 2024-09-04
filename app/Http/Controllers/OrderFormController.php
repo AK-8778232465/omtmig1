@@ -33,6 +33,8 @@ class OrderFormController extends Controller
         ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
         ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
         ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+        ->leftJoin('oms_users as typist_users', 'oms_order_creations.typist_id', '=', 'typist_users.id')
+        ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
         ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
         ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
         ->leftJoin('oms_city','oms_order_creations.city_id','=','oms_city.id')
@@ -42,6 +44,7 @@ class OrderFormController extends Controller
             'oms_order_creations.status_id as status_id',
             'oms_order_creations.county_id as county_id',
             'oms_order_creations.process_id as process_id',
+            'oms_order_creations.completion_date as completion_date',
             ///
                 'oms_order_creations.city_id as city_id',
             'oms_city.city as city',
@@ -58,14 +61,19 @@ class OrderFormController extends Controller
             'oms_order_creations.assignee_user_id',
             'oms_order_creations.tier_id',
             'oms_order_creations.assignee_qa_id',
+            'oms_order_creations.typist_id',
+            'oms_order_creations.typist_qc_id',
             'stl_item_description.lob_id as lob_id', // Add this line
             'stl_lob.name as lob_name', // Select the lob name
             'stl_client.client_name',
             'stl_item_description.client_id as client_id',
             'stl_process.name as process_type',
+            'stl_item_description.tat_value as tat_value',
             DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
             DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
-            'stl_item_description.process_name' // Adding product_name from 'oms_products' table
+            DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")") as typist_user'),
+            DB::raw('CONCAT(typist_qas.emp_id, " (", typist_qas.username, ")") as typist_qa'),
+            'stl_item_description.process_name'
         )
         ->where('oms_order_creations.is_active', 1)
         ->where('oms_order_creations.id', $orderId);
@@ -79,13 +87,13 @@ class OrderFormController extends Controller
                 $request->status != 7
             ) {
                 if ($request->status == 1) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
                     }
                 } elseif($request->status == 4) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
                         if(in_array($user->user_type_id, [6])) {
@@ -103,7 +111,7 @@ class OrderFormController extends Controller
                         }
                     }
                 } else {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } elseif(in_array($user->user_type_id, [6])){
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
@@ -131,13 +139,13 @@ class OrderFormController extends Controller
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
             } elseif ($request->status == 6) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9, 10, 11])) {
                     $query->whereNull('oms_order_creations.assignee_user_id')->where('oms_order_creations.status_id', 1);
                 } else {
                     $query->whereNull('oms_order_creations.id');
                 }
             } elseif ($request->status == 7) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9, 10, 11])) {
                     $query->whereNull('oms_order_creations.assignee_qa_id')->where('oms_order_creations.status_id', 4);
                 } else {
                     $query->whereNull('oms_order_creations.id');
@@ -147,7 +155,7 @@ class OrderFormController extends Controller
         $orderData = $query->first();
 
         if(!empty($orderData)) {
-            if($orderData->client_id != 16) {
+            if($orderData->client_id != 16 && $orderData->client_id != 82) {
                 return view('app.orders.comingsoon');
             }
             $countyData = Null;
@@ -222,7 +230,7 @@ class OrderFormController extends Controller
 
 
 
-            $orderHistory = DB::table('order_status_history')->where('order_id', $orderId)->orderBy('created_at', 'desc')->first();
+            $orderHistory = DB::table('order_status_history')->where('order_id', $orderId)->orderBy('id', 'desc')->first();
 
             $query = DB::table('oms_order_creations')
             ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
@@ -293,12 +301,48 @@ class OrderFormController extends Controller
 
             $primarySource = PrimarySource::select('id','source_name')->get();
 
+            $clientIdList = DB::table('oms_vendor_information')
+                ->select('id', 'accurate_client_id')->where('product_id', $orderData->process_id)    
+                ->get();
+
+            $userinput = DB::table('production_tracker')
+                ->where('order_id', $orderData->id)->first();
+
+                $vendorequirements = DB::table('county_instructions')
+                ->where('county_id', $orderData->county_id)
+                ->where('state_id', $orderData->property_state)
+                ->where('city_id', $orderData->city_id)
+                ->whereNotNull('county_id')
+                ->where('lob_id', $orderData->lob_id)
+                ->first();
+    
+                if ($vendorequirements) {
+                    $vendorequirements = json_decode($vendorequirements->json, true);
+                } else {
+                    $vendorequirements = [];
+                }
+
             $instructionId = !empty($countyData->id) ? $countyData->id : '' ;
 
+            $orderstatusInfo = DB::table('order_status_history')
+                ->leftJoin('oms_users', 'order_status_history.created_by', '=', 'oms_users.id')
+                ->leftJoin('oms_status', 'order_status_history.status_id', '=', 'oms_status.id')
+                ->select(
+                    'order_status_history.comment',
+                    'oms_status.status',
+                    'oms_users.emp_id',
+                    'oms_users.username',
+                    'order_status_history.created_at'
+                )
+                ->where('order_status_history.order_id', $orderData->id)
+                ->whereNotNull('order_status_history.comment')
+                ->orderBy('order_status_history.id', 'desc')
+                ->get();
+                
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
-            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId'));
-        } else if(in_array($user->user_type_id, [1,2,3,4,5,9])) {
-            return view('app.orders.orderform', compact('orderData', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId'));
+            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo'));
+        } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
+            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo'));
         } else {
             return redirect('/orders_status');
         }
@@ -340,6 +384,48 @@ class OrderFormController extends Controller
     }
 
     public function orderSubmit(Request $request) {
+
+        if (!empty($request->getID) && ($request->getID == 82)) {
+            $getdata = DB::table('production_tracker')->where('order_id', $request->orderId)->first();
+            
+            if ($getdata) {
+                DB::table('production_tracker')->where('order_id', $request->orderId)
+                    ->update([
+                        'accurate_client_id' => $request->accurateClientId,
+                        'portal_fee_cost' => $request->portalfeecost,
+                        'source' => $request->source,
+                        'copy_cost' => $request->copyCost,
+                        'no_of_search_done' => $request->noOfSearch,
+                        'no_of_documents_retrieved' => $request->documentRetrive,
+                        'title_point_account' => $request->titlePointAccount,
+                        'purchase_link' => $request->purchase_link,
+                        'username' => $request->username,
+                        'password' => $request->password,
+                        'file_path' => $request->file_path,
+                        'updated_by' => Auth::id(),
+                        'updated_at' => Carbon::now(),
+                    ]);
+            } else {
+                DB::table('production_tracker')->insert([
+                    'order_id' => $request->orderId,
+                    'accurate_client_id' => $request->accurateClientId,
+                    'portal_fee_cost' => $request->portalfeecost,
+                    'source' => $request->source,
+                    'copy_cost' => $request->copyCost,
+                    'no_of_search_done' => $request->noOfSearch,
+                    'no_of_documents_retrieved' => $request->documentRetrive,
+                    'title_point_account' => $request->titlePointAccount,
+                    'purchase_link' => $request->purchase_link,
+                    'username' => $request->username,
+                    'password' => $request->password,
+                    'file_path' => $request->file_path,
+                    'created_by' => Auth::id(),
+                    'created_at' => Carbon::now(),
+                ]);
+            }
+        }
+
+
         if(!empty($request->orderId) && !empty($request->orderStatus)) {
             $orderId = $request->orderId;
             $statusId = $request->orderStatus;
@@ -353,7 +439,7 @@ class OrderFormController extends Controller
                 'state_id' => $request->stateId,
                 'county_id' => $request->countyId,
                 'city_id' => $request->cityId,
-                'completion_date' => Carbon::now(),
+                'completion_date' => Carbon::now()->setTimezone('America/New_York'),
             ]);
             } else {
                 $update_status = OrderCreation::find($orderId)
@@ -372,7 +458,8 @@ class OrderFormController extends Controller
                     'status_id' => $request->orderStatus,
                     'comment' => $request->orderComment,
                     'checked_array' => $request->checklistItems,
-                    'created_at' => date('Y-m-d H:i:s'),
+                    'created_at' => Carbon::now()->setTimezone('America/New_York'),
+                    'created_by' => Auth::id(),
                 ]);
 
                 $getPrimaryName = DB::table('oms_primary_source')->where('id', $request->primarySource)->value('source_name');
@@ -414,7 +501,7 @@ class OrderFormController extends Controller
                     'state_id' => $request->stateId,
                     'county_id' => $request->countyId,
                     'city_id' => $request->cityId,
-                    'completion_date' => Carbon::now(),
+                    'completion_date' => Carbon::now()->setTimezone('America/New_York'),
                 ]);
             }else{
                     $update_status = OrderCreation::find($orderId)
@@ -484,7 +571,7 @@ class OrderFormController extends Controller
                 $update_status = OrderCreation::find($orderId)
             ->update([
                 'status_id' => $request->orderStatus,
-                'completion_date' => Carbon::now(),
+                'completion_date' => Carbon::now()->setTimezone('America/New_York'),
             ]);
             }else{
             $update_status = OrderCreation::find($orderId)
@@ -526,7 +613,8 @@ class OrderFormController extends Controller
                     'status_id' => $statusId,
                     'comment' => null,
                     'checked_array' => null,
-                    'created_at' => Carbon::now(),
+                    'created_at' => Carbon::now()->setTimezone('America/New_York'),
+                    'created_by' => Auth::id(),
                 ]);
                 return response()->json(['message' => 'Time duration updated successfully.']);
             } else {
@@ -539,4 +627,30 @@ class OrderFormController extends Controller
         return response()->json(['message' => 'Invalid status ID.'], 400);
     }
     }
+
+    public function getaccurateClientId(Request $request){
+        $getclientid = $request->client_id;
+        $getproductid = $request->product_id;
+        $orderId = $request->order_id;
+    
+        $getUserInputdetails = DB::table('production_tracker')
+            ->where('order_id', $orderId)
+            ->where('accurate_client_id', $getclientid)
+            ->first();
+    
+        if(!empty($getclientid) && !empty($getproductid)){
+            $vendorDetail = DB::table('oms_vendor_information')
+                ->where('id', $getclientid)
+                ->where('product_id', $getproductid)
+                ->first();
+        } else {
+            return response()->json(['message' => 'Product Is Not Available']);
+        }
+    
+        return response()->json([
+            'vendorDetail' => $vendorDetail,
+            'getUserInputdetails' => $getUserInputdetails
+        ]);
+    }
+    
 }

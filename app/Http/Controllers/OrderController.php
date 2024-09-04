@@ -55,7 +55,12 @@ class OrderController extends Controller
                     $query->where('assignee_user_id', $user->id)
                         ->orWhere('assignee_qa_id', $user->id);
                 });
-            } else{
+            } elseif($user->user_type_id == 10){
+                $statusCountsQuery->where('typist_id', $user->id)
+                ->whereNotIn('status_id', [1, 13, 4, 15, 17]);
+            }elseif($user->user_type_id == 11){
+                $statusCountsQuery->where('typist_qc_id', $user->id)
+                ->whereNotIn('status_id', [1, 13, 4, 15, 16]);
 
             }
         }
@@ -147,43 +152,32 @@ class OrderController extends Controller
     $fromDateRange = $request->input('fromDate_range');
     $toDateRange = $request->input('toDate_range');
 
-    // Initialize default dates
  
 
-    // Check if fromDate_range and toDate_range are provided
     if ($fromDateRange && $toDateRange) {
         
-        // Format and assign the provided date ranges using Carbon
         $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
         $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
     } else {
        
-        // Define a regex pattern to match dates in the format 'MM-DD-YYYY'
         $datePattern = '/(\d{2}-\d{2}-\d{4})/';
 
-        // Check if the selectedDateFilter is not empty and contains 'to'
         if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
-            // Split the date range string into two parts
             list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
 
-            // Trim any extra spaces
             $fromDateText = trim($fromDateText);
             $toDateText = trim($toDateText);
 
-            // Extract dates using regex
             preg_match($datePattern, $fromDateText, $fromDateMatches);
             preg_match($datePattern, $toDateText, $toDateMatches);
 
-            // Assign and format the extracted dates using Carbon
             $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
             $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
         } else {
-            // If no 'to' is found, assume it's a single date and use it for both fromDate and toDate
             preg_match($datePattern, $selectedDateFilter, $dateMatches);
 
-            // Assign and format the extracted date using Carbon
             $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
-            $toDate = $fromDate; // Use the same date for both
+            $toDate = $fromDate; 
         }
     }
  
@@ -196,6 +190,8 @@ class OrderController extends Controller
             ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
             ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+            ->leftJoin('oms_users as typist_users', 'oms_order_creations.typist_id', '=', 'typist_users.id')
+            ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
             ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
             ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
             ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
@@ -214,14 +210,19 @@ class OrderController extends Controller
                 'assignee_qas.username',
                 'oms_order_creations.assignee_user_id',
                 'oms_order_creations.assignee_qa_id',
+                'oms_order_creations.typist_id',
+                'oms_order_creations.typist_qc_id',
                 'oms_order_creations.associate_id',
                 'stl_lob.name as lob_name',
                 'stl_process.name as process_name',
                 'stl_client.client_name',
+                'stl_client.id as client_id',
                 'stl_item_description.process_name as process', 
                 'oms_tier.Tier_id as tier_name',
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
+                DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")") as typist_user'),
+                DB::raw('CONCAT(typist_qas.emp_id, " (", typist_qas.username, ")") as typist_qa'),
                 DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name')
             )
             ->where('oms_order_creations.is_active', 1)
@@ -238,7 +239,7 @@ class OrderController extends Controller
             
             if (
                 isset($request->status) &&
-                in_array($request->status, [1, 2, 3, 4, 5, 13, 14]) &&
+                in_array($request->status, [1, 2, 3, 4, 5, 13, 14, 15, 16, 17]) &&
                 $request->status != 'All' &&
                 $request->status != 6 &&
                 $request->status != 7
@@ -295,6 +296,10 @@ class OrderController extends Controller
                                 ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
                         });
 
+                    }elseif(in_array($user->user_type_id, [10]) && $request->status != 13) {
+                        $query->where('oms_order_creations.status_id', $request->status)->Where('oms_order_creations.typist_id', $user->id);
+                    }elseif(in_array($user->user_type_id, [11]) && $request->status != 13) {
+                    $query->where('oms_order_creations.status_id', $request->status)->Where('oms_order_creations.typist_qc_id', $user->id);
                     }
                     else{
                         if($request->status != 13){
@@ -325,7 +330,13 @@ class OrderController extends Controller
                         $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
                             ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
                     });
-                } else {
+                } elseif(in_array($user->user_type_id, [10])){
+                    $query->where('oms_order_creations.typist_id', $user->id)
+                    ->whereNotIn('status_id', [1, 13, 4, 15, 17]);
+                }elseif(in_array($user->user_type_id, [11])){
+                    $query->where('oms_order_creations.typist_qc_id', $user->id)
+                    ->whereNotIn('status_id', [1, 13, 4, 15, 16]);
+                }else {
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
             } elseif ($request->status == 6) {
@@ -342,7 +353,7 @@ class OrderController extends Controller
                 }
             }
 
-    if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
+if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $fromDate = Session::get('fromDate');
@@ -350,11 +361,9 @@ class OrderController extends Controller
         $project_id = Session::get('projectId');
         $client_id = Session::get('clientId');
     
-        // Ensure project_id and client_id are arrays
         $project_id = !is_array($project_id) ? explode(',', $project_id) : $project_id;
         $client_id = !is_array($client_id) ? explode(',', $client_id) : $client_id;
     
-        // Initialize queries
         $carryOverAllStatusCounts = OrderCreation::query()->with('process', 'client')
                 ->whereHas('process', function ($query) {
                     $query->where('stl_item_description.is_approved', 1);
@@ -924,6 +933,8 @@ class OrderController extends Controller
             ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
             ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+            ->leftJoin('oms_users as typist_users', 'oms_order_creations.typist_id', '=', 'typist_users.id')
+            ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
             ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
             ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
             ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
@@ -941,6 +952,8 @@ class OrderController extends Controller
                 'oms_order_creations.assignee_user_id',
                 'oms_order_creations.assignee_qa_id',
                 'oms_order_creations.associate_id',
+                'oms_order_creations.typist_id',
+                'oms_order_creations.typist_qc_id',
                 'stl_lob.name as lob_name',
                 'stl_process.name as process_name',
                 'stl_client.client_name',
@@ -949,6 +962,8 @@ class OrderController extends Controller
                 
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
+                DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")") as typist_user'),
+                DB::raw('CONCAT(typist_qas.emp_id, " (", typist_qas.username, ")") as typist_qa'),
                 DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name')
             )
             ->where('oms_order_creations.is_active', 1)
@@ -1108,7 +1123,72 @@ class OrderController extends Controller
             $sql = 'CONCAT(associate_names.emp_id, " (", associate_names.username, ")")  like ?';
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
+        ->filterColumn('typist_user', function($query, $keyword) {
+            $sql = 'CONCAT(typist_users.emp_id, " (", typist_users.username, ")")  like ?';
+            $order->whereRaw($sql, ["%{$keyword}%"]);        })
+        ->filterColumn('typist_qa', function($query, $keyword) {
+            $sql = 'CONCAT(typist_qas.emp_id, " (", typist_qas.username, ")")  like ?';
+            $order->whereRaw($sql, ["%{$keyword}%"]);
+        })
         ->addColumn('status', function ($order) use ($request) {
+            if ($order->client_id == 82) {
+                                $statusMapping = [];
+                if (Auth::user()->hasRole('Typist')) {
+                                $statusMapping = [
+                                    14 => 'Clarification',
+                                    16 => 'Typing',
+                                    2 => 'Hold',
+                                    5 => 'Completed',
+                                    3 => 'Cancelled',
+                                ];
+
+                    if ($order->typist_qc_id != null) {
+                        $statusMapping[17] = 'Typing QC';
+                            }
+                } elseif (Auth::user()->hasRole('Typist/Qcer')) {
+                            $statusMapping = [
+                        16 => 'Typing',
+                                14 => 'Clarification',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                                3 => 'Cancelled',
+                            ];
+                } elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head')) {
+                    $statusMapping = [
+                        1 => 'WIP',
+                        15 => 'Purchaser',
+                        14 => 'Clarification',
+                        2 => 'Hold',
+                        5 => 'Completed',
+                        3 => 'Cancelled',
+                    ];
+                    
+                    if ($order->assignee_qa_id !== null) {
+                        $statusMapping[4] = 'Send for QC';
+                    }
+                    
+                    if ($order->typist_qc_id !== null) {
+                        $statusMapping[17] = 'Typing QC';
+                    }
+                    
+                    if ($order->typist_id !== null) {
+                        $statusMapping[16] = 'Typing';
+                    }                    
+                } else {
+                                $statusMapping = [
+                                    1 => 'WIP',
+                                    15 => 'Purchaser',
+                                    14 => 'Clarification',
+                                    4 => 'Send for QC',
+                                    16 => 'Typing',
+                                    17 => 'Typing QC',
+                                    2 => 'Hold',
+                                    5 => 'Completed',
+                                    3 => 'Cancelled',
+                                ];
+                }
+            
+                        }else{
                     if($order->assignee_qa_id) {
                         if (Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL')){
                             $statusMapping = [];
@@ -1181,7 +1261,7 @@ class OrderController extends Controller
 
                             ];
                         }
-
+                        }
                     }
 
         $user = Auth::user();
@@ -1380,7 +1460,7 @@ class OrderController extends Controller
         $updateData = ['status_id' => $statusId];
 
         if ($statusId == 5) {
-            $updateData['completion_date'] = Carbon::now();
+            $updateData['completion_date'] = Carbon::now()->setTimezone('America/New_York');
         } else {
             $updateData['completion_date'] = null;
         }
@@ -1411,7 +1491,8 @@ class OrderController extends Controller
                     'status_id' => $statusId,
                     'comment' => $gethistorydata ? $gethistorydata->comment : null,
                     'checked_array' => $gethistorydata ? $gethistorydata->checked_array : null,
-                    'created_at' => now(),
+                    'created_at' => Carbon::now()->setTimezone('America/New_York'),
+                    'created_by' => Auth::id(),
                 ]);
     
                 return response()->json(['success' => 'Status updated successfully']);

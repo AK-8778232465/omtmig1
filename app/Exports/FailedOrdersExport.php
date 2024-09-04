@@ -30,6 +30,8 @@ class FailedOrdersExport implements FromCollection, WithHeadings
                 $row->county,
                 $row->status,
                 $row->tier,
+                $row->typist_qc_id,
+                $row->typist_id,
                 $row->comments,
             ];
         });
@@ -48,6 +50,8 @@ class FailedOrdersExport implements FromCollection, WithHeadings
             'County',
             'Status',
             'tier',
+            'Typist',
+            'Typist QC',
             'Comments',
         ];
     }

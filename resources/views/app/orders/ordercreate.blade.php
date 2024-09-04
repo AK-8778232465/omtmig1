@@ -177,8 +177,7 @@
                         <div class="form-group col-lg-3 mb-0 pb-0">
                             <label class="font-weight-bold">Order ID<span style="color:red;">*</span></label>
                             <input type="text" id="order_id" name="order_id" class="form-control" placeholder="Enter Order ID" required
-                            data-parsley-pattern="^[a-zA-Z0-9-]+$"
-                            data-parsley-error-message="Order ID should not be empty and No special characters are allowed."
+                            data-parsley-error-message="Order ID should not be empty."
                             data-parsley-trigger="focusout keyup"
                             maxlength="20">
                         </div>
@@ -270,6 +269,27 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="form-group col-lg-3 mb-0 pb-0">
+                            <label class="font-weight-bold">Typist</label>
+                            <select id="typist_id" name="typist_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
+                                <option selected="" disabled="" value="">Select Typist</option>
+                                @foreach ($typists as $typist)
+                                    <option value="{{ $typist->id }}">{{ $typist->username }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                <div class="form-group row mb-4 pb-0 pl-3 pr-3">
+                    <div class="form-group col-lg-3 mb-0 pb-0">
+                        <label class="font-weight-bold">Typist QC</label>
+                        <select id="typist_qc_id" name="typist_qc_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist QC"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
+                            <option selected="" disabled="" value="">Select Typist QC</option>
+                            @foreach ($typist_qcs as $typist_qc)
+                                <option value="{{ $typist_qc->id }}">{{ $typist_qc->username }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     </div>
 
                     <div class="text-center form-group row mb-3 pb-2">

@@ -78,9 +78,19 @@ p {
                         <p id="filename-display" style="margin-top: 10px;"></p> 
                     </div>
                     <div class="col-3"></div>
-                    <div class="col-lg-12 mb-2 mt-3 text-center">
-                        <a class="btn btn-sm btn-info mx-2" href="{{ asset('/template/sample_template_for_sduploads.xlsx') }}"><i class="fas fa-download"></i> Sample Format</a>
-                        <button type="submit" class="btn btn-sm btn-primary">
+        <div class="row col-12 mb-5 mt-3">
+            <div class="col-4"></div>
+            <div class="col-2">
+                <label class="font-weight-bold">Sample</label>
+                <select class="form-control select2dropdown" id="selectclient">
+                    <option selected disabled value="">Select Client</option>
+                    <option value="1">Fams</option>
+                    <option value="2">Accurate</option>
+                </select>
+            </div>
+            <div class="col-6">
+                <a class="btn btn-sm btn-info mx-2 mt-4" href="" id="download"><i class="fas fa-download"></i> Sample Format</a>
+                <button type="submit" class="btn btn-sm btn-primary mt-4">
                             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="13" height="14" x="0" y="0" viewBox="0 0 459.904 459.904" style="enable-background: new 0 0 512 512" xml:space="preserve">
                                 <g>
                                     <path d="M123.465 168.28h46.543v138.07c0 14.008 11.358 25.352 25.352 25.352h69.2c13.993 0 25.352-11.343 25.352-25.352V168.28h46.527c7.708 0 14.637-4.641 17.601-11.764 2.933-7.094 1.301-15.295-4.145-20.741L243.413 29.28c-7.437-7.422-19.485-7.422-26.938 0L110.011 135.775a19.023 19.023 0 0 0-4.13 20.741c2.962 7.109 9.876 11.764 17.584 11.764z" fill="#ffffff" opacity="1" data-original="#ffffff"></path>
@@ -91,6 +101,7 @@ p {
                     </div>
                 </div>
             </div>
+</div>
         </form>
         <table id="datatable" class="table table-striped table-bordered p-2">
             <thead>
@@ -282,6 +293,22 @@ $('#sdupload_id').on('submit', function(event){
         });
     }
 });
+
+$(document).ready(function () {
+        $('#selectclient').on('change', function () {
+            var selectedValue = $(this).val();
+            var downloadLink = $('#download');
+            
+            if (selectedValue == "1") {
+                downloadLink.attr('href', "{{ asset('/template/Fams_Sample_Excel.xlsx') }}");
+            } else if (selectedValue == "2") {
+                downloadLink.attr('href', "{{ asset('/template/Accurate_Sample_Excel.xlsx') }}");
+            } else {
+                downloadLink.attr('href', "#");
+            }
+        });
+    });
+
 
 </script>
 

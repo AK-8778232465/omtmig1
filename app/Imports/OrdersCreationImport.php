@@ -89,6 +89,8 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'status' => isset($row['Status']) ? $row['Status'] : null,
             'created_by' => $this->userid,
             'tier' => $row['Tier'] ?? null,
+            'typist_qc_id' => $row['Typist QC'] ?? null,
+            'typist_id' => $row['Typist'] ?? null,
             'audit_id' => $this->auditId,
         ];
 
@@ -179,6 +181,29 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $assignee_qa = User::where('emp_id', $assignee_qa)->whereIn('user_type_id', [7,8])->first();
         }
 
+if(isset($row['Typist QC'])){
+    $TypistQC = trim($row['Typist QC']);
+    $TypistQC = User::where('emp_id', $TypistQC)->first();
+    if (!$TypistQC) {
+        $data['comments'] = 'Typist QC not matched with database records';
+        OrderTemp::insert($data);
+        ++$this->unsuccess_rows;
+        return null;
+    }
+}
+
+if(isset($row['Typist'])){
+    $Typist = trim($row['Typist']);
+    $Typist = User::where('emp_id', $Typist)->first();
+    if (!$Typist) {
+        $data['comments'] = 'Typist not matched with database records';
+        OrderTemp::insert($data);
+        ++$this->unsuccess_rows;
+        return null;
+    }
+}
+
+
 
         if (isset($row['Tier'])){
             $Tier = trim($row['Tier']);
@@ -263,6 +288,8 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 'assignee_user_id' => isset($assignee_user->id) ? $assignee_user->id : null,
                 'assignee_qa_id' => isset($assignee_qa->id) ? $assignee_qa->id : null,
                 'created_by' => $this->userid,
+                'typist_id' => isset($Typist) ? $Typist->id : null,
+                'typist_qc_id' =>isset($TypistQC) ? $TypistQC->id : null,
                 'tier_id' => $Tier->id ?? null,
             ]);
 

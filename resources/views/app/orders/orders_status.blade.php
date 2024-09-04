@@ -170,12 +170,15 @@
         <div class="card-body">
             <div class="row justify-content-start m-3 mt-2 mb-4" id="statusButtons">
                 <div class="bg-info shadow-lg p-0 rounded text-white" style="text-decoration: none; font-size:0.7rem">
-                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer')) d-none @endif">Yet to Assign User<span id="status_6_count"></span></button>
+                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Yet to Assign User<span id="status_6_count"></span></button>
                     <button id="status_7"  class="btn btn-info status-btn d-none">Yet to Assign QA<span id="status_7_count"></span></button>
-                    <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer')) d-none @endif">WIP<span id="status_1_count"></span></button>
-                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span></button>
+                    <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">WIP<span id="status_1_count"></span></button>
+                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span></button>
+                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif" >Purchaser<span id="status_15_count"></span></button>
                     <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span></button>
-                    <button id="status_4" class="btn btn-info status-btn">Send For Qc<span id="status_4_count"></span></button>
+                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Send For Qc<span id="status_4_count"></span></button>
+                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Typing<span id="status_16_count"></span></button>
+                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist')) d-none @endif">Typing QC<span id="status_17_count"></span></button>
                     <button id="status_2" class="btn btn-info status-btn">Hold<span id="status_2_count"></span></button>
                     <button id="status_5" class="btn btn-info status-btn">Completed<span id="status_5_count"></span></button>
                     <button id="status_3" class="btn btn-info status-btn">Cancelled<span id="status_3_count"></span></button>
@@ -248,6 +251,7 @@
                         <div class="form-group">
                             <label for="searchInputs"><b>Search</b>:</label>
                             <input type="text" class="form-control" id="searchInputs" style="border:1px solid blue;">
+                            <!-- <p style="text-align:center;color:Red;">*(While Searching OrderID, Use Comma separator)</p> -->
                             <p id="orderIdTip" class="red-text" style="display:none; color:red;">Use Comma separator for multiple search</p>
                         </div>
                     </div>
@@ -277,6 +281,8 @@
                             <th style="width:20%">Status @for($i = 0; $i < 17; $i++) &nbsp; @endfor</th>
                             <th style="width:10%">User</th>
                             <th style="width:10%">QA</th>
+                            <th style="width:10%">Typists</th>
+                            <th style="width:10%">Typists QC</th>
                             @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer'))
                             <th style="width: 7%">Assign</th>
                             @else
@@ -639,6 +645,15 @@ $(document).ready(function() {
             case 'status_14':
                 defaultStatus = 14;
                 break;
+            case 'status_15':
+                defaultStatus = 15;
+                break;
+            case 'status_16':
+                defaultStatus = 16;
+                break;
+            case 'status_17':
+                defaultStatus = 17;
+                break;
             case 'status_4':
                 defaultStatus = 4;
                 break;
@@ -713,6 +728,10 @@ $(document).ready(function() {
                 { "data": "status", "name": "status" },
                 { "data": "assignee_user", "name": "assignee_user", "visible": @if(Auth::user()->hasRole('Process')) false @else true @endif },
                 { "data": "assignee_qa", "name": "assignee_qa", "visible": @if(Auth::user()->hasRole('Qcer')) false @else true @endif },
+                { "data": "typist_user", "name": "typist_user" },
+                { "data": "typist_qa", "name": "typist_qa" },
+               
+
                 {
                     "data": "checkbox",
                     "name": "checkbox",
@@ -728,16 +747,21 @@ $(document).ready(function() {
                 { "data": "associate_name", "name": "associate_name", "visible": true},
             ],
             createdRow: function (row, data, dataIndex) {
-                    let status = data.status_id; // Assuming the status_id field exists in the returned data
+                    let status = data.status_id; 
                     let tat_value = data.tat_value;
                     let orderDate = new Date(data.order_date);
-                    let currentDate = new Date();
-                    let timeDiff = Math.abs(currentDate - orderDate);
-                    let diffHours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
-                    if(!tat_value == 0){
+                    var currentDate = new Date(new Intl.DateTimeFormat('en-US', {
+                            timeZone: 'America/New_York',
+                            year: 'numeric', month: 'numeric', day: 'numeric',
+                            hour: 'numeric', minute: 'numeric', second: 'numeric',
+                            hour12: false
+                        }).format(new Date()));
+                    let timeDiff = (currentDate - orderDate) / (1000 * 60 * 60);
+
+                    if (tat_value > 0) {
                         if (status == 1 || status == 4 || status == 13) {
-                            if (diffHours > tat_value) {
-                                $(row).addClass('text-danger'); // Apply red color to the row
+                            if (timeDiff >= tat_value) { 
+                                $(row).addClass('text-danger');
                             }
                         }
                     }
@@ -825,30 +849,36 @@ $(document).ready(function() {
         if (status == 6 || status == 7 || status == 5) {
             $('.status-dropdown').prop('disabled', true);
             if (status == 6 || status == 7) {
-                datatable.column(13).visible(true);
+            // Make column 15 visible
+            datatable.column(15).visible(true);
+
+            // Disable the dropdown
                 $('.status-dropdown').prop('disabled', true);
+
+            // Hide column 17
+            datatable.column(17).visible(false);
             }
         } else {
             $('.status-dropdown').prop('disabled', false);
-            datatable.column(13).visible(false);
+            datatable.column(15).visible(false);
         }
         // //
         @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') ||Auth::user()->hasRole('SPOC') )
             if(status == 13){
                 $('.status-dropdown').prop('disabled', false);
-                datatable.column(13).visible(true);
+                datatable.column(15).visible(true);
             }
             else if(status == 6){
                 $('.status-dropdown').prop('disabled', false);
-                datatable.column(13).visible(true);
+                datatable.column(15).visible(true);
                 $('.status-dropdown').prop('disabled', true);
             } else {
-                datatable.column(13).visible(true);
+                datatable.column(15).visible(true);
             }
 
             if(status == 5 || status == 'All'){
                 $('.status-dropdown').prop('disabled', false);
-                datatable.column(13).visible(false);
+                datatable.column(15).visible(false);
             }
 
             if (status == 13) {
@@ -861,18 +891,18 @@ $(document).ready(function() {
 
         @if(Auth::user()->hasRole('Process/Qcer'))
         if(status == 6){
-            datatable.column(13).visible(true);////
+            datatable.column(15).visible(true);////
         }else{
-            datatable.column(13).visible(false);
+            datatable.column(15).visible(false);
         }
         @endif
 
 
         if(status == 13){
             $('.status-dropdown').prop('disabled', false);
-            datatable.column(15).visible(true);
+            datatable.column(17).visible(true);
         } else {
-            datatable.column(15).visible(false);
+            datatable.column(17).visible(false);
         }
         @if(Auth::user()->hasRole('Qcer'))
         if(status == 1 || status == 2 || status == 5) {
@@ -943,7 +973,7 @@ function updateStatusCounts() {
         let statusCounts = response.StatusCounts;
         let assign = response.AssignCoverSheet;
         let total = 0;
-        for (let status = 1; status <= 14; status++) {
+        for (let status = 1; status <= 17; status++) {
           if (status !== 6) { // Exclude status 6
             let count = statusCounts[status] || 0;
             total += count;

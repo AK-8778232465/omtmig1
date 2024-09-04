@@ -126,6 +126,8 @@ Route::middleware('auth:web')->controller(OrderFormController::class)->group(fun
     Route::any('coversheet_submit', 'coversheet_submit')->name('coversheet_submit');
     Route::any('updateClickTime', 'updateClickTime')->name('updateClickTime');
 
+    // accurate client
+    Route::any('getaccurateClientId', 'getaccurateClientId')->name('getaccurateClientId');
 
 });
 

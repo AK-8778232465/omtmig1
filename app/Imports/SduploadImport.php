@@ -67,6 +67,8 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
         $getClient = Client::where('id', $this->client_id)->first();
         $getProcess = stlprocess::where('id', $this->process_id)->first();
         $getUser = User::where('id', $this->userid)->first();
+
+    if($getClient->id == 16){
         $data = [
             'client' => $getClient->client_name,
             'lob' => $getLob->name,
@@ -228,6 +230,109 @@ class SduploadImport implements ToModel, ShouldQueue, WithEvents, WithHeadingRow
             ++$this->unsuccess_rows;
             return null; 
         }
+
+    }else {
+            $data = [
+                'client' => $getClient->client_name,
+                'lob' => $getLob->name,
+                'process' => $getProcess->name,
+                'state' => isset($row['State Abbr']) ? $row['State Abbr'] : null,
+                'county' => isset($row['COUNTY']) ? $row['COUNTY'] : null,
+                'created_at' => now(),
+                'created_by' => $getUser->username,
+                'audit_id' => $this->auditId,
+            ];
+        
+            Log::channel('sdupload')->info('Processing row data:', $data);
+        
+            // Validate State
+            $stateCode = strtoupper($row['State Abbr']);
+            $state = null;
+        
+            if ($stateCode) {
+                $state = State::where('short_code', $stateCode)->first();
+            }
+        
+            if (!$state) {
+                $data['comments'] = 'State is Invalid';
+                CountyInstructionTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
+        
+            Log::channel('sdupload')->info('Processing row state code:', ['stateCode' => $stateCode]);
+        
+            // Validate County
+            $countyCode = strtoupper($row['COUNTY']);
+            $county = null;
+        
+            if ($countyCode && $state) {
+                $county = County::where('county_name', $countyCode)
+                                ->where('stateId', $state->id)
+                                ->first();
+            }
+        
+            if (!$county) {
+                $data['comments'] = 'County is Invalid';
+                CountyInstructionTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
+        
+            Log::channel('sdupload')->info('Processing row county:', ['county' => $county ? $county->toArray() : 'Not found']);
+        
+            // Prepare JSON Data
+            $jsonData = [
+                'SOURCE' => $row['Source'] ?? null,
+                'ASSESSOR' => $row['Assessor'] ?? null,
+                'JUDGEMENTS' => $row['Judgements'] ?? null,
+                'MAPPING' => $row['Mapping'] ?? null,
+                'RECORDER' => $row["ROD (Recorder's Site)"] ?? null,
+                'TREASURER' => $row['Treasurer'] ?? null,
+                'STATUTES' => $row['Statutes'] ?? null,
+                'UCC' => $row['UCC'] ?? null,
+            ];
+            Log::channel('sdupload')->info('Processing row JSON data:', $jsonData);
+        
+            try {
+                // Check if Record Exists
+                $existingRecord = CountyInstructions::where([
+                    ['state_id', '=', $state->id],
+                    ['county_id', '=', $county->id],
+                    ['client_id', '=', $this->client_id],
+                    ['lob_id', '=', $this->lob_id],
+                ])->first();
+        
+                Log::channel('sdupload')->info('Processing row existing record:', ['existingRecord' => $existingRecord ? $existingRecord->toArray() : 'Not found']);
+        
+                if ($existingRecord) {
+                    // Update Existing Record
+                    $existingRecord->update([
+                        'json' => json_encode($jsonData),
+                        'updated_by' => $this->userid,
+                        'updated_at' => now(),
+                    ]);
+                    ++$this->success_rows;
+                } else {
+                    // Insert New Record
+                    CountyInstructions::insert([
+                        'client_id' => $this->client_id,
+                        'lob_id' => $this->lob_id,
+                        'process_id' => $this->process_id,
+                        'state_id' => $state->id,
+                        'county_id' => $county->id,
+                        'json' => json_encode($jsonData),
+                        'created_by' => $this->userid,
+                        'created_at' => now(),
+                    ]);
+                    ++$this->success_rows;
+                }
+            } catch (\Exception $e) {
+                ++$this->unsuccess_rows;
+                return null;
+            }
+        }
+        
     }
 
     public function batchSize(): int
