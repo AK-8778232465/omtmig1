@@ -205,9 +205,14 @@ position: relative;
                             </div>
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">Source</div>
-                                <input type="text" id="source_id" name="source_id" class="form-control" 
-                                    placeholder="Enter Source Info" 
-                                    value="{{ $userinput ? $userinput->source : '' }}">
+                                    <select class="form-control select2dropdown" name="source_id" id="source_id">
+                                        <option value="">Select Source Info</option>
+                                    @foreach ($sourcedetails as $source)
+                                    <option value="{{ $source->id }}" {{ ($userinput->source ?? '') == $source->id ? 'selected' : '' }}>
+                                        {{ $source->source_name }}
+                                    </option>
+                                    @endforeach
+                                    </select>
                             </div>
                             <div class="col-md-3 mb-2 {{ $orderData->completion_date ? '' : 'd-none' }}" id="production_date_container">
                                 <div class="font-weight-bold">Completion Date and Time</div>
