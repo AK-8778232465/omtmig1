@@ -728,8 +728,8 @@ $(document).ready(function() {
                 { "data": "status", "name": "status" },
                 { "data": "assignee_user", "name": "assignee_user", "visible": @if(Auth::user()->hasRole('Process')) false @else true @endif },
                 { "data": "assignee_qa", "name": "assignee_qa", "visible": @if(Auth::user()->hasRole('Qcer')) false @else true @endif },
-                { "data": "typist_user", "name": "typist_user" },
-                { "data": "typist_qa", "name": "typist_qa" },
+                { "data": "typist_user", "name": "typist_user", "visible": @if(Auth::user()->hasRole('Typist')) false @else true @endif },
+                { "data": "typist_qa", "name": "typist_qa", "visible": @if(Auth::user()->hasRole('Typist/Qcer')) false @else true @endif },
                
 
                 {

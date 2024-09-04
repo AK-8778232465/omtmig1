@@ -491,9 +491,11 @@ position: relative;
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                     <select class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                        @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                         <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Purchaser</option>
                                                         <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                                        @endif
                                                         @if(isset($orderData->assignee_qa))
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                                                         @endif

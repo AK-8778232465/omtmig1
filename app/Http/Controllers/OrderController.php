@@ -1147,6 +1147,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             }
                 } elseif (Auth::user()->hasRole('Typist/Qcer')) {
                             $statusMapping = [
+                                17 => 'Typing QC',
                         16 => 'Typing',
                                 14 => 'Clarification',
                                 2 => 'Hold',
