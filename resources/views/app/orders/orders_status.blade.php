@@ -1086,7 +1086,7 @@ $(document).ready(function() {
             } else if (status == 13 || status == 6) {
                 userlist = <?php echo json_encode($typists); ?>;
             }  
-            $('#typist_id').empty().append('<option selected disabled value="">Select User</option>');
+            $('#typist_id').empty().append('<option selected disabled value="">Select Typist</option>');
             $.each(userlist, function(index, user) {
                 $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
             });
@@ -1110,7 +1110,7 @@ $(document).ready(function() {
             } else if (status == 13 || status == 6) {
                 userlist = <?php echo json_encode($typists_qcs); ?>;
             }  
-            $('#typist_qc_id').empty().append('<option selected disabled value="">Select User</option>');
+            $('#typist_qc_id').empty().append('<option selected disabled value="">Select Typist_QC</option>');
             $.each(userlist, function(index, user) {
                 $('#typist_qc_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
             });
@@ -1257,7 +1257,7 @@ $(document).on('change', 'input.check-one', function() {
             }
 
             $('#typist_id').empty();
-            $('#typist_id').append('<option selected disabled value="">Select User</option>');
+            $('#typist_id').append('<option selected disabled value="">Select Typist</option>');
             $.each(userlist, function(index, user) {
                 $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
             });
@@ -1281,7 +1281,7 @@ $(document).on('change', 'input.check-one', function() {
             }
 
             $('#typist_qc_id').empty();
-            $('#typist_qc_id').append('<option selected disabled value="">Select User</option>');
+            $('#typist_qc_id').append('<option selected disabled value="">Select Typist_QC</option>');
             $.each(userlist, function(index, user) {
                 $('#typist_qc_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
             });
