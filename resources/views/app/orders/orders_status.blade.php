@@ -174,11 +174,11 @@
                     <button id="status_7"  class="btn btn-info status-btn d-none">Yet to Assign QA<span id="status_7_count"></span></button>
                     <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">WIP<span id="status_1_count"></span></button>
                     <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span></button>
-                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif" >Purchaser<span id="status_15_count"></span></button>
+                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif" >Purchaser<span id="status_15_count"></span></button>
                     <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span></button>
                     <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Send For Qc<span id="status_4_count"></span></button>
-                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Typing<span id="status_16_count"></span></button>
-                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist')) d-none @endif">Typing QC<span id="status_17_count"></span></button>
+                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing<span id="status_16_count"></span></button>
+                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing QC<span id="status_17_count"></span></button>
                     <button id="status_2" class="btn btn-info status-btn">Hold<span id="status_2_count"></span></button>
                     <button id="status_5" class="btn btn-info status-btn">Completed<span id="status_5_count"></span></button>
                     <button id="status_3" class="btn btn-info status-btn">Cancelled<span id="status_3_count"></span></button>
