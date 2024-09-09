@@ -195,7 +195,8 @@
                             data-parsley-error-message="Product Code should not be empty" data-parsley-errors-container="#process_code_error" required>
                                 <option selected="" disabled="" value="">Select Product</option>
                                 @foreach ($processList as $process)
-                                    <option value="{{ $process->id }}">{!! $process->project_code.' ('.$process->process_name.')' !!}</option>
+                                <option value="{{ $process->id }}" data-client-id="{{ $process->client_id }}">
+                                    {!! $process->project_code.' ('.$process->process_name.')' !!}</option>
                                 @endforeach
                             </select>
                             <div id="process_code_error" class="parsley-error"></div>
@@ -223,7 +224,7 @@
                                 <option selected="" disabled="" value="">Select County</option>
                             </select>
                         </div>
-                        <div class="form-group col-lg-3 mb-0 pb-0">
+                        <div class="form-group col-lg-3 mb-0 pb-0" id= "municipality-container">
                             <label class="font-weight-bold">Municipality</label>
                             <select id="city" name="city" class="form-control select2dropdown" style="width:100%" autocomplete="off"  data-parsley-trigger="focusout keyup">
                                 <option selected="" disabled="" value="">Select Municipality</option>
@@ -260,7 +261,7 @@
                                 @endforeach
                             </select>
                         </div>
-                            <div class="form-group col-lg-3 mb-0 pb-0">
+                            <div class="form-group col-lg-3 mb-0 pb-0" id= "tier-container">
                             <label class="font-weight-bold">Tier</label>
                             <select id="tier_id" name="tier_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Tier"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Tier</option>
@@ -269,7 +270,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group col-lg-3 mb-0 pb-0">
+                        <div class="form-group col-lg-3 mb-0 pb-0" id= "typist-container">
                             <label class="font-weight-bold">Typist</label>
                             <select id="typist_id" name="typist_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Typist</option>
@@ -280,7 +281,7 @@
                         </div>
                     </div>
 
-                <div class="form-group row mb-4 pb-0 pl-3 pr-3">
+                <div class="form-group row mb-4 pb-0 pl-3 pr-3" id= "typist-qc-container">
                     <div class="form-group col-lg-3 mb-0 pb-0">
                         <label class="font-weight-bold">Typist QC</label>
                         <select id="typist_qc_id" name="typist_qc_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist QC"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
@@ -823,6 +824,34 @@ $(document).ready(function() {
     if ($('#filename-display').text().trim() === '') {
         $('#filename-display').hide();
     }
+});
+
+
+$(document).ready(function() {
+    $('#process_code').change(function() {
+        var selectedOption = $(this).find('option:selected');
+        var clientId = selectedOption.data('client-id');
+console.log(clientId);
+        // Check if the client_id is 16
+        if (clientId == 16) {
+            $('#typist-container').hide();
+            $('#typist-qc-container').hide();
+        } else {
+            $('#typist-container').show();
+            $('#typist-qc-container').show();
+        }
+
+        if(clientId == 82){
+            $('#municipality-container').hide();
+            $('#tier-container').hide();
+        }else{
+            $('#municipality-container').show();
+            $('#tier-container').show();
+        }
+    });
+
+    // Trigger change event on page load in case there's a pre-selected option
+    $('#process_code').trigger('change');
 });
 
 

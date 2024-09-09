@@ -1364,6 +1364,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $stateList = State::select('id', 'short_code')->get();
         $processors = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [6, 8, 9])->orderBy('emp_id')->get();
         $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7, 8])->orderBy('emp_id')->get();
+        $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [10])->orderBy('emp_id')->get();
+        $typists_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [11])->orderBy('emp_id')->get();
+
         $statusList = Status::select('id', 'status')->get();
         $countyList = County::select('id', 'county_name')->get();
 
@@ -1373,7 +1376,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         // Get the selected status from the request or use the default status
         $selectedStatus = $request->input('status', $defaultStatus->id);
 
-        return view('app.orders.orders_status', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList', 'selectedStatus'));
+        return view('app.orders.orders_status', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList', 'selectedStatus', 'typists', 'typists_qcs'));
     }
 
     public function assignment_update(Request $request)
@@ -1404,15 +1407,24 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 } elseif ($input['cover_prep_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update(['associate_id' => $input['cover_prep_id']]);
+                }elseif ($input['typist_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update(['typist_id' => $input['typist_id']]);
+                }elseif ($input['typist_qc_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update(['typist_qc_id' => $input['typist_qc_id']]);
                 }
+
             }
  
-            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3]) && $input['user_id'] != null && $input['qcer_id'] != null && $input['cover_prep_id'] != null) {
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3]) && $input['user_id'] != null && $input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_id'] != null && $input['typist_qc_id'] != null) {
                 OrderCreation::whereIn('id', $orderIds)
                     ->update([
                         'assignee_user_id' => $input['user_id'],
                         'assignee_qa_id' => $input['qcer_id'],
-                        'associate_id' => $input['cover_prep_id']
+                        'associate_id' => $input['cover_prep_id'],
+                        'typist_id' => $input['typist_id'],
+                        'typist_qc_id' => $input['typist_qc_id']
                     ]);
             }
  
@@ -1422,10 +1434,165 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         ->update([
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
-                            'associate_id' => $input['cover_prep_id']
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_id' => $input['typist_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+
                         ]);
             }
- 
+
+                if ($input['user_id'] != null && $input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_id'] != null)  {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_id' => $input['typist_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+
+                        ]);
+                }
+
+
+                if ($input['user_id'] != null && $input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_qc_id'] != null)  {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_id' => $input['typist_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+
+                        ]);
+                }
+
+
+                if ($input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_id'] != null)  {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_id' => $input['typist_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+
+                        ]);
+                }
+
+                if ($input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_qc_id'] != null)  {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_id' => $input['typist_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+
+                        ]);
+                }
+
+                if ($input['user_id'] != null && $input['cover_prep_id'] != null && $input['typist_id'] != null)  {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_id' => $input['typist_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+
+                        ]);
+                }
+                if ($input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_id'] != null)  {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_id' => $input['typist_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+
+                        ]);
+                }
+
+                if ($input['user_id'] != null && $input['cover_prep_id'] != null && $input['typist_qc_id'] != null)  {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_id' => $input['typist_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+
+                        ]);
+                }
+
+                if ($input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_qc_id'] != null)  {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_id' => $input['typist_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+
+                        ]);
+                }
+                    
+                if ($input['cover_prep_id'] != null && $input['typist_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'typist_id' => $input['typist_id'],
+                        ]);
+                }
+
+
+                if ($input['cover_prep_id'] != null && $input['typist_qc_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_user_id' => $input['user_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+                        ]);
+                }
+
+
+                
+                if ($input['user_id'] != null && $input['typist_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_id' => $input['typist_id'],
+                        ]);
+                }
+
+                if ($input['user_id'] != null && $input['typist_qc_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'associate_id' => $input['cover_prep_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+                        ]);
+                }
+
+
+
+                if ($input['qcer_id'] != null && $input['typist_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'typist_id' => $input['typist_id'],
+                        ]);
+                }
+
+
+                if ($input['qcer_id'] != null && $input['typist_qc_id'] != null) {
+                    OrderCreation::whereIn('id', $orderIds)
+                        ->update([
+                            'assignee_qa_id' => $input['qcer_id'],
+                            'typist_qc_id' => $input['typist_qc_id'],
+                        ]);
+                }
+
+
                 if ($input['cover_prep_id'] != null && $input['qcer_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([

@@ -303,8 +303,7 @@
                     <div class="form-group">
                         <div class="row d-none" id="assign_tab">
                             <div class="col-12 row">
-                                <div class="col-1"></div>
-                                <div class="col-3">
+                                <div class="col-2">
                                     <select style="width: 100%;" class="form-control form-control-sm" id="user_id" name="user_id">
                                         <option selected disabled value="">Select User</option>
                                         @foreach ($processors as $processor)
@@ -312,7 +311,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-2">
                                     <select style="width: 100%;" class="form-control form-control-sm" id="qcer_id" name="qcer_id">
                                         <option selected disabled value="">Select Qcer</option>
                                         @foreach ($qcers as $qcer)
@@ -320,15 +319,30 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-3" id="coversheetPrepDropdown">
+                                <div class="col-2" id="coversheetPrepDropdown">
                                     <select style="width: 100%;"  class="form-control form-control-sm" id="cover_prep_id" name="cover_prep_id">
                                     <option selected disabled value=""> Select coversheet-preparor</option>
                                     </select>
                                 </div>
                                 <div class="col-2">
+                                    <select style="width: 100%;" class="form-control form-control-sm" id="typist_id" name="typist_id">
+                                        <option selected disabled value="">Select Typists</option>
+                                        @foreach ($typists as $typist)
+                                            <option value="{{ $typist->id }}">{{ $typist->username }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <select style="width: 100%;" class="form-control form-control-sm" id="typist_qc_id" name="typist_qc_id">
+                                        <option selected disabled value="">Select Typists_QC</option>
+                                        @foreach ($typists_qcs as $typists_qc)
+                                            <option value="{{ $typists_qc->id }}">{{ $typists_qc->username }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-2">
                                     <button type="submit" class="btn btn-sm btn-primary" id="assignBtn" name="assign">Assign</button>
                                 </div>
-                                <div class="col-3"></div>
                             </div>
                         </div>
                     </div>
@@ -795,6 +809,12 @@ $(document).ready(function() {
         if ($("#qcer_id").data('select2') !== undefined) {
             $("#qcer_id").select2('destroy');
         }
+        if ($("#typist_id").data('select2') !== undefined) {
+            $("#typist_id").select2('destroy');
+        }
+        if ($("#typist_qc_id").data('select2') !== undefined) {
+            $("#typist_qc_id").select2('destroy');
+        }
 
         if ($("#cover_prep_id").data('select2') !== undefined) {
             $("#cover_prep_id").select2('destroy');
@@ -803,6 +823,12 @@ $(document).ready(function() {
         $("#user_id").select2();
         $('#qcer_id').prop('selectedIndex',0);
         $("#qcer_id").select2();
+
+        $('#typist_id').prop('selectedIndex',0);
+        $("#typist_id").select2();
+        $('#typist_qc_id').prop('selectedIndex',0);
+        $("#typist_qc_id").select2();
+
         $('#cover_prep_id').prop('selectedIndex',0);
         $("#cover_prep_id").select2();
         $('input.check-all').prop('checked', false);
@@ -823,6 +849,15 @@ $(document).ready(function() {
         if ($("#qcer_id").data('select2') !== undefined) {
             $("#qcer_id").select2('destroy');
         }
+
+        if ($("#typist_id").data('select2') !== undefined) {
+            $("#typist_id").select2('destroy');
+        }
+
+        if ($("#typist_qc_id").data('select2') !== undefined) {
+            $("#typist_qc_id").select2('destroy');
+        }
+
         if ($("#cover_prep_id").data('select2') !== undefined) {
             $("#cover_prep_id").select2('destroy');
         }
@@ -830,6 +865,13 @@ $(document).ready(function() {
         $("#user_id").select2();
         $('#qcer_id').prop('selectedIndex',0);
         $("#qcer_id").select2();
+
+        $('#typist_id').prop('selectedIndex',0);
+        $("#typist_id").select2();
+
+        $('#typist_qc_id').prop('selectedIndex',0);
+        $("#typist_qc_id").select2();
+        
         $('#cover_prep_id').prop('selectedIndex',0);
         $("#cover_prep_id").select2();
         $('input.check-all').prop('checked', false);
@@ -1031,7 +1073,52 @@ $(document).ready(function() {
     }
     });
 
+    $(document).on('change', 'input.check-all', function() {
+        var isChecked = $(this).prop('checked');
+        $('input.check-one').prop('checked', isChecked);
 
+        if (isChecked) {
+            $('#assign_tab').removeClass('d-none');
+            task_status = $('#statusButtons').find('.btn-primary').attr('id');
+            let status = task_status.replace("status_", "");
+            if (status != 13 && status != 6 ) {
+            var userlist = (status != status != 13 && status != 6) ? <?php echo json_encode($typists); ?> : <?php echo json_encode($typists); ?>;
+            } else if (status == 13 || status == 6) {
+                userlist = <?php echo json_encode($typists); ?>;
+            }  
+            $('#typist_id').empty().append('<option selected disabled value="">Select User</option>');
+            $.each(userlist, function(index, user) {
+                $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+            });
+        } else {
+            $('#assign_tab').addClass('d-none');
+            $('#typist_id').empty();
+    }
+    });
+
+
+    $(document).on('change', 'input.check-all', function() {
+        var isChecked = $(this).prop('checked');
+        $('input.check-one').prop('checked', isChecked);
+
+        if (isChecked) {
+            $('#assign_tab').removeClass('d-none');
+            task_status = $('#statusButtons').find('.btn-primary').attr('id');
+            let status = task_status.replace("status_", "");
+            if (status != 13 && status != 6 ) {
+            var userlist = (status != status != 13 && status != 6) ? <?php echo json_encode($typists_qcs); ?> : <?php echo json_encode($typists_qcs); ?>;
+            } else if (status == 13 || status == 6) {
+                userlist = <?php echo json_encode($typists_qcs); ?>;
+            }  
+            $('#typist_qc_id').empty().append('<option selected disabled value="">Select User</option>');
+            $.each(userlist, function(index, user) {
+                $('#typist_qc_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+            });
+        } else {
+            $('#assign_tab').addClass('d-none');
+            $('#typist_qc_id').empty();
+    }
+    });
 
     $(document).on('change', 'input.check-all', function() {
         var isChecked = $(this).prop('checked');
@@ -1165,6 +1252,54 @@ $(document).on('change', 'input.check-one', function() {
         let status = task_status.replace("status_", "");
         var userlist = [];
 
+        if (status != null) {
+                userlist = <?php echo json_encode($typists); ?>;
+            }
+
+            $('#typist_id').empty();
+            $('#typist_id').append('<option selected disabled value="">Select User</option>');
+            $.each(userlist, function(index, user) {
+                $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+            });
+        } else {
+            $('#assign_tab').addClass('d-none');
+            $('#typist_id').empty();
+        }
+});
+
+
+$(document).on('change', 'input.check-one', function() {
+    var anyCheckboxChecked = $('input.check-one:checked').length > 0;
+    if (anyCheckboxChecked) {
+        $('#assign_tab').removeClass('d-none');
+        var task_status = $('#statusButtons').find('.btn-primary').attr('id');
+        let status = task_status.replace("status_", "");
+        var userlist = [];
+
+        if (status != null) {
+                userlist = <?php echo json_encode($typists_qcs); ?>;
+            }
+
+            $('#typist_qc_id').empty();
+            $('#typist_qc_id').append('<option selected disabled value="">Select User</option>');
+            $.each(userlist, function(index, user) {
+                $('#typist_qc_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+            });
+        } else {
+            $('#assign_tab').addClass('d-none');
+            $('#typist_qc_id').empty();
+        }
+});
+
+
+$(document).on('change', 'input.check-one', function() {
+    var anyCheckboxChecked = $('input.check-one:checked').length > 0;
+    if (anyCheckboxChecked) {
+        $('#assign_tab').removeClass('d-none');
+        var task_status = $('#statusButtons').find('.btn-primary').attr('id');
+        let status = task_status.replace("status_", "");
+        var userlist = [];
+
         if (status != 7 && status != 13) {
             userlist = <?php echo json_encode($processors); ?>;
         }
@@ -1262,6 +1397,18 @@ $(document).on('click', '.status-dropdown', function() {
 
     $(document).ready(function() {
         $("#user_id").select2();
+        $('.content-loaded').show();
+        $('.frame').addClass('d-none');
+    });
+
+    $(document).ready(function() {
+        $("#typist_id").select2();
+        $('.content-loaded').show();
+        $('.frame').addClass('d-none');
+    });
+    
+    $(document).ready(function() {
+        $("#typist_qc_id").select2();
         $('.content-loaded').show();
         $('.frame').addClass('d-none');
     });
@@ -1420,6 +1567,8 @@ $(document).on('click', '.status-dropdown', function() {
             let checkedOrdersArray = $('input[name="orders[]"]:checked');
             let user_id = $('#user_id').val();
             let qcer_id = $('#qcer_id').val();
+            let typist_id = $('#typist_id').val();
+            let typist_qc_id = $('#typist_qc_id').val();
             let cover_prep_id = $('#cover_prep_id').val();
 
             $.ajax({
@@ -1432,7 +1581,9 @@ $(document).on('click', '.status-dropdown', function() {
                     }).get(),
                     user_id: user_id,
                     qcer_id: qcer_id,
-                    cover_prep_id:cover_prep_id,
+                    typist_id: typist_id,
+                    typist_qc_id: typist_qc_id,
+                    cover_prep_id: cover_prep_id,
                     _token: '{{csrf_token()}}'
                 },
                 success: function (response) {
@@ -1467,6 +1618,9 @@ $(document).on('click', '.status-dropdown', function() {
         let order_id = elementId.split('_')[2];
         let user_id = "{!! Auth::id() !!}";
         let qcer_id = "{!! Auth::id() !!}";
+        let typist_id = "{!! Auth::id() !!}";
+        let typist_qc_id = "{!! Auth::id() !!}";
+
         let cover_prep_id = "{!! Auth::id() !!}";
 
         let orders = [order_id];
@@ -1478,6 +1632,8 @@ $(document).on('click', '.status-dropdown', function() {
                 orders: orders,
                 user_id: user_id,
                 qcer_id: qcer_id,
+                typist_id: typist_id,
+                typist_qc_id: typist_qc_id,
                 cover_prep_id: cover_prep_id,
                 _token: '{{csrf_token()}}'
             },
