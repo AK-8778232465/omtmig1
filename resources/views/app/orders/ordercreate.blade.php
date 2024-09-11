@@ -158,6 +158,23 @@
       }
     }
 
+    #selectclient {
+        width: 120px;
+        
+    }
+  
+    .select2-container--default .select2-results__option {
+        text-align: left;
+        padding-left: 10px; 
+    }
+
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        text-align: left; 
+        padding-left: 10px; 
+    } 
+
+
   
 </style>
 <div class="container-fluid mt-2">
@@ -864,6 +881,21 @@ console.log(clientId);
     // Trigger change event on page load in case there's a pre-selected option
     $('#process_code').trigger('change');
 });
+
+$(document).ready(function () {
+        $('#selectclient').on('change', function () {
+            var selectedValue = $(this).val();
+            var downloadLink = $('#download');
+            
+            if (selectedValue == "1") {
+                downloadLink.attr('href', "{{ asset('/template/Fams_sample_template.xlsx') }}");
+            } else if (selectedValue == "2") {
+                downloadLink.attr('href', "{{ asset('/template/Accurate_sample_template.xlsx') }}");
+            } else {
+                downloadLink.attr('href', "#");
+            }
+        });
+    });
 
 
 </script>
