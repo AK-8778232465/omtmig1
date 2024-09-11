@@ -8,7 +8,6 @@ use App\Models\OrderCreation;
 use App\Models\OrderTemp;
 use App\Models\Process;
 use App\Models\State;
-use App\Models\City;
 use App\Models\Status;
 
 use App\Models\Lob;
@@ -87,7 +86,6 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'lob' => isset($row['Lob']) ? $row['Lob'] : null,
             'state' => isset($row['State']) ? $row['State'] : null,
             'county' => isset($row['County']) ? $row['County'] : null,
-            'city' => isset($row['Municipality']) ? $row['Municipality'] : null,
             'status' => isset($row['Status']) ? $row['Status'] : null,
             'created_by' => $this->userid,
             'tier' => $row['Tier'] ?? null,
@@ -107,23 +105,10 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         $stateCode = trim($row['State']);
         $countyName = trim($row['County']);
-        $municipality = trim($row['Municipality']);
 
         $state = State::where('short_code', $stateCode)->first();
         if ($state) {
             $county = County::where('county_name', $countyName)->where('stateId', $state->id)->first();
-        }
-        if ($county) {
-            $city = City::where('city', $municipality)->where('county_id', $county->id)->first();
-        }
-
-        if(isset($row['Municipality'])){
-        if (!$city) {
-            $data['comments'] = 'Municipality not matched with database records';
-            OrderTemp::insert($data);
-            ++$this->unsuccess_rows;
-            return null;
-        }
         }
 
         $process = trim($row['Product Name']);
@@ -196,7 +181,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $assignee_qa = User::where('emp_id', $assignee_qa)->whereIn('user_type_id', [7,8])->first();
         }
 
-        if(isset($row['Typist QC'])){
+if(isset($row['Typist QC'])){
     $TypistQC = trim($row['Typist QC']);
     $TypistQC = User::where('emp_id', $TypistQC)->first();
     if (!$TypistQC) {
@@ -205,9 +190,9 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         ++$this->unsuccess_rows;
         return null;
     }
-        }
+}
 
-        if(isset($row['Typist'])){
+if(isset($row['Typist'])){
     $Typist = trim($row['Typist']);
     $Typist = User::where('emp_id', $Typist)->first();
     if (!$Typist) {
@@ -216,7 +201,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         ++$this->unsuccess_rows;
         return null;
     }
-        }
+}
 
 
 
@@ -299,7 +284,6 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 'process_id' => $processOrg->id,
                 'state_id' => isset($state) ? $state->id : null,
                 'county_id' => isset($county) ? $county->id : null,
-                'city_id' => isset($city) ? $city->id : null,
                 'status_id' => $Status,
                 'assignee_user_id' => isset($assignee_user->id) ? $assignee_user->id : null,
                 'assignee_qa_id' => isset($assignee_qa->id) ? $assignee_qa->id : null,
