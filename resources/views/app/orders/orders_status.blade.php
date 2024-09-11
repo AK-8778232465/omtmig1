@@ -92,7 +92,7 @@
                         <div class="col-lg-4">
                             <label for="order_date" class="font-weight-bold">Order Received Date<span style="color:red;">*</span></label>
                             <br>
-                            <input type="datetime-local" id="order_date_ed" value="" class="form-control" name="order_date">
+                            <input type="date" id="order_date_ed" value="" class="form-control" name="order_date">
                         </div>
                         <div class="col-lg-4">
                             <label class="font-weight-bold">Product Code<span style="color:red;">*</span></label><br>
@@ -1437,9 +1437,6 @@ $(document).on('click', '.status-dropdown', function() {
 				$("#property_county_ed").val(res['county_id']);
                 $("#assign_user_ed").val(res['assignee_user_id']);
                 $("#assign_qa_ed").val(res['assignee_qa_id']);
-
-                var orderDate = res['order_date'].replace(' ', 'T');
-                $("#order_date_ed").val(orderDate);
 
 				$("#myModalEdit").modal('show');
 			}
