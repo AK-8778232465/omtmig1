@@ -158,6 +158,23 @@
       }
     }
 
+    #selectclient {
+        width: 120px;
+        
+    }
+  
+    .select2-container--default .select2-results__option {
+        text-align: left;
+        padding-left: 10px; 
+    }
+
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        text-align: left; 
+        padding-left: 10px; 
+    } 
+
+
   
 </style>
 <div class="container-fluid mt-2">
@@ -313,8 +330,17 @@
                     </div>
 
                     <div class="form-group col-lg-6 mb-2 mt-2 pb-0 text-center" style="margin-top: auto;">
-                    <a class="btn btn-sm btn-info mx-2" href="{{asset('/template/sample_template.xlsx')}}" ><i class="fas fa-download"></i> Sample Format</a>
-                        <button type="submit" class="btn btn-sm btn-primary" maxlength="100">
+                        
+                        <h6 style="margin-right: 370px;"><strong>Sample:</strong></h6>
+                            <select class="form-control select2dropdown" style="width:200px;" id="selectclient">
+                                <option selected disabled value="">Select Client</option>
+                                <option value="1">Fams</option>
+                                <option value="2">Accurate</option>
+                            </select>
+                                            
+                            <a class="btn btn-sm btn-info mx-2 mt-1" href="" id="download"><i class="fas fa-download"></i> Sample Format</a>
+                       
+                            <button type="submit" class="btn btn-sm btn-primary mt-1" maxlength="100">
                             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="13" height="14" x="0" y="0" viewBox="0 0 459.904 459.904" style="enable-background:new 0 0 512 512" xml:space="preserve" class="">
                                 <g>
                                     <path d="M123.465 168.28h46.543v138.07c0 14.008 11.358 25.352 25.352 25.352h69.2c13.993 0 25.352-11.343 25.352-25.352V168.28h46.527c7.708 0 14.637-4.641 17.601-11.764 2.933-7.094 1.301-15.295-4.145-20.741L243.413 29.28c-7.437-7.422-19.485-7.422-26.938 0L110.011 135.775a19.023 19.023 0 0 0-4.13 20.741c2.962 7.109 9.876 11.764 17.584 11.764z" fill="#ffffff" opacity="1" data-original="#ffffff" class=""></path>
@@ -853,6 +879,21 @@ console.log(clientId);
     // Trigger change event on page load in case there's a pre-selected option
     $('#process_code').trigger('change');
 });
+
+$(document).ready(function () {
+        $('#selectclient').on('change', function () {
+            var selectedValue = $(this).val();
+            var downloadLink = $('#download');
+            
+            if (selectedValue == "1") {
+                downloadLink.attr('href', "{{ asset('/template/Fams_sample_template.xlsx') }}");
+            } else if (selectedValue == "2") {
+                downloadLink.attr('href', "{{ asset('/template/Accurate_sample_template.xlsx') }}");
+            } else {
+                downloadLink.attr('href', "#");
+            }
+        });
+    });
 
 
 </script>
