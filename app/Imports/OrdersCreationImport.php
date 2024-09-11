@@ -107,22 +107,24 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         $stateCode = trim($row['State']);
         $countyName = trim($row['County']);
-        $municipality = trim($row['Municipality']);
 
         $state = State::where('short_code', $stateCode)->first();
         if ($state) {
             $county = County::where('county_name', $countyName)->where('stateId', $state->id)->first();
         }
+
+        $municipality = isset($row['Municipality']) ? trim($row['Municipality']) : null;
+
+        if ($municipality) {
         if ($county) {
             $city = City::where('city', $municipality)->where('county_id', $county->id)->first();
-        }
 
-        if(isset($row['Municipality'])){
         if (!$city) {
             $data['comments'] = 'Municipality not matched with database records';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
+        }
         }
         }
 
