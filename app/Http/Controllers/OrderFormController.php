@@ -51,23 +51,26 @@ class OrderFormController extends Controller
             ////
             'oms_order_creations.tier_id as tier_id',
             'oms_order_creations.order_date as order_date',
-            'oms_order_creations.state_id as property_state', // Add this line
-            'oms_order_creations.county_id as property_county', // Add this line
+            'oms_order_creations.state_id as property_state', 
+            'oms_order_creations.county_id as property_county', 
             'stl_item_description.project_code as project_code',
             'stl_item_description.process_name as process_name',
             'stl_item_description.qc_enabled as qc_enabled',
             'oms_state.short_code as short_code',
+            'oms_state.state_name as state_name', 
+            'county.county_name as county_name', 
             'county.county_name as county_name',
             'oms_order_creations.assignee_user_id',
             'oms_order_creations.tier_id',
             'oms_order_creations.assignee_qa_id',
             'oms_order_creations.typist_id',
             'oms_order_creations.typist_qc_id',
-            'stl_item_description.lob_id as lob_id', // Add this line
-            'stl_lob.name as lob_name', // Select the lob name
+            'stl_item_description.lob_id as lob_id',
+            'stl_lob.name as lob_name',
             'stl_client.client_name',
             'stl_item_description.client_id as client_id',
             'stl_process.name as process_type',
+            'stl_process.id as stl_process_id',
             'stl_item_description.tat_value as tat_value',
             DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
             DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
@@ -419,9 +422,9 @@ class OrderFormController extends Controller
                 }
                 
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
-            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails'));
+            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo'));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
-            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails'));
+            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo'));
         } else {
             return redirect('/orders_status');
         }
