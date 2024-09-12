@@ -1593,13 +1593,13 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 }
 
 
-                if ($input['typist_qc_id'] != null && $input['typist_id'] != null) {
-                    OrderCreation::whereIn('id', $orderIds)
-                        ->update([
-                            'typist_qc_id' => $input['typist_qc_id'],
-                            'typist_id' => $input['typist_id'],
-                        ]);
-                }
+                // if ($input['typist_qc_id'] != null && $input['typist_id'] != null) {
+                //     OrderCreation::whereIn('id', $orderIds)
+                //         ->update([
+                //             'typist_qc_id' => $input['typist_qc_id'],
+                //             'typist_id' => $input['typist_id'],
+                //         ]);
+                // }
 
                 if ($input['cover_prep_id'] != null && $input['qcer_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
