@@ -416,7 +416,7 @@ position: relative;
                                     <tbody>
                                         @foreach($famsTypingInfo as $info)
                                             <tr>
-                                                <td>{{ $info->area ?? '' }}</td>
+                                                <td>{{ $info->area ?? '-' }}</td>
                                                 <td>{!! nl2br(e($info->comments ?? '-')) !!}</td>
                                             </tr>
                                         @endforeach

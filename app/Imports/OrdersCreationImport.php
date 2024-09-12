@@ -89,11 +89,11 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'county' => isset($row['County']) ? $row['County'] : null,
             'city' => isset($row['Municipality']) ? $row['Municipality'] : null,
             'status' => isset($row['Status']) ? $row['Status'] : null,
-            'created_by' => $this->userid,
-            'tier' => $row['Tier'] ?? null,
-            'typist_qc_id' => $row['Typist QC'] ?? null,
-            'typist_id' => $row['Typist'] ?? null,
+            'tier' => isset($row['Tier']) ? $row['Tier'] : null,
+            'typist_qc_id' => isset($row['Typist QC']) ? $row['Typist QC'] : null,
+            'typist_id' => isset($row['Typist']) ? $row['Typist'] : null,
             'audit_id' => $this->auditId,
+            'created_by' => $this->userid,
         ];
 
 
@@ -105,12 +105,15 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             return null;
         }
 
-        $stateCode = trim($row['State']);
-        $countyName = trim($row['County']);
-
+        $stateCode = isset($row['State']) ? trim($row['State']) : null;
+        if ($stateCode) {
         $state = State::where('short_code', $stateCode)->first();
+        }
+        $countyName = isset($row['County']) ? trim($row['County']) : null;
+        if ($countyName) {
         if ($state) {
             $county = County::where('county_name', $countyName)->where('stateId', $state->id)->first();
+        }
         }
 
         $municipality = isset($row['Municipality']) ? trim($row['Municipality']) : null;
@@ -187,13 +190,14 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             return null;
         }
 
-        $assignee_user = trim($row['Emp ID-Order Assigned']);
+        $assignee_user = isset($row['Emp ID-Order Assigned']) ? trim($row['Emp ID-Order Assigned']) : null;
+
         if ($assignee_user) {
             $assignee_user = User::where('emp_id', $assignee_user)->whereIn('user_type_id', [6,8])->first();
         }
 
+        $assignee_qa = isset($row['Assignee_QA']) ? trim($row['Assignee_QA']) : null;
 
-        $assignee_qa = trim($row['Assignee_QA']);
         if ($assignee_qa) {
             $assignee_qa = User::where('emp_id', $assignee_qa)->whereIn('user_type_id', [7,8])->first();
         }
