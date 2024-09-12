@@ -401,6 +401,31 @@ position: relative;
                     </div>
                 </div>
                 @endif
+                    @endif
+                    @if(in_array($orderData->stl_process_id, [2, 4, 6]))
+                        <h6 class="font-weight-bold">Product And State Specific Information :</h6>
+                        <div class="card shadow shadow-md rounded shadow-grey mb-4">
+                            <div class="card-body">
+                                <table id="fams_typing_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                    <thead>
+                                        <tr>
+                                        <th style="width: 30%;">Area</th>
+                                            <th>Comments</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($famsTypingInfo as $info)
+                                            <tr>
+                                                <td>{{ $info->area ?? '' }}</td>
+                                                <td>{!! nl2br(e($info->comments ?? '-')) !!}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endif
+                    @if(!in_array($orderData->stl_process_id, [2, 4, 6]))
                 <h6 class="font-weight-bold">Order Submission :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
                     <div class="card-body">
@@ -884,7 +909,7 @@ function formatContent(content) {
         .replace(/\[ \] ([^\[\]]+)/g, '<br>[ ] $1') 
         .replace(/:/g, ':<br>') 
         .replace(/\,/g, ',<br>')
-        .replace(/•/g, '•<br>')
+        .replace(/ï¿½/g, 'ï¿½<br>')
         .replace(/(?:\r\n|\r|\n)/g, '<br>')  
         .replace(/(\d+\.)/g, '<br><b>$1</b>'); 
 }

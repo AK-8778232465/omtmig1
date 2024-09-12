@@ -341,6 +341,83 @@ class OrderFormController extends Controller
                 
                 $sourcedetails = DB::table('oms_accurate_source')->get();
 
+                if ($orderData->lob_id == 8) {
+                    $famsTypingInfo = DB::table('oms_fams_typing_info')
+                        ->where(function ($query) use ($orderData) {
+                            $query->where('lob_id', $orderData->lob_id)
+                                ->where(function ($query) use ($orderData) {
+                                    $query->where('state_id', $orderData->property_state)
+                                            ->orWhereNull('state_id');
+                                });
+                        })
+                        ->where(function ($query) use ($orderData) {
+                            $query->where('product_id', $orderData->process_id)
+                                ->orWhereNull('product_id');
+                        })
+                        ->get();
+                    
+                    if ($famsTypingInfo->isEmpty()) {
+                        $famsTypingInfo = DB::table('oms_fams_typing_info')
+                            ->where('lob_id', $orderData->lob_id)
+                            ->whereNull('state_id')
+                            ->whereNull('product_id')
+                            ->get();
+                    }
+                    $avr_dr_required = (object) ['required' => null]; 
+                
+                    if ($famsTypingInfo->contains('area', 'Parcel ID and Legal requirements')) {
+                        $avr_dr_required = DB::table('oms_avr_dr_required_info')
+                            ->select('required')
+                            ->where('state', $orderData->state_name)
+                            ->where('county', $orderData->county_name)
+                            ->first();
+                    }
+                
+                    $famsTypingInfo->transform(function ($item) use ($avr_dr_required) {
+                        $item->required = $avr_dr_required->required ?? '';
+                
+                        if ($item->area == "Parcel ID and Legal requirements") {
+                            if ($item->required == 1) {
+                                $item->comments = "Parcel Required";
+                            } elseif ($item->required == 2) {
+                                $item->comments = "Legal Required";
+                            }
+                        }
+                
+                        return $item;
+                    });
+                
+                } else {
+                    $famsTypingInfo = DB::table('oms_fams_typing_info')
+                            ->where(function ($query) use ($orderData) {
+                                $query->where('lob_id', $orderData->lob_id)
+                                    ->where(function ($query) use ($orderData) {
+                                        $query->where('state_id', $orderData->property_state)
+                                            ->orWhereNull('state_id');
+                                    });
+                            })
+                            ->where(function ($query) use ($orderData) {
+                                $query->where('product_id', $orderData->process_id)
+                                    ->orWhereNull('product_id');
+                            })
+                            ->get()
+                            ->reject(function ($item) use ($orderData) {
+                                $productIds = [126, 127, 128, 129, 138, 139];
+                                return $item->lob_id == 6 &&
+                                    in_array($item->product_id, $productIds) &&
+                                    $orderData->property_state == 37 &&
+                                    $item->comments == 'if only docket available in SP, we need to add Actual Copy to follow note';
+                            });
+                    
+                    if ($famsTypingInfo->isEmpty()) {
+                        $famsTypingInfo = DB::table('oms_fams_typing_info')
+                            ->where('lob_id', $orderData->lob_id)
+                                ->whereNull('state_id')
+                            ->whereNull('product_id')
+                            ->get();
+                    }
+                }
+                
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails'));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
