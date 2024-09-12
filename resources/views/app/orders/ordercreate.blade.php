@@ -191,7 +191,7 @@
             <div class="card">
                 <div class="card-body rounded shadow-sm " style="border-top:3px solid #0e7c31">
                     <div class="form-group row mb-4 pb-0 pl-3 pr-3 mt-3">
-                        <div class="form-group col-lg-3 mb-0 pb-0">
+                        <div class="form-group col-lg-3 mb-3 pb-0">
                             <label class="font-weight-bold">Order ID<span style="color:red;">*</span></label>
                             <input type="text" id="order_id" name="order_id" class="form-control" placeholder="Enter Order ID" required
                             data-parsley-error-message="Order ID should not be empty."
@@ -199,55 +199,64 @@
                             maxlength="20">
                         </div>
                        {{--new changes--}}
-                        <div class="form-group col-lg-3 mb-0 pb-0">
+                        <div class="form-group col-lg-3 mb-3 pb-0">
                             <label for="order_date" class="font-weight-bold">Order Received Date and Time<span style="color:red;">*</span></label>
                             <br>
                             <div class="input-container">
                             <input type="datetime-local" id="order_date" class="form-control" step="1" name="order_date" required data-parsley-trigger="focusout keyup" data-parsley-error-message="Order Received Date and Time should not be empty" format="MM-DD-YYYY THH:mm" hour24="true">
                             </div>
                         </div>
-                        <div class="form-group col-lg-3 mb-0 pb-0">
+                        <div class="form-group col-lg-3 mb-3 pb-0">
+                            <label class="font-weight-bold">Lob</label>
+                            <select id="lob_id" name="lob_id" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Lob">
+                                <option selected="" disabled="" value="">Select lob</option>
+                                @foreach ($lobs as $lob)
+                                <option value="{{ $lob->id }}" data-client-id="{{ $lob->client_id }}">{{ $lob->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-3 mb-3 pb-0">
+                            <label class="font-weight-bold">Process</label>
+                            <select id="process_type_id" name="process_type_id" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Process">
+                                <option selected="" disabled="" value="">Select Process</option>
+                            </select>
+                        </div>
+                        {{-- Second row --}}
+                        <div class="form-group col-lg-3 mb-3 pb-0">
                             <label class="font-weight-bold">Product<span style="color:red;">*</span></label><br>
                             <select class="form-control select2dropdown" style="width:100%" name="process_code" id="process_code" aria-hidden="true" data-parsley-trigger="focusout keyup"
                             data-parsley-error-message="Product Code should not be empty" data-parsley-errors-container="#process_code_error" required>
-                                <option selected="" disabled="" value="">Select Product</option>
-                                @foreach ($processList as $process)
-                                <option value="{{ $process->id }}" data-client-id="{{ $process->client_id }}">
-                                    {!! $process->project_code.' ('.$process->process_name.')' !!}</option>
-                                @endforeach
+                                <option selected="" disabled="" value="" >Select Product</option>
                             </select>
                             <div id="process_code_error" class="parsley-error"></div>
                         </div>
-                        <div class="form-group col-lg-3 mb-0 pb-0">
-                                <label class="font-weight-bold">Lob</label>
-                                <select id="lob_id" name="lob_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Lob"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
-                                    <option selected="" disabled="" value="">Select lob</option>
-                                </select>
-                        </div>
-                    </div>
-                    <div class="form-group row mb-4 pb-0 pl-3 pr-3">
-                         <div class="form-group col-lg-3 mb-0 pb-0">
+
+
+                         <div class="form-group col-lg-3 mb-3 pb-0">
                             <label class="font-weight-bold">State Code</label><br>
                             <select class="form-control select2dropdown" style="width:100%" name="property_state" id="property_state" aria-hidden="true">
                             <option selected="" disabled="" value="">Select State Code</option>
                             @foreach ($stateList as $state)
                                     <option value="{{ $state->id }}">{{ $state->short_code }}</option>
                             @endforeach
-                        </select>
+                           </select>
                         </div>
-                        <div class="form-group col-lg-3 mb-0 pb-0">
+                        <div class="form-group col-lg-3 mb-3 pb-0">
                             <label class="font-weight-bold">County</label>
                             <select id="property_county" name="property_county" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Enter Property County"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select County</option>
                             </select>
                         </div>
-                        <div class="form-group col-lg-3 mb-0 pb-0" id= "municipality-container">
+                        <div class="form-group col-lg-3 mb-3 pb-0" id= "municipality-container">
                             <label class="font-weight-bold">Municipality</label>
                             <select id="city" name="city" class="form-control select2dropdown" style="width:100%" autocomplete="off"  data-parsley-trigger="focusout keyup">
                                 <option selected="" disabled="" value="">Select Municipality</option>
                             </select>
                         </div>
-                        <div class="form-group col-lg-3 mb-0 pb-0">
+                        {{-- End 2nd --}}
+
+                        {{-- 3rd --}}
+                        <div class="form-group col-lg-3 mb-3 pb-0">
                             <label class="font-weight-bold">Status<span style="color:red;">*</span></label>
                             <select id="order_status" name="order_status" required type="text" class="form-control" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup" data-parsley-error-message="Status should not be Empty ">
                                 <option selected="" disabled="" value="">Select Status</option>
@@ -258,9 +267,7 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
-                    <div class="form-group row mb-4 pb-0 pl-3 pr-3">
-                        <div class="form-group col-lg-3 mb-0 pb-0">
+                        <div class="form-group col-lg-3 mb-3 pb-0">
                             <label class="font-weight-bold">Assign User</label>
                             <select id="assignee_user" name="assignee_user" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected disabled value="">Select Assignee</option>
@@ -269,7 +276,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group col-lg-3 mb-0 pb-0">
+                        <div class="form-group col-lg-3 mb-3 pb-0">
                             <label class="font-weight-bold">Assign QA</label>
                             <select id="assignee_qa" name="assignee_qa" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select QA</option>
@@ -278,7 +285,7 @@
                                 @endforeach
                             </select>
                         </div>
-                            <div class="form-group col-lg-3 mb-0 pb-0" id= "tier-container">
+                        <div class="form-group col-lg-3 mb-3 pb-0" id= "tier-container">
                             <label class="font-weight-bold">Tier</label>
                             <select id="tier_id" name="tier_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Tier"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Tier</option>
@@ -287,7 +294,10 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group col-lg-3 mb-0 pb-0" id= "typist-container">
+                        {{-- 3rd end --}}
+
+                        {{-- 4th --}}
+                        <div class="form-group col-lg-3 mb-3 pb-0" id= "typist-container">
                             <label class="font-weight-bold">Typist</label>
                             <select id="typist_id" name="typist_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Typist</option>
@@ -296,18 +306,18 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
-
-                <div class="form-group row mb-4 pb-0 pl-3 pr-3" id= "typist-qc-container">
-                    <div class="form-group col-lg-3 mb-0 pb-0">
-                        <label class="font-weight-bold">Typist QC</label>
-                        <select id="typist_qc_id" name="typist_qc_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist QC"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
-                            <option selected="" disabled="" value="">Select Typist QC</option>
-                            @foreach ($typist_qcs as $typist_qc)
-                                <option value="{{ $typist_qc->id }}">{{ $typist_qc->username }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+    
+                        <div class="form-group col-lg-3 mb-3 pb-0" id="typist-qc-container">
+                            <label class="font-weight-bold">Typist QC</label>
+                            <select id="typist_qc_id" name="typist_qc_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist QC"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
+                                <option selected="" disabled="" value="">Select Typist QC</option>
+                                @foreach ($typist_qcs as $typist_qc)
+                                    <option value="{{ $typist_qc->id }}">{{ $typist_qc->username }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        {{-- 4th end --}}
+                        
                     </div>
 
                     <div class="text-center form-group row mb-3 pb-2">
@@ -783,32 +793,11 @@ $('#property_county').on('change', function () {
     }, 1000);
 }
 
-$('#process_code').on('change', function () {
-    var process_id = $("#process_code").val();
-    $("#lob_id").html('');
-    $.ajax({
-        url: "{{ url('getlob') }}",
-        type: "POST",
-        data: {
-            process_id: process_id,
-            _token: '{{ csrf_token() }}'
-        },
-        dataType: 'json',
-        success: function (response) {
-            $('#lob_id').html('<option value="">Select LOB</option>');
-            $.each(response, function (key, value) {
-                $("#lob_id").append('<option value="' + value.id + '">' + value.name + '</option>');
-            });
-        }
-    });
-});
-
-
 $('#lob_id').on('change', function () {
     var lob_id = $("#lob_id").val();
-    $("#product_id").html('');
+    $("#process_type_id").html(''); 
     $.ajax({
-        url: "{{ url('getproduct') }}",
+        url: "{{ url('getprocesstypeid') }}",
         type: "POST",
         data: {
             lob_id: lob_id,
@@ -816,13 +805,45 @@ $('#lob_id').on('change', function () {
         },
         dataType: 'json',
         success: function (response) {
-            $('#product_id').html('<option value="">Select Product</option>');
+            $('#process_type_id').html('<option value="">Select Process</option>');
             $.each(response, function (key, value) {
-                $("#product_id").append('<option value="' + value.id + '">' + value.product_name + '</option>');
+                $("#process_type_id").append('<option value="' + value.id + '">' + value.name + '</option>');
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching process types: ", status, error);
+        }
+    });
+});
+
+
+$('#process_type_id').on('change', function () {
+    var lob_id = $("#lob_id").val();
+    var process_type_id = $("#process_type_id").val();
+    console.log(process_type_id);
+    $("#process_code").html('');
+    
+    $.ajax({
+        url: "{{ url('getprocess_code') }}",
+        type: "POST",
+        data: {
+            lob_id: lob_id,
+            process_type_id: process_type_id,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            $('#process_code').html('<option value="">Select Product</option>');
+            $.each(response, function (key, value) {
+                $("#process_code").append('<option value="' + value.id + '">' + value.project_code + ' '+'(' + value.process_name + ')' +'</option>');
+
             });
         }
     });
 });
+
+
+
 
 // Js Dropify
 $(document).ready(function() {
@@ -854,7 +875,7 @@ $(document).ready(function() {
 
 
 $(document).ready(function() {
-    $('#process_code').change(function() {
+    $('#lob_id').change(function() {
         var selectedOption = $(this).find('option:selected');
         var clientId = selectedOption.data('client-id');
 console.log(clientId);
@@ -876,8 +897,7 @@ console.log(clientId);
         }
     });
 
-    // Trigger change event on page load in case there's a pre-selected option
-    $('#process_code').trigger('change');
+    $('#lob_id').trigger('change');
 });
 
 $(document).ready(function () {

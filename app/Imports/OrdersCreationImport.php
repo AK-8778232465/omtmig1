@@ -14,6 +14,7 @@ use App\Models\Status;
 use App\Models\Lob;
 use App\Models\Tier;
 use App\Models\User;
+use App\Models\stlprocess;
 use Carbon\Carbon;
 use DB;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -85,6 +86,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             'assignee_qa' => isset($row['Assignee_QA']) ? $row['Assignee_QA'] : null,
             'process' => isset($row['Product Name']) ? $row['Product Name'] : null,
             'lob' => isset($row['Lob']) ? $row['Lob'] : null,
+            'process_type_id' => isset($row['Process']) ? $row['Process'] : null,
             'state' => isset($row['State']) ? $row['State'] : null,
             'county' => isset($row['County']) ? $row['County'] : null,
             'city' => isset($row['Municipality']) ? $row['Municipality'] : null,
@@ -163,6 +165,34 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 return null;
             }
         }
+
+
+
+
+            $process_type = trim($row['Process']);
+            if ($process_type) {
+                $process_typeid = stlprocess::where('name', $process_type)
+                                    ->where('lob_id', $lob->id)
+                                    ->select('id', 'name')
+                                    ->first();
+                
+                if ($process_typeid) {
+                    $process_type_id = $process_typeid->id; // Use the id of the process
+                } else {
+                    $data['comments'] = 'Process not matched with database records';
+                    OrderTemp::insert($data);
+                    ++$this->unsuccess_rows;
+                    return null;
+                }
+            } else {
+                $data['comments'] = 'Process should not be empty';
+                OrderTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
+
+
+
 
         $Status = trim($row['Status']);
         if (!$Status) {
@@ -312,6 +342,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 'created_by' => $this->userid,
                 'typist_id' => isset($Typist) ? $Typist->id : null,
                 'typist_qc_id' =>isset($TypistQC) ? $TypistQC->id : null,
+                'process_type_id' => $process_type_id, // Use the id
                 'tier_id' => $Tier->id ?? null,
             ]);
 

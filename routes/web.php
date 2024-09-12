@@ -142,10 +142,13 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::post('/updateOrder', 'updateOrder')->name('updateOrder');
     Route::post('/delete_order', 'delete_order')->name('delete_order');
     Route::any('/progressBar', 'progressBar')->name('progressBar');
-
+    
     Route::any('/getStatus', 'getStatus')->name('getStatus');
-    Route::any('/getlob', 'getlob')->name('getlob');
-    Route::any('/getproduct', 'getproduct')->name('getproduct');
+    Route::any('/getlob', 'getlob')->name('getlob');//??
+    Route::any('/getprocesstypeid', 'getprocesstypeid')->name('getprocesstypeid');
+    Route::any('/getprocess_code', 'getprocess_code')->name('getprocess_code');
+
+    Route::any('/getproduct', 'getproduct')->name('getproduct');//??
 
     Route::post('getCities', 'getCities')->name('getCities');
 

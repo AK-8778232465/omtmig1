@@ -14,6 +14,7 @@ use App\Models\Status;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Tier;
+use App\Models\Lob;
 use Carbon\Carbon;
 use DataTables;
 use DB;
@@ -65,32 +66,37 @@ class OrderCreationController extends Controller
         $tierList = Tier::select('id','Tier_id')->get();
         $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 10)->get();
         $typist_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 11)->get();
+        $lobs = Lob::select('id','client_id','name')->get();
+        
 
 
-
-        return view('app.orders.ordercreate', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList','exceldetail','tierList','typists','typist_qcs'));
+        return view('app.orders.ordercreate', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList','exceldetail','tierList','typists','typist_qcs','lobs'));
     }
 
-    public function getlob(Request $request){
 
-        // $query = DB::table('oms_order_creations')
-        //     ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
-        //     ->leftJoin('oms_products', 'stl_item_description.client_id', '=', 'oms_products.client_id')
-        //     ->where('stl_item_description.id', $request->process_id)->pluck('oms_products.lob_id')
-        //     ->toArray();
-        $query = DB::table('stl_item_description')->select('lob_id')->where('id',$request->process_id);
-            $lobData = DB::table('stl_lob')->where('id',$query)->orderBy('name','asc')->get();
-        return response()->json($lobData);
-    }
 
-    public function getproduct(Request $request) {
-        $productList = Product::where('lob_id', $request->lob_id)
-        ->orderBy('product_name','asc')
-            ->where('is_active', 1)
+
+    public function getprocesstypeid(Request $request)
+    {
+        $lob = $request->input('lob_id');
+        $processtype = DB::table('stl_process')
+            ->select('id', 'name')
+            ->where('lob_id', $lob)
             ->get();
-            
-        return response()->json($productList);
+        return response()->json($processtype);
     }
+ 
+    public function getprocess_code(Request $request)
+    {
+        $lob = $request->input('lob_id');
+       
+        $process_type_id = $request->input('process_type_id');
+        $process_code = DB::table('stl_item_description')->select('id', 'process_name', 'project_code', 'process_id')->where('lob_id', $lob)->where('process_id', $process_type_id)->get();
+        return response()->json($process_code);
+
+
+    }
+
     
     public function getCities(Request $request)
     {
@@ -131,6 +137,7 @@ class OrderCreationController extends Controller
             'assignee_user_id' => isset($input['assignee_user']) ? $input['assignee_user'] : NULL,
             'assignee_qa_id' => isset($input['assignee_qa']) ? $input['assignee_qa'] : NULL,
             'lob_id' => isset($input['lob_id']) ? $input['lob_id'] : NULL,
+            'process_type_id' => isset($input['process_type_id']) ? $input['process_type_id'] : NULL,
             'tier_id' => isset($input['tier_id']) ? $input['tier_id'] : NULL,
             'typist_id' => isset($input['typist_id']) ? $input['typist_id'] : NULL,
             'typist_qc_id' => isset($input['typist_qc_id']) ? $input['typist_qc_id'] : NULL,
