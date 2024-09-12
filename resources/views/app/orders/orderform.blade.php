@@ -333,6 +333,7 @@ position: relative;
                   <!-- // -->
                 @endif
                     @if($orderData->client_id == 16)
+                        @if(!in_array($orderData->stl_process_id, [2, 4, 6]))
                 @if(!@empty($countyInfo))
                 <input type="hidden" name="instructionId" id="instructionId" value="{{$instructionId}}">
                 <h6 class="font-weight-bold">Source Information :</h6>
@@ -946,7 +947,7 @@ function formatContent(content) {
         .replace(/\[ \] ([^\[\]]+)/g, '<br>[ ] $1') 
         .replace(/:/g, ':<br>') 
         .replace(/\,/g, ',<br>')
-        .replace(/�/g, '�<br>')
+        .replace(/•/g, '•<br>')
         .replace(/(?:\r\n|\r|\n)/g, '<br>')  
         .replace(/(\d+\.)/g, '<br><b>$1</b>'); 
 }
