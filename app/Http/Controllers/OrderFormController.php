@@ -404,9 +404,9 @@ class OrderFormController extends Controller
                             ->reject(function ($item) use ($orderData) {
                                 $productIds = [126, 127, 128, 129, 138, 139];
                                 return $item->lob_id == 6 &&
-                                    in_array($item->product_id, $productIds) &&
+                                   in_array($orderData->process_id, $productIds) &&
                                     $orderData->property_state == 37 &&
-                                    $item->comments == 'if only docket available in SP, we need to add Actual Copy to follow note';
+                                   $item->comments == 'If only docket available in SP, we need to add Actual Copy to follow note';
                             });
                     
                     if ($famsTypingInfo->isEmpty()) {
