@@ -1305,26 +1305,26 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         })
         ->addColumn('order_id', function ($order) {
             $user = Auth::user();
-            $orderId = '';
+            $orderId = $order->id ?? '';
         
-            if ($user->user_type_id == 8) {
-                if (($order->status_id == 1 && $order->assignee_qa_id != Auth::id()) || 
-                    ($order->status_id == 1 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == Auth::id())) {
-                    $orderId = $order->id ?? '';
-                } elseif (($order->status_id == 4 && $order->assignee_user_id != Auth::id() && $order->assignee_qa_id == Auth::id()) ||
-                            ($order->status_id == 4 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == Auth::id()) || 
-                            ($order->status_id == 4 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == null)) {
-                    $orderId = $order->id ?? '';
-                } elseif (($order->status_id == 13 && $order->associate_id != null) ||($order->status_id == 13 && $order->associate_id == null)
-                ) {
-                        $orderId = $order->id ?? '';
-                    } 
-                else {
-                    $orderId = '';
-                }
-            } else {
-                $orderId = $order->id ?? '';
-            }
+            // if ($user->user_type_id == 8) {
+            //     if (($order->status_id == 1 && $order->assignee_qa_id != Auth::id()) || 
+            //         ($order->status_id == 1 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == Auth::id())) {
+            //         $orderId = $order->id ?? '';
+            //     } elseif (($order->status_id == 4 && $order->assignee_user_id != Auth::id() && $order->assignee_qa_id == Auth::id()) ||
+            //                 ($order->status_id == 4 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == Auth::id()) || 
+            //                 ($order->status_id == 4 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == null)) {
+            //         $orderId = $order->id ?? '';
+            //     } elseif (($order->status_id == 13 && $order->associate_id != null) ||($order->status_id == 13 && $order->associate_id == null)
+            //     ) {
+            //             $orderId = $order->id ?? '';
+            //         } 
+            //     else {
+            //         $orderId = '';
+            //     }
+            // } else {
+            //     $orderId = $order->id ?? '';
+            // }
 
             return '<span class="px-2 py-1 rounded text-white goto-order ml-2" id="goto_' . $orderId . '">' . $order->order_id . '</span>';
         })
