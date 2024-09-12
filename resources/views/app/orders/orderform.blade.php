@@ -482,6 +482,7 @@ position: relative;
                                         </div>
                                             <div class="col-10 mb-2">
                                     <div class="font-weight-bold mb-1 mt-1">Status :</div>
+                                        <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
                                         <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
                                             <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                             <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
@@ -501,6 +502,41 @@ position: relative;
                                 </div>
                         </div>
                     </div>
+                    @endif
+                    @if(in_array($orderData->stl_process_id, [2, 4, 6]))
+                    <h6 class="font-weight-bold">Order Submission :</h6>
+                    <div class="card shadow shadow-md rounded showdow-grey mb-4">
+                        <div class="card-body">
+                                    <div class="row mt-4 mb-4">
+                                <div class="col-lg-4 ">
+                                    <div class="font-weight-bold">Comments :</div>
+                                    <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
+                                </div>
+                                    <div class="col-lg-5 mx-5 mt-1">
+                                        <div class="row">
+                                            <div class="col-10 mb-2">
+                                                <div class="font-weight-bold mb-1 mt-1">Status :</div>
+                                                <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
+                                                <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                    <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                    <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
+                                                    <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+                                                    <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                    <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                                    <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
+                                                    <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-center my-4">
+                                    <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
+                                    <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit" name="coversheetsubmit" onclick="order_submition({{$orderData->id}},2)" type="submit">Coversheet Prep & Submit</button>
+                                </div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -520,6 +556,7 @@ position: relative;
                                         <div class="col-10 mb-2">
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
+                                                <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
                                                     <select class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
                                                         @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
@@ -674,6 +711,7 @@ function order_submition(orderId, type) {
         var check_box_id = $("#check_box_id").val();
         var orderComment = $("#order_comment").val();
         var orderStatus = $("#order_status").val();
+    var currentStatusId = $("#current_status_id").val();
         var tierId = $("#tier_id").val();
         var productId = $("#process_id").val();
         var propertystate = $("#property_state").val();
@@ -687,7 +725,6 @@ function order_submition(orderId, type) {
     var accurateClientId = $("#client_id_").val();
     var portalfeecost = $("#portal_fee_cost_id").val();
     var source = $("#source_id").val();
-    // var productionDate = $("#production_date_id").val();
     var copyCost = $("#copy_cost_id").val();
     var noOfSearch = $("#no_of_search_id").val();
     var documentRetrive = $("#document_retrive_id").val();
@@ -713,6 +750,7 @@ function order_submition(orderId, type) {
             check_box_id: check_box_id,
             orderComment: orderComment,
             orderStatus: orderStatus,
+            currentStatusId: currentStatusId,
             stateId: propertystate,
             cityId: city,
             countyId: propertycounty,
@@ -726,7 +764,6 @@ function order_submition(orderId, type) {
         accurateClientId: accurateClientId,
         portalfeecost: portalfeecost,
         source: source,
-        // productionDate: productionDate,
         copyCost: copyCost,
         noOfSearch: noOfSearch,
         documentRetrive: documentRetrive,

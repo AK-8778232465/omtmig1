@@ -326,7 +326,7 @@ class OrderFormController extends Controller
 
             $orderstatusInfo = DB::table('order_status_history')
                 ->leftJoin('oms_users', 'order_status_history.created_by', '=', 'oms_users.id')
-                ->leftJoin('oms_status', 'order_status_history.status_id', '=', 'oms_status.id')
+                ->leftJoin('oms_status', 'order_status_history.current_status_id', '=', 'oms_status.id')
                 ->select(
                     'order_status_history.comment',
                     'oms_status.status',
@@ -535,6 +535,7 @@ class OrderFormController extends Controller
                 DB::table('order_status_history')->insert([
                     'order_id' => $orderId,
                     'status_id' => $request->orderStatus,
+                    'current_status_id' => $request->currentStatusId,
                     'comment' => $request->orderComment,
                     'checked_array' => $request->checklistItems,
                     'created_at' => Carbon::now()->setTimezone('America/New_York'),
