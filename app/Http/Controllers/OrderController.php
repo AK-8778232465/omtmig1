@@ -194,8 +194,9 @@ class OrderController extends Controller
             ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
             ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
             ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
-            ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
             ->leftJoin('oms_tier','oms_order_creations.tier_id', '=', 'oms_tier.id')
+            ->leftJoin('stl_process', 'oms_order_creations.process_type_id', '=', 'stl_process.id')
+            
             ->select(
                 'oms_order_creations.id',
                 'oms_order_creations.order_id as order_id',
@@ -937,8 +938,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
             ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
             ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
-            ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
             ->leftJoin('oms_tier','oms_order_creations.tier_id', '=', 'oms_tier.id')
+            ->leftJoin('stl_process', 'oms_order_creations.process_type_id', '=', 'stl_process.id')
+
             ->select(
                 'oms_order_creations.id',
                 'oms_order_creations.order_id as order_id',
