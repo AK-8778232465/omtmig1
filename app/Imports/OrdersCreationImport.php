@@ -268,9 +268,10 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
 
         $existingOrder = OrderCreation::where('order_id', $data['order_id'])
-       ->whereDate('order_date', '=', $data['order_date'])
-       ->where('process_id', $process->id)
-            ->exists();
+            ->whereDate('order_date', '=', $data['order_date'])
+            ->where('process_id', $process->id)
+            ->where('process_type_id', $process_typeid->id)
+                    ->exists();
 
 
         if ($existingOrder) {
@@ -294,6 +295,10 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             ->where('lob_id', $lob->id)
             ->first();
 
+        $process_type = DB::table('stl_process')
+            ->where('lob_id', $lob->id)
+            ->first();
+
         if (!$processOrg) {
             $data['comments'] = 'Product Name not matched with database records for the given Lob';
             OrderTemp::insert($data);
@@ -304,11 +309,13 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         $existingOrder = OrderCreation::where('order_id', $data['order_id'])
         ->whereDate('order_date', '=', $data['order_date'])
         ->where('process_id', $processOrg->id)
+        ->where('process_type_id', $process_type->id)
              ->exists();
  
+
  
          if ($existingOrder) {
-             $data['comments'] = 'Duplicate Order ID and Order Date found';
+             $data['comments'] = 'Duplicate Order ID and Order Date or Process found';
              OrderTemp::insert($data);
              ++$this->unsuccess_rows;
              return null;
