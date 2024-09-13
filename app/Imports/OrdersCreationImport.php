@@ -292,12 +292,14 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
 
         $processOrg = Process::where('process_name', $process->process_name)
-            ->where('lob_id', $lob->id)
             ->first();
 
         $process_type = DB::table('stl_process')
             ->where('lob_id', $lob->id)
+            ->where('id', $process_type_id)
             ->first();
+
+            
 
         if (!$processOrg) {
             $data['comments'] = 'Product Name not matched with database records for the given Lob';
