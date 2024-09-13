@@ -289,9 +289,9 @@
                             <label class="font-weight-bold">Tier</label>
                             <select id="tier_id" name="tier_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Tier"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Tier</option>
-                                @foreach ($tierList as $tier)
+                                <!-- @foreach ($tierList as $tier)
                                     <option value="{{ $tier->id }}">{{ $tier->Tier_id }}</option>
-                                @endforeach
+                                @endforeach -->
                             </select>
                         </div>
                         {{-- 3rd end --}}
@@ -822,6 +822,7 @@ $('#process_type_id').on('change', function () {
     var process_type_id = $("#process_type_id").val();
     console.log(process_type_id);
     $("#process_code").html('');
+    $("#tier_id").html(''); 
     
     $.ajax({
         url: "{{ url('getprocess_code') }}",
@@ -834,9 +835,17 @@ $('#process_type_id').on('change', function () {
         dataType: 'json',
         success: function (response) {
             $('#process_code').html('<option value="">Select Product</option>');
-            $.each(response, function (key, value) {
-                $("#process_code").append('<option value="' + value.id + '">' + value.project_code + ' '+'(' + value.process_name + ')' +'</option>');
+            $.each(response.process_code, function (key, value) {
+                $("#process_code").append('<option value="' + value.id + '">' + value.project_code + ' ' + '(' + value.process_name + ')' + '</option>');
+            });
 
+            $('#tier_id').html('<option value="">Select Tier</option>');
+            $.each(response.tiers, function (key, value) {
+                if (value.Tier_id !== undefined) { 
+                    $("#tier_id").append('<option value="' + value.id + '">' + value.Tier_id + '</option>');
+                } else {
+                    console.error('Tier_id is undefined for one of the records.');
+                }
             });
         }
     });
