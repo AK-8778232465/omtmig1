@@ -54,6 +54,7 @@ class OrderCreationController extends Controller
             $processIds = DB::table('stl_item_description')->where('is_approved', 1)->where('is_active', 1)->pluck('id')->toArray();
         } else {
             $processIds = DB::table('oms_user_service_mapping')->whereIn('user_id', $reportingUserIds)->where('is_active', 1)->pluck('service_id')->toArray();
+    
         }
         $processList = DB::table('stl_item_description')->where('is_approved', 1)->where('is_active', 1)->whereIn('id', $processIds)->select('id', 'process_name', 'project_code', 'client_id')->orderBy('project_code')->get();
         $stateList = State::select('id', 'short_code')->get();
@@ -66,11 +67,14 @@ class OrderCreationController extends Controller
         $tierList = Tier::select('id','Tier_id')->get();
         $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 10)->get();
         $typist_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 11)->get();
+
+        $mapped_lobs = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
+        
         $lobs = DB::table('stl_item_description')
         ->leftjoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
         ->where('stl_item_description.is_approved', 1)
         ->where('stl_item_description.is_active', 1)
-        ->whereIn('stl_item_description.id', $processIds)
+        ->whereIn('stl_item_description.id', $mapped_lobs)
         ->select(
             'stl_lob.name as name',
             'stl_lob.client_id as client_id',
@@ -92,12 +96,8 @@ class OrderCreationController extends Controller
         $lob = $request->input('lob_id');
  
         $user = User::where('id', Auth::id())->first();
- 
-        $processList=[];
-        session(['user_type_id' => $user->user_type_id]);
-        $reportingUserIds = User::getAllLowerLevelUserIds(Auth::id());
        
-        $processIds = DB::table('oms_user_service_mapping')->whereIn('user_id', $user)->where('is_active', 1)->pluck('service_id')->toArray();
+        $processIds = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
    
  
         $processtype = DB::table('stl_process')
@@ -117,9 +117,7 @@ class OrderCreationController extends Controller
  
         $user = User::where('id', Auth::id())->first();
  
-        $reportingUserIds = User::getAllLowerLevelUserIds(Auth::id());
- 
-        $processIds = DB::table('oms_user_service_mapping')->whereIn('user_id', $user)->where('is_active', 1)->pluck('service_id')->toArray();
+        $processIds = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
  
         $lob = $request->input('lob_id');
        
@@ -144,7 +142,7 @@ class OrderCreationController extends Controller
 
 
 
-    
+
 
     
     public function getCities(Request $request)
