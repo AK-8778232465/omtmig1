@@ -407,7 +407,7 @@ class OrderFormController extends Controller
                             })
                             ->get()
                             ->reject(function ($item) use ($orderData) {
-                                $productIds = [126, 127, 128, 129, 138, 139];
+                                $productIds = [117, 118, 119, 120, 129, 130];
                                 return $item->lob_id == 6 &&
                                    in_array($orderData->process_id, $productIds) &&
                                     $orderData->property_state == 37 &&
