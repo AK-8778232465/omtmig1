@@ -36,7 +36,7 @@ class OrderFormController extends Controller
         ->leftJoin('oms_users as typist_users', 'oms_order_creations.typist_id', '=', 'typist_users.id')
         ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
         ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
-        ->leftJoin('stl_process', 'oms_order_creations.process_type_id', '=', 'stl_process.id')
+        ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
         ->leftJoin('oms_city','oms_order_creations.city_id','=','oms_city.id')
         ->select(
             'oms_order_creations.id',
@@ -298,9 +298,7 @@ class OrderFormController extends Controller
 
             $productList = product::select('id','product_name')->get();
 
-            $tierList = Tier::select('id', 'tier_id')
-                ->whereRaw('JSON_CONTAINS(stl_process_id, \'["' . $orderData->stl_process_id . '"]\')')
-                ->get();
+            $tierList = Tier::select('id','tier_id')->get();
    
         $lobList = DB::table('stl_lob')->select('id', 'name')->get(); 
 
