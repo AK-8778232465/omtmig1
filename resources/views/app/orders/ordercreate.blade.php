@@ -302,7 +302,7 @@
                             <select id="typist_id" name="typist_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Typist</option>
                                 @foreach ($typists as $typist)
-                                    <option value="{{ $typist->id }}">{{ $typist->username }}</option>
+                                <option value="{{ $typist->id }}">{{ $typist->emp_id. " (" .$typist->username. ")"  }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -312,7 +312,7 @@
                             <select id="typist_qc_id" name="typist_qc_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist QC"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Typist QC</option>
                                 @foreach ($typist_qcs as $typist_qc)
-                                    <option value="{{ $typist_qc->id }}">{{ $typist_qc->username }}</option>
+                                <option value="{{ $typist_qc->id }}">{{ $typist_qc->emp_id. " (" .$typist_qc->username. ")"  }}</option>
                                 @endforeach
                             </select>
                         </div>

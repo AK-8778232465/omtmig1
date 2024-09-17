@@ -125,10 +125,26 @@ class OrderCreationController extends Controller
        
         $process_type_id = $request->input('process_type_id');
         $process_code = DB::table('stl_item_description')->select('id', 'process_name', 'project_code', 'process_id')->where('lob_id', $lob)->where('process_id', $process_type_id)->whereIn('id', $processIds )->get();
-        return response()->json($process_code);
+
+    $get_tier = DB::table('oms_tier')
+        ->select('id', 'Tier_id')
+        ->where(function($query) use ($process_type_id) {
+            $query->where('stl_process_id', 'LIKE', '%"'.$process_type_id.'"%');
+        })
+        ->get();
+
+    return response()->json([
+        'process_code' => $process_code,
+        'tiers' => $get_tier
+    ]);
  
  
     }
+
+
+
+
+    
 
     
     public function getCities(Request $request)
