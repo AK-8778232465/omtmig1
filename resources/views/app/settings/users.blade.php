@@ -132,7 +132,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    @role('Super Admin|Business Head|SPOC')
+                                    @role('Super Admin|Business Head|SPOC|PM/TL')
                                     <a href="#"><span class="edit_user ml-2"  data-id="{{ $users->id }}">
                                         <img class="menuicon tbl_editbtn" src="{{asset('assets/images/edit.svg')}}" >&nbsp;
                                     </span></a>
