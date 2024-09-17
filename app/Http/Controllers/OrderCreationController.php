@@ -66,8 +66,19 @@ class OrderCreationController extends Controller
         $tierList = Tier::select('id','Tier_id')->get();
         $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 10)->get();
         $typist_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 11)->get();
-        $lobs = Lob::select('id','client_id','name')->get();
-        
+        $lobs = DB::table('stl_item_description')
+        ->leftjoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
+        ->where('stl_item_description.is_approved', 1)
+        ->where('stl_item_description.is_active', 1)
+        ->whereIn('stl_item_description.id', $processIds)
+        ->select(
+            'stl_lob.name as name',
+            'stl_lob.client_id as client_id',
+            'stl_lob.id as id',
+           
+        )
+        ->distinct()
+        ->get();
 
 
         return view('app.orders.ordercreate', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList','exceldetail','tierList','typists','typist_qcs','lobs'));
@@ -75,39 +86,48 @@ class OrderCreationController extends Controller
 
 
 
-
+    
     public function getprocesstypeid(Request $request)
     {
         $lob = $request->input('lob_id');
+ 
+        $user = User::where('id', Auth::id())->first();
+ 
+        $processList=[];
+        session(['user_type_id' => $user->user_type_id]);
+        $reportingUserIds = User::getAllLowerLevelUserIds(Auth::id());
+       
+        $processIds = DB::table('oms_user_service_mapping')->whereIn('user_id', $user)->where('is_active', 1)->pluck('service_id')->toArray();
+   
+ 
         $processtype = DB::table('stl_process')
-            ->select('id', 'name')
-            ->where('lob_id', $lob)
+        ->leftjoin('stl_item_description', 'stl_process.id', '=', 'stl_item_description.process_id')
+            ->select('stl_process.id', 'stl_process.name')
+            ->whereIn('stl_item_description.id', $processIds)
+            ->where('stl_process.lob_id', $lob)
+            ->where('stl_item_description.lob_id', $lob)
+            ->groupBy('stl_process.id')
             ->get();
         return response()->json($processtype);
     }
- 
+
+
     public function getprocess_code(Request $request)
     {
+ 
+        $user = User::where('id', Auth::id())->first();
+ 
+        $reportingUserIds = User::getAllLowerLevelUserIds(Auth::id());
+ 
+        $processIds = DB::table('oms_user_service_mapping')->whereIn('user_id', $user)->where('is_active', 1)->pluck('service_id')->toArray();
+ 
         $lob = $request->input('lob_id');
-        $process_type_id = $request->input('process_type_id');
        
-        $process_code = DB::table('stl_item_description')
-            ->select('id', 'process_name', 'project_code', 'process_id')
-            ->where('lob_id', $lob)
-            ->where('process_id', $process_type_id)
-            ->get();
-
-        $get_tier = DB::table('oms_tier')
-            ->select('id', 'Tier_id')
-            ->where(function($query) use ($process_type_id) {
-                $query->where('stl_process_id', 'LIKE', '%"'.$process_type_id.'"%');
-            })
-            ->get();
-
-        return response()->json([
-            'process_code' => $process_code,
-            'tiers' => $get_tier
-        ]);
+        $process_type_id = $request->input('process_type_id');
+        $process_code = DB::table('stl_item_description')->select('id', 'process_name', 'project_code', 'process_id')->where('lob_id', $lob)->where('process_id', $process_type_id)->whereIn('id', $processIds )->get();
+        return response()->json($process_code);
+ 
+ 
     }
 
     
