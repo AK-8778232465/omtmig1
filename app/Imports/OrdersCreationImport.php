@@ -132,7 +132,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
         }
         }
-
+        
         $process = trim($row['Product Name']);
         if (!$process) {
             $data['comments'] = 'Product Name should not be empty';
@@ -148,7 +148,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 return null;
             }
         }
-
+      
         //Lob
         $lob = trim($row['Lob']);
         if (!$lob) {
@@ -167,19 +167,36 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
 
 
-
-
             $process_type = trim($row['Process']);
             if ($process_type) {
-                $process_typeid = stlprocess::where('name', $process_type)
-                                    ->where('lob_id', $lob->id)
-                                    ->select('id', 'name')
-                                    ->first();
-                
-                if ($process_typeid) {
-                    $process_type_id = $process_typeid->id; // Use the id of the process
+            $process = trim($row['Product Name']);
+
+                $stl_process = stlprocess::where('name', $process_type)
+                    ->where('lob_id', $lob->id) 
+                    ->first();
+            
+                if ($stl_process) {
+            
+                    $process_typeid = Process::leftJoin('stl_lob', 'stl_lob.id', '=', 'stl_item_description.lob_id')
+                        ->leftJoin('stl_process', 'stl_process.id', '=', 'stl_item_description.process_id')
+                        ->where('stl_item_description.process_id', $stl_process->id)
+                        ->where('stl_item_description.lob_id', $lob->id)
+                        ->where('stl_item_description.process_name', $process)
+                        ->select('stl_item_description.id', 'stl_item_description.process_name')
+                        ->first();
+                        // dd($process_typeid);
+                    
+                    if ($process_typeid) {
+                        $process_type_id = $process_typeid->id;
+                        // dd($process_type_id);
+                    } else {
+                        $data['comments'] = 'Process not matched with database records';
+                        OrderTemp::insert($data);
+                        ++$this->unsuccess_rows;
+                        return null;
+                    }
                 } else {
-                    $data['comments'] = 'Process not matched with database records';
+                    $data['comments'] = 'Process not found in database';
                     OrderTemp::insert($data);
                     ++$this->unsuccess_rows;
                     return null;
@@ -190,6 +207,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 ++$this->unsuccess_rows;
                 return null;
             }
+            
 
 
 
@@ -254,6 +272,31 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
     }
         }
 
+        $processOrg = trim($row['Product Name']);
+        if ($processOrg) {
+                $process_orgid = Process::leftJoin('stl_lob', 'stl_lob.id', '=', 'stl_item_description.lob_id')
+                    ->where('stl_item_description.lob_id', $lob->id)
+                    ->where('stl_item_description.process_name', $processOrg)
+                    ->select('stl_item_description.id', 'stl_item_description.process_name')
+                    ->first();
+                
+                if ($process_orgid) {
+                    $processOrg = $process_orgid;
+                } else {
+                    $data['comments'] = 'Process not matched with database records';
+                    OrderTemp::insert($data);
+                    ++$this->unsuccess_rows;
+                    return null;
+                }
+           
+        } else {
+            $data['comments'] = 'Process should not be empty';
+            OrderTemp::insert($data);
+            ++$this->unsuccess_rows;
+            return null;
+        }
+
+
 
 
         if (isset($row['Tier'])){
@@ -269,8 +312,8 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         $existingOrder = OrderCreation::where('order_id', $data['order_id'])
             ->whereDate('order_date', '=', $data['order_date'])
-            ->where('process_id', $process->id)
-            ->where('process_type_id', $process_typeid->id)
+            ->where('process_id', $processOrg->id)
+            ->where('process_type_id', $process_typeid->process_id)
                     ->exists();
 
 
@@ -291,13 +334,71 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             return null;
         }
 
-        $processOrg = Process::where('process_name', $process->process_name)
-            ->first();
+        $processOrg = trim($row['Product Name']);
+        if ($processOrg) {
+                $process_orgid = Process::leftJoin('stl_lob', 'stl_lob.id', '=', 'stl_item_description.lob_id')
+                    ->where('stl_item_description.lob_id', $lob->id)
+                    ->where('stl_item_description.process_name', $processOrg)
+                    ->select('stl_item_description.id', 'stl_item_description.process_name')
+                    ->first();
+                
+                if ($process_orgid) {
+                    $processOrg = $process_orgid;
+                } else {
+                    $data['comments'] = 'Process not matched with database records';
+                    OrderTemp::insert($data);
+                    ++$this->unsuccess_rows;
+                    return null;
+                }
+           
+        } else {
+            $data['comments'] = 'Process should not be empty';
+            OrderTemp::insert($data);
+            ++$this->unsuccess_rows;
+            return null;
+        }
+          
 
-        $process_type = DB::table('stl_process')
-            ->where('lob_id', $lob->id)
-            ->where('id', $process_type_id)
-            ->first();
+
+
+            $process_type = trim($row['Process']);
+            if ($process_type) {
+            $process = trim($row['Product Name']);
+
+                $stl_process = stlprocess::where('name', $process_type)
+                    ->where('lob_id', $lob->id) 
+                    ->first();
+            
+                if ($stl_process) {
+
+                    $process_typeid = Process::leftJoin('stl_lob', 'stl_lob.id', '=', 'stl_item_description.lob_id')
+                        ->leftJoin('stl_process', 'stl_process.id', '=', 'stl_item_description.process_id')
+                        ->where('stl_item_description.process_id', $stl_process->id)
+                        ->where('stl_item_description.lob_id', $lob->id)
+                        ->where('stl_item_description.process_name', $process)
+                        ->select('stl_item_description.process_id', 'stl_item_description.process_name')
+                        ->first();
+                    
+                    if ($process_typeid) {
+                        $process_type_id = $process_typeid;
+                    } else {
+                        $data['comments'] = 'Process not matched with database records';
+                        OrderTemp::insert($data);
+                        ++$this->unsuccess_rows;
+                        return null;
+                    }
+                } else {
+                    $data['comments'] = 'Process not found in database';
+                    OrderTemp::insert($data);
+                    ++$this->unsuccess_rows;
+                    return null;
+                }
+            } else {
+                $data['comments'] = 'Process should not be empty';
+                OrderTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
 
             
 
@@ -311,7 +412,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         $existingOrder = OrderCreation::where('order_id', $data['order_id'])
         ->whereDate('order_date', '=', $data['order_date'])
         ->where('process_id', $processOrg->id)
-        ->where('process_type_id', $process_type->id)
+        ->where('process_type_id', $process_typeid->process_id)
              ->exists();
  
 
@@ -351,7 +452,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 'created_by' => $this->userid,
                 'typist_id' => isset($Typist) ? $Typist->id : null,
                 'typist_qc_id' =>isset($TypistQC) ? $TypistQC->id : null,
-                'process_type_id' => $process_type_id, // Use the id
+                'process_type_id' => $process_type_id->process_id, // Use the id
                 'tier_id' => $Tier->id ?? null,
                 'lob_id' => $lob->id ?? null
             ]);
