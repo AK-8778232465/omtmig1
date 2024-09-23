@@ -310,11 +310,15 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             }
         }
 
+        $orderDate_condition = \Carbon\Carbon::parse($data['order_date'])->format('Y-m-d');
+
         $existingOrder = OrderCreation::where('order_id', $data['order_id'])
-            ->whereDate('order_date', '=', $data['order_date'])
-            ->where('process_id', $processOrg->id)
-            ->where('process_type_id', $process_typeid->process_id)
+                    ->whereDate('order_date', '=', $orderDate_condition)
+                    ->where('process_id', $processOrg->id)
+                    ->where('lob_id',  $lob->id)
+                    ->where('process_type_id', $process_typeid->process_id)
                     ->exists();
+        
 
 
         if ($existingOrder) {
@@ -409,11 +413,15 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             return null;
         }
 
+        $orderDate_condition = \Carbon\Carbon::parse($data['order_date'])->format('Y-m-d');
+
         $existingOrder = OrderCreation::where('order_id', $data['order_id'])
-        ->whereDate('order_date', '=', $data['order_date'])
-        ->where('process_id', $processOrg->id)
-        ->where('process_type_id', $process_typeid->process_id)
-             ->exists();
+                    ->whereDate('order_date', '=', $orderDate_condition)
+                    ->where('process_id', $processOrg->id)
+                    ->where('lob_id',  $lob->id)
+                    ->where('process_type_id', $process_typeid->process_id)
+                    ->exists();
+
  
 
  
