@@ -397,11 +397,36 @@ class OrderCreationController extends Controller
     }
 
     public function delete_order(Request $request)
-    {
-        $DeleteOrder = OrderCreation::where('id', $request->id)->update(['is_active' => 0]);
+{
+    try {
+        if ($request->has('type_id') && !empty($request->orders)) {
+            $DeleteOrder = OrderCreation::where('status_id', $request->type_id)
+                ->whereIn('id', $request->orders)
+                ->update(['is_active' => 0]);
 
-        return response()->json(['data' => 'success','msg' => 'Deleted Successfully']);
+            if ($DeleteOrder) {
+                return response()->json(['data' => 'success', 'msg' => 'Orders deleted successfully']);
+            } else {
+                return response()->json(['data' => 'error', 'msg' => 'No orders found to delete'], 404);
     }
+        }
+        elseif ($request->has('id')) {
+            $DeleteOrder = OrderCreation::where('id', $request->id)
+                ->update(['is_active' => 0]);
+
+            if ($DeleteOrder) {
+                return response()->json(['data' => 'success', 'msg' => 'Order deleted successfully']);
+            } else {
+                return response()->json(['data' => 'error', 'msg' => 'Order not found to delete'], 404);
+            }
+        } else {
+            return response()->json(['data' => 'error', 'msg' => 'Invalid request data'], 400);
+        }
+    } catch (\Exception $e) {
+        return response()->json(['data' => 'error', 'msg' => 'Failed to delete orders. Please try again.'], 500);
+    }
+}
+
 
     public function progressBar(Request $request)
     {

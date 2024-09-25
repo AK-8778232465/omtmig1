@@ -342,6 +342,7 @@
                                 </div>
                                 <div class="col-2">
                                     <button type="submit" class="btn btn-sm btn-primary" id="assignBtn" name="assign">Assign</button>
+                                    <button class="btn btn-sm btn-danger ml-2" id="deleteBtn" name="deleteBtn">Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -1613,6 +1614,71 @@ $(document).on('click', '.status-dropdown', function() {
             });
         }
     });
+
+
+$('#deleteBtn').click(function (event) {
+    event.preventDefault();
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to delete the selected order(s)? This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, cancel!'
+    }).then((result) => {
+        if (result.value) {
+            if ($("#assignmentForm").parsley().isValid()) {
+                
+                let task_status = $('#statusButtons').find('.btn-primary').attr('id');
+                let status = task_status.replace("status_", ""); 
+                let checkedOrdersArray = $('input[name="orders[]"]:checked').map(function () {
+                    return $(this).val();
+                }).get();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('delete_order') }}", 
+                    data: {
+                        type_id: status,                 
+                        orders: checkedOrdersArray,     
+                        _token: '{{ csrf_token() }}'    
+                    },
+                    success: function (response) {
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: response.msg,
+                            icon: "success",
+                            timer: 1000
+                        });
+
+                        page_reload();
+                    },
+                    error: function (error) {
+                        var err = Object.values(error.responseJSON.errors).map(function (errorArray) {
+                            return errorArray.join('<br>');
+                        }).join('<br>');
+
+                        Swal.fire({
+                            title: "Error",
+                            html: err, 
+                            icon: "error",
+                            timer: 2000
+                        });
+                    }
+                });
+            }
+        } else {
+            Swal.fire({
+                title: "Cancelled",
+                text: "Your order(s) are safe!",
+                icon: "info",
+                timer: 1500
+            });
+        }
+    });
+});
 
     $(document).on("click", ".assign-me", function (event) {
         let task_status = $('#statusButtons').find('.btn-primary').attr('id');
