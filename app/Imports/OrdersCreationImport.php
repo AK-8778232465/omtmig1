@@ -274,10 +274,19 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         $processOrg = trim($row['Product Name']);
         if ($processOrg) {
+
+            $process_type = trim($row['Process']);
+
+                    $stl_process = stlprocess::where('name', $process_type)
+                    ->where('lob_id', $lob->id) 
+                    ->first();
+
                 $process_orgid = Process::leftJoin('stl_lob', 'stl_lob.id', '=', 'stl_item_description.lob_id')
+                ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
                     ->where('stl_item_description.lob_id', $lob->id)
                     ->where('stl_item_description.process_name', $processOrg)
-                    ->select('stl_item_description.id', 'stl_item_description.process_name')
+                    ->where('stl_item_description.process_id', $stl_process->id)
+                    ->select('stl_item_description.id', 'stl_item_description.process_name', 'stl_item_description.process_id')
                     ->first();
                 
                 if ($process_orgid) {
@@ -340,10 +349,19 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         $processOrg = trim($row['Product Name']);
         if ($processOrg) {
+
+            $process_type = trim($row['Process']);
+
+                    $stl_process = stlprocess::where('name', $process_type)
+                    ->where('lob_id', $lob->id) 
+                    ->first();
+
                 $process_orgid = Process::leftJoin('stl_lob', 'stl_lob.id', '=', 'stl_item_description.lob_id')
+                ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
                     ->where('stl_item_description.lob_id', $lob->id)
                     ->where('stl_item_description.process_name', $processOrg)
-                    ->select('stl_item_description.id', 'stl_item_description.process_name')
+                    ->where('stl_item_description.process_id', $stl_process->id)
+                    ->select('stl_item_description.id', 'stl_item_description.process_name', 'stl_item_description.process_id')
                     ->first();
                 
                 if ($process_orgid) {
