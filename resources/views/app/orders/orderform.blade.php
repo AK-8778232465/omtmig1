@@ -3,66 +3,104 @@
 @section('content')
 <style>
 
-.card-body #timer ul li {
+         .card-body #timer ul li {
   display: inline-block;
   font-size: 0.5em;
   list-style-type: none;
-  padding: 1em;
-}
+        }
 
-.card-body #timer ul li span {
+        .card-body #timer ul li span {
   display: block;
   font-size: 1rem;
-}
+        }
 
-.adjust-colon {
-position: relative;
+        .adjust-colon {
+            position: relative;
     top: -15px;
-}
+        }
 
-.timer-green {
+        .timer-green {
     color: #41B680;
     font-size: 14px;      
-}
+        }
 
-.timer-red {
+        .timer-gold {
+            color: #0000FF;
+            font-size: 14px;
+        }
+
+        .timer-orange {
+            color: orange;
+            font-size: 14px;      
+        }
+
+        .timer-red {
     color: red;
     font-size: 14px;
-}
+        }
 
-#headline.timer-red{
+        #headline.timer-red {
     color: white;  
     background-color: red !important; 
-}
+        }
 
-
-#headline.timer-green{
+        #headline.timer-green {
     color: white; 
     background-color: #41B680 !important; 
-}
+        }
+
+        #headline.timer-gold {
+    color: white; 
+            background-color: #0000FF !important;
+        }
+
+        #headline.timer-orange {
+            color: white;
+            background-color: orange !important;
+        }
+
+        .sticky-container {
+    position: sticky;
+    top: 60px; 
+    z-index: 10; 
+    background-color: white;
+        }
+
+        .error-message {
+        font-size: 3rem; 
+        font-weight: bold;
+        color: #333;
+        margin-top: 20px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
 
 </style>
-<div class="col-lg-12 mt-2">
-    <div class="card">
-        <div class="card-body">
-            <div class="p-0">
-                <div class="d-flex justify-content-center">
-                    <h5 class="border bg-info rounded font-weight-bold fs-4 text-uppercase border-grey px-2 py-1">{{$orderData->client_name}} - {{$orderData->process_type}}</h5>
-                </div>
-                <div class="row">
-                    <div class="col-md-3 mt-5">
-                        <div class="d-flex">
+<div class="col-lg-12">
+    <div class="col-lg-12 mt-2" id="ip_div">
+                    <div class="sticky-container shadow shadow-md rounded showdow-grey mb-4">
+    <div class="bg-light">
+        <div class="row justify-content-between">
+            <div class="col-md-3 mt-3" style="max-width: 300px;">
+                                    <div class="d-flex sticky1 ml-3">
                             <h5 class="font-weight-bold">LOB:</h5> 
                             <div style="margin-left: 10px;">
-                                <h5 class="border bg-light rounded font-weight-bold fs-3 text-uppercase  p-1 mt-1">{{ $orderData->lob_id ? ($lobList->where('id', $orderData->lob_id)->first()->name ?? '-') : '' }}</h5>
+                                <h5 class="border bg-light rounded font-weight-bold fs-3 text-uppercase  p-1 mt-1">
+                                    {{ $orderData->lob_id ? ($lobList->where('id', $orderData->lob_id)->first()->name ?? '-') : '' }}
+                                </h5>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-7"></div>
-                    <div class="col-md-2">
+            <div class="col-md-5 text-center mt-2" style="max-width: 300px;">
+                <h5 class="border bg-info rounded font-weight-bold fs-2 text-uppercase border-grey px-2 py-1">
+                    {{$orderData->client_name}} - {{$orderData->process_type}}
+                </h5>
+            </div>
+            <div id="timer-container" class="col-md-4" style="max-width: 220px;">
                         <div class="card-body">
-                            <div id="timer" class="text-center bg-light rounded font-weight-bold">
-                            <h5 id="headline" class="border bg-white rounded font-weight-bold fs-4 text-uppercase border-grey px-2 py-1">Timer</h5>
+                    <div id="timer" class="text-center bg-white rounded font-weight-bold">
+                        <h5 id="headline" class="rounded font-weight-bold" style="font-size: 12px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+                                                Date  Time (EST)
+                                            </h5>
                                 <ul class="p-0 m-0">
                                 <li><span id="days"></span> Days</li>
                                     <li><span class="adjust-colon">:</span></li>
@@ -76,6 +114,11 @@ position: relative;
                         </div>
                     </div>
                 </div>
+                        </div>
+</div>
+        <div class="card">
+            <div class="card-body">
+                <div class="p-0">
                 <h6 class="font-weight-bold">Order Information :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
                     <div class="card-body">
@@ -92,7 +135,7 @@ position: relative;
                             @if($orderData->client_id == 16)
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">Tier</div>
-                                <select name="tier_id" id="tier_id" class="form-control">
+                                <select name="tier_id" id="tier_id" class="form-control" style="width: 100%">
                                     <option value="">Select Tier</option>
                                     @foreach($tierList as $tier)
                                         <option value="{{ $tier->id }}" {{ $orderData->tier_id == $tier->id ? 'selected' : '' }}>
@@ -105,7 +148,7 @@ position: relative;
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">Order Rec Date and Time</div>
                                 <div>
-                                    {{ $orderData->order_date ? (($formattedDate = date('m/d/Y H:i', strtotime($orderData->order_date))) !== false ? $formattedDate : '-') : '-' }} ({{('EST')}}) 
+                                        {{ $orderData->order_date ? (($formattedDate = date('m/d/Y H:i:s', strtotime($orderData->order_date))) !== false ? $formattedDate : '-') : '-' }} ({{('EST')}})
                                 </div>
  
                             </div>
@@ -179,6 +222,9 @@ position: relative;
                     </div>
                 </div>
                 @if($orderData->client_id == 82)
+                <?php
+                $readValue = $orderData->read_value;
+                ?>
                 <h6 class="font-weight-bold">User Inputs :</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
                 <input type="hidden" id="getID" value="{{($orderData->client_id)}}">
@@ -276,27 +322,34 @@ position: relative;
                 <!-- // -->
                 <h6 class="font-weight-bold">Vendor Requirements:</h6>
                 <div class="card shadow shadow-md rounded showdow-grey mb-4">
-                    <div class="card-body">
-                        <div class="row col-md-12">
+                    <div class="card-body col-12 mt-1 mb-1">
+                        <div class="row mx-2">
+                            <div class="card col-md-3">
                             <div class="row font-weight-bold p-2">State Specific Instructions:</div>
                             <p id="state_specific_instructions" class="col-md-12 px-1" style="font-size: 14px !important;"></p>
                             </div>
-                            <div class="row col-md-12">
+                            <div class="card col-md-4">
                                 <div class="row font-weight-bold p-2">Stop Notes:</div>
                             <p id="stop_notes" class="col-md-12 px-1" style="font-size: 14px !important;"></p>
                         </div>
-                            <div class="row col-md-12">
+                            <div class="card col-md-5">
                                 <div class="row font-weight-bold p-2">Order Requirements:</div>
                             <p id="order_requirements" class="col-md-12 px-1" style="font-size: 14px !important;"></p>
                             </div>
                         </div>
+                        <div class="d-flex justify-content-center mt-4">
+                                <?php if (is_null($readValue)): ?>
+                                    <button class="btn btn-primary" id="proceedButton" value="1" style="cursor: pointer;" type="button">Proceed</button>
+                                <?php endif; ?>
+                        </div>
+                    </div>
                     </div>
                  <!-- // -->
                  @if($orderData->client_id == 82)
                  @if(!@empty($vendorequirements))
                 <input type="hidden" name="instructionId" id="instructionId" value="{{$instructionId}}">
-                <h6 class="font-weight-bold">Source Information :</h6>
-                    <div class="card shadow shadow-md rounded showdow-grey mb-4">
+                <h6 class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> font-weight-bold">Source Information :</h6>
+                    <div class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
                         <div class="card-body">
                             <table id="source_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                 <thead>
@@ -465,7 +518,7 @@ position: relative;
                                 </div>
                                 <div class="col-lg-4 ">
                                     <div class="font-weight-bold">Comments :</div>
-                                    <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
+                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4"></textarea>
                                 </div>
                                 <div class="col-lg-5 mx-5 mt-1">
                                         <div class="row">
@@ -503,6 +556,34 @@ position: relative;
                                 </div>
                         </div>
                     </div>
+                        <div class="card-body">
+                            <table id="orderstatusdetail_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Comments</th>
+                                        <th>Status</th>
+                                        <th>User</th>
+                                        <th>Date and Time (EST)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if($orderstatusInfo && count($orderstatusInfo) > 0)
+                                        @foreach($orderstatusInfo as $status)
+                                            <tr>
+                                                <td>{{ $status->comment ?? 'N/A' }}</td>
+                                                <td>{{ $status->status }}</td>
+                                                <td>{{ $status->username ?? 'N/A' }}</td>
+                                                <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td class="text-center" colspan="4">No status history available for this order.</td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
                     @endif
                     @if(in_array($orderData->stl_process_id, [2, 4, 6]))
                     <h6 class="font-weight-bold">Order Submission :</h6>
@@ -511,14 +592,14 @@ position: relative;
                                     <div class="row mt-4 mb-4">
                                 <div class="col-lg-4 ">
                                     <div class="font-weight-bold">Comments :</div>
-                                    <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
+                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4"></textarea>
                                 </div>
                                     <div class="col-lg-5 mx-5 mt-1">
                                         <div class="row">
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                 <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                <select style="width:300px"  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
                                                     <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                     <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                                                     <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
@@ -537,6 +618,34 @@ position: relative;
                                 </div>
                         </div>
                     </div>
+                        <div class="card-body">
+                            <table id="orderstatusdetail_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Comments</th>
+                                        <th>Status</th>
+                                        <th>User</th>
+                                        <th>Date and Time (EST)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if($orderstatusInfo && count($orderstatusInfo) > 0)
+                                        @foreach($orderstatusInfo as $status)
+                                            <tr>
+                                                <td>{{ $status->comment ?? 'N/A' }}</td>
+                                                <td>{{ $status->status }}</td>
+                                                <td>{{ $status->username ?? 'N/A' }}</td>
+                                                <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td class="text-center" colspan="4">No status history available for this order.</td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -544,13 +653,13 @@ position: relative;
                 @endif
                 <!-- // -->
                 @if($orderData->client_id == 82)
-                <h6 class="font-weight-bold">Order Submission :</h6>
-                <div class="card shadow shadow-md rounded showdow-grey mb-4">
-                        <div class="card-body">
+                <h6 class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> font-weight-bold">Order Submission :</h6>
+                <div class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
+                        <div class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> card-body">
                             <div class="row mt-4 mb-4">
                                 <div class="col-lg-4 ">
                                     <div class="font-weight-bold">Comments :</div>
-                                    <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4">{!! (isset($orderHistory) && isset($orderHistory->comment)) ? $orderHistory->comment : '' !!}</textarea>
+                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4"></textarea>
                                 </div>
                                 <div class="col-lg-4 mx-5 mt-1">
                                     <div class="row">
@@ -558,10 +667,10 @@ position: relative;
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                 <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                    <select class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
                                                         @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                        <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Purchaser</option>
+                                                            <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
                                                         <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         @endif
                                                         @if(isset($orderData->assignee_qa))
@@ -585,7 +694,7 @@ position: relative;
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-body">
+                                <div class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> card-body">
                                     <table id="orderstatusdetail_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                         <thead>
                                             <tr>
@@ -607,7 +716,7 @@ position: relative;
                                                 @endforeach
                                             @else
                                                 <tr>
-                                                    <td colspan="4">No status history available for this order.</td>
+                                                    <td class="text-center" colspan="4">No status history available for this order.</td>
                                                 </tr>
                                             @endif
                                         </tbody>
@@ -621,7 +730,62 @@ position: relative;
             </div>
             @endif
     </div>
+    </div>
+    @if($orderData->status_id == 15)
+    <div class="modal fade" id="ipErrorModal" tabindex="-1" aria-labelledby="ipErrorModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-body d-flex justify-content-center align-items-center flex-column" style="border-top: none !important;">
+                    <img src="{{ asset('assets/images/p_ip_error.png') }}" style="height: 30vh;" alt="IP Error">
+                    <span class="error-message mt-3">
+                    <span style="font-size: 30px;">Switch to US IP Address</span>
+    </span>
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    @if($orderData && $orderData->id)
+                        <button 
+                            onclick="window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}';" 
+                            class="btn btn-success me-2">
+        Refresh
+    </button>
+                    @endif
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal" aria-label="Close" onclick="window.location.href='{{ url('orders_status') }}'">Back</button>
+                </div>
+            </div>
+    </div>
+    </div>
+    @endif
 </div>
+@if($orderData->status_id == 15)
+<script>
+$(document).ready(function() {
+    $.get('https://api.ipify.org?format=json', function(data) {
+        var ipAddress = data.ip;
+        $('#user_ip').html(ipAddress);
+        $.ajax({
+            url: `https://ipinfo.io/${ipAddress}/json`,
+            method: 'GET',
+            dataType: 'json',
+            success: function(ipData) {
+                
+                if (ipData.country && ipData.country === 'US') {
+                    $('#ipErrorModal').modal('hide');
+                } else {
+                   $('#ipErrorModal').modal('show');
+                    $('#ipErrorModal').on('hide.bs.modal', function (e) {
+                        e.preventDefault();
+                    });
+                }
+                
+            },
+            error: function() {
+                console.error("Failed to get IP information.");
+            }
+        });
+    });
+});
+</script>
+@endif
 
 <script>
 
@@ -734,7 +898,7 @@ function order_submition(orderId, type) {
     var username = $("#username_id").val();
     var password = $("#password_id").val();
     var file_path = $("#file_path_id").val();
-
+    var readed_value = 1;
 
     if ($('#primary_source').hasClass('required-field') && !primarySource) {
             Swal.fire({
@@ -773,6 +937,7 @@ function order_submition(orderId, type) {
         username: username,
         password: password,
         file_path: file_path,
+        readed_value: readed_value,
             submit_type: type,
             _token: '{{ csrf_token() }}'
         };
@@ -929,11 +1094,14 @@ $(document).ready(function () {
 
                 $('#portal_fee_cost_id').val(userinputdetails.portal_fee_cost || '');
                 $('#source_id').val(userinputdetails.source || '');
-                // $('#production_date_id').val(userinputdetails.production_date ? userinputdetails.production_date.split(' ')[0] : '');
                 $('#copy_cost_id').val(userinputdetails.copy_cost || '');
                 $('#no_of_search_id').val(userinputdetails.no_of_search_done || '');
                 $('#document_retrive_id').val(userinputdetails.no_of_documents_retrieved || '');
                 $('#title_point_account_id').val(userinputdetails.title_point_account || '');
+                $('#purchase_link_id').val(userinputdetails.purchase_link || '');
+                $('#username_id').val(userinputdetails.username || '');
+                $('#password_id').val(userinputdetails.password || '');
+                $('#file_path_id').val(userinputdetails.file_path || '');
 
                 $('#state_specific_instructions').html(formatContent(vendordetails.state_specific_instructions || 'N/A'));
                 $('#stop_notes').html(formatContent(vendordetails.stop_notes || 'N/A'));
@@ -966,11 +1134,13 @@ function initializeTimer() {
     var compareDate = new Date(orderRecDate);
     var deadline = new Date(compareDate.getTime() + tatValue * 60 * 60 * 1000);
     
+    var phaseDuration = tatValue / 4;
+
     var timer = setInterval(function() {
-        updateTimer(compareDate, deadline);
+        updateTimer(compareDate, deadline, phaseDuration);
         }, 1000);
 
-    function updateTimer(toDate, deadline) {
+    function updateTimer(toDate, deadline, phaseDuration) {
         var now = new Date(new Intl.DateTimeFormat('en-US', {
             timeZone: 'America/New_York',
             year: 'numeric', month: 'numeric', day: 'numeric',
@@ -978,10 +1148,10 @@ function initializeTimer() {
             hour12: false
         }).format(new Date()));
 
-        var difference = now.getTime() - toDate.getTime();
-        var deadlineDifference = now.getTime() - deadline.getTime();
+        var elapsed = now.getTime() - toDate.getTime();
+        var elapsedHours = elapsed / (1000 * 60 * 60);
 
-        var seconds = Math.floor(difference / 1000);
+        var seconds = Math.floor(elapsed / 1000);
         var minutes = Math.floor(seconds / 60);
         var hours = Math.floor(minutes / 60);
         var days = Math.floor(hours / 24);
@@ -995,54 +1165,82 @@ function initializeTimer() {
         document.getElementById("minutes").textContent = minutes;
         document.getElementById("seconds").textContent = seconds;
 
-    if (!tatValue || tatValue.trim() === '' || tatValue == 0) {
-        document.getElementById("days").classList.add("timer-black");
-        document.getElementById("hours").classList.add("timer-black");
-        document.getElementById("minutes").classList.add("timer-black");
-        document.getElementById("seconds").classList.add("timer-black");
-        document.getElementById("headline").classList.add("timer-black");
-        return;
-    }
+        document.getElementById("days").classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
+        document.getElementById("hours").classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
+        document.getElementById("minutes").classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
+        document.getElementById("seconds").classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
+        document.getElementById("headline").classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
 
-        if (deadlineDifference <= 0) {
+        if (elapsedHours <= phaseDuration) {
             document.getElementById("days").classList.add("timer-green");
             document.getElementById("hours").classList.add("timer-green");
             document.getElementById("minutes").classList.add("timer-green");
             document.getElementById("seconds").classList.add("timer-green");
             document.getElementById("headline").classList.add("timer-green");
-
-            document.getElementById("days").classList.remove("timer-red");
-            document.getElementById("hours").classList.remove("timer-red");
-            document.getElementById("minutes").classList.remove("timer-red");
-            document.getElementById("seconds").classList.remove("timer-red");
-            document.getElementById("headline").classList.remove("timer-red");
-
+        } else if (elapsedHours <= phaseDuration * 2) {
+            document.getElementById("days").classList.add("timer-gold");
+            document.getElementById("hours").classList.add("timer-gold");
+            document.getElementById("minutes").classList.add("timer-gold");
+            document.getElementById("seconds").classList.add("timer-gold");
+            document.getElementById("headline").classList.add("timer-gold");
+        } else if (elapsedHours <= phaseDuration * 3) {
+            document.getElementById("days").classList.add("timer-orange");
+            document.getElementById("hours").classList.add("timer-orange");
+            document.getElementById("minutes").classList.add("timer-orange");
+            document.getElementById("seconds").classList.add("timer-orange");
+            document.getElementById("headline").classList.add("timer-orange");
         } else {
             document.getElementById("days").classList.add("timer-red");
             document.getElementById("hours").classList.add("timer-red");
             document.getElementById("minutes").classList.add("timer-red");
             document.getElementById("seconds").classList.add("timer-red");
             document.getElementById("headline").classList.add("timer-red");
-
-            document.getElementById("days").classList.remove("timer-green");
-            document.getElementById("hours").classList.remove("timer-green");
-            document.getElementById("minutes").classList.remove("timer-green");
-            document.getElementById("seconds").classList.remove("timer-green");
-            document.getElementById("headline").classList.remove("timer-green");
         }
     }
 }
 $(document).ready(function() {
     $('#orderstatusdetail_datatable').DataTable({
-        "ordering": true, // Enable sorting
-        "searching": true, // Enable searching
-        "paging": true, // Enable pagination
-        "info": true, // Show table information
-        "lengthChange": true, // Allow the user to change the number of rows shown
-        "pageLength": 10, // Default number of rows per page
-        "order": [[3, 'desc']] // Order by the 'Date and Time (EST)' column by default
+        "ordering": true, 
+        "searching": true, 
+        "paging": true, 
+        "info": true, 
+        "lengthChange": true, 
+        "pageLength": 10, 
+        "order": [[3, 'desc']]
     });
 });
 
+function updateESTTime() {
+            const now = new Date();
+            const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+            const options = { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit', 
+                hour12: false 
+            };
+            const estFormatted = estDate.toLocaleString('en-US', options).replace(',', '');
+
+            document.getElementById('headline').textContent = estFormatted + " (EST)";
+        }
+
+        updateESTTime();
+        setInterval(updateESTTime, 1000);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const proceedButton = document.getElementById('proceedButton');
+        if (proceedButton) {
+            proceedButton.addEventListener('click', function() {
+                document.querySelectorAll('.read_value').forEach(function(element) {
+                    element.classList.remove('d-none');
+                });
+
+                this.classList.add('d-none');
+            });
+        }
+    });
 </script>
 @endsection

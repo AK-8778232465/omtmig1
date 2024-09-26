@@ -406,7 +406,7 @@
                                         <h3 class="icon-dual-warning mb-0" id="pre_qu_cnt">0</h3>
                                     </div>
                                     <div class="justify-content-between align-items-center mt-2">
-                                        <span>Send For Qc</span>
+                                        <span>Send For QC</span>
                                         <i class="icon-dual-warning font-large-2 float-right" data-feather="chevrons-right"></i>
                                     </div>
                                 </div>
@@ -690,7 +690,7 @@
                                 <th width="11%">WIP</th>
                                 <th width="11%">Coversheet Prep</th>
                                 <th width="11%">Clarification</th>
-                                <th width="11%">Send For Qc</th>
+                                <th width="11%">Send For QC</th>
                                 <th width="11%">Hold</th>
                                 <th width="11%">Cancelled</th>
                                 <th width="11%">Completed</th>

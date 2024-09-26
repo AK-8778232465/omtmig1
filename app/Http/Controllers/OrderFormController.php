@@ -15,6 +15,8 @@ use App\Models\OrderCreation;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Stevebauman\Location\Facades\Location;
+use Illuminate\Support\Facades\Http;
 use Session;
 use DataTables;
 use Carbon\Carbon;
@@ -72,6 +74,7 @@ class OrderFormController extends Controller
             'stl_process.name as process_type',
             'stl_process.id as stl_process_id',
             'stl_item_description.tat_value as tat_value',
+            'oms_order_creations.accurate_read_id as read_value',
             DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
             DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
             DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")") as typist_user'),
@@ -307,7 +310,7 @@ class OrderFormController extends Controller
             $primarySource = PrimarySource::select('id','source_name')->get();
 
             $clientIdList = DB::table('oms_vendor_information')
-                ->select('id', 'accurate_client_id')->where('product_id', $orderData->process_id)    
+                ->select('id', 'accurate_client_id')->where('product_id', $orderData->process_id)->orderBy('accurate_client_id')  
                 ->get();
 
             $userinput = DB::table('production_tracker')
@@ -470,6 +473,12 @@ class OrderFormController extends Controller
     public function orderSubmit(Request $request) {
 
         if (!empty($request->getID) && ($request->getID == 82)) {
+            $readId = $request->readed_value;
+            $id = $request->orderId;
+            $updated = DB::table('oms_order_creations')
+            ->where('id', $id)
+            ->update(['accurate_read_id' => $readId]);
+
             $getdata = DB::table('production_tracker')->where('order_id', $request->orderId)->first();
             
             if ($getdata) {

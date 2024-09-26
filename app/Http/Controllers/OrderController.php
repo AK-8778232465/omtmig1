@@ -1159,7 +1159,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 } elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head')) {
                     $statusMapping = [
                         1 => 'WIP',
-                        15 => 'Purchaser',
+                        15 => 'Doc Purchase',
                         14 => 'Clarification',
                         2 => 'Hold',
                         5 => 'Completed',
@@ -1180,7 +1180,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 } else {
                                 $statusMapping = [
                                     1 => 'WIP',
-                                    15 => 'Purchaser',
+                                    15 => 'Doc Purchase',
                                     14 => 'Clarification',
                                     4 => 'Send for QC',
                                     16 => 'Typing',
@@ -1667,7 +1667,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 DB::table('order_status_history')->insert([
                     'order_id' => $orderId,
                     'status_id' => $statusId,
-                    'comment' => $gethistorydata ? $gethistorydata->comment : null,
+                    'comment' => null,
+                    'current_status_id' => $request->currentValue,
                     'checked_array' => $gethistorydata ? $gethistorydata->checked_array : null,
                     'created_at' => Carbon::now()->setTimezone('America/New_York'),
                     'created_by' => Auth::id(),

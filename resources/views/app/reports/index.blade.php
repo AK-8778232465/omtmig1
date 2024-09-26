@@ -222,7 +222,7 @@
                                     <th width="11%">WIP</th>
                                     <th width="11%">Coversheet Prep</th>
                                     <th width="11%">Clarification</th>
-                                    <th width="11%">Send For Qc</th>
+                                    <th width="11%">Send For QC</th>
                                     <th width="11%">Hold</th>
                                     <th width="11%">Cancelled</th>
                                     <th width="11%">Completed</th>
@@ -735,7 +735,7 @@ $('#newreports_datatable').on('draw.dt', function () {
                         success: function(response) {
                             var data = response.data;
 
-                            var headers = ["Users", "WIP", "Coversheet Prep", "Clarification", "Send For Qc", "Hold", "Cancelled", "Completed", "All"];
+                            var headers = ["Users", "WIP", "Coversheet Prep", "Clarification", "Send For QC", "Hold", "Cancelled", "Completed", "All"];
                             var exportData = data.map(row => [
                                 row.userinfo,
                                 row.status_1,

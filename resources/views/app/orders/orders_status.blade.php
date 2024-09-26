@@ -174,9 +174,9 @@
                     <button id="status_7"  class="btn btn-info status-btn d-none">Yet to Assign QA<span id="status_7_count"></span></button>
                     <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">WIP<span id="status_1_count"></span></button>
                     <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span></button>
-                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif" >Purchaser<span id="status_15_count"></span></button>
+                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif" >Doc Purchase<span id="status_15_count"></span></button>
                     <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span></button>
-                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Send For Qc<span id="status_4_count"></span></button>
+                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Send For QC<span id="status_4_count"></span></button>
                     <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing<span id="status_16_count"></span></button>
                     <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing QC<span id="status_17_count"></span></button>
                     <button id="status_2" class="btn btn-info status-btn">Hold<span id="status_2_count"></span></button>
@@ -342,7 +342,7 @@
                                 </div>
                                 <div class="col-2">
                                     <button type="submit" class="btn btn-sm btn-primary" id="assignBtn" name="assign">Assign</button>
-                                    <button class="btn btn-sm btn-danger ml-2" id="deleteBtn" name="deleteBtn">Delete</button>
+                                    <button class="btn btn-sm ml-2" id="deleteBtn" name="deleteBtn" style="background-color: #ef4d56; color: white; border: none;">Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -1335,8 +1335,11 @@ $(document).on('click', '.status-dropdown', function() {
     });
 });
 
+var previousValue;
 
-
+$(document).on('focus', '.status-dropdown', function() {
+    previousValue = $(this).val();
+});
     $(document).on('change', '.status-dropdown', function() {
     var selectedStatus = $(this).val();
     var rowId = $(this).data('row-id');
@@ -1358,6 +1361,7 @@ $(document).on('click', '.status-dropdown', function() {
                 type: 'POST',
                 data: {
                     rowId: rowId,
+                    currentValue: previousValue,
                     selectedStatus: selectedStatus,
                     _token: '{{csrf_token()}}',
                 },
@@ -1738,7 +1742,7 @@ $('#deleteBtn').click(function (event) {
         localStorage.setItem("lastOrderStatus", task_status);
 
     $.ajax({
-        url: '{{ route('updateClickTime') }}',
+        url: "{{ route('updateClickTime') }}",
         type: 'POST',
         data: {
             order_id: order_id,
