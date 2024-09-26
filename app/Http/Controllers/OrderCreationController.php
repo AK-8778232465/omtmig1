@@ -399,9 +399,8 @@ class OrderCreationController extends Controller
     public function delete_order(Request $request)
 {
     try {
-        if ($request->has('type_id') && !empty($request->orders)) {
-            $DeleteOrder = OrderCreation::where('status_id', $request->type_id)
-                ->whereIn('id', $request->orders)
+        if (!empty($request->orders)) {
+            $DeleteOrder = OrderCreation::whereIn('id', $request->orders)
                 ->update(['is_active' => 0]);
 
             if ($DeleteOrder) {
