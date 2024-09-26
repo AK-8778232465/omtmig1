@@ -191,10 +191,14 @@ class OrderCreationController extends Controller
             'created_by' => Auth::id(),
         ];
 
-        $duplicateOrderCount = OrderCreation::where('process_id', $input['process_code'])
-            ->where('order_id', $input['order_id'])
-            ->where('is_active', 1)
-            ->count();
+        
+            $duplicateOrderCount = OrderCreation::where('order_id', $input['order_id'])
+                ->where(DB::raw('DATE(order_date)'), '=', date('Y-m-d', strtotime($input['order_date'])))                
+                ->where('lob_id', $input['lob_id'])
+                ->where('process_type_id', $input['process_type_id'])
+                ->where('process_id', $input['process_code'])            
+                ->where('is_active', 1)
+                ->count();
 
         if ($duplicateOrderCount > 0) {
             return response()->json(['data' => 'error', 'msg' => 'Order already exists.']);
