@@ -673,15 +673,13 @@
                                                             <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
                                                         <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         @endif
-                                                        @if(isset($orderData->assignee_qa))
+
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                                        @endif
-                                                        @if(isset($orderData->typist_user))
+
                                                         <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
-                                                        @endif
-                                                        @if(isset($orderData->typist_qa))
+
                                                         <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                                        @endif
+                                                        
                                                         <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                                                         <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                                                         <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
