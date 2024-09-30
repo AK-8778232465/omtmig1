@@ -1142,15 +1142,13 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     2 => 'Hold',
                                     5 => 'Completed',
                                     3 => 'Cancelled',
+                                    17 => 'Typing QC',
                                 ];
 
-                    if ($order->typist_qc_id != null) {
-                        $statusMapping[17] = 'Typing QC';
-                            }
                 } elseif (Auth::user()->hasRole('Typist/Qcer')) {
                             $statusMapping = [
                                 17 => 'Typing QC',
-                        16 => 'Typing',
+                                16 => 'Typing',
                                 14 => 'Clarification',
                                 2 => 'Hold',
                                 5 => 'Completed',
@@ -1164,19 +1162,11 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         2 => 'Hold',
                         5 => 'Completed',
                         3 => 'Cancelled',
+                        4 => 'Send for QC',
+                        16 => 'Typing',
+                        17 => 'Typing QC'
                     ];
                     
-                    if ($order->assignee_qa_id !== null) {
-                        $statusMapping[4] = 'Send for QC';
-                    }
-                    
-                    if ($order->typist_qc_id !== null) {
-                        $statusMapping[17] = 'Typing QC';
-                    }
-                    
-                    if ($order->typist_id !== null) {
-                        $statusMapping[16] = 'Typing';
-                    }                    
                 } else {
                                 $statusMapping = [
                                     1 => 'WIP',
