@@ -535,12 +535,13 @@ class SettingController extends Controller
 
     public function getlobId(Request $request)
     {
-        $lobs = DB::table('stl_lob')
-                    ->select('id', 'name')
-                    ->where('client_id', $request->client_id)
-                    ->orderBy('name', 'asc')
-                    ->get();
-       
+        $filteredLob = DB::table('stl_lob')->select('id', 'client_id', 'name')->get();
+        $clientIdToMatch = $request->client_id;
+        $lobs = $filteredLob->filter(function($item) use ($clientIdToMatch) {
+            $clientIds = json_decode($item->client_id, true);
+            return in_array($clientIdToMatch, $clientIds);
+        });
+
         return response()->json($lobs);
     }
 
