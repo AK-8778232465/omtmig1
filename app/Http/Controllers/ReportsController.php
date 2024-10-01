@@ -207,7 +207,7 @@ private function getProcessIdsBasedOnUserRole($user)
                 'county.county_name as county_name',
                 'oms_status.status as status',
                 'county_instructions.json as county_instruction_json',
-                 'order_status_history.comment as status_comment'
+                'oms_order_creations.comment as status_comment'
             )
             ->whereNotNull('oms_order_creations.assignee_user_id')
             ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
