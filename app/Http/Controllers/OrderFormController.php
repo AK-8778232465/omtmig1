@@ -556,6 +556,12 @@ class OrderFormController extends Controller
                     'created_by' => Auth::id(),
                 ]);
 
+                DB::table('oms_order_creations')
+                    ->where('id', $orderId)
+                    ->update([
+                        'comment' => $request->orderComment,
+                    ]);
+
                 $getPrimaryName = DB::table('oms_primary_source')->where('id', $request->primarySource)->value('source_name');
 
                 if(!empty($request->instructionId)) {
