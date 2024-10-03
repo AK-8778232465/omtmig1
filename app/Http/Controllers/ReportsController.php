@@ -257,11 +257,11 @@ private function getProcessIdsBasedOnUserRole($user)
         return response()->json($cities);
     }
 
-public function get_timetaken(Request $request)
+    public function get_timetaken(Request $request)
     {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
-        $clientId = $request->input('client_id');
+        $client_id = $request->input('client_id');
         $projectId = $request->input('project_id');
         $selectedDateFilter = $request->input('selectedDateFilter');
         $fromDateRange = $request->input('fromDate_range');
@@ -320,106 +320,101 @@ public function get_timetaken(Request $request)
             $statusCountsQuery->whereIn('oms_order_creations.process_id', $projectId);
         }
     
-        if (!empty($clientId) && $clientId[0] !== 'All') {
-            $statusCountsQuery->whereIn('stl_item_description.client_id', $clientId);
-        }
+        if (!empty($client_id) && $client_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+        }    
     
-       
-
-        if(!empty($projectId) && $projectId[0] !== 'All'){
         $statusCounts = $statusCountsQuery->get();
-            $statusCounts = $statusCounts->groupBy('process_name');
-        }else{
-            $statusCounts = $statusCountsQuery->get();
-            $statusCounts = $statusCounts->groupBy('userid');
-        }
-
-        $dataForDataTables = $statusCounts->map(function ($orders, $userid) use($fromDate, $toDate, $projectId, $clientId){
-        $completedCount = 0;
-        if (!empty($projectId) && $projectId[0] !== 'All') {
     
-            $completedCount = DB::table('oms_order_creations')
-            ->whereDate('order_date', '>=', $fromDate)
-            ->whereDate('order_date', '<=', $toDate)
-            ->where('oms_order_creations.is_active', 1)
-                ->where('status_id', 5)
-                ->where('assignee_user_id', $userid)
-                ->whereIn('oms_order_creations.process_id', $projectId)
-                ->count();
-        }elseif(!empty($clientId) && $clientId[0] !== 'All') {
-            $completedCount = DB::table('oms_order_creations')
-                ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
-                ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
-                ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
-                ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
-                ->whereDate('oms_order_creations.order_date', '<=', $toDate)
-                ->where('oms_order_creations.is_active', 1)
-                ->where('oms_order_creations.status_id', 5)
-                ->where('oms_order_creations.assignee_user_id', $userid)
-                ->whereIn('stl_item_description.client_id', $clientId)
-                ->count();
-        }else{
-            $completedCount = DB::table('oms_order_creations')
-                ->whereDate('order_date', '>=', $fromDate)
-                ->whereDate('order_date', '<=', $toDate)
-                ->where('oms_order_creations.is_active', 1)
-                ->where('status_id', 5)
-                ->where('assignee_user_id', $userid)
-                ->count();
-        }
+        // Get all order IDs
+        $orderIds = $statusCounts->pluck('orderid');
+    
+        // Pre-fetch order status history for all relevant orders
+        $orderStatusHistory = DB::table('order_status_history')
+            ->whereIn('order_id', $orderIds)
+            ->whereIn('status_id', [1, 5]) // 1 = Start, 5 = End
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->groupBy('order_id');
+    
+        $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use ($fromDate, $toDate, $projectId, $client_id, $orderStatusHistory) {
+            $completedCount = 0;
+    
+            if (!empty($projectId) && $projectId[0] !== 'All') {
+                $completedCount = DB::table('oms_order_creations')
+                    ->whereDate('order_date', '>=', $fromDate)
+                    ->whereDate('order_date', '<=', $toDate)
+                    ->where('oms_order_creations.is_active', 1)
+                    ->where('status_id', 5)
+                    ->where('assignee_user_id', $userid)
+                    ->whereIn('oms_order_creations.process_id', $projectId)
+                    ->count();
+            } elseif (!empty($client_id) && $client_id[0] !== 'All') {
+                $completedCount = DB::table('oms_order_creations')
+                    ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
+                    ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+                    ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+                    ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
+                    ->whereDate('oms_order_creations.order_date', '<=', $toDate)
+                    ->where('oms_order_creations.is_active', 1)
+                    ->where('oms_order_creations.status_id', 5)
+                    ->where('oms_order_creations.assignee_user_id', $userid)
+                    ->whereIn('stl_item_description.client_id', $client_id)
+                    ->count();
+            } else {
+                $completedCount = DB::table('oms_order_creations')
+                    ->whereDate('order_date', '>=', $fromDate)
+                    ->whereDate('order_date', '<=', $toDate)
+                    ->where('oms_order_creations.is_active', 1)
+                    ->where('status_id', 5)
+                    ->where('assignee_user_id', $userid)
+                    ->count();
+            }
+    
             $totalTimeTakenSeconds = 0;
             foreach ($orders as $order) {
-            $orderStartTime = DB::table('order_status_history')
-                    ->where('order_id', $order->orderid)
-                    ->where('status_id', 1)
-                    ->orderBy('created_at', 'asc')
-                    ->first();
-    
-            $orderEndTime = DB::table('order_status_history')
-                    ->where('order_id', $order->orderid)
-                    ->where('status_id', 5)
-                    ->orderBy('created_at', 'asc')
-                    ->first();
+                $orderHistory = $orderStatusHistory->get($order->orderid, collect());
+                $orderStartTime = $orderHistory->where('status_id', 1)->first();
+                $orderEndTime = $orderHistory->where('status_id', 5)->first();
     
                 if ($orderStartTime && $orderEndTime) {
-                
-                $startTime = Carbon::parse($orderStartTime->created_at);
-                $endTime = Carbon::parse($orderEndTime->created_at);
+                    $startTime = Carbon::parse($orderStartTime->created_at);
+                    $endTime = Carbon::parse($orderEndTime->created_at);
     
-                $timeTakenSeconds = $endTime->diffInSeconds($startTime);
-                $totalTimeTakenSeconds += $timeTakenSeconds;
+                    $timeTakenSeconds = $endTime->diffInSeconds($startTime);
+                    $totalTimeTakenSeconds += $timeTakenSeconds;
                 }
             }
     
-        $totalTimeTakenHours = $this->formatSecondsToHours($totalTimeTakenSeconds);
-        $avgTimeTakenSeconds = $completedCount > 0 ? ($totalTimeTakenSeconds / $completedCount) : 0;
-        $avgTimeTakenHours = $this->formatSecondsToHours($avgTimeTakenSeconds);
-    
+            $totalTimeTakenHours = $this->formatSecondsToHours($totalTimeTakenSeconds);
+            $avgTimeTakenSeconds = $completedCount > 0 ? ($totalTimeTakenSeconds / $completedCount) : 0;
+            $avgTimeTakenHours = $this->formatSecondsToHours($avgTimeTakenSeconds);
     
             return [
                 'emp_id' => $orders->first()->empid,
                 'Users' => $orders->first()->username,
                 'Product_Type' => $orders->first()->project_code . ' (' . $orders->first()->process_name . ')',
-            'NO_OF_ASSIGNED_ORDERS' => $orders->count(),
+                'NO_OF_ASSIGNED_ORDERS' => $orders->count(),
                 'NO_OF_COMPLETED_ORDERS' => $completedCount,
                 'TOTAL_TIME_TAKEN_FOR_COMPLETED_ORDERS' => $totalTimeTakenHours,
                 'AVG_TIME_TAKEN_FOR_COMPLETED_ORDERS' => $avgTimeTakenHours,
-            'TOTAL_TIME_TAKEN_SECONDS' => $totalTimeTakenSeconds, 
-            'AVG_TIME_TAKEN_SECONDS' => $avgTimeTakenSeconds, 
+                'TOTAL_TIME_TAKEN_SECONDS' => $totalTimeTakenSeconds, 
+                'AVG_TIME_TAKEN_SECONDS' => $avgTimeTakenSeconds
             ];
-        });
+        })->values();
     
         return Datatables::of($dataForDataTables)->toJson();
 
-}
+    }
     
-private function formatSecondsToHours($seconds)
-{
-    $hours = floor($seconds / 3600);
-    $minutes = floor(($seconds % 3600) / 60);
-    $seconds = $seconds % 60; 
-    return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds); 
-}
+    private function formatSecondsToHours($seconds)
+    {
+        $hours = floor($seconds / 3600);
+        $minutes = floor(($seconds / 60) % 60);
+        $seconds = $seconds % 60;
+
+        return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+    }
    
 public function orderTimeTaken(Request $request) {
         $user = Auth::user();
