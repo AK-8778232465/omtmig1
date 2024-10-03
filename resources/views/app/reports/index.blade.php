@@ -348,7 +348,6 @@
 
 $(document).ready(function() {
         $('#orderwise_timetaken_datatable').DataTable();
-        $('#filterButton2').click();
     });
 
 let selectedDateFilter = '';
@@ -766,38 +765,6 @@ $('#newreports_datatable').on('draw.dt', function () {
     });
 
 
-$("#filterButton").on('click', function() {
-    let fromDate = $("#fromDate_range").val();
-    let toDate = $("#toDate_range").val();
-    let client_id = $("#client_id_dcf").val();
-    let project_id = $("#project_id_dcf").val();
-
-    if (fromDate && toDate) {
-        userwise_datatable(fromDate, toDate, client_id, project_id);
-        orderWise(fromDate, toDate, client_id, project_id);
-        userTimeTaken_datatable(fromDate, toDate, client_id, project_id);
-        orderTimeTaken_datatable(fromDate, toDate, client_id, project_id);
-    } else if ($("#dateFilter").val() === 'custom') {
-        if (!fromDate || !toDate) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Date Range',
-                text: 'Please select both "From Date" and "To Date" before filtering.'
-            });
-        } else {
-            userwise_datatable(fromDate, toDate, client_id, project_id);
-            orderWise(fromDate, toDate, client_id, project_id);
-            userTimeTaken_datatable(fromDate, toDate, client_id, project_id);
-            orderTimeTaken_datatable(fromDate, toDate, client_id, project_id);
-        }
-    } else {
-        userwise_datatable(fromDate, toDate, client_id, project_id);
-        orderWise(fromDate, toDate, client_id, project_id);
-        userTimeTaken_datatable(fromDate, toDate, client_id, project_id);
-        orderTimeTaken_datatable(fromDate, toDate, client_id, project_id);
-    }
-});
-
 $('#client_id_dcf').on('change', function () {
     let getproject_id = $("#client_id_dcf").val();
     $("#project_id_dcf").html('<option selected value="All">All Products</option>');
@@ -811,12 +778,6 @@ $(document).ready(function() {
         $("#client_id_dcf").select2();
 
     $('.select2-basic-multiple').select2();
-    userwise_datatable();
-    userTimeTaken_datatable();
-    orderTimeTaken_datatable();
-    attendance_report();
-    orderWise();
-
 
     $('#client_id_dcf').on('change', function () {
        let getproject_id = $("#client_id_dcf").val();
@@ -824,6 +785,37 @@ $(document).ready(function() {
         fetchProData(getproject_id);
     });
 });
+
+$(document).on('click', '#filterButton,#filterButton2', function () {
+    // Find the active report item
+    const activeItem = $('.report-item.active');
+
+    // Check if an active item exists and call the respective function
+    if (activeItem.length) {
+        const activeId = activeItem.attr('id'); // Get the ID of the active item
+
+        // Run the corresponding function based on the active item ID
+        switch (activeId) {
+            case 'orderwise-details':
+                orderWise();
+                break;
+            case 'userwise-details':
+                userwise_datatable();
+                break;
+            case 'ordercompletion-details':
+                userTimeTaken_datatable();
+                break;
+            case 'orderprogress-details':
+                orderTimeTaken_datatable();
+                break;
+            default:
+                console.log('No valid report item is active.');
+        }
+    } else {
+        console.log('No report item is currently active.');
+    }
+});
+
 
 
 
@@ -866,7 +858,6 @@ $(document).ready(function() {
             $('#attendance_report').show();
             $('#hidefilter').hide();
             $('#datepicker').show();
-            $('#filterButton2').click();
         }
     }
 
@@ -1068,8 +1059,6 @@ $(document).ready(function() {
 
     // Call the function to set the default date when the page loads
     setDefaultDate();
-    var selectedDate = $('#defultDate').val(); // Capture the selected date
-    attendance_report(selectedDate);
     // Event listener for the filter button click
     $('#filterButton2').on('click', function () {
         var selectedDate = $('#defultDate').val(); // Capture the selected date
