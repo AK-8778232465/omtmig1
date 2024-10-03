@@ -603,7 +603,7 @@ function orderWise() {
                         success: function(response) {
                             var data = response.data;
 
-                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Short Code", "County Name", "Status", "Primary Source"];
+                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Short Code", "County Name", "Status", "Status Comment", "Primary Source"];
                             var exportData = data.map((row, index) => [
                                 index + 1,
                                 row.process,
