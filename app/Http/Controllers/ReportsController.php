@@ -193,10 +193,10 @@ private function getProcessIdsBasedOnUserRole($user)
                      ->on('stl_item_description.client_id', '=', 'county_instructions.client_id')
                      ->on('stl_item_description.lob_id', '=', 'county_instructions.lob_id');
             })
-            ->leftJoin('order_status_history', function ($join) {
-                $join->on('oms_order_creations.id', '=', 'order_status_history.order_id')
-                    ->where('order_status_history.id', '=', DB::raw("(SELECT MAX(id) FROM order_status_history WHERE order_id = oms_order_creations.id)"));
-            })
+            // ->leftJoin('order_status_history', function ($join) {
+            //     $join->on('oms_order_creations.id', '=', 'order_status_history.order_id')
+            //         ->where('order_status_history.id', '=', DB::raw("(SELECT MAX(id) FROM order_status_history WHERE order_id = oms_order_creations.id)"));
+            // })
             ->select(
                 'oms_order_creations.order_id as order_id',
                 'oms_order_creations.order_date as order_date',
