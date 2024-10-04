@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\Tier;
 use App\Models\Lob;
+use App\Models\Client;
 use Carbon\Carbon;
 use DataTables;
 use DB;
@@ -70,10 +71,32 @@ class OrderCreationController extends Controller
 
         $mapped_lobs = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
         
-        $lobs = DB::table('stl_item_description')
+    
+
+        $clients = DB::table('stl_client')
+        ->leftjoin('stl_item_description', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->where('stl_item_description.is_approved', 1)
+        ->where('stl_item_description.is_active', 1)
+        ->whereIn('stl_item_description.id', $mapped_lobs)
+        ->select('stl_item_description.client_id','stl_client.id', 'stl_client.client_name')
+        ->distinct()
+        ->get();
+
+
+        return view('app.orders.ordercreate', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList','exceldetail','tierList','typists','typist_qcs', 'clients'));
+    }
+
+public function getlobid(Request $request){
+    $client = $request->input('select_client_id');
+
+    $user = User::where('id', Auth::id())->first();
+    $mapped_lobs = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
+
+    $lobs = DB::table('stl_item_description')
         ->leftjoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
         ->where('stl_item_description.is_approved', 1)
         ->where('stl_item_description.is_active', 1)
+        ->where('stl_item_description.client_id', $client)
         ->whereIn('stl_item_description.id', $mapped_lobs)
         ->select(
             'stl_lob.name as name',
@@ -83,29 +106,31 @@ class OrderCreationController extends Controller
         )
         ->distinct()
         ->get();
+        return response()->json($lobs);
 
-
-        return view('app.orders.ordercreate', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList','exceldetail','tierList','typists','typist_qcs','lobs'));
-    }
-
-
+   
+}
 
     
     public function getprocesstypeid(Request $request)
     {
         $lob = $request->input('lob_id');
+        $client = $request->input('select_client_id');
+
  
         $user = User::where('id', Auth::id())->first();
        
         $processIds = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
    
  
-        $processtype = DB::table('stl_process')
-        ->leftjoin('stl_item_description', 'stl_process.id', '=', 'stl_item_description.process_id')
+        $processtype = DB::table('stl_item_description')
+        ->leftjoin('stl_process', 'stl_process.id', '=', 'stl_item_description.process_id')
+        ->leftjoin('stl_client', 'stl_client.id', '=', 'stl_item_description.client_id')
             ->select('stl_process.id', 'stl_process.name')
             ->whereIn('stl_item_description.id', $processIds)
             ->where('stl_process.lob_id', $lob)
             ->where('stl_item_description.lob_id', $lob)
+            ->where('stl_item_description.client_id', $client)
             ->groupBy('stl_process.id')
             ->get();
         return response()->json($processtype);
@@ -120,9 +145,10 @@ class OrderCreationController extends Controller
         $processIds = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
  
         $lob = $request->input('lob_id');
+        $client = $request->input('select_client_id');
        
         $process_type_id = $request->input('process_type_id');
-        $process_code = DB::table('stl_item_description')->select('id', 'process_name', 'project_code', 'process_id')->where('lob_id', $lob)->where('process_id', $process_type_id)->whereIn('id', $processIds )->get();
+        $process_code = DB::table('stl_item_description')->select('id', 'process_name', 'project_code', 'process_id')->where('client_id', $client)->where('lob_id', $lob)->where('process_id', $process_type_id)->whereIn('id', $processIds )->get();
 
     $get_tier = DB::table('oms_tier')
         ->select('id', 'Tier_id')
@@ -166,6 +192,7 @@ class OrderCreationController extends Controller
     public function InsertOrder(Request $request)
     {
         $request->validate([
+            'select_client_id' => 'required',
             'order_id' => 'required',
             'order_date' => 'required',
             'process_code' => 'required',
@@ -176,6 +203,7 @@ class OrderCreationController extends Controller
         $orderData = [
             'order_id' => $input['order_id'],
             'order_date' => $input['order_date'],
+            'client_id' => $input['select_client_id'],
             'process_id' => $input['process_code'],
             'state_id' => isset($input['property_state']) ? $input['property_state'] : NULL,
             'county_id' => isset($input['property_county']) ? $input['property_county'] : NULL,
@@ -193,7 +221,8 @@ class OrderCreationController extends Controller
 
         
             $duplicateOrderCount = OrderCreation::where('order_id', $input['order_id'])
-                ->where(DB::raw('DATE(order_date)'), '=', date('Y-m-d', strtotime($input['order_date'])))                
+                ->where(DB::raw('DATE(order_date)'), '=', date('Y-m-d', strtotime($input['order_date'])))    
+                ->where('client_id', $input['client_id'])        
                 ->where('lob_id', $input['lob_id'])
                 ->where('process_type_id', $input['process_type_id'])
                 ->where('process_id', $input['process_code'])            

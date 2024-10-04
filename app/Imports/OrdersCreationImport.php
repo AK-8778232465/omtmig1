@@ -15,6 +15,8 @@ use App\Models\Lob;
 use App\Models\Tier;
 use App\Models\User;
 use App\Models\stlprocess;
+use App\Models\Client;
+
 use Carbon\Carbon;
 use DB;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -82,6 +84,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         $data = [
             'order_date' => $order_date,
             'order_id' => isset($row['OrderID']) ? $row['OrderID'] : null,
+            'client_id' => isset($row['Client']) ? $row['Client'] : null,
             'assignee_user' => isset($row['Emp ID-Order Assigned']) ? $row['Emp ID-Order Assigned'] : null,
             'assignee_qa' => isset($row['Assignee_QA']) ? $row['Assignee_QA'] : null,
             'process' => isset($row['Product Name']) ? $row['Product Name'] : null,
@@ -148,9 +151,31 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 return null;
             }
         }
+
+
+        $client = trim($row['Client']);
+         if(!$client) {
+            $data['comments'] = 'Client should not be empty';
+            OrderTemp::insert($data);
+            ++$this->unsuccess_rows;
+            return null;
+        } else {
+            $client = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client)])->first();
+            if (!$client) {
+                $data['comments'] = 'Client not matched with database records';
+                OrderTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
+        }
+
+
+
+       
       
         //Lob
         $lob = trim($row['Lob']);
+        
         if (!$lob) {
             $data['comments'] = 'Lob should not be empty';
             OrderTemp::insert($data);
@@ -170,6 +195,10 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $process_type = trim($row['Process']);
             if ($process_type) {
             $process = trim($row['Product Name']);
+            $client = trim($row['Client']);
+            $client_name = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client)])->first();
+
+            // $client_name = Process::where('client_id', $client->id);
 
                 $stl_process = stlprocess::where('name', $process_type)
                     ->where('lob_id', $lob->id) 
@@ -182,6 +211,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                         ->where('stl_item_description.process_id', $stl_process->id)
                         ->where('stl_item_description.lob_id', $lob->id)
                         ->where('stl_item_description.process_name', $process)
+                        ->where('stl_item_description.client_id', $client_name->id)
                         ->select('stl_item_description.id', 'stl_item_description.process_name')
                         ->first();
                         // dd($process_typeid);
@@ -276,6 +306,10 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         if ($processOrg) {
 
             $process_type = trim($row['Process']);
+            $client = trim($row['Client']);
+
+            $client_name = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client)])->first();
+
 
                     $stl_process = stlprocess::where('name', $process_type)
                     ->where('lob_id', $lob->id) 
@@ -286,6 +320,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                     ->where('stl_item_description.lob_id', $lob->id)
                     ->where('stl_item_description.process_name', $processOrg)
                     ->where('stl_item_description.process_id', $stl_process->id)
+                    ->where('stl_item_description.client_id', $client_name->id)
                     ->select('stl_item_description.id', 'stl_item_description.process_name', 'stl_item_description.process_id')
                     ->first();
                 
@@ -351,6 +386,9 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         if ($processOrg) {
 
             $process_type = trim($row['Process']);
+            $client = trim($row['Client']);
+            $client_name = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client)])->first();
+
 
                     $stl_process = stlprocess::where('name', $process_type)
                     ->where('lob_id', $lob->id) 
@@ -361,6 +399,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                     ->where('stl_item_description.lob_id', $lob->id)
                     ->where('stl_item_description.process_name', $processOrg)
                     ->where('stl_item_description.process_id', $stl_process->id)
+                    ->where('stl_item_description.client_id', $client_name->id)
                     ->select('stl_item_description.id', 'stl_item_description.process_name', 'stl_item_description.process_id')
                     ->first();
                 
@@ -380,6 +419,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             return null;
         }
           
+       
 
 
 
@@ -468,6 +508,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $orderId = OrderCreation::insert([
                 'order_date' => $order_date,
                 'order_id' => $orderId,
+                'client_id' => $client->id ?? null,
                 'process_id' => $processOrg->id,
                 'state_id' => isset($state) ? $state->id : null,
                 'county_id' => isset($county) ? $county->id : null,

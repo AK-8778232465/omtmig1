@@ -192,6 +192,17 @@
                 <div class="card-body rounded shadow-sm " style="border-top:3px solid #0e7c31">
                     <div class="form-group row mb-4 pb-0 pl-3 pr-3 mt-3">
                         <div class="form-group col-lg-3 mb-3 pb-0">
+                            <label class="font-weight-bold">Clients<span style="color:red;">*</span></label>
+                            <select id="select_client_id" name="select_client_id" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Lob">
+                                <option selected="" disabled="" value="">Select Client</option>
+                                @foreach ($clients as $client)
+                                <option value="{{ $client->id }}" data-client-id="{{ $client->id }}">{{ $client->client_name }}</option>
+                                @endforeach
+                            </select>
+                            
+                        </div>
+
+                        <div class="form-group col-lg-3 mb-3 pb-0">
                             <label class="font-weight-bold">Order ID<span style="color:red;">*</span></label>
                             <input type="text" id="order_id" name="order_id" class="form-control" placeholder="Enter Order ID" required
                             data-parsley-error-message="Order ID should not be empty."
@@ -210,9 +221,6 @@
                             <label class="font-weight-bold">Lob</label>
                             <select id="lob_id" name="lob_id" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Lob">
                                 <option selected="" disabled="" value="">Select lob</option>
-                                @foreach ($lobs as $lob)
-                                <option value="{{ $lob->id }}" data-client-id="{{ $lob->client_id }}">{{ $lob->name }}</option>
-                                @endforeach
                             </select>
                         </div>
                         <div class="form-group col-lg-3 mb-3 pb-0">
@@ -793,14 +801,43 @@ $('#property_county').on('change', function () {
     }, 1000);
 }
 
+$('#select_client_id').on('change', function () {
+    var select_client_id = $("#select_client_id").val();
+    $("#lob_id").html(''); 
+    $.ajax({
+        url: "{{ url('getlobid') }}",
+        type: "POST",
+        data: {
+            select_client_id: select_client_id,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            $('#lob_id').html('<option value="">Select Lob</option>');
+            $.each(response, function (key, value) {
+                $("#lob_id").append('<option value="' + value.id + '">' + value.name + '</option>');
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching Lob: ", status, error);
+        }
+    });
+});
+
+
+
+
 $('#lob_id').on('change', function () {
     var lob_id = $("#lob_id").val();
+    var select_client_id = $("#select_client_id").val();
+
     $("#process_type_id").html(''); 
     $.ajax({
         url: "{{ url('getprocesstypeid') }}",
         type: "POST",
         data: {
             lob_id: lob_id,
+            select_client_id: select_client_id,
             _token: '{{ csrf_token() }}'
         },
         dataType: 'json',
@@ -820,7 +857,8 @@ $('#lob_id').on('change', function () {
 $('#process_type_id').on('change', function () {
     var lob_id = $("#lob_id").val();
     var process_type_id = $("#process_type_id").val();
-    console.log(process_type_id);
+    var select_client_id = $("#select_client_id").val();
+
     $("#process_code").html('');
     $("#tier_id").html(''); 
     
@@ -828,6 +866,7 @@ $('#process_type_id').on('change', function () {
         url: "{{ url('getprocess_code') }}",
         type: "POST",
         data: {
+            select_client_id: select_client_id,
             lob_id: lob_id,
             process_type_id: process_type_id,
             _token: '{{ csrf_token() }}'
@@ -884,7 +923,7 @@ $(document).ready(function() {
 
 
 $(document).ready(function() {
-    $('#lob_id').change(function() {
+    $('#select_client_id').change(function() {
         var selectedOption = $(this).find('option:selected');
         var clientId = selectedOption.data('client-id');
 console.log(clientId);
@@ -906,7 +945,7 @@ console.log(clientId);
         }
     });
 
-    $('#lob_id').trigger('change');
+    $('#select_client_id').trigger('change');
 });
 
 $(document).ready(function () {
