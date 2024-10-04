@@ -144,6 +144,8 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::any('/progressBar', 'progressBar')->name('progressBar');
     
     Route::any('/getStatus', 'getStatus')->name('getStatus');
+    Route::any('/getlobid', 'getlobid')->name('getlobid');
+
     Route::any('/getlob', 'getlob')->name('getlob');//??
     Route::any('/getprocesstypeid', 'getprocesstypeid')->name('getprocesstypeid');
     Route::any('/getprocess_code', 'getprocess_code')->name('getprocess_code');
