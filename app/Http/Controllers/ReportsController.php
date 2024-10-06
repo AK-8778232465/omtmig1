@@ -444,7 +444,7 @@ if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
             ->get()
             ->groupBy('order_id');
     
-        $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use ($fromDate, $toDate, $projectId, $client_id, $orderStatusHistory) {
+        $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use ($fromDate, $toDate, $product_id, $client_id, $orderStatusHistory) {
             $completedCount = 0;
     
             if (!empty($product_id) && $product_id[0] !== 'All') {
