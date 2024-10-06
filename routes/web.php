@@ -163,7 +163,11 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
 
 Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPOC')->controller(ReportsController::class)->group(function () {
     Route::get('Reports', 'Reports')->name('Reports');
-    Route::post('Productdropdown', 'Productdropdown')->name('Productdropdown');
+    Route::post('get_lob', 'get_lob')->name('get_lob');
+    Route::post('get_process', 'get_process')->name('get_process');
+    Route::post('get_product', 'get_product')->name('get_product');
+
+
     Route::post('userwise_count', 'userwise_count')->name('userwise_count');
     Route::post('orderWise', 'orderWise')->name('orderWise');
 
