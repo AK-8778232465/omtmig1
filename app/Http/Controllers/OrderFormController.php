@@ -556,11 +556,30 @@ class OrderFormController extends Controller
                     'created_by' => Auth::id(),
                 ]);
 
-                DB::table('oms_order_creations')
+                if($request->currentStatusId != 4){
+                    DB::table('oms_order_creations')
                     ->where('id', $orderId)
                     ->update([
                         'comment' => $request->orderComment,
                     ]);
+                }
+
+
+                if($request->currentStatusId == 4){
+                    DB::table('oms_order_creations')
+                    ->where('id', $orderId)
+                    ->update([
+                        'qc_comment' => $request->orderComment,
+                        'updated_qc' => Auth::id(),
+                    ]);
+                }
+
+                DB::table('oms_order_creations')
+                    ->where('id', $orderId)
+                    ->update(['status_updated_time' => Carbon::now()
+                ]);       
+                  
+
 
                 $getPrimaryName = DB::table('oms_primary_source')->where('id', $request->primarySource)->value('source_name');
 

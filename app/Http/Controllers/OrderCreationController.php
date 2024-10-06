@@ -217,6 +217,7 @@ public function getlobid(Request $request){
             'typist_id' => isset($input['typist_id']) ? $input['typist_id'] : NULL,
             'typist_qc_id' => isset($input['typist_qc_id']) ? $input['typist_qc_id'] : NULL,
             'created_by' => Auth::id(),
+            'status_updated_time' => Carbon::now()
         ];
 
         

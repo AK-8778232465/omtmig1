@@ -183,16 +183,23 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-3">
+
+            <div class="col-md-2">
                 <div class="form-group">
-                    <label for="project">Product</label>
-                    <select class="form-control select2-basic-multiple" style="width:100%" name="dcf_project_id[]" id="project_id_dcf" multiple="multiple">
-                        <option selected value="All">All Products</option>
+                    <label for="lob_id">Lob</label>
+                    <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id" multiple="multiple">
+                        <option selected value="Select Lob">Select Lob</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-2 mt-4">
-                <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
+
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="process_type_id">Process</label>
+                    <select class="form-control select2-basic-multiple" style="width:100%" name="process_type_id" id="process_type_id" multiple="multiple">
+                        <option selected value="All">All</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="mb-4" id="datepicker">
@@ -208,6 +215,21 @@
                 </div>
             </div>
         </div>
+
+<div class= "col-md-7 d-flex row" >
+        <div class="col-md-4 mt-3" id="hidefilter_2">
+            <div class="form-group">
+                <label for="product_id">Product</label>
+                <select class="form-control select2-basic-multiple" style="width:100%" name="product_id" id="product_id" multiple="multiple">
+                    <option selected value="All">All Products</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3" style="margin-top:41px;" id="hidefilter_3">
+            <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
+        </div>
+</div>
+
         <div class="card col-md-10 mt-5 tabledetails" id="userwise_table" style="font-size: 12px;">
             <h4 class="text-center mt-3">Userwise Details</h4>
                 <div class="card-body">
@@ -245,16 +267,23 @@
                         <table id="newreports_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
                                 <tr>
-                                    <th width="12%">S.No</th>
-                                    <th width="11%">Product Type</th>
-                                    <th width="11%">Order Received</th>
-                                    <th width="11%">Production Date</th>
-                                    <th width="11%">Order Id</th>
-                                    <th width="11%">State</th>
-                                    <th width="11%">County</th>
+                                    <th width="5%">S.No</th>
+                                    <th width="11%">Process</th>
+                                    <th width="8%">Order Received Date</th>
+                                    <th width="8%">Production Date</th>
+                                    <th width="11%">Order ID</th>
+                                    <th width="5%">State</th>
+                                    <th width="5%">County Name</th>
+                                    <th width="5%">Status Updated Date</th>
                                     <th width="11%">Status</th>
-                                    <th width="11%">Comments</th>
-                                    <th width="11%">Primary Source</th>
+                                    <th width="11%">Status Comments</th>
+                                    <th width="5%">Primary Source</th>
+                                    <th width="5%">Process type</th>
+                                    <th width="11%">User Emp Id</th>
+                                    <th width="11%">User Emp Name</th>
+                                    <th width="5%">QA Emp Id</th>
+                                    <th width="6%">QA Emp Name</th>
+                                    <th width="11%">QA Comments</th>
                                 </tr>
                             </thead>
                             <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -518,11 +547,66 @@ function formatDate(date) {
     }
 }
 
+
+$(document).ready(function() {
+        var isClientChanging = false;
+        $(document).on('change', '#client_id_dcf', function() {
+            if (isClientChanging) return;
+            isClientChanging = true;
+            var selectedClientOption = $(this).val();
+            $("#client_id_dcf").val(selectedClientOption && selectedClientOption.includes('All') ? ['All'] : selectedClientOption);
+            if ($("#client_id_dcf").val() !== selectedClientOption) {
+                $("#client_id_dcf").trigger('change');
+            }
+            isClientChanging = false;
+        });
+
+        var isLobChanging = false;
+        $(document).on('change', '#lob_id', function() {
+            if (isLobChanging) return;
+            isLobChanging = true;
+            var selectedLobOption = $(this).val();
+            $("#lob_id").val(selectedLobOption && selectedLobOption.includes('Select Lob') ? ['Select Lob'] : selectedLobOption);
+            if ($("#lob_id").val() !== selectedLobOption) {
+                $("#lob_id").trigger('change');
+            }
+            isLobChanging = false;
+        });
+
+        var isProcessChanging = false;
+        $(document).on('change', '#process_type_id', function() {
+            if (isProcessChanging) return;
+            isProcessChanging = true;
+            var selectedProcessOption = $(this).val();
+            $("#process_type_id").val(selectedProcessOption && selectedProcessOption.includes('All') ? ['All'] : selectedProcessOption);
+            if ($("#process_type_id").val() !== selectedProcessOption) {
+                $("#process_type_id").trigger('change');
+            }
+            isProcessChanging = false;
+        });
+
+
+        var isProductChanging = false;
+        $(document).on('change', '#product_id', function() {
+            if (isProductChanging) return;
+            isProductChanging = true;
+            var selectedProductOption = $(this).val();
+            $("#product_id").val(selectedProductOption && selectedProductOption.includes('All') ? ['All'] : selectedProductOption);
+            if ($("#product_id").val() !== selectedProductOption) {
+                $("#product_id").trigger('change');
+            }
+            isProductChanging = false;
+        });
+    });
+
+
 function orderWise() {
     var fromDate = $('#fromDate_range').val();
     var toDate = $('#toDate_range').val();
     var client_id = $('#client_id_dcf').val();
-    var project_id = $('#project_id_dcf').val();
+    var lob_id = $('#lob_id').val();
+    var process_type_id = $('#process_type_id').val();
+    var product_id = $('#product_id').val();
 
     var table = $('#newreports_datatable').DataTable({
         destroy: true,
@@ -535,7 +619,9 @@ function orderWise() {
                 d.fromDate_range  = fromDate;
                 d.toDate_range = toDate;
                 d.client_id = client_id;
-                d.project_id = project_id;
+                d.product_id = product_id;
+                d.lob_id = lob_id;
+                d.process_type_id = process_type_id;
                 d.selectedDateFilter = selectedDateFilter;
                 d._token = '{{ csrf_token() }}';
             },
@@ -579,9 +665,26 @@ function orderWise() {
             { data: 'order_id', name: 'order_id' },
             { data: 'short_code', name: 'short_code' },
             { data: 'county_name', name: 'county_name' },
+            { data: 'status_updated_time',
+              name: 'status_updated_time',
+              render: function(data, type, row) {
+                return data ? formatExcelDate(data) : '';
+              }},
             { data: 'status', name: 'status' },
-             { data: 'status_comment', name: 'status_comment' },
-            { data: 'primary_source', name: 'primary_source' }
+            { data: 'status_comment', name: 'status_comment' },
+            { data: 'primary_source', name: 'primary_source' },
+            { data: 'process_name', name: 'process_name' },
+            { data: 'emp_id', name: 'emp_id' },
+            { data: 'emp_name', name: 'emp_name' },
+            {data: 'qc_EmpId', name: 'qc_EmpId'},
+            {data: 'qa_user', name: 'qa_user'},
+            {data: 'qc_comment', name: 'qc_comment'},
+            
+
+
+
+
+
         ],
         dom: 'l<"toolbar">Bfrtip',
         buttons: [
@@ -594,15 +697,17 @@ function orderWise() {
                         data: {
                             toDate_range: toDate,
                             fromDate_range: fromDate,
-                            client_id: client_id,
-                            project_id: project_id,
+                            client_id : client_id,
+                            product_id : product_id,
+                            lob_id : lob_id,
+                            process_type_id : process_type_id,
                             selectedDateFilter: selectedDateFilter,
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
                             var data = response.data;
 
-                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Short Code", "County Name", "Status", "Status Comment", "Primary Source"];
+                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source","Process Type", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments"];
                             var exportData = data.map((row, index) => [
                                 index + 1,
                                 row.process,
@@ -611,9 +716,18 @@ function orderWise() {
                                 row.order_id,
                                 row.short_code,
                                 row.county_name,
+                                formatExcelDate(row.status_updated_time),
                                 row.status,
                                 row.status_comment,
-                                row.primary_source
+                                row.primary_source,
+                                row.process_name.replace(/&amp;/g, '&'),
+                                row.emp_id,
+                                row.emp_name,
+                                row.qc_EmpId,
+                                row.qa_user,
+                                row.qc_comment,
+
+
                             ]);
 
                             var wb = XLSX.utils.book_new();
@@ -652,7 +766,7 @@ $('#newreports_datatable').on('draw.dt', function () {
 
     function fetchProData(client_id) {
         $.ajax({
-            url: "{{ url('Productdropdown') }}",
+            url: "{{ url('get_lob') }}",
             type: "POST",
             data: {
                 client_id: client_id,
@@ -660,9 +774,10 @@ $('#newreports_datatable').on('draw.dt', function () {
             },
             dataType: 'json',
             success: function (response) {
-                $('#project_id_dcf').html('<option selected value="All">All Products</option>');
+                $('#lob_id').html('<option selected value="Select Lob">Select Lob</option>');
                 $.each(response, function (index, item) {
-                    $("#project_id_dcf").append('<option value="' + item.id + '">' + item.project_code + ' - (' + item.process_name + ')</option>');
+                    $("#lob_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+
 
                 });
             },
@@ -672,11 +787,69 @@ $('#newreports_datatable').on('draw.dt', function () {
         });
     }
 
+    $('#lob_id').on('change', function () {
+    var lob_id = $(this).val();
+    $("#process_type_id").html(''); 
+        $.ajax({
+            url: "{{ url('get_process') }}",
+            type: "POST",
+            data: {
+                lob_id: lob_id,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: 'json',
+            success: function (response) {
+                $('#process_type_id').html('<option selected value="All">All</option>');
+                $.each(response, function (index, item) {
+                    $("#process_type_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error: ' + status + ' - ' + error);
+            }
+        });
+    })
+
+
+
+    $('#process_type_id').on('change', function () {
+    var process_type_id = $(this).val();
+    var client_id = $('#client_id_dcf').val();
+    var lob_id = $('#lob_id').val();
+
+    console.log(process_type_id);
+    $("#product_id").html(''); 
+        $.ajax({
+            url: "{{ url('get_product') }}",
+            type: "POST",
+            data: {
+                process_type_id: process_type_id,
+                client_id: client_id,
+                lob_id:lob_id,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: 'json',
+            success: function (response) {
+                $('#product_id').html('<option selected value="All">All</option>');
+                $.each(response, function (index, item) {
+                    $("#product_id").append('<option value="' + item.id + '">' + '(' + item.project_code + ') ' + item.process_name + '</option>');
+
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error: ' + status + ' - ' + error);
+            }
+        });
+    })
+
     function userwise_datatable() {
     var fromDate =  $('#fromDate_range').val();
     var toDate = $('#toDate_range').val();
     var client_id = $('#client_id_dcf').val();
-    var project_id = $('#project_id_dcf').val();
+    var lob_id = $('#lob_id').val();
+    var process_type_id = $('#process_type_id').val();
+    var product_id = $('#product_id').val();
 
     var table = $('#userwise_datatable').DataTable({
         destroy: true,
@@ -689,7 +862,9 @@ $('#newreports_datatable').on('draw.dt', function () {
                 d.toDate_range = toDate;
                 d.fromDate_range = fromDate;
                 d.client_id = client_id;
-                d.project_id = project_id;
+                d.lob_id = lob_id;
+                d.process_type_id = process_type_id,
+                d.product_id = product_id,
                 d.selectedDateFilter = selectedDateFilter;
                 d._token = '{{ csrf_token() }}';
             },
@@ -726,8 +901,10 @@ $('#newreports_datatable').on('draw.dt', function () {
                         data: {
                             toDate_range: toDate,
                             fromDate_range: fromDate,
-                            client_id: client_id,
-                            project_id: project_id,
+                            client_id : client_id,
+                            lob_id : lob_id,
+                            process_type_id : process_type_id,
+                            product_id : product_id,
                             selectedDateFilter : selectedDateFilter,
                             _token: '{{ csrf_token() }}'
                         },
@@ -766,9 +943,9 @@ $('#newreports_datatable').on('draw.dt', function () {
 
 
 $('#client_id_dcf').on('change', function () {
-    let getproject_id = $("#client_id_dcf").val();
-    $("#project_id_dcf").html('<option selected value="All">All Products</option>');
-    fetchProData(getproject_id);
+    let client_id = $("#client_id_dcf").val();
+    $("#lob_id").html('<option selected value="All">All</option>');
+    fetchProData(client_id);
 });
 
 $(document).ready(function() {
@@ -842,21 +1019,36 @@ $(document).ready(function() {
             $('#userwise_table').show();
             $('#datepicker').hide();
             $('#hidefilter').show();
+            $('#hidefilter_2').show();
+            $('#hidefilter_3').show();
+
         } else if (reportId === 'orderwise-details') {
             $('#newreports_table').show();
             $('#datepicker').hide();
             $('#hidefilter').show();
+            $('#hidefilter_2').show();
+            $('#hidefilter_3').show();
+
         } else if (reportId === 'ordercompletion-details') {
             $('#timetaken_table').show();
             $('#datepicker').hide();
             $('#hidefilter').show();
+            $('#hidefilter_2').show();
+            $('#hidefilter_3').show();
+
         } else if (reportId === 'orderprogress-details') {
             $('#orderwise_timetaken_table').show();
             $('#datepicker').hide();
             $('#hidefilter').show();
+            $('#hidefilter_2').show();
+            $('#hidefilter_3').show();
+
+
         } else if (reportId === 'attendance-details') {
             $('#attendance_report').show();
             $('#hidefilter').hide();
+            $('#hidefilter_2').hide();
+            $('#hidefilter_3').hide();
             $('#datepicker').show();
         }
     }
@@ -933,8 +1125,10 @@ document.getElementById('fromDate_range').addEventListener('change', function() 
 function userTimeTaken_datatable() {
     var fromDate = $('#fromDate_range').val();
     var toDate = $('#toDate_range').val();
-    var client_id = $('#client_id_dcf').val();
-    var project_id = $('#project_id_dcf').val();
+    let client_id = $("#client_id_dcf").val();
+    let lob_id = $("#lob_id").val();
+    let process_type_id = $('#process_type_id').val();
+    let product_id = $('#product_id').val();
 
     $('#timetaken_datatable').DataTable({
         destroy: true,
@@ -947,16 +1141,18 @@ function userTimeTaken_datatable() {
                     toDate_range: toDate,
                     fromDate_range: fromDate,
                     client_id: client_id,
-                    project_id: project_id,
-                selectedDateFilter: selectedDateFilter,
+                    lob_id: lob_id,
+                    process_type_id: process_type_id,
+                    product_id : product_id,
+                    selectedDateFilter: selectedDateFilter,
                     _token: '{{ csrf_token() }}'
             },
             dataSrc: function (json) {
-                if (Array.isArray(project_id) && project_id.includes('All')) {
+                if (Array.isArray(product_id) && product_id.includes('All')) {
                     json.data.forEach(function (item) {
                         item.Product_Type = 'All Products';
                     });
-                } else if (project_id === 'All') {
+                } else if (product_id === 'All') {
                     json.data.forEach(function (item) {
                         item.Product_Type = 'All';
                     });
@@ -988,8 +1184,10 @@ function userTimeTaken_datatable() {
 function orderTimeTaken_datatable() {
     var fromDate = $('#fromDate_range').val();
     var toDate = $('#toDate_range').val();
-    var client_id = $('#client_id_dcf').val();
-    var project_id = $('#project_id_dcf').val();
+    let client_id = $("#client_id_dcf").val();
+    let lob_id = $("#lob_id").val();
+    let process_type_id = $('#process_type_id').val();
+    let product_id = $('#product_id').val();
 
     $('#orderwise_timetaken_datatable').DataTable({
         destroy: true,
@@ -1002,16 +1200,18 @@ function orderTimeTaken_datatable() {
                 toDate_range: toDate,
                 fromDate_range: fromDate,
                 client_id: client_id,
-                project_id: project_id,
+                lob_id: lob_id,
+                process_type_id : process_type_id,
+                product_id: product_id,
                 selectedDateFilter: selectedDateFilter,
                 _token: '{{ csrf_token() }}'
             },
             dataSrc: function (json) {
-                if (Array.isArray(project_id) && project_id.includes('All')) {
+                if (Array.isArray(product_id) && product_id.includes('All')) {
                     json.data.forEach(function (item) {
                         item.Product_Type = 'All  Products';
                     });
-                } else if (project_id === 'All') {
+                } else if (product_id === 'All') {
                     json.data.forEach(function (item) {
                         item.Product_Type = 'All';
                     });

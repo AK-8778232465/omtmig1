@@ -26,26 +26,77 @@ class ReportsController extends Controller
     }
 
 
-    public function Productdropdown(Request $request)
+    public function get_lob(Request $request)
     {
         $client_id = $request->client_id;
         if (!is_array($client_id)) {
             $client_id = [$client_id];
         }
         if (in_array('All', $client_id)) {
-            $getProject = DB::table('stl_item_description')
-                            ->select('id', 'client_id', 'process_name', 'project_code')
-                            ->orderBy('project_code', 'asc')
+            $getlob = DB::table('stl_lob')
+                            ->select('id', 'name')
                             ->get();
         } else {
-            $getProject = DB::table('stl_item_description')
-                            ->select('id', 'client_id', 'process_name', 'project_code')
-                            ->whereIn('client_id', $client_id)
-                            ->orderBy('project_code', 'asc')
-                            ->get();
+            $filteredLob = DB::table('stl_lob')->select('id', 'client_id', 'name')->get();
+        $getlob = $filteredLob->filter(function($item) use ($client_id) {
+            $clientIds = json_decode($item->client_id, true);
+            // Check if there's any overlap between the request client_ids and the stored client_ids
+            return !empty(array_intersect($client_id, $clientIds));
+        });
         }
 
-        return response()->json($getProject); // Return JSON response
+        return response()->json($getlob); // Return JSON response
+    }
+
+
+    public function get_process(Request $request)
+    {
+        $lob_id = $request->lob_id;
+        if (!is_array($lob_id)) {
+            $lob_id = [$lob_id];
+        }
+        if (in_array('All', $lob_id)) {
+            $getprocess = DB::table('stl_process')
+                            ->select('id', 'name')
+                            ->get();
+        } else {
+            $getprocess = DB::table('stl_process')
+                            ->select('id', 'name', 'lob_id')
+                            ->where('lob_id', $lob_id)
+                            ->get();
+
+        }
+
+        return response()->json($getprocess); 
+    }
+
+
+
+    
+    public function get_product(Request $request)
+    {
+        $process_type_id = $request->process_type_id;
+        $client_id = $request->client_id;
+        $lob_id = $request->lob_id;
+
+        if (!is_array($process_type_id)) {
+            $process_type_id = [$process_type_id];
+        }
+        if (in_array('All', $process_type_id)) {
+            $getprocess = DB::table('stl_item_description')
+                            ->select('id', 'process_name', 'project_code')
+                            ->get();
+        } else {
+            $getprocess = DB::table('stl_item_description')
+                            ->select('id', 'process_name', 'project_code')
+                            ->where('process_id', $process_type_id)
+                            ->where('client_id', $client_id)
+                            ->where('lob_id', $lob_id)
+                            ->get();
+
+        }
+
+        return response()->json($getprocess); 
     }
 
     public function userwise_count(Request $request)
@@ -53,7 +104,9 @@ class ReportsController extends Controller
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $client_id = $request->input('client_id');
-        $project_id = $request->input('project_id');
+        $lob_id = $request->input('lob_id');
+        $process_type_id = $request->input('process_type_id');
+        $product_id = $request->input('product_id');
         $selectedDateFilter = $request->input('selectedDateFilter');
         $fromDateRange = $request->input('fromDate_range');
         $toDateRange = $request->input('toDate_range');
@@ -85,6 +138,9 @@ class ReportsController extends Controller
             ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
             ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
             ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+            ->leftJoin('stl_lob', 'oms_order_creations.lob_id', '=', 'stl_lob.id')
+            ->leftJoin('stl_process', 'oms_order_creations.process_type_id', '=', 'stl_process.id')
+
             ->selectRaw('
                 CONCAT(oms_users.emp_id, " (", oms_users.username, ")") as userinfo,
                 SUM(CASE WHEN status_id = 1 THEN 1 ELSE 0 END) as `status_1`,
@@ -104,12 +160,20 @@ class ReportsController extends Controller
             ->whereIn('oms_order_creations.process_id', $processIds)
             ->groupBy('oms_order_creations.assignee_user_id');
 
-        if (!empty($project_id) && $project_id[0] !== 'All') {
-            $statusCountsQuery->whereIn('oms_order_creations.process_id', $project_id);
+        if (!empty($product_id) && $product_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('oms_order_creations.process_id', $product_id);
         }
 
         if (!empty($client_id) && $client_id[0] !== 'All') {
             $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+        }
+
+        if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
+        }
+
+        if (!empty($lob_id) && $lob_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('oms_order_creations.lob_id', $lob_id);
         }
 
         $statusCounts = $statusCountsQuery->get();
@@ -147,7 +211,9 @@ private function getProcessIdsBasedOnUserRole($user)
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $client_id = $request->input('client_id');
-        $project_id = $request->input('project_id');
+        $lob_id = $request->input('lob_id');
+        $process_type_id = $request->input('process_type_id');
+        $product_id = $request->input('product_id');
         $selectedDateFilter = $request->input('selectedDateFilter');
         $fromDateRange = $request->input('fromDate_range');
         $toDateRange = $request->input('toDate_range');
@@ -180,8 +246,13 @@ private function getProcessIdsBasedOnUserRole($user)
             ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
             ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
             ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
-            ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
+            ->leftJoin('stl_process', 'oms_order_creations.process_type_id', '=', 'stl_process.id')
+            ->leftJoin('stl_lob', 'oms_order_creations.lob_id', '=', 'stl_lob.id')
             ->leftJoin('oms_city', 'oms_order_creations.city_id', '=', 'oms_city.id')
+            ->leftJoin('oms_users as assignee_user', 'oms_order_creations.assignee_user_id', '=', 'assignee_user.id')
+            ->leftJoin('oms_users as status_update_qc', 'oms_order_creations.updated_qc', '=', 'status_update_qc.id')
+
+
             ->leftJoin('county_instructions', function($join) {
                 $join->on('oms_order_creations.state_id', '=', 'county_instructions.state_id')
                      ->on('oms_order_creations.county_id', '=', 'county_instructions.county_id')
@@ -207,7 +278,15 @@ private function getProcessIdsBasedOnUserRole($user)
                 'county.county_name as county_name',
                 'oms_status.status as status',
                 'county_instructions.json as county_instruction_json',
-                'oms_order_creations.comment as status_comment'
+                'oms_order_creations.comment as status_comment',
+                'stl_process.name as process_name',
+                'assignee_user.emp_id as EmpId',
+                'assignee_user.username as EmpName',
+                'status_update_qc.emp_id as qc_EmpId',
+                'status_update_qc.username as qa_user',
+                'oms_order_creations.qc_comment as qc_comment',
+                'oms_order_creations.status_updated_time as status_updated_time',
+
             )
             ->whereNotNull('oms_order_creations.assignee_user_id')
             ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
@@ -221,8 +300,17 @@ private function getProcessIdsBasedOnUserRole($user)
         if (!empty($client_id) && $client_id[0] !== 'All') {
             $query->whereIn('stl_item_description.client_id', $client_id);
         }
-        if (!empty($project_id) && $project_id[0] !== 'All') {
-            $query->whereIn('oms_order_creations.process_id', $project_id);
+
+        if (!empty($product_id) && $product_id[0] !== 'All') {
+            $query->whereIn('oms_order_creations.process_id', $product_id);
+        }
+
+        if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
+            $query->whereIn('oms_order_creations.process_type_id', $process_type_id);
+        }
+
+        if (!empty($lob_id) && $lob_id[0] !== 'All') {
+            $query->whereIn('oms_order_creations.lob_id', $lob_id);
         }
         $results = $query->orderBy('oms_order_creations.id', 'desc')->get();
         $results = $results->map(function($item) {
@@ -236,8 +324,16 @@ private function getProcessIdsBasedOnUserRole($user)
                 'short_code' => $item->short_code,
                 'county_name' => $item->county_name,
                 'status' => $item->status,
-                 'status_comment' => $item->status_comment,
+                'status_comment' => $item->status_comment,
                 'primary_source' => $primarySource,
+                'process_name' => $item->process_name,
+                'emp_id' => $item->EmpId,
+                'emp_name' => $item->EmpName,
+                'qa_user' => $item->qa_user,
+                'qc_EmpId' => $item->qc_EmpId,
+                'qc_comment' => $item->qc_comment,
+                'status_updated_time' => $item->status_updated_time
+                
             ];
         });
 
@@ -262,7 +358,9 @@ private function getProcessIdsBasedOnUserRole($user)
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $client_id = $request->input('client_id');
-        $projectId = $request->input('project_id');
+        $lob_id = $request->input('lob_id');
+        $process_type_id = $request->input('process_type_id');
+        $product_id = $request->input('product_id');
         $selectedDateFilter = $request->input('selectedDateFilter');
         $fromDateRange = $request->input('fromDate_range');
         $toDateRange = $request->input('toDate_range');
@@ -294,6 +392,8 @@ private function getProcessIdsBasedOnUserRole($user)
             ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
             ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
             ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+            ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
+            ->leftJoin('stl_lob', 'oms_order_creations.lob_id', '=', 'stl_lob.id')
             ->select(
                 'oms_users.id as userid',
                 'oms_users.emp_id as empid',
@@ -316,14 +416,21 @@ private function getProcessIdsBasedOnUserRole($user)
             $statusCountsQuery->whereIn('oms_order_creations.process_id', $processIds);
         }
     
-        if (!empty($projectId) && $projectId[0] !== 'All') {
-            $statusCountsQuery->whereIn('oms_order_creations.process_id', $projectId);
+        if (!empty($product_id) && $product_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('oms_order_creations.process_id', $product_id);
         }
     
         if (!empty($client_id) && $client_id[0] !== 'All') {
             $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
         }    
     
+if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
+        }
+
+        if (!empty($lob_id) && $lob_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('oms_order_creations.lob_id', $lob_id);
+        }
         $statusCounts = $statusCountsQuery->get();
     
         // Get all order IDs
@@ -340,14 +447,14 @@ private function getProcessIdsBasedOnUserRole($user)
         $dataForDataTables = $statusCounts->groupBy('userid')->map(function ($orders, $userid) use ($fromDate, $toDate, $projectId, $client_id, $orderStatusHistory) {
             $completedCount = 0;
     
-            if (!empty($projectId) && $projectId[0] !== 'All') {
+            if (!empty($product_id) && $product_id[0] !== 'All') {
                 $completedCount = DB::table('oms_order_creations')
                     ->whereDate('order_date', '>=', $fromDate)
                     ->whereDate('order_date', '<=', $toDate)
                     ->where('oms_order_creations.is_active', 1)
                     ->where('status_id', 5)
                     ->where('assignee_user_id', $userid)
-                    ->whereIn('oms_order_creations.process_id', $projectId)
+                    ->whereIn('oms_order_creations.process_id', $product_id)
                     ->count();
             } elseif (!empty($client_id) && $client_id[0] !== 'All') {
                 $completedCount = DB::table('oms_order_creations')
@@ -419,8 +526,10 @@ private function getProcessIdsBasedOnUserRole($user)
 public function orderTimeTaken(Request $request) {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
-        $clientId = $request->input('client_id');
-        $projectId = $request->input('project_id');
+        $client_id = $request->input('client_id');
+        $lob_id = $request->input('lob_id');
+        $process_type_id = $request->input('process_type_id');
+        $product_id = $request->input('product_id');
         $selectedDateFilter = $request->input('selectedDateFilter');
         $fromDateRange = $request->input('fromDate_range');
         $toDateRange = $request->input('toDate_range');
@@ -453,6 +562,8 @@ public function orderTimeTaken(Request $request) {
             ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
             ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
             ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+            ->leftJoin('stl_process', 'stl_item_description.process_id', '=', 'stl_process.id')
+            ->leftJoin('stl_lob', 'oms_order_creations.lob_id', '=', 'stl_lob.id')
             ->select(
                 'oms_users.id as userid',
                 'oms_users.emp_id as empid',
@@ -476,15 +587,15 @@ public function orderTimeTaken(Request $request) {
         }
     
     
-        if (!empty($projectId) && $projectId[0] !== 'All') {
-            $statusCountsQuery->whereIn('oms_order_creations.process_id', $projectId);
+        if (!empty($product_id) && $product_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('oms_order_creations.process_id', $product_id);
         }
     
-        if (!empty($clientId) && $clientId[0] !== 'All') {
-            $statusCountsQuery->whereIn('stl_item_description.client_id', $clientId);
+        if (!empty($client_id) && $client_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
         }
     
-        if(!empty($projectId) && $projectId[0] !== 'All'){
+        if(!empty($product_id) && $product_id[0] !== 'All'){
             $statusCounts = $statusCountsQuery->get();
             $statusCounts = $statusCounts->groupBy('process_name');
         }else{

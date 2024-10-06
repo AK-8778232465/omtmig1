@@ -521,7 +521,8 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                 'typist_qc_id' =>isset($TypistQC) ? $TypistQC->id : null,
                 'process_type_id' => $process_type_id->process_id, // Use the id
                 'tier_id' => $Tier->id ?? null,
-                'lob_id' => $lob->id ?? null
+                'lob_id' => $lob->id ?? null,
+                'status_updated_time' => Carbon::now(),
             ]);
 
             if (!$orderId) {

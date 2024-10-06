@@ -1636,6 +1636,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $update_status = OrderCreation::where('id', $orderId)->update($updateData);
 
         if ($update_status) {
+            OrderCreation::where('id', $orderId)->update(['status_updated_time' => Carbon::now()]);
+        }
+
+        if ($update_status) {
             $update_data = OrderCreation::select('tier_id', 'state_id', 'county_id', 'city_id')
                 ->where('id', $orderId)
                 ->first();
