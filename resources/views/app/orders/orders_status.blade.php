@@ -324,7 +324,7 @@
                                     <option selected disabled value=""> Select coversheet-preparor</option>
                                     </select>
                                 </div>
-                                <div class="col-2">
+                                <div class="col-2" id="typist_div">
                                     <select style="width: 100%;" class="form-control form-control-sm" id="typist_id" name="typist_id">
                                         <option selected disabled value="">Select Typists</option>
                                         @foreach ($typists as $typist)
@@ -332,7 +332,8 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-2">
+                                
+                                <div class="col-2" id="typist_qc_div">
                                     <select style="width: 100%;" class="form-control form-control-sm" id="typist_qc_id" name="typist_qc_id">
                                         <option selected disabled value="">Select Typists_QC</option>
                                         @foreach ($typists_qcs as $typists_qc)
@@ -1247,24 +1248,35 @@ $(document).on('change', 'input.check-one', function() {
 
 $(document).on('change', 'input.check-one', function() {
     var anyCheckboxChecked = $('input.check-one:checked').length > 0;
-    if (anyCheckboxChecked) {
-        $('#assign_tab').removeClass('d-none');
-        var task_status = $('#statusButtons').find('.btn-primary').attr('id');
-        let status = task_status.replace("status_", "");
-        var userlist = [];
 
-        if (status != null) {
-                userlist = <?php echo json_encode($typists); ?>;
-            }
+    if (anyCheckboxChecked) {   
 
+        if ($(this).data('id') == 82) {
+                $('#assign_tab').removeClass('d-none');
+                $('#typist_div').removeClass('d-none');
+                var task_status = $('#statusButtons').find('.btn-primary').attr('id');
+                let status = task_status.replace("status_", "");
+                var userlist = [];
+
+                if (status != null) {
+                        userlist = <?php echo json_encode($typists); ?>;
+                }
+
+                $('#typist_id').empty();
+                $('#typist_id').append('<option selected disabled value="">Select Typist</option>');
+                $.each(userlist, function(index, user) {
+                    $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+                });
+        }else{
+            $('#assign_tab').addClass('d-none');
             $('#typist_id').empty();
-            $('#typist_id').append('<option selected disabled value="">Select Typist</option>');
-            $.each(userlist, function(index, user) {
-                $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
-            });
+            $('#typist_div').addClass('d-none');
+        }
+
         } else {
             $('#assign_tab').addClass('d-none');
             $('#typist_id').empty();
+            $('#typist_div').addClass('d-none');
         }
 });
 
@@ -1272,7 +1284,10 @@ $(document).on('change', 'input.check-one', function() {
 $(document).on('change', 'input.check-one', function() {
     var anyCheckboxChecked = $('input.check-one:checked').length > 0;
     if (anyCheckboxChecked) {
+        if ($(this).data('id') == 82) {
         $('#assign_tab').removeClass('d-none');
+        $('#typist_qc_div').removeClass('d-none');
+
         var task_status = $('#statusButtons').find('.btn-primary').attr('id');
         let status = task_status.replace("status_", "");
         var userlist = [];
@@ -1286,11 +1301,19 @@ $(document).on('change', 'input.check-one', function() {
             $.each(userlist, function(index, user) {
                 $('#typist_qc_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
             });
+        }else{
+            $('#assign_tab').addClass('d-none');
+            $('#typist_id').empty();
+            $('#typist_qc_div').addClass('d-none');
+        }
         } else {
             $('#assign_tab').addClass('d-none');
             $('#typist_qc_id').empty();
+            $('#typist_qc_div').addClass('d-none');
+
         }
 });
+
 
 
 $(document).on('change', 'input.check-one', function() {

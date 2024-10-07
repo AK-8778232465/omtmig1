@@ -1066,7 +1066,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             if(in_array($user->user_type_id, [6, 7, 8])) {
                 return '<span class="px-2 py-2 rounded text-white assign-me ml-2" id="assign_me_' . ($order->id ?? '') . '">Assign</span>';
             } else {
-                return '<input class="checkbox-table check-one mx-2" data-id="' . ($order->process_id ?? '') . '" type="checkbox" value="' . ($order->id ?? '') . '" id="logs' . ($order->id ?? '') . '" name="orders[]">';
+                return '<input class="checkbox-table check-one mx-2" data-id="' . ($order->client_id ?? '') . '" type="checkbox" value="' . ($order->id ?? '') . '" id="logs' . ($order->id ?? '') . '" name="orders[]">';
             }
         })
         ->addColumn('action', function ($order) {
