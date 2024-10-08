@@ -106,7 +106,7 @@ class OrderController extends Controller
             ->whereHas('client', function ($query) {
                 $query->where('stl_client.is_approved', 1);
             })
-            ->Where('oms_order_creations.assignee_user_id', $user->id)
+        ->where('oms_order_creations.assignee_user_id', $user->id)
             ->count();
 
         $assign_coverSheet = OrderCreation::with('process', 'client')
@@ -138,9 +138,110 @@ class OrderController extends Controller
             $statusCounts[13] = $user_coverSheet;
         }
 
-        return response()->json(['StatusCounts' => $statusCounts, 'AssignCoverSheet' => $assign_coverSheet]);
+    $tatstatusCountsQuery = DB::table('oms_order_creations')
+        ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
+        ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
+        ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+        ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
+        ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+        ->leftJoin('oms_users as typist_users', 'oms_order_creations.typist_id', '=', 'typist_users.id')
+        ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
+        ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
+        ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
+        ->leftJoin('oms_tier','oms_order_creations.tier_id', '=', 'oms_tier.id')
+        ->leftJoin('stl_process', 'oms_order_creations.process_type_id', '=', 'stl_process.id')
+        ->select(
+            'oms_order_creations.id',
+            'oms_order_creations.order_id as order_id',
+            'oms_order_creations.status_id as status_id',
+            'oms_order_creations.order_date as order_date',
+            'stl_item_description.tat_value as tat_value',
+            'oms_order_creations.assignee_user_id',
+            'oms_order_creations.assignee_qa_id',
+            'oms_order_creations.typist_id',
+            'oms_order_creations.typist_qc_id',
+            'oms_order_creations.associate_id',
+        )
+        ->whereIn('oms_order_creations.process_id', $processIds)
+        ->where('oms_order_creations.is_active', 1)
+        ->whereNotNull('oms_order_creations.assignee_user_id')
+        ->where('stl_item_description.is_approved', 1)
+        ->where('stl_client.is_approved', 1);
+
+        if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+            if ($user->user_type_id == 6) {
+                $tatstatusCountsQuery->where('oms_order_creations.assignee_user_id', $user->id);
+            } elseif($user->user_type_id == 7) {
+                $tatstatusCountsQuery->where('oms_order_creations.assignee_qa_id', $user->id)
+                ->whereNotIn('oms_order_creations.status_id', [1]);
+            } elseif($user->user_type_id == 8) {
+                $tatstatusCountsQuery->where(function ($query) use($user) {
+                    $query->where('oms_order_creations.assignee_user_id', $user->id)
+                        ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
+                });
+            } elseif($user->user_type_id == 10){
+                $tatstatusCountsQuery->where('oms_order_creations.typist_id', $user->id)
+                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 17]);
+            } elseif($user->user_type_id == 11){
+                $tatstatusCountsQuery->where('oms_order_creations.typist_qc_id', $user->id)
+                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 16]);
+            }
+        }
+
+        $tatStatusCountsQuery = $tatstatusCountsQuery->get();
+
+        function calculateTatValues($tatStatusCountsQuery)
+        {
+            $resultsByStatus = [];
+        
+            foreach ($tatStatusCountsQuery as $order) {
+                if (!is_null($order->tat_value)) {
+                    $tatValue = $order->tat_value; 
+                    $statusId = $order->status_id; 
+                    $tatHours = $tatValue / 4; 
+        
+                    $orderDate = new \DateTime($order->order_date, new \DateTimeZone('Etc/GMT+5'));
+        
+                    $currentDate = new \DateTime('now', new \DateTimeZone('Etc/GMT+5'));
+        
+                    $diff = $currentDate->diff($orderDate);
+        
+                    $hoursDifference = ($diff->days * 24) + $diff->h + ($diff->i / 60); 
+        
+                    if (!isset($resultsByStatus[$statusId])) {
+                        $resultsByStatus[$statusId] = [
+                            'orderReachthird' => 0,  
+                            'orderReachfourth' => 0  
+                        ];
+                    }
+        
+                    if ($hoursDifference >= $tatHours * 3) {
+                        $resultsByStatus[$statusId]['orderReachfourth'] += 1;
+                    } 
+                    elseif ($hoursDifference >= $tatHours * 2) {
+                        $resultsByStatus[$statusId]['orderReachthird'] += 1;
+                    }
+                }
     }
 
+            return $resultsByStatus;
+    }
+
+        $results = calculateTatValues($tatStatusCountsQuery);
+        
+        $totalThirdCount = array_sum(array_column($results, 'orderReachthird'));
+        $totalFourthCount = array_sum(array_column($results, 'orderReachfourth'));
+
+        return response()->json([
+            'StatusCounts' => $statusCounts,
+            'AssignCoverSheet' => $assign_coverSheet,
+            'TatStatusResults' => $results,  
+            'tat_status_All_third_count' => $totalThirdCount, 
+            'tat_status_All_fourth_count' => $totalFourthCount,
+        ]);
+}
 
     public function getOrderData(Request $request)
     {
@@ -1071,6 +1172,18 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         })
         ->addColumn('action', function ($order) {
             return '<td><div class="row mb-0"><div class="edit_order col-6" style="cursor: pointer;" data-id="' . ($order->id ?? '') . '"><img class="menuicon tbl_editbtn" src="/assets/images/edit.svg" />&nbsp;</div><div class="col-6"><span class="dripicons-trash delete_order text-danger" style="font-size:14px; cursor: pointer;" data-id="' . ($order->id ?? '') . '"></span></div></div></td>';
+        })
+        ->orderColumn('order_id', function($query, $order) {
+            $query->orderBy('oms_order_creations.order_id', $order);
+        })
+        ->orderColumn('lob_name', function($query, $order) {
+            $query->orderBy('stl_lob.name', $order);
+        })
+        ->orderColumn('process_name', function($query, $order) {
+            $query->orderBy('stl_process.name', $order);
+        })
+        ->orderColumn('order_date', function($query, $order) {
+            $query->orderBy('oms_order_creations.order_date', $order);
         })
         ->filterColumn('lob_name', function($order, $keyword) {
             $sql = "stl_lob.name  like ?";

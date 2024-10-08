@@ -182,7 +182,14 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             ++$this->unsuccess_rows;
             return null;
         } else {
-            $lob = Lob::whereRaw('LOWER(name) = ?', [strtolower($lob)])->first();
+            $client = trim($row['Client']);
+            $client = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client)])->first();
+            // $lob = Lob::whereRaw('LOWER(name) = ?', [strtolower($lob)])->where('client_id', $client->id)->first();
+
+            $lob = Lob::whereRaw('LOWER(name) = ?', [strtolower($lob)])
+            ->whereRaw('JSON_CONTAINS(client_id, ?)', [json_encode((string)$client->id)])
+            ->first();
+
             if (!$lob) {
                 $data['comments'] = 'Lob not matched with database records';
                 OrderTemp::insert($data);

@@ -793,4 +793,296 @@ public function attendance_report(Request $request)
     return Datatables::of($dataForDataTables)->toJson();
 }
 
+
+public function production_report(Request $request) {
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+    $client_id = $request->input('client_id');
+    $lob_id = $request->input('lob_id');
+    $process_type_id = $request->input('process_type_id');
+    $product_id = $request->input('product_id');
+    $selectedDateFilter = $request->input('selectedDateFilter');
+    $fromDateRange = $request->input('fromDate_range');
+    $toDateRange = $request->input('toDate_range');
+    $draw = $request->input('draw');
+    $start = $request->input('start');
+    $length = $request->input('length');
+    $searchValue = $request->input('search.value'); 
+    
+    $fromDate = null;
+    $toDate = null;
+
+    if ($fromDateRange && $toDateRange) {
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $toDate = $fromDate;
+        }
+    }
+
+    $statusCountsQuery = DB::table('production_tracker')
+        ->leftJoin('oms_order_creations as order_creation_main', 'production_tracker.order_id', '=', 'order_creation_main.id')
+        ->leftJoin('oms_users as assignee_user', 'order_creation_main.assignee_user_id', '=', 'assignee_user.id')
+        ->leftJoin('oms_users as qa_user', 'order_creation_main.assignee_qa_id', '=', 'qa_user.id')
+        ->leftJoin('oms_users as typist_user', 'order_creation_main.typist_id', '=', 'typist_user.id')
+        ->leftJoin('oms_users as typist_qc_user', 'order_creation_main.typist_qc_id', '=', 'typist_qc_user.id')
+        ->leftJoin('stl_item_description', 'order_creation_main.process_id', '=', 'stl_item_description.id')
+        ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->leftJoin('stl_lob', 'order_creation_main.lob_id', '=', 'stl_lob.id')
+        ->leftJoin('stl_process', 'order_creation_main.process_type_id', '=', 'stl_process.id')
+        ->leftJoin('oms_state', 'order_creation_main.state_id', '=', 'oms_state.id')
+        ->leftJoin('county', 'order_creation_main.county_id', '=', 'county.id')
+        ->leftJoin('oms_status', 'order_creation_main.status_id', '=', 'oms_status.id')
+        ->leftJoin('oms_vendor_information', 'production_tracker.accurate_client_id', '=', 'oms_vendor_information.id')
+        ->select(
+            'order_creation_main.order_date as order_date',
+            'assignee_user.emp_id as assignee_empid',
+            'qa_user.emp_id as qa_empid',
+            'typist_user.emp_id as typist_empid',
+            'typist_qc_user.emp_id as typist_qc_empid',
+            'stl_item_description.process_name as process_name',
+            'oms_vendor_information.accurate_client_id as acc_client_id',
+            'order_creation_main.order_id as order_num',
+            'oms_state.short_code as short_code',
+            'county.county_name as county_name',
+            'production_tracker.portal_fee_cost as portal_fee_cost',
+            'production_tracker.source as source',
+            'production_tracker.production_date as production_date',
+            'production_tracker.copy_cost as copy_cost',
+            'production_tracker.no_of_search_done as no_of_search_done',
+            'production_tracker.no_of_documents_retrieved as no_of_documents_retrieved',
+            'production_tracker.title_point_account as title_point_account',
+            'production_tracker.purchase_link as purchase_link',
+            'production_tracker.username as production_username',
+            'production_tracker.password as password',
+            'order_creation_main.completion_date as completion_date',
+            'oms_status.status as status',
+            'stl_item_description.tat_value as tat_value',
+            'order_creation_main.comment as comment'
+        )
+        ->where('order_creation_main.is_active', 1)
+        ->where('stl_item_description.is_approved', 1);
+
+    if ($fromDate && $toDate) {
+        $statusCountsQuery->whereBetween('order_creation_main.order_date', [$fromDate, $toDate]);
+    }
+
+    if (!empty($processIds)) {
+        $statusCountsQuery->whereIn('order_creation_main.process_id', $processIds);
+    }
+
+    if (!empty($product_id) && $product_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('order_creation_main.process_id', $product_id);
+    }
+
+    if (!empty($client_id) && $client_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+    }
+    if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('order_creation_main.process_type_id', $process_type_id);
+    }
+
+if (!empty($lob_id) && $lob_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('order_creation_main.lob_id', $lob_id);
+}
+
+    if (!empty($searchValue)) {
+        $statusCountsQuery->where(function($query) use ($searchValue) {
+            $query->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
+                  ->orWhere('qa_user.emp_id', 'like', "%{$searchValue}%")
+                  ->orWhere('typist_user.emp_id', 'like', "%{$searchValue}%")
+                  ->orWhere('typist_qc_user.emp_id', 'like', "%{$searchValue}%")
+                  ->orWhere('stl_item_description.process_name', 'like', "%{$searchValue}%")
+                  ->orWhere('order_creation_main.order_id', 'like', "%{$searchValue}%")
+                  ->orWhere('oms_state.short_code', 'like', "%{$searchValue}%")
+                  ->orWhere('county.county_name', 'like', "%{$searchValue}%")
+                  ->orWhere('production_tracker.portal_fee_cost', 'like', "%{$searchValue}%")
+                  ->orWhere('production_tracker.production_date', 'like', "%{$searchValue}%")
+                  ->orWhere('oms_status.status', 'like', "%{$searchValue}%");
+        });
+    }
+
+    $orderColumnIndex = $request->input('order.0.column'); 
+    $orderDirection = $request->input('order.0.dir'); 
+
+    $columns = [
+        'order_creation_main.order_date',
+        'assignee_user.emp_id',
+        'qa_user.emp_id',
+        'typist_user.emp_id',
+        'typist_qc_user.emp_id',
+        'stl_item_description.process_name',
+        'oms_vendor_information.accurate_client_id',
+        'order_creation_main.order_id',
+        'oms_state.short_code',
+        'county.county_name',
+        'production_tracker.portal_fee_cost',
+        'production_tracker.source',
+        'production_tracker.production_date',
+        'production_tracker.copy_cost',
+        'production_tracker.no_of_search_done',
+        'production_tracker.no_of_documents_retrieved',
+        'production_tracker.title_point_account',
+        'production_tracker.purchase_link',
+        'production_tracker.username',
+        'production_tracker.password',
+        'order_creation_main.completion_date',
+        'oms_status.status',
+        'stl_item_description.tat_value',
+        'order_creation_main.comment'
+    ];
+
+    if (isset($columns[$orderColumnIndex])) {
+        $statusCountsQuery->orderBy($columns[$orderColumnIndex], $orderDirection);
+    }
+
+    $totalRecords = $statusCountsQuery->count();
+    $result = $statusCountsQuery->skip($start)->take($length)->get();
+
+    return response()->json([
+        'draw' => intval($draw),  
+        'recordsTotal' => $totalRecords,
+        'recordsFiltered' => $totalRecords, 
+        'data' => $result
+    ]);
+}
+
+public function exportProductionReport(Request $request) {
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+    $client_id = $request->input('client_id');
+    $lob_id = $request->input('lob_id');
+    $process_type_id = $request->input('process_type_id');
+    $product_id = $request->input('product_id');
+    $selectedDateFilter = $request->input('selectedDateFilter');
+    $fromDateRange = $request->input('fromDate_range');
+    $toDateRange = $request->input('toDate_range');
+    $searchValue = $request->input('search.value');
+
+    $fromDate = null;
+    $toDate = null;
+
+    if ($fromDateRange && $toDateRange) {
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $toDate = $fromDate;
+        }
+    }
+
+    $statusCountsQuery = DB::table('production_tracker')
+        ->leftJoin('oms_order_creations as order_creation_main', 'production_tracker.order_id', '=', 'order_creation_main.id')
+        ->leftJoin('oms_users as assignee_user', 'order_creation_main.assignee_user_id', '=', 'assignee_user.id')
+        ->leftJoin('oms_users as qa_user', 'order_creation_main.assignee_qa_id', '=', 'qa_user.id')
+        ->leftJoin('oms_users as typist_user', 'order_creation_main.typist_id', '=', 'typist_user.id')
+        ->leftJoin('oms_users as typist_qc_user', 'order_creation_main.typist_qc_id', '=', 'typist_qc_user.id')
+        ->leftJoin('stl_item_description', 'order_creation_main.process_id', '=', 'stl_item_description.id')
+        ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->leftJoin('stl_lob', 'order_creation_main.lob_id', '=', 'stl_lob.id')
+        ->leftJoin('stl_process', 'order_creation_main.process_type_id', '=', 'stl_process.id')
+        ->leftJoin('oms_state', 'order_creation_main.state_id', '=', 'oms_state.id')
+        ->leftJoin('county', 'order_creation_main.county_id', '=', 'county.id')
+        ->leftJoin('oms_status', 'order_creation_main.status_id', '=', 'oms_status.id')
+        ->leftJoin('oms_vendor_information', 'production_tracker.accurate_client_id', '=', 'oms_vendor_information.id')
+        ->select(
+            'order_creation_main.order_date as order_date',
+            'assignee_user.emp_id as assignee_empid',
+            'qa_user.emp_id as qa_empid',
+            'typist_user.emp_id as typist_empid',
+            'typist_qc_user.emp_id as typist_qc_empid',
+            'stl_item_description.process_name as process_name',
+            'oms_vendor_information.accurate_client_id as acc_client_id',
+            'order_creation_main.order_id as order_num',
+            'oms_state.short_code as short_code',
+            'county.county_name as county_name',
+            'production_tracker.portal_fee_cost as portal_fee_cost',
+            'production_tracker.source as source',
+            'production_tracker.production_date as production_date',
+            'production_tracker.copy_cost as copy_cost',
+            'production_tracker.no_of_search_done as no_of_search_done',
+            'production_tracker.no_of_documents_retrieved as no_of_documents_retrieved',
+            'production_tracker.title_point_account as title_point_account',
+            'production_tracker.purchase_link as purchase_link',
+            'production_tracker.username as production_username',
+            'production_tracker.password as password',
+            'order_creation_main.completion_date as completion_date',
+            'oms_status.status as status',
+            'stl_item_description.tat_value as tat_value',
+            'order_creation_main.comment as comment'
+        )
+        ->where('order_creation_main.is_active', 1)
+        ->where('stl_item_description.is_approved', 1);
+
+    if ($fromDate && $toDate) {
+        $statusCountsQuery->whereBetween('order_creation_main.order_date', [$fromDate, $toDate]);
+    }
+
+    if (!empty($processIds)) {
+        $statusCountsQuery->whereIn('order_creation_main.process_id', $processIds);
+    }
+
+    if (!empty($product_id) && $product_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('order_creation_main.process_id', $product_id);
+    }
+
+    if (!empty($client_id) && $client_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+    }
+
+    if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('order_creation_main.process_type_id', $process_type_id);
+    }
+
+    if (!empty($lob_id) && $lob_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('order_creation_main.lob_id', $lob_id);
+    }
+
+    if (!empty($searchValue)) {
+        $statusCountsQuery->where(function($query) use ($searchValue) {
+            $query->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
+                ->orWhere('qa_user.emp_id', 'like', "%{$searchValue}%")
+                ->orWhere('typist_user.emp_id', 'like', "%{$searchValue}%")
+                ->orWhere('typist_qc_user.emp_id', 'like', "%{$searchValue}%")
+                ->orWhere('stl_item_description.process_name', 'like', "%{$searchValue}%")
+                ->orWhere('order_creation_main.order_id', 'like', "%{$searchValue}%")
+                ->orWhere('oms_state.short_code', 'like', "%{$searchValue}%")
+                ->orWhere('county.county_name', 'like', "%{$searchValue}%")
+                ->orWhere('production_tracker.portal_fee_cost', 'like', "%{$searchValue}%")
+                ->orWhere('production_tracker.production_date', 'like', "%{$searchValue}%")
+                ->orWhere('oms_status.status', 'like', "%{$searchValue}%");
+        });
+    }
+
+    $result = $statusCountsQuery->get();
+
+    return response()->json([
+        'data' => $result
+    ]);
+}
+     
 }

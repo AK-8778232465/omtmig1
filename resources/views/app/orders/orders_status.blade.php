@@ -66,8 +66,22 @@
     pointer-events: none; 
     cursor: not-allowed; 
 }
+.div1{
+    background-color: lightgrey;
+    width: 120px;
+    height:40px;
+    border: 1px solid green;
+    /* padding: 10px;
+    margin: 20px; */
+}
 
-
+.border-box {
+    border: 1px solid #000; /* Add your preferred color */
+    border-radius: 4px; /* Rounded corners */
+    /* padding: 10px; Adjust padding */
+    height: 30px; /* Adjust height based on content */
+    display: inline-block; /* Ensure it wraps only the content */
+}
 </style>
 
 {{-- Edit Model Order --}}
@@ -92,7 +106,7 @@
                         <div class="col-lg-4">
                             <label for="order_date" class="font-weight-bold">Order Received Date<span style="color:red;">*</span></label>
                             <br>
-                            <input type="datetime-local" id="order_date_ed" value="" class="form-control" name="order_date">
+                            <input type="datetime-local" id="order_date_ed" class="form-control" step="1" name="order_date" format="MM-DD-YYYY THH:mm:ss" hour24="true">
                         </div>
                         <div class="col-lg-4">
                             <label class="font-weight-bold">Product Code<span style="color:red;">*</span></label><br>
@@ -170,19 +184,87 @@
         <div class="card-body">
             <div class="row justify-content-start m-3 mt-2 mb-4" id="statusButtons">
                 <div class="bg-info shadow-lg p-0 rounded text-white" style="text-decoration: none; font-size:0.7rem">
-                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Yet to Assign User<span id="status_6_count"></span></button>
-                    <button id="status_7"  class="btn btn-info status-btn d-none">Yet to Assign QA<span id="status_7_count"></span></button>
-                    <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">WIP<span id="status_1_count"></span></button>
-                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span></button>
-                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif" >Doc Purchase<span id="status_15_count"></span></button>
-                    <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span></button>
-                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Send For QC<span id="status_4_count"></span></button>
-                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing<span id="status_16_count"></span></button>
-                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing QC<span id="status_17_count"></span></button>
-                    <button id="status_2" class="btn btn-info status-btn">Hold<span id="status_2_count"></span></button>
-                    <button id="status_5" class="btn btn-info status-btn">Completed<span id="status_5_count"></span></button>
-                    <button id="status_3" class="btn btn-info status-btn">Cancelled<span id="status_3_count"></span></button>
-                    <button id="status_All" class="btn btn-info status-btn" >All<span id="status_All_count"></span></button>
+                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif" style="cursor: pointer;">Yet to Assign User<span id="status_6_count"></span>
+                     <!-- <div style=""> -->
+                            <!-- <div style="display: inline-block;"></div>
+                            <span id="tat_status_6_third_count"></span>
+                            <div style="display: inline-block;"></div>
+                            <span id="tat_status_6_fourth_count"></span> -->
+                        <!-- </div> -->
+                    </button>
+                    <button id="status_7"  class="btn btn-info status-btn d-none">Yet to Assign QA<span id="status_7_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_7_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_7_fourth_count">0</span>
+                        </div>
+                    </button>
+                    <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">WIP<span id="status_1_count"></span> <div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_1_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_1_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_13_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_13_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif" >Doc Purchase<span id="status_15_count"></span> <div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_15_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_15_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_14_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_14_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Send For QC<span id="status_4_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_4_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_4_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing<span id="status_16_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_16_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_16_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing QC<span id="status_17_count"></span> <div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_17_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_17_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_2" class="btn btn-info status-btn">Hold<span id="status_2_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_2_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_2_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_5" class="btn btn-info status-btn">Completed<span id="status_5_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_5_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_5_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_3" class="btn btn-info status-btn">Cancelled<span id="status_3_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_3_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_3_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_All" class="btn btn-info status-btn" >All<span id="status_All_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_All_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_All_fourth_count">0</span>
+                        </div></button>
                 </div>
             </div>
            
@@ -251,7 +333,6 @@
                         <div class="form-group">
                             <label for="searchInputs"><b>Search</b>:</label>
                             <input type="text" class="form-control" id="searchInputs" style="border:1px solid blue;">
-                            <!-- <p style="text-align:center;color:Red;">*(While Searching OrderID, Use Comma separator)</p> -->
                             <p id="orderIdTip" class="red-text" style="display:none; color:red;">Use Comma separator for multiple search</p>
                         </div>
                     </div>
@@ -762,6 +843,7 @@ $(document).ready(function() {
                 },
                 { "data": "associate_name", "name": "associate_name", "visible": true},
             ],
+            "order": [[1, 'asc']],
             createdRow: function (row, data, dataIndex) {
                     let status = data.status_id; 
                     let tat_value = data.tat_value;
@@ -1032,6 +1114,32 @@ function updateStatusCounts() {
         $('#status_6_count').text(' (' + count6 + ')');
         $('#status_7_count').text(' (' + count7 + ')');
         $('#status_All_count').text(' (' + total + ')');
+
+        // Initialize sums for third and fourth counts
+        let allThirdCount = 0;
+        let allFourthCount = 0;
+
+        // Update TatStatusResults and calculate total counts
+        if (response.TatStatusResults) {
+          for (let key in response.TatStatusResults) {
+            if (response.TatStatusResults.hasOwnProperty(key)) {
+              let thirdCount = response.TatStatusResults[key].orderReachthird || 0;
+              let fourthCount = response.TatStatusResults[key].orderReachfourth || 0;
+
+              // Update individual third and fourth count displays
+              $('#tat_status_' + key + '_third_count').text(thirdCount);
+              $('#tat_status_' + key + '_fourth_count').text(fourthCount);
+
+              // Sum up third and fourth counts for All
+              allThirdCount += thirdCount;
+              allFourthCount += fourthCount;
+            }
+          }
+        }
+
+        // Display total third and fourth counts in the All sections
+        $('#tat_status_All_third_count').text(allThirdCount);
+        $('#tat_status_All_fourth_count').text(allFourthCount);
       }
     },
     error: function(error) {

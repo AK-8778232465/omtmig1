@@ -111,11 +111,18 @@
                                 <li><span id="seconds"></span> Seconds</li>
                                 </ul>
                             </div>
+                            <div id="completion-timing" class="text-center bg-white border rounded font-weight-bold" style="display: block; max-height: 2px !important;">
+                                <h5 class="rounded bg-info font-weight-bold" style="font-size: 15px !important; margin-top: 0px !important; margin-bottom: 0px !important;max-height: 16px;">
+                                    TAT Time
+                                </h5>
+                                <p class="rounded font-weight-bold" id="completion-time" style="font-size: 15px;margin-bottom: 0px;max-height: 15px;">4962:13:38</p>
+                                <p style="font-size: 12px;margin-top: 2px;max-height: 14px;">HH:MM:SS</p>
+                            </div>
+                        </div>
                         </div>
                     </div>
                 </div>
                         </div>
-</div>
         <div class="card">
             <div class="card-body">
                 <div class="p-0">
@@ -338,9 +345,16 @@
                             </div>
                         </div>
                         <div class="d-flex justify-content-center mt-4">
-                                <?php if (is_null($readValue)): ?>
+                            @if(is_null($readValue) && $orderData->status_id == 1)
+                            <?php if (is_null($readValue) && $orderData->status_id == 1): ?>
                                     <button class="btn btn-primary" id="proceedButton" value="1" style="cursor: pointer;" type="button">Proceed</button>
                                 <?php endif; ?>
+                            @endif
+                            @if(!is_null($readValue))
+                            <?php if (!is_null($readValue)): ?>
+                                <input type="hidden" name="proceedButton" id="proceedButton" value="{{$readValue}}">
+                            <?php endif; ?>
+                            @endif
                         </div>
                     </div>
                     </div>
@@ -348,8 +362,8 @@
                  @if($orderData->client_id == 82)
                  @if(!@empty($vendorequirements))
                 <input type="hidden" name="instructionId" id="instructionId" value="{{$instructionId}}">
-                <h6 class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> font-weight-bold">Source Information :</h6>
-                    <div class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
+                <h6 class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> font-weight-bold">Source Information :</h6>
+                    <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
                         <div class="card-body">
                             <table id="source_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                 <thead>
@@ -653,9 +667,9 @@
                 @endif
                 <!-- // -->
                 @if($orderData->client_id == 82)
-                <h6 class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> font-weight-bold">Order Submission :</h6>
-                <div class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
-                        <div class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> card-body">
+                <h6 class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> font-weight-bold">Order Submission :</h6>
+                <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
+                        <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card-body">
                             <div class="row mt-4 mb-4">
                                 <div class="col-lg-4 ">
                                     <div class="font-weight-bold">Comments :</div>
@@ -692,7 +706,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="read_value <?php echo is_null($readValue) ? 'd-none' : ''; ?> card-body">
+                                <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card-body">
                                     <table id="orderstatusdetail_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                         <thead>
                                             <tr>
@@ -896,7 +910,7 @@ function order_submition(orderId, type) {
     var username = $("#username_id").val();
     var password = $("#password_id").val();
     var file_path = $("#file_path_id").val();
-    var readed_value = 1;
+        var readed_value = $("#proceedButton").val();
 
     if ($('#primary_source').hasClass('required-field') && !primarySource) {
             Swal.fire({
@@ -1129,14 +1143,26 @@ function formatContent(content) {
 function initializeTimer() {
     var orderRecDate = "{{ $orderData->order_date ? date('m/d/Y H:i', strtotime($orderData->order_date)) : '' }}";
     var tatValue = "{{ $orderData->tat_value }}";
+    var completionDate = "{{ $orderData->completion_date }}";
+    var status = "{{ $orderData->status_id }}";
+
     var compareDate = new Date(orderRecDate);
     var deadline = new Date(compareDate.getTime() + tatValue * 60 * 60 * 1000);
     
     var phaseDuration = tatValue / 4;
 
+    if (status === "5") {
+        document.getElementById("timer").style.display = "none";
+        document.getElementById("completion-timing").style.display = "block";
+        displayCompletionTime(compareDate, new Date(completionDate));
+    } else {
+        document.getElementById("timer").style.display = "block";
+        document.getElementById("completion-timing").style.display = "none";
+
     var timer = setInterval(function() {
         updateTimer(compareDate, deadline, phaseDuration);
         }, 1000);
+    }
 
     function updateTimer(toDate, deadline, phaseDuration) {
         var now = new Date(new Intl.DateTimeFormat('en-US', {
@@ -1163,39 +1189,44 @@ function initializeTimer() {
         document.getElementById("minutes").textContent = minutes;
         document.getElementById("seconds").textContent = seconds;
 
-        document.getElementById("days").classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
-        document.getElementById("hours").classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
-        document.getElementById("minutes").classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
-        document.getElementById("seconds").classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
-        document.getElementById("headline").classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
+        ["days", "hours", "minutes", "seconds", "headline"].forEach(id => {
+            document.getElementById(id).classList.remove("timer-green", "timer-gold", "timer-orange", "timer-red");
+        });
 
         if (elapsedHours <= phaseDuration) {
-            document.getElementById("days").classList.add("timer-green");
-            document.getElementById("hours").classList.add("timer-green");
-            document.getElementById("minutes").classList.add("timer-green");
-            document.getElementById("seconds").classList.add("timer-green");
-            document.getElementById("headline").classList.add("timer-green");
+            applyTimerClass("timer-green");
         } else if (elapsedHours <= phaseDuration * 2) {
-            document.getElementById("days").classList.add("timer-gold");
-            document.getElementById("hours").classList.add("timer-gold");
-            document.getElementById("minutes").classList.add("timer-gold");
-            document.getElementById("seconds").classList.add("timer-gold");
-            document.getElementById("headline").classList.add("timer-gold");
+            applyTimerClass("timer-gold");
         } else if (elapsedHours <= phaseDuration * 3) {
-            document.getElementById("days").classList.add("timer-orange");
-            document.getElementById("hours").classList.add("timer-orange");
-            document.getElementById("minutes").classList.add("timer-orange");
-            document.getElementById("seconds").classList.add("timer-orange");
-            document.getElementById("headline").classList.add("timer-orange");
+            applyTimerClass("timer-orange");
         } else {
-            document.getElementById("days").classList.add("timer-red");
-            document.getElementById("hours").classList.add("timer-red");
-            document.getElementById("minutes").classList.add("timer-red");
-            document.getElementById("seconds").classList.add("timer-red");
-            document.getElementById("headline").classList.add("timer-red");
+            applyTimerClass("timer-red");
         }
     }
+
+    function applyTimerClass(className) {
+        ["days", "hours", "minutes", "seconds", "headline"].forEach(id => {
+            document.getElementById(id).classList.add(className);
+        });
+    }
+
+    function displayCompletionTime(startDate, endDate) {
+        var diff = endDate.getTime() - startDate.getTime();
+        var totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+        var remainingHours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var remainingMinutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        var remainingSeconds = Math.floor((diff % (1000 * 60)) / 1000);
+        var totalHours = (totalDays * 24) + remainingHours;
+
+        document.getElementById("completion-time").textContent = 
+            (totalHours < 10 ? '0' : '') + totalHours + ':' + 
+            (remainingMinutes < 10 ? '0' : '') + remainingMinutes + ':' + 
+            (remainingSeconds < 10 ? '0' : '') + remainingSeconds;
+        }
+
 }
+initializeTimer();
+
 $(document).ready(function() {
     $('#orderstatusdetail_datatable').DataTable({
         "ordering": true, 

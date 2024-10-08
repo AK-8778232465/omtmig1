@@ -67,56 +67,72 @@
 
 #customfromRange {
     flex-wrap: wrap;
-    align-items: center; /* Align items vertically centered */
-    gap: 15px; /* Space between items */
+    align-items: center; 
+    gap: 15px; 
 }
 
 #customfromRange label {
     font-weight: bold;
-    color: #007bff; /* Change to your preferred color */
+    color: #007bff;
 }
 
 #customfromRange input[type="date"] {
-    border: 1px solid #007bff; /* Match the border color with the label color */
+    border: 1px solid #007bff;
     padding: 5px;
     border-radius: 4px;
 }
 
 #customfromRange .input-group-text {
     font-weight: bold;
-    color: #007bff; /* Change to your preferred color */
+    color: #007bff; 
 }
 
 
 #customfromRange .input-wrapper {
     display: flex;
     align-items: center;
-    gap: 10px; /* Space between label and input */
+    gap: 10px;
 }
 
 #customToRange {
     display: flex;
     flex-wrap: wrap;
-    align-items: center; /* Align items vertically centered */
-    gap: 15px; /* Space between items */
+    align-items: center; 
+    gap: 15px; 
 }
 
 
 #customToRange .input-group-text {
     font-weight: bold;
     color: #007bff;
-     /* Change to your preferred color */
 }
 
 #customToRange input[type="date"] {
-    border: 1px solid #007bff; /* Match the border color with the label color */
+    border: 1px solid #007bff;
     padding: 5px;
     border-radius: 4px;
     width: 100px;
 }
 
     #orderwise_timetaken_datatable th {
-    border: 1px solid rgb(230, 230, 230); /* Light and slightly transparent cement color border */
+    border: 1px solid rgb(230, 230, 230); 
+}
+/* // */
+.tabledetails {
+    overflow-x: auto; 
+}
+
+#production_datatable {
+    border-collapse: collapse;
+    width: 100%; 
+    background-color: #f5f5f5; 
+}
+
+
+#production_datatable td {
+    white-space: nowrap; 
+    padding: 8px; 
+    text-align: center; 
 }
 
 </style>
@@ -129,6 +145,7 @@
             <li id="ordercompletion-details" class="report-item">Order Completion Details</li>
             <li id="orderprogress-details" class="report-item">Order Progress Details</li>
             <li id="attendance-details" class="report-item">Attendance Details</li>
+            <li id="production-report" class="report-item">Production Report</li>
         </ul>
     </div>
 
@@ -366,6 +383,47 @@
                     </div>
                 </div>
             </div>
+            <div class="card col-md-10 mt-2 tabledetails" id="production_report" style="font-size: 12px; overflow-x: auto;">
+    <h4 class="text-center mt-3">Production Report</h4>
+    <div class="card-body">
+        <div class="p-0">
+            <div style="overflow-x:auto;">
+                <table id="production_datatable" class="table table-bordered" style="border-collapse: collapse; width: 100%; background-color: #f5f5f5;">
+                    <thead class="text-center" style="font-size: 12px;">
+                        <tr>
+                            <th style="white-space: nowrap; width: 150px;">S.No</th>
+                            <th style="white-space: nowrap; width: 150px;">Received EST</th>
+                            <th style="white-space: nowrap; width: 100px;">Client ID</th>
+                            <th style="white-space: nowrap; width: 150px;">Product</th>
+                            <th style="white-space: nowrap; width: 100px;">Order Num</th>
+                            <th style="white-space: nowrap; width: 100px;">State</th>
+                            <th style="white-space: nowrap; width: 100px;">County</th>
+                            <th style="white-space: nowrap; width: 150px;">Portal Fee Cost</th>
+                            <th style="white-space: nowrap; width: 100px;">Source</th>
+                            <th style="white-space: nowrap; width: 150px;">Production date</th>
+                            <th style="white-space: nowrap; width: 100px;">User EMP ID</th>
+                            <th style="white-space: nowrap; width: 100px;">QA EMP ID</th>
+                            <th style="white-space: nowrap; width: 100px;">Typist EMP ID</th>
+                            <th style="white-space: nowrap; width: 150px;">Typist QC EMP ID</th>
+                            <th style="white-space: nowrap; width: 100px;">Copy Cost</th>
+                            <th style="white-space: nowrap; width: 150px;">No. of Search done</th>
+                            <th style="white-space: nowrap; width: 250px;">No of Documents Retrieved in TP/Other Applications</th>
+                            <th style="white-space: nowrap; width: 150px;">Title Point Account</th>
+                            <th style="white-space: nowrap; width: 150px;">Purchase Link</th>
+                            <th style="white-space: nowrap; width: 100px;">User Name</th>
+                            <th style="white-space: nowrap; width: 100px;">Password</th>
+                            <th style="white-space: nowrap; width: 150px;">Completed Time (in EST)</th>
+                            <th style="white-space: nowrap; width: 150px;">Search Final Status</th>
+                            <th style="white-space: nowrap; width: 100px;">TAT Time</th>
+                            <th style="white-space: nowrap; width: 200px;">Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center" style="font-size: 12px; background-color: #ffffff;"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+            </div>
         </div>
     </div>
 </div>
@@ -377,7 +435,7 @@
 
 $(document).ready(function() {
         $('#orderwise_timetaken_datatable').DataTable();
-    });
+});
 
 let selectedDateFilter = '';
 document.addEventListener('DOMContentLoaded', function() {
@@ -985,6 +1043,9 @@ $(document).on('click', '#filterButton,#filterButton2', function () {
             case 'orderprogress-details':
                 orderTimeTaken_datatable();
                 break;
+            case 'production-report':
+                 production_report();
+                break;
             default:
                 console.log('No valid report item is active.');
         }
@@ -1011,6 +1072,7 @@ $(document).ready(function() {
         $('#orderwise_timetaken_table').hide();
         $('#attendance_report').hide();
         $('#datepicker').hide();
+        $('#production_report').hide();
 
 
 
@@ -1050,6 +1112,13 @@ $(document).ready(function() {
             $('#hidefilter_2').hide();
             $('#hidefilter_3').hide();
             $('#datepicker').show();
+            $('#filterButton2').click();
+        }else if (reportId === 'production-report') {
+            $('#production_report').show();
+            $('#hidefilter').show();
+            $('#datepicker').hide();
+            $('#hidefilter_2').show();
+            $('#hidefilter_3').show();
         }
     }
 
@@ -1296,6 +1365,208 @@ function attendance_report(selectedDate) {
         order: [[0, 'asc']]
     });
 }
+
+function production_report() {
+    var fromDate = $('#fromDate_range').val();
+    var toDate = $('#toDate_range').val();
+    let client_id = $("#client_id_dcf").val();
+    let lob_id = $("#lob_id").val();
+    let process_type_id = $('#process_type_id').val();
+    let product_id = $('#product_id').val();
+    let selectedDateFilter = $('#selectedDateFilter').val(); 
+
+    if ($.fn.DataTable.isDataTable('#production_datatable')) {
+        $('#production_datatable').DataTable().clear().destroy();
+    }
+
+    var table = $('#production_datatable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ route('production_report') }}", 
+            type: 'POST',
+            data: {
+                fromDate_range: fromDate,
+                toDate_range: toDate,
+                client_id: client_id,
+                lob_id: lob_id,
+                process_type_id: process_type_id,
+                product_id: product_id,
+                selectedDateFilter: selectedDateFilter,
+                _token: '{{ csrf_token() }}' 
+            },
+            dataSrc: function (json) {
+                return json.data; 
+            }
+        },
+        columns: [
+            {
+                data: null,
+                title: 'S.No',
+                render: function (data, type, row, meta) {
+                    return meta.row + meta.settings._iDisplayStart + 1; // Serial number
+                }
+            },
+            { data: 'order_date', title: 'Received EST' },
+            { data: 'acc_client_id', title: 'Client ID' },
+            // { data: 'process_name', title: 'Product' },
+            { 
+                data: 'process_name', 
+                title: 'Product', 
+                className: 'text-left'  // Left-align the Product column
+            },
+            { data: 'order_num', title: 'Order Num' },
+            { data: 'short_code', title: 'State' },
+            { data: 'county_name', title: 'County' },
+            { data: 'portal_fee_cost', title: 'Portal Fee Cost' },
+            { data: 'source', title: 'Source' },
+            { data: 'completion_date', title: 'Production Date' },
+            { data: 'assignee_empid', title: 'User EMP ID' },
+            { data: 'qa_empid', title: 'QA EMP ID' },
+            { data: 'typist_empid', title: 'Typist EMP ID' },
+            { data: 'typist_qc_empid', title: 'Typist QC EMP ID' },
+            { data: 'copy_cost', title: 'Copy Cost' },
+            { data: 'no_of_search_done', title: 'No. of Search Done' },
+            { data: 'no_of_documents_retrieved', title: 'No of Documents Retrieved in TP/Other Applications' },
+            { data: 'title_point_account', title: 'Title Point Account' },
+            {
+                data: 'purchase_link',
+                title: 'Purchase Link',
+                render: function (data, type, row) {
+                    if (data && data.trim() !== "") {
+                        return `<a href="${data}" target="_blank" title="${data}">${data}</a>`; // Link for purchase
+                    } else {
+                        return '';
+                    }
+                }
+            },
+            { data: 'production_username', title: 'User Name' },
+            { data: 'password', title: 'Password' },
+            { data: 'completion_date', title: 'Completed Time (in EST)' },
+            { data: 'status', title: 'Search Final Status' },
+            {
+                title: 'TAT Time',
+                data: null,
+                render: function (data, type, row) {
+                    var orderDate = new Date(row.order_date);
+                    var completionDate = row.completion_date ? new Date(row.completion_date) : null;
+
+                    if (!isNaN(orderDate) && completionDate && !isNaN(completionDate)) {
+                        var diffMs = completionDate - orderDate;
+                        var totalSeconds = Math.floor(diffMs / 1000);
+
+                        var hours = Math.floor(totalSeconds / 3600);
+                        var minutes = Math.floor((totalSeconds % 3600) / 60);
+                        var seconds = totalSeconds % 60;
+
+                        hours = String(hours).padStart(2, '0');
+                        minutes = String(minutes).padStart(2, '0');
+                        seconds = String(seconds).padStart(2, '0');
+
+                        return hours + ':' + minutes + ':' + seconds;
+                    } else {
+                        return '';
+                    }
+                }
+            },
+            { data: 'comment', title: 'Comments' }
+        ],
+        dom: 'l<"toolbar">Bfrtip', 
+        buttons: [
+            {
+                text: 'Excel',
+                action: function (e, dt, button, config) {
+                    $.ajax({
+                        url: "{{ route('exportProductionReport') }}",
+                        type: 'POST',
+                        data: {
+                            fromDate_range: fromDate,
+                            toDate_range: toDate,
+                            client_id: client_id,
+                            lob_id: lob_id,
+                            process_type_id: process_type_id,
+                            product_id: product_id,
+                            selectedDateFilter: selectedDateFilter,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function (response) {
+                            exportToExcel(response.data); 
+                        }
+                    });
+                }
+            }
+        ],
+        lengthMenu: [10, 25, 50, 75, 100],
+        order: [[0, 'asc']],  
+        scrollX: true, 
+        fixedHeader: true,  
+        fixedFooter: true  
+    });
+}
+
+function exportToExcel(data) {
+    var exportData = data.map(function (row, index) {
+        return {
+            "S.No": index + 1,
+            "Received EST": row.order_date,
+            "Client ID": row.acc_client_id,
+            "Product": row.process_name,
+            "Order Num": row.order_num,
+            "State": row.short_code,
+            "County": row.county_name,
+            "Portal Fee Cost": row.portal_fee_cost,
+            "Source": row.source,
+            "Production Date": row.completion_date,
+            "User EMP ID": row.assignee_empid,
+            "QA EMP ID": row.qa_empid,
+            "Typist EMP ID": row.typist_empid,
+            "Typist QC EMP ID": row.typist_qc_empid,
+            "Copy Cost": row.copy_cost,
+            "No. of Search Done": row.no_of_search_done,
+            "No of Documents Retrieved in TP/Other Applications": row.no_of_documents_retrieved,
+            "Title Point Account": row.title_point_account,
+            "Purchase Link": row.purchase_link,
+            "User Name": row.production_username,
+            "Password": row.password,
+            "Completed Time (in EST)": row.completion_date,
+            "Search Final Status": row.status,
+            "TAT Time": calculateTatTime(row.order_date, row.completion_date),
+            "Comments": row.comment
+        };
+    });
+
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.json_to_sheet(exportData);
+
+    XLSX.utils.book_append_sheet(wb, ws, "Production Report");
+
+    XLSX.writeFile(wb, "Production_Report.xlsx");
+}
+
+function calculateTatTime(orderDate, completionDate) {
+    var orderDateObj = new Date(orderDate);
+    var completionDateObj = completionDate ? new Date(completionDate) : null;
+
+    if (!isNaN(orderDateObj) && completionDateObj && !isNaN(completionDateObj)) {
+        var diffMs = completionDateObj - orderDateObj;
+        var totalSeconds = Math.floor(diffMs / 1000);
+
+        var hours = Math.floor(totalSeconds / 3600);
+        var minutes = Math.floor((totalSeconds % 3600) / 60);
+        var seconds = totalSeconds % 60;
+
+        hours = String(hours).padStart(2, '0');
+        minutes = String(minutes).padStart(2, '0');
+        seconds = String(seconds).padStart(2, '0');
+
+        return hours + ':' + minutes + ':' + seconds;
+    } else {
+        return '';
+    }
+}
+
+
+
 
 
 

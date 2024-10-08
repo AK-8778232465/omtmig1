@@ -176,8 +176,8 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::any('get_timetaken', 'get_timetaken')->name('get_timetaken');
     Route::any('orderTimeTaken', 'orderTimeTaken')->name('orderTimeTaken');
     Route::any('attendance_report', 'attendance_report')->name('attendance_report');
-
-
+    Route::any('production_report', 'production_report')->name('production_report');
+    Route::any('exportProductionReport', 'exportProductionReport')->name('exportProductionReport');
 
 
 });

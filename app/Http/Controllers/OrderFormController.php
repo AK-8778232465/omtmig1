@@ -556,14 +556,11 @@ class OrderFormController extends Controller
                     'created_by' => Auth::id(),
                 ]);
 
-                if($request->currentStatusId != 4){
                     DB::table('oms_order_creations')
                     ->where('id', $orderId)
                     ->update([
                         'comment' => $request->orderComment,
                     ]);
-                }
-
 
                 if($request->currentStatusId == 4){
                     DB::table('oms_order_creations')
