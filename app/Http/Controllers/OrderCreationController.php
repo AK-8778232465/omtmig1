@@ -223,7 +223,7 @@ public function getlobid(Request $request){
         
             $duplicateOrderCount = OrderCreation::where('order_id', $input['order_id'])
                 ->where(DB::raw('DATE(order_date)'), '=', date('Y-m-d', strtotime($input['order_date'])))    
-                ->where('client_id', $input['client_id'])        
+                ->where('client_id', $input['select_client_id'])        
                 ->where('lob_id', $input['lob_id'])
                 ->where('process_type_id', $input['process_type_id'])
                 ->where('process_id', $input['process_code'])            
