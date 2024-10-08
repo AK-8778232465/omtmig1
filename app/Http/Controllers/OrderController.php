@@ -1412,7 +1412,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $user = Auth::user();
             $orderId = '';
 
-            $currentDateTime = Carbon::now('EST');
+            $currentDateTime = Carbon::now('America/New_York');
             $tatValueInHours = $order->tat_value / 4; 
             $orderDate = $order->order_date;        
             $elapsedHours = $currentDateTime->diffInHours($orderDate); 
