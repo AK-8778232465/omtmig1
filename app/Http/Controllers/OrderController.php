@@ -1411,6 +1411,22 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         ->addColumn('order_id', function ($order) {
             $user = Auth::user();
             $orderId = '';
+
+            $currentDateTime = Carbon::now('EST');
+            $tatValueInHours = $order->tat_value / 4; 
+            $orderDate = $order->order_date;        
+            $elapsedHours = $currentDateTime->diffInHours($orderDate); 
+
+            if ($elapsedHours < $tatValueInHours) {
+                $className = 'goto-order1'; 
+            } elseif ($elapsedHours < ($tatValueInHours*2)) {
+                $className = 'goto-order2'; 
+            } elseif ($elapsedHours < ($tatValueInHours*3)) {
+                $className = 'goto-order3'; 
+            } else {
+                $className = 'goto-order4'; 
+            }
+
         
             if ($user->user_type_id == 8) {
                 if (($order->status_id == 1 && $order->assignee_qa_id != Auth::id()) || 
@@ -1431,7 +1447,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 $orderId = $order->id ?? '';
             }
 
-            return '<span class="px-2 py-1 rounded text-white goto-order ml-2" id="goto_' . $orderId . '">' . $order->order_id . '</span>';
+            return '<span class="px-2 py-1 rounded text-white goto-order ' . $className . ' ml-2" id="goto_' . $orderId . '">' . $order->order_id . '</span>';
         })
         ->rawColumns(['checkbox', 'action', 'status', 'order_id'])
         ->toJson();
