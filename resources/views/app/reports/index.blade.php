@@ -1023,9 +1023,9 @@ $('#client_id_dcf').on('change', function () {
     let client_id = $("#client_id_dcf").val();
     let product_id = $("#product_id").val();
 
-    $("#lob_id").html('<option selected value="">Select Lob</option>');
-    $("#product_id").html('<option selected value="">All</option>');
-    $("#process_type_id").html('<option selected value="">All</option>');
+    $("#lob_id").html('<option selected value="Select Lob">Select Lob</option>');
+    $("#product_id").html('<option selected value="All">All</option>');
+    $("#process_type_id").html('<option selected value="All">All</option>');
 
 
     fetchProData(client_id,product_id);
