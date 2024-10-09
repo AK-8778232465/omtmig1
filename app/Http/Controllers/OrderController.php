@@ -1418,7 +1418,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $tatValueInHours = $order->tat_value / 4; 
             $orderDate = $order->order_date;        
             $elapsedHours = $currentDateTime->diffInHours($orderDate); 
-
+            if($order->status_id == 5){
+                $className = 'goto-order5'; 
+            } else {
             if ($elapsedHours < $tatValueInHours) {
                 $className = 'goto-order1'; 
             } elseif ($elapsedHours < ($tatValueInHours*2)) {
@@ -1428,7 +1430,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             } else {
                 $className = 'goto-order4'; 
             }
-
+            }
         
             if ($user->user_type_id == 8) {
                 if (($order->status_id == 1 && $order->assignee_qa_id != Auth::id()) || 
