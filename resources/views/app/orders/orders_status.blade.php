@@ -185,12 +185,12 @@
             <div class="row justify-content-start m-3 mt-2 mb-4" id="statusButtons">
                 <div class="bg-info shadow-lg p-0 rounded text-white" style="text-decoration: none; font-size:0.7rem">
                     <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif" style="cursor: pointer;">Yet to Assign User<span id="status_6_count"></span>
-                     <!-- <div style=""> -->
-                            <!-- <div style="display: inline-block;"></div>
-                            <span id="tat_status_6_third_count"></span>
+                     <div style="">
                             <div style="display: inline-block;"></div>
-                            <span id="tat_status_6_fourth_count"></span> -->
-                        <!-- </div> -->
+                            <!-- <span id="tat_status_6_third_count"></span> -->
+                            <div style="display: inline-block;"></div>
+                            <!-- <span id="tat_status_6_fourth_count"></span> -->
+                        </div>
                     </button>
                     <button id="status_7"  class="btn btn-info status-btn d-none">Yet to Assign QA<span id="status_7_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
@@ -248,11 +248,12 @@
                             <span id="tat_status_2_fourth_count">0</span>
                         </div></button>
                     <button id="status_5" class="btn btn-info status-btn">Completed<span id="status_5_count"></span><div style="">
-                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
-                            <span id="tat_status_5_third_count">0</span>
-                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
-                            <span id="tat_status_5_fourth_count">0</span>
-                        </div></button>
+                            <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <!-- <span id="tat_status_5_third_count">0</span> -->
+                            <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <!-- <span id="tat_status_5_fourth_count">0</span> -->
+                        </div>
+                    </button>
                     <button id="status_3" class="btn btn-info status-btn">Cancelled<span id="status_3_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_3_third_count">0</span>

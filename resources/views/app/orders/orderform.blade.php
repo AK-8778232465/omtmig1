@@ -239,8 +239,8 @@
                     <div class="card-body">
                         <div class="row">
                         <div class="col-md-3 mb-2">
-                            <div class="font-weight-bold">Client ID</div>
-                            <select class="form-control select2dropdown" name="client_id" id="client_id_">
+                            <div class="font-weight-bold">Client ID<span style="color:red;">*</span></div>
+                            <select class="form-control select2dropdown" name="client_id" id="client_id_" required>
                                 <option value="">Select Client ID</option>
                                 @foreach($clientIdList as $client)
                                     <option value="{{ $client->id }}"
@@ -251,14 +251,14 @@
                             </select>
                         </div>
                             <div class="col-md-3 mb-2">
-                                <div class="font-weight-bold">Portal Fee Cost</div>
+                                <div class="font-weight-bold">Portal Fee Cost<span style="color:red;">*</span></div>
                                 <input type="text" id="portal_fee_cost_id" name="portal_fee_cost_id" class="form-control" 
                                     placeholder="Enter Portal Fee Cost" 
-                                    value="{{ $userinput ? $userinput->portal_fee_cost : '' }}">
+                                    value="{{ $userinput ? $userinput->portal_fee_cost : '' }}" required>
                             </div>
                             <div class="col-md-3 mb-2">
-                                <div class="font-weight-bold">Source</div>
-                                    <select class="form-control select2dropdown" name="source_id" id="source_id">
+                                <div class="font-weight-bold">Source<span style="color:red;">*</span></div>
+                                    <select class="form-control select2dropdown" name="source_id" id="source_id" required>
                                         <option value="">Select Source Info</option>
                                     @foreach ($sourcedetails as $source)
                                     <option value="{{ $source->id }}" {{ ($userinput->source ?? '') == $source->id ? 'selected' : '' }}>
@@ -275,22 +275,22 @@
                         <!-- </div>
                             <div class="row mt-3 mb-2"> -->
                                 <div class="col-md-3 mb-2">
-                                    <div class="font-weight-bold">Copy Cost</div>
+                                    <div class="font-weight-bold">Copy Cost<span style="color:red;">*</span></div>
                                     <input type="text" id="copy_cost_id" name="copy_cost_id" class="form-control" 
                                         placeholder="Enter Copy Cost" 
-                                        value="{{ $userinput ? $userinput->copy_cost : '' }}">
+                                        value="{{ $userinput ? $userinput->copy_cost : '' }}" required>
                                 </div>
                                 <div class="col-md-3 mb-2">
-                                    <div class="font-weight-bold">No of Search Done</div>
+                                    <div class="font-weight-bold">No of Search Done<span style="color:red;">*</span></div>
                                     <input type="text" id="no_of_search_id" name="no_of_search_id" class="form-control" 
                                         placeholder="Enter No of Search" 
-                                        value="{{ $userinput ? $userinput->no_of_search_done : '' }}">
+                                        value="{{ $userinput ? $userinput->no_of_search_done : '' }}" required>
                                 </div>
                                 <div class="col-md-3 mb-2">
-                                    <div class="font-weight-bold">No of Documents Retrieved in TP/Other Applications:</div>
+                                    <div class="font-weight-bold">No of Documents Retrieved in TP/Other Applications<span style="color:red;">*</span></div>
                                     <input type="text" id="document_retrive_id" name="document_retrive_id" class="form-control" 
                                         placeholder="Enter No of Documents Retrieved" 
-                                        value="{{ $userinput ? $userinput->no_of_documents_retrieved : '' }}">
+                                        value="{{ $userinput ? $userinput->no_of_documents_retrieved : '' }}" required>
                                 </div>
                                 <div class="col-md-3 mb-2">
                                     <div class="font-weight-bold">Title Point Account</div>
@@ -881,6 +881,29 @@ $('#city').on('change', function () {
 
 
 function order_submition(orderId, type) {
+    var getID = $("#getID").val();
+    if (getID == 82) {
+        const requiredFields = [
+            { id: "#client_id_", message: "Client ID is required." },
+            { id: "#portal_fee_cost_id", message: "Portal Fee Cost is required." },
+            { id: "#source_id", message: "Source is required." },
+            { id: "#copy_cost_id", message: "Copy Cost is required." },
+            { id: "#no_of_search_id", message: "No of Search Done is required." },
+            { id: "#document_retrive_id", message: "No of Documents Retrieved is required." }
+        ];
+
+        for (const field of requiredFields) {
+            if (!$(field.id).val()) {
+                Swal.fire({
+                    title: "Please fill the Column",
+                    text: field.message,
+                    icon: "error"
+                });
+                return false;
+            }
+        }
+    }
+
         var checklistItems = [];
         $("input[name='checks[]']:checked").each(function() {
             checklistItems.push($(this).val());

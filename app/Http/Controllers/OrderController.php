@@ -216,7 +216,9 @@ class OrderController extends Controller
                             'orderReachfourth' => 0  
                         ];
                     }
-        
+                    if ($statusId == 5) {
+                        continue;
+                    }
                     if ($hoursDifference >= $tatHours * 3) {
                         $resultsByStatus[$statusId]['orderReachfourth'] += 1;
                     } 

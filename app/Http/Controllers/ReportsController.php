@@ -797,10 +797,11 @@ public function attendance_report(Request $request)
 public function production_report(Request $request) {
     $user = Auth::user();
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-    $client_id = $request->input('client_id');
-    $lob_id = $request->input('lob_id');
-    $process_type_id = $request->input('process_type_id');
-    $product_id = $request->input('product_id');
+    
+    $clientId = $request->input('client_id');
+    $lobId = $request->input('lob_id');
+    $processTypeId = $request->input('process_type_id');
+    $productId = $request->input('product_id');
     $selectedDateFilter = $request->input('selectedDateFilter');
     $fromDateRange = $request->input('fromDate_range');
     $toDateRange = $request->input('toDate_range');
@@ -809,28 +810,8 @@ public function production_report(Request $request) {
     $length = $request->input('length');
     $searchValue = $request->input('search.value'); 
     
-    $fromDate = null;
-    $toDate = null;
-
-    if ($fromDateRange && $toDateRange) {
-        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
-        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
-    } else {
-        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
-        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
-            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
-            $fromDateText = trim($fromDateText);
-            $toDateText = trim($toDateText);
-            preg_match($datePattern, $fromDateText, $fromDateMatches);
-            preg_match($datePattern, $toDateText, $toDateMatches);
-            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
-            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
-        } else {
-            preg_match($datePattern, $selectedDateFilter, $dateMatches);
-            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
-            $toDate = $fromDate;
-        }
-    }
+    // Date filtering logic
+    list($fromDate, $toDate) = $this->getDateRange($selectedDateFilter, $fromDateRange, $toDateRange);
 
     $statusCountsQuery = DB::table('production_tracker')
         ->leftJoin('oms_order_creations as order_creation_main', 'production_tracker.order_id', '=', 'order_creation_main.id')
@@ -848,10 +829,10 @@ public function production_report(Request $request) {
         ->leftJoin('oms_vendor_information', 'production_tracker.accurate_client_id', '=', 'oms_vendor_information.id')
         ->select(
             'order_creation_main.order_date as order_date',
-            'assignee_user.emp_id as assignee_empid',
-            'qa_user.emp_id as qa_empid',
-            'typist_user.emp_id as typist_empid',
-            'typist_qc_user.emp_id as typist_qc_empid',
+            DB::raw("CONCAT(assignee_user.emp_id, '(', assignee_user.username, ')') as assignee_empid"),
+            DB::raw("CONCAT(qa_user.emp_id, '(', qa_user.username, ')') as qa_empid"),
+            DB::raw("CONCAT(typist_user.emp_id, '(', typist_user.username, ')') as typist_empid"),
+            DB::raw("CONCAT(typist_qc_user.emp_id, '(', typist_qc_user.username, ')') as typist_qc_empid"),
             'stl_item_description.process_name as process_name',
             'oms_vendor_information.accurate_client_id as acc_client_id',
             'order_creation_main.order_id as order_num',
@@ -879,31 +860,79 @@ public function production_report(Request $request) {
         $statusCountsQuery->whereBetween('order_creation_main.order_date', [$fromDate, $toDate]);
     }
 
-    if (!empty($processIds)) {
-        $statusCountsQuery->whereIn('order_creation_main.process_id', $processIds);
-    }
+    $this->applyFilters($statusCountsQuery, $processIds, $clientId, $lobId, $processTypeId, $productId, $searchValue);
 
-    if (!empty($product_id) && $product_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('order_creation_main.process_id', $product_id);
-    }
+    $this->applySorting($statusCountsQuery, $request);
 
-    if (!empty($client_id) && $client_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
-    }
-    if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('order_creation_main.process_type_id', $process_type_id);
-    }
+    $totalRecords = $statusCountsQuery->count();
+    $result = $statusCountsQuery->skip($start)->take($length)->get();
 
-if (!empty($lob_id) && $lob_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('order_creation_main.lob_id', $lob_id);
+    return response()->json([
+        'draw' => intval($draw),
+        'recordsTotal' => $totalRecords,
+        'recordsFiltered' => $totalRecords,
+        'data' => $result
+    ]);
 }
 
+private function getDateRange($selectedDateFilter, $fromDateRange, $toDateRange) {
+    $fromDate = null;
+    $toDate = null;
+
+    if ($fromDateRange && $toDateRange) {
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $toDate = $fromDate;
+        }
+    }
+
+    return [$fromDate, $toDate];
+}
+
+private function applyFilters($query, $processIds, $clientId, $lobId, $processTypeId, $productId, $searchValue) {
+    if (!empty($processIds)) {
+        $query->whereIn('order_creation_main.process_id', $processIds);
+    }
+
+    if (!empty($productId) && $productId[0] !== 'All') {
+        $query->whereIn('order_creation_main.process_id', $productId);
+    }
+
+    if (!empty($clientId) && $clientId[0] !== 'All') {
+        $query->whereIn('stl_item_description.client_id', $clientId);
+    }
+
+    if (!empty($processTypeId) && $processTypeId[0] !== 'All') {
+        $query->whereIn('order_creation_main.process_type_id', $processTypeId);
+    }
+
+    if (!empty($lobId) && $lobId[0] !== 'All') {
+        $query->whereIn('order_creation_main.lob_id', $lobId);
+    }
+
     if (!empty($searchValue)) {
-        $statusCountsQuery->where(function($query) use ($searchValue) {
-            $query->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
+        $query->where(function($q) use ($searchValue) {
+            $q->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('assignee_user.username', 'like', "%{$searchValue}%")
                   ->orWhere('qa_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('qa_user.username', 'like', "%{$searchValue}%")
                   ->orWhere('typist_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('typist_user.username', 'like', "%{$searchValue}%")
                   ->orWhere('typist_qc_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('typist_qc_user.username', 'like', "%{$searchValue}%")
                   ->orWhere('stl_item_description.process_name', 'like', "%{$searchValue}%")
                   ->orWhere('order_creation_main.order_id', 'like', "%{$searchValue}%")
                   ->orWhere('oms_state.short_code', 'like', "%{$searchValue}%")
@@ -913,7 +942,9 @@ if (!empty($lob_id) && $lob_id[0] !== 'All') {
                   ->orWhere('oms_status.status', 'like', "%{$searchValue}%");
         });
     }
+}
 
+private function applySorting($query, Request $request) {
     $orderColumnIndex = $request->input('order.0.column'); 
     $orderDirection = $request->input('order.0.dir'); 
 
@@ -923,6 +954,10 @@ if (!empty($lob_id) && $lob_id[0] !== 'All') {
         'qa_user.emp_id',
         'typist_user.emp_id',
         'typist_qc_user.emp_id',
+        'assignee_user.username',
+        'qa_user.username',
+        'typist_user.username',
+        'typist_qc_user.username',
         'stl_item_description.process_name',
         'oms_vendor_information.accurate_client_id',
         'order_creation_main.order_id',
@@ -945,19 +980,10 @@ if (!empty($lob_id) && $lob_id[0] !== 'All') {
     ];
 
     if (isset($columns[$orderColumnIndex])) {
-        $statusCountsQuery->orderBy($columns[$orderColumnIndex], $orderDirection);
+        $query->orderBy($columns[$orderColumnIndex], $orderDirection);
     }
-
-    $totalRecords = $statusCountsQuery->count();
-    $result = $statusCountsQuery->skip($start)->take($length)->get();
-
-    return response()->json([
-        'draw' => intval($draw),  
-        'recordsTotal' => $totalRecords,
-        'recordsFiltered' => $totalRecords, 
-        'data' => $result
-    ]);
 }
+
 
 public function exportProductionReport(Request $request) {
     $user = Auth::user();
@@ -1011,10 +1037,10 @@ public function exportProductionReport(Request $request) {
         ->leftJoin('oms_vendor_information', 'production_tracker.accurate_client_id', '=', 'oms_vendor_information.id')
         ->select(
             'order_creation_main.order_date as order_date',
-            'assignee_user.emp_id as assignee_empid',
-            'qa_user.emp_id as qa_empid',
-            'typist_user.emp_id as typist_empid',
-            'typist_qc_user.emp_id as typist_qc_empid',
+            DB::raw("CONCAT(assignee_user.emp_id, '(', assignee_user.username, ')') as assignee_empid"),
+            DB::raw("CONCAT(qa_user.emp_id, '(', qa_user.username, ')') as qa_empid"),
+            DB::raw("CONCAT(typist_user.emp_id, '(', typist_user.username, ')') as typist_empid"),
+            DB::raw("CONCAT(typist_qc_user.emp_id, '(', typist_qc_user.username, ')') as typist_qc_empid"),
             'stl_item_description.process_name as process_name',
             'oms_vendor_information.accurate_client_id as acc_client_id',
             'order_creation_main.order_id as order_num',
@@ -1063,11 +1089,15 @@ public function exportProductionReport(Request $request) {
     }
 
     if (!empty($searchValue)) {
-        $statusCountsQuery->where(function($query) use ($searchValue) {
-            $query->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
+        $query->where(function($q) use ($searchValue) {
+            $q->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('assignee_user.username', 'like', "%{$searchValue}%")
                 ->orWhere('qa_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('qa_user.username', 'like', "%{$searchValue}%")
                 ->orWhere('typist_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('typist_user.username', 'like', "%{$searchValue}%")
                 ->orWhere('typist_qc_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('typist_qc_user.username', 'like', "%{$searchValue}%")
                 ->orWhere('stl_item_description.process_name', 'like', "%{$searchValue}%")
                 ->orWhere('order_creation_main.order_id', 'like', "%{$searchValue}%")
                 ->orWhere('oms_state.short_code', 'like', "%{$searchValue}%")
