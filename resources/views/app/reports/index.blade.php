@@ -238,7 +238,7 @@
             <div class="form-group">
                 <label for="product_id">Product</label>
                 <select class="form-control select2-basic-multiple" style="width:100%" name="product_id" id="product_id" multiple="multiple">
-                    <option selected value="All">All Products</option>
+                    <option selected value="All">All</option>
                 </select>
             </div>
         </div>
@@ -822,21 +822,27 @@ $('#newreports_datatable').on('draw.dt', function () {
 });
 
 
-    function fetchProData(client_id) {
+    function fetchProData(client_id, product_id) {
         $.ajax({
             url: "{{ url('get_lob') }}",
             type: "POST",
             data: {
                 client_id: client_id,
+                product_id:product_id,
                 _token: '{{ csrf_token() }}'
             },
             dataType: 'json',
             success: function (response) {
                 $('#lob_id').html('<option selected value="Select Lob">Select Lob</option>');
-                $.each(response, function (index, item) {
-                    $("#lob_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+                $('#product_id').html('<option selected value="All">All</option>');
 
 
+                $.each(response.lob, function (index, item) {
+                $("#lob_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+                });
+
+                $.each(response.products, function (index, item) {
+                $("#product_id").append('<option value="' + item.id + '">' + item.process_name + ' (' + item.project_code + ')</option>');
                 });
             },
             error: function (xhr, status, error) {
@@ -845,22 +851,35 @@ $('#newreports_datatable').on('draw.dt', function () {
         });
     }
 
+
+
+
     $('#lob_id').on('change', function () {
     var lob_id = $(this).val();
-    $("#process_type_id").html(''); 
+    var client_id = $('#client_id_dcf').val();
+    $("#process_type_id").html('');
+    $("#product_id").html(''); 
+
         $.ajax({
             url: "{{ url('get_process') }}",
             type: "POST",
             data: {
                 lob_id: lob_id,
+                client_id: client_id,
                 _token: '{{ csrf_token() }}'
             },
             dataType: 'json',
             success: function (response) {
                 $('#process_type_id').html('<option selected value="All">All</option>');
-                $.each(response, function (index, item) {
-                    $("#process_type_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+                $('#product_id').html('<option selected value="All">All</option>');
 
+
+                $.each(response.process, function (index, item) {
+                $("#process_type_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+                });
+
+                $.each(response.products, function (index, item) {
+                $("#product_id").append('<option value="' + item.id + '">' + item.process_name + ' (' + item.project_code + ')</option>');
                 });
             },
             error: function (xhr, status, error) {
@@ -1002,8 +1021,14 @@ $('#newreports_datatable').on('draw.dt', function () {
 
 $('#client_id_dcf').on('change', function () {
     let client_id = $("#client_id_dcf").val();
-    $("#lob_id").html('<option selected value="All">All</option>');
-    fetchProData(client_id);
+    let product_id = $("#product_id").val();
+
+    $("#lob_id").html('<option selected value="">Select Lob</option>');
+    $("#product_id").html('<option selected value="">All</option>');
+    $("#process_type_id").html('<option selected value="">All</option>');
+
+
+    fetchProData(client_id,product_id);
 });
 
 $(document).ready(function() {

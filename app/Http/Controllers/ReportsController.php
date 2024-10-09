@@ -29,6 +29,8 @@ class ReportsController extends Controller
     public function get_lob(Request $request)
     {
         $client_id = $request->client_id;
+        $product_id = $request->product_id;
+
         if (!is_array($client_id)) {
             $client_id = [$client_id];
         }
@@ -45,29 +47,57 @@ class ReportsController extends Controller
         });
         }
 
-        return response()->json($getlob); // Return JSON response
+        if (in_array('All', $client_id)) {
+            $getproduct = DB::table('stl_item_description')
+                        ->select('id', 'process_name', 'project_code')
+                        ->get();
+        }else{
+            $getproduct = DB::table('stl_item_description')
+                        ->select('id', 'process_name', 'project_code')
+                        ->whereIn('client_id', $client_id)
+                        ->get();
+        }
+
+
+        return response()->json([
+            'lob' => $getlob,
+            'products' => $getproduct
+        ]); 
     }
 
 
     public function get_process(Request $request)
     {
         $lob_id = $request->lob_id;
+        $client_id = $request->client_id;
+
         if (!is_array($lob_id)) {
             $lob_id = [$lob_id];
         }
-        if (in_array('All', $lob_id)) {
+        if (in_array('Select Lob', $lob_id)) {
             $getprocess = DB::table('stl_process')
                             ->select('id', 'name')
                             ->get();
         } else {
             $getprocess = DB::table('stl_process')
                             ->select('id', 'name', 'lob_id')
-                            ->where('lob_id', $lob_id)
+                            ->whereIn('lob_id', $lob_id)
                             ->get();
 
         }
 
-        return response()->json($getprocess); 
+    if($lob_id && $client_id){
+        $get_product = DB::table('stl_item_description')
+                    ->select('id', 'process_name', 'project_code')
+                    ->whereIn('client_id', $client_id)
+                    ->whereIn('lob_id', $lob_id)
+                    ->get();
+    }
+    
+        return response()->json([
+            'process' => $getprocess,
+            'products' => $get_product
+        ]); 
     }
 
 
@@ -89,9 +119,9 @@ class ReportsController extends Controller
         } else {
             $getprocess = DB::table('stl_item_description')
                             ->select('id', 'process_name', 'project_code')
-                            ->where('process_id', $process_type_id)
-                            ->where('client_id', $client_id)
-                            ->where('lob_id', $lob_id)
+                            ->whereIn('process_id', $process_type_id)
+                            ->whereIn('client_id', $client_id)
+                            ->whereIn('lob_id', $lob_id)
                             ->get();
 
         }
@@ -107,6 +137,7 @@ class ReportsController extends Controller
         $lob_id = $request->input('lob_id');
         $process_type_id = $request->input('process_type_id');
         $product_id = $request->input('product_id');
+
         $selectedDateFilter = $request->input('selectedDateFilter');
         $fromDateRange = $request->input('fromDate_range');
         $toDateRange = $request->input('toDate_range');
@@ -172,9 +203,11 @@ class ReportsController extends Controller
             $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
 
-        if (!empty($lob_id) && $lob_id[0] !== 'All') {
+        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
             $statusCountsQuery->whereIn('oms_order_creations.lob_id', $lob_id);
         }
+        
+       
 
         $statusCounts = $statusCountsQuery->get();
 
@@ -309,7 +342,7 @@ private function getProcessIdsBasedOnUserRole($user)
             $query->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
 
-        if (!empty($lob_id) && $lob_id[0] !== 'All') {
+        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
             $query->whereIn('oms_order_creations.lob_id', $lob_id);
         }
         $results = $query->orderBy('oms_order_creations.id', 'desc')->get();
@@ -427,8 +460,8 @@ private function getProcessIdsBasedOnUserRole($user)
 if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
             $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
-
-        if (!empty($lob_id) && $lob_id[0] !== 'All') {
+    
+        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
             $statusCountsQuery->whereIn('oms_order_creations.lob_id', $lob_id);
         }
         $statusCounts = $statusCountsQuery->get();
@@ -593,6 +626,15 @@ public function orderTimeTaken(Request $request) {
     
         if (!empty($client_id) && $client_id[0] !== 'All') {
             $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+        }
+
+        
+        if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
+        }
+    
+        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+            $statusCountsQuery->whereIn('oms_order_creations.lob_id', $lob_id);
         }
     
         if(!empty($product_id) && $product_id[0] !== 'All'){
@@ -919,7 +961,7 @@ private function applyFilters($query, $processIds, $clientId, $lobId, $processTy
         $query->whereIn('order_creation_main.process_type_id', $processTypeId);
     }
 
-    if (!empty($lobId) && $lobId[0] !== 'All') {
+    if (!empty($lobId) && $lobId[0] !== 'Select Lob') {
         $query->whereIn('order_creation_main.lob_id', $lobId);
     }
 
