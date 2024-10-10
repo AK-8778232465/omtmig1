@@ -869,6 +869,8 @@ public function production_report(Request $request) {
         ->leftJoin('county', 'order_creation_main.county_id', '=', 'county.id')
         ->leftJoin('oms_status', 'order_creation_main.status_id', '=', 'oms_status.id')
         ->leftJoin('oms_vendor_information', 'production_tracker.accurate_client_id', '=', 'oms_vendor_information.id')
+        ->leftJoin('oms_accurate_source', 'production_tracker.source', '=', 'oms_accurate_source.id')
+
         ->select(
             'order_creation_main.order_date as order_date',
             DB::raw("CONCAT(assignee_user.emp_id, '(', assignee_user.username, ')') as assignee_empid"),
@@ -881,7 +883,7 @@ public function production_report(Request $request) {
             'oms_state.short_code as short_code',
             'county.county_name as county_name',
             'production_tracker.portal_fee_cost as portal_fee_cost',
-            'production_tracker.source as source',
+            'oms_accurate_source.source_name as source_name',
             'production_tracker.production_date as production_date',
             'production_tracker.copy_cost as copy_cost',
             'production_tracker.no_of_search_done as no_of_search_done',
@@ -1006,7 +1008,7 @@ private function applySorting($query, Request $request) {
         'oms_state.short_code',
         'county.county_name',
         'production_tracker.portal_fee_cost',
-        'production_tracker.source',
+        'oms_accurate_source.source_name',
         'production_tracker.production_date',
         'production_tracker.copy_cost',
         'production_tracker.no_of_search_done',
@@ -1077,6 +1079,7 @@ public function exportProductionReport(Request $request) {
         ->leftJoin('county', 'order_creation_main.county_id', '=', 'county.id')
         ->leftJoin('oms_status', 'order_creation_main.status_id', '=', 'oms_status.id')
         ->leftJoin('oms_vendor_information', 'production_tracker.accurate_client_id', '=', 'oms_vendor_information.id')
+        ->leftJoin('oms_accurate_source', 'production_tracker.source', '=', 'oms_accurate_source.id')
         ->select(
             'order_creation_main.order_date as order_date',
             DB::raw("CONCAT(assignee_user.emp_id, '(', assignee_user.username, ')') as assignee_empid"),
@@ -1089,7 +1092,7 @@ public function exportProductionReport(Request $request) {
             'oms_state.short_code as short_code',
             'county.county_name as county_name',
             'production_tracker.portal_fee_cost as portal_fee_cost',
-            'production_tracker.source as source',
+            'oms_accurate_source.source_name as source_name',
             'production_tracker.production_date as production_date',
             'production_tracker.copy_cost as copy_cost',
             'production_tracker.no_of_search_done as no_of_search_done',
