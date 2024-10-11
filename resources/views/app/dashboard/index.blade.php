@@ -678,6 +678,26 @@
 </div>
         @endif
 
+
+        <div class="card col-md-12 mt-3 ml-3" id="pending_status_table" style="font-size: 12px;">
+            <h5 class="text-center mt-3" style="font-weight: bold">Pending Order Status:</h5>
+                <div class="card-body">
+                    <table id="pending_status" class="table table-bordered nowrap mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                        <thead class="text-center">
+                        <tr>
+                            <th width="10%">Status</th>
+                            <th width="15%" class="wrap-column">More than 10 Days</th>
+                            <th width="15%" class="wrap-column">More than 20 Days</th>
+                            <th width="15%" class="wrap-column">More than 30 Days</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                        </table>
+                </div>
+            </div>
+
+
+
         @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP','PM/TL','Business Head']))
         <div class="card mt-5 tabledetails d-none" id="userwise_table">
             <h4 class="text-center mt-3">Userwise Details</h4>
@@ -803,9 +823,11 @@ $(document).ready(function() {
 
             fetchOrderData(projectId, clientId, fromDate, toDate);
             getGrandTotal(fromDate, toDate, client_id);
-            preOrderData(projectId, clientId, fromDate, toDate)
-            datewise_datatable(fromDate, toDate, client_id, projectId)
+            preOrderData(projectId, clientId, fromDate, toDate);
+            datewise_datatable(fromDate, toDate, client_id, projectId);
             userwise_datatable(fromDate, toDate, client_id, projectId);
+            pending_status(fromDate, toDate, client_id, projectId);
+
         });
         preOrderData(projectId, clientId, fromDate, toDate)
         fetchOrderData(projectId, clientId, fromDate, toDate);
@@ -1318,6 +1340,39 @@ var fromDate  = "";
 var toDate = "";
 var client_id  = "";
 
+function pending_status(fromDate,toDate,client_id,project_id) {
+        fromDate = $('#fromDate_dcf').val();
+        toDate = $('#toDate_dcf').val();
+        client_id = $('#client_id_dcf').val();
+        project_id = $('#project_id_dcf').val();
+
+    var datatable = $('#pending_status').DataTable({
+    destroy: true,
+    processing: true,
+    serverSide: false,
+    searching: true,
+    ajax: {
+        url: "{{ route('pending_status') }}",
+        type: 'POST',
+        data: {
+                fromDate: fromDate,
+                toDate: toDate,
+                client_id: client_id,
+                project_id: project_id,
+                _token: '{{ csrf_token() }}'
+            },
+        dataSrc: 'data'
+    },
+    columns: [
+        { data: 'status', name: 'status', className: 'text-center'},
+        { data: 'moreThan10Days', name: 'moreThan10Days', className: 'text-center' },
+        { data: 'moreThan20Days', name: 'moreThan20Days', className: 'text-center' },
+        { data: 'moreThan30Days', name: 'moreThan30Days', className: 'text-center' }
+    ]
+    });
+}
+
+
 
 
 $(document).ready(function() {
@@ -1590,6 +1645,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const fteClientIdDcf = document.getElementById('fteClient');
 
     const userwiseIdDcf = document.getElementById('userwise_table');
+    const pendingwise_status = document.getElementById('pending_status_table');
+
     const datewiseIdDcf = document.getElementById('datewise_table');
     const transIdDcf = document.getElementById('Trans_hide');
     const fteIdDcf = document.getElementById('fteClientTable');
@@ -1604,6 +1661,7 @@ document.addEventListener('DOMContentLoaded', function() {
             rightContent.style.display = 'block';
             billingIdDcf.style.display = 'none';
             userwiseIdDcf.style.display = 'block';
+            pendingwise_status.style.display = 'block';
             datewiseIdDcf.style.display = 'block';
             transIdDcf.style.display = 'none';
             fteIdDcf.style.display = 'none';
@@ -1618,6 +1676,8 @@ document.addEventListener('DOMContentLoaded', function() {
             rightContent.style.display = 'none';
             billingIdDcf.style.display = 'block';
             userwiseIdDcf.style.display = 'none';
+            pendingwise_status.style.display = 'none';
+
             datewiseIdDcf.style.display = 'none';
             transIdDcf.style.display = 'block';
              fteIdDcf.style.display = 'block';

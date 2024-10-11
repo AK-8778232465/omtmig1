@@ -35,6 +35,7 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('order_detail', 'order_detail')->name('order_detail');
     Route::post('getTotalData', 'getTotalData')->name('getTotalData');
     Route::any('previous_count', 'previous_count')->name('previous_count');
+Route::any('pending_status', 'pending_status')->name('pending_status');
 
     Route::post('getTotalDataFte', 'getTotalDataFte')->name('getTotalDataFte');
 

@@ -1796,4 +1796,103 @@ public function revenue_detail_client_fte(Request $request){
         }
 
     }
+
+
+
+    public function pending_status(Request $request)
+    {
+        $user = Auth::user();
+
+        $fromDate = $request->input('fromDate');
+        $toDate = $request->input('toDate');
+        $client_id = $request->input('client_id');
+        $project_id = $request->input('project_id');
+
+        $today = Carbon::now();
+    
+
+    
+        $status_name = DB::table('oms_status')->select('id', 'status')->get()->pluck('status', 'id')->toArray();
+         
+        $result = [];
+
+        foreach ($status_name as $status_id => $status_name_value) {
+            $tenDaysAgo = $today->copy()->subDays(10);
+            $twentyDaysAgo = $today->copy()->subDays(20);
+            $thirtyDaysAgo = $today->copy()->subDays(30);
+        
+            $moreThan10Days = OrderCreation::where('status_id', $status_id)
+                ->whereBetween('status_updated_time', [$twentyDaysAgo, $tenDaysAgo]);
+
+                if (!empty($client_id) && $client_id[0] !== 'All') {
+                    $moreThan10Days->whereIn('client_id', $client_id);
+                }
+
+                if (!empty($project_id) && $project_id[0] !== 'All') {
+                    $moreThan10Days->whereIn('process_id', $project_id);
+                }
+
+                  if ($fromDate && $toDate) {
+                        $moreThan10Days->where(function($datequery) use ($fromDate, $toDate) {
+                            $datequery->whereDate('order_date', '>=', $fromDate)
+                                    ->whereDate('order_date', '<=', $toDate);
+                        });
+                    }
+
+                $moreThan10DaysCount = $moreThan10Days->count();
+
+                
+            $moreThan20Days = OrderCreation::where('status_id', $status_id)
+                ->whereBetween('status_updated_time', [$thirtyDaysAgo, $twentyDaysAgo]);
+                if (!empty($client_id) && $client_id[0] !== 'All') {
+                    $moreThan20Days->whereIn('client_id', $client_id);
+                }
+
+                if (!empty($project_id) && $project_id[0] !== 'All') {
+                    $moreThan20Days->whereIn('process_id', $project_id);
+                }
+
+                if ($fromDate && $toDate) {
+                    $moreThan20Days->where(function($datequery) use ($fromDate, $toDate) {
+                        $datequery->whereDate('order_date', '>=', $fromDate)
+                                ->whereDate('order_date', '<=', $toDate);
+                    });
+                }
+                
+                $moreThan20DaysCount = $moreThan20Days->count();
+            
+            $moreThan30Days = OrderCreation::where('status_id', $status_id)
+                ->where('status_updated_time', '<=', $thirtyDaysAgo);
+            
+                if (!empty($client_id) && $client_id[0] !== 'All') {
+                    $moreThan30Days->whereIn('client_id', $client_id);
+                }
+
+                if (!empty($project_id) && $project_id[0] !== 'All') {
+                    $moreThan30Days->whereIn('process_id', $project_id);
+                }
+
+                if ($fromDate && $toDate) {
+                    $moreThan30Days->where(function($datequery) use ($fromDate, $toDate) {
+                        $datequery->whereDate('order_date', '>=', $fromDate)
+                                ->whereDate('order_date', '<=', $toDate);
+                    });
+                }
+                
+                $moreThan30DaysCount = $moreThan30Days->count();
+
+                if ($moreThan10DaysCount > 0 || $moreThan20DaysCount > 0 || $moreThan30DaysCount > 0) {
+                    $result[] = [
+                        'status' => $status_name_value,
+                        'moreThan10Days' => $moreThan10DaysCount,
+                        'moreThan20Days' => $moreThan20DaysCount,
+                        'moreThan30Days' => $moreThan30DaysCount,
+                    ];
+                }
+        }
+    
+        return Datatables::of($result)->toJson();
+    }
+
+
 }
