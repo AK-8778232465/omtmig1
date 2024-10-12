@@ -317,6 +317,33 @@
                     </div>
             </div>
 <!-- !-- // -->
+
+<div class="card col-md-5 mt-3 ml-3" id="available_resource_table" style="font-size: 12px;">
+    <h4 class="text-center mt-3" style="font-weight: bold">Available Resources</h4>
+        <div class="card-body">
+            <div class="p-0">
+                <div class="d-flex">
+                    <div> <h5 class="text-center" style="font-weight: bold">No. of Users Available:</h5></div>
+                    <div> <h5 id="available_users" style="color:blue;font-weight: bold;margin-left:10px"></h5></div>
+                    <div><h5 style="margin-left:3px">/</h5></div>
+                    <div><h5 id="total_users" style="color:rgb(247, 8, 8);font-weight: bold;margin-left:3px"></h5></div>                                    
+                </div>
+
+
+                <table id="available_resources" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <thead class="text-center" style="font-size: 12px;">
+                        <tr>
+                            <th width="10%">Emp Id</th>
+                            <th width="12%">Emp Name</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center" style="font-size: 12px;"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
 <div id="rightContent">
     <div class="col-12">
         <div class="row my-2">
@@ -1646,6 +1673,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const userwiseIdDcf = document.getElementById('userwise_table');
     const pendingwise_status = document.getElementById('pending_status_table');
+    const available_resource_table = document.getElementById('available_resource_table');
+
 
     const datewiseIdDcf = document.getElementById('datewise_table');
     const transIdDcf = document.getElementById('Trans_hide');
@@ -1662,6 +1691,7 @@ document.addEventListener('DOMContentLoaded', function() {
             billingIdDcf.style.display = 'none';
             userwiseIdDcf.style.display = 'block';
             pendingwise_status.style.display = 'block';
+            available_resource_table.style.display = 'block';
             datewiseIdDcf.style.display = 'block';
             transIdDcf.style.display = 'none';
             fteIdDcf.style.display = 'none';
@@ -1676,6 +1706,7 @@ document.addEventListener('DOMContentLoaded', function() {
             rightContent.style.display = 'none';
             billingIdDcf.style.display = 'block';
             userwiseIdDcf.style.display = 'none';
+            available_resource_table.style.display = 'none';
             pendingwise_status.style.display = 'none';
 
             datewiseIdDcf.style.display = 'none';
@@ -1683,6 +1714,7 @@ document.addEventListener('DOMContentLoaded', function() {
              fteIdDcf.style.display = 'block';
               fteProjectIdDcf.style.display = 'block';
               fteClientIdDcf.style.display = 'block';
+
 
         }
     }
@@ -1700,6 +1732,70 @@ document.addEventListener('DOMContentLoaded', function() {
 $(document).ready(function () {
     $("#filterButton").click();
 });
+
+function total_users() {
+    $.ajax({
+        url: "{{ route('total_users') }}",
+        type: "GET",
+        dataType: 'json',
+        success: function (response) {
+            // Update the text of available_users and total_users
+            $('#available_users').text(response.active_user); // Display active users
+            $('#total_users').text(response.user_lower_count); // Display total lower level users
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching user data:", error);
+        }
+    });
+}
+
+// Call the function to execute it
+total_users();
+setInterval(total_users, 10000);
+
+
+
+
+function total_users_name() {
+    // Initialize the DataTable
+    var table = $('#available_resources').DataTable({
+        destroy: true,
+        processing: true,
+        serverSide: false,
+        searching: false, // Disable the search bar
+        lengthChange: false,
+        ajax: {
+            url: "{{ route('total_users_name') }}", // Adjust route if necessary
+            type: "POST",
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            dataSrc: 'data', // Change 'data' to whatever your response wraps the array in
+        },
+        columns: [
+            { data: 'emp_id', name: 'emp_id' }, // Maps to Emp Id
+            { data: 'username', name: 'username' } // Maps to Emp Name
+        ],
+        columnDefs: [
+            { width: "20px", targets: [0, 1] } // Set width for both columns
+        ],
+        autoWidth: false
+
+    });
+}
+
+$(document).ready(function() {
+    total_users_name();
+});
+setInterval(total_users_name, 10000);
+
+
+
+
+
+
+
+  
 
 
 </script>

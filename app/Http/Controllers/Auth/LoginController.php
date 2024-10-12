@@ -38,8 +38,15 @@ class LoginController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
+        $user = User::where('id', Auth::id())->first();
+
+        if ($user) {
+            $user->update(['logged_in' => 0]); // Mark user as inactive
+        }
+
+
         $this->middleware('guest')->except('logout');
     }
 
@@ -50,6 +57,8 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
+        $user = User::where('id', Auth::id())->first();
+        $user->update(['logged_in' => 1]);
         return redirect()->intended('/home');
     }
 
@@ -72,4 +81,6 @@ class LoginController extends Controller
 
         return false;
     }
+
+
 }

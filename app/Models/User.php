@@ -22,7 +22,7 @@ class User extends Authenticatable
     protected $table = 'oms_users';
     public $timestamps = false;
 
-    protected $fillable = ['username', 'emp_id', 'email', 'password', 'user_type_id', 'is_active'];
+    protected $fillable = ['username', 'emp_id', 'email', 'password', 'user_type_id', 'is_active','logged_in'];
 
     /**
      * The attributes that should be hidden for serialization.

@@ -7,6 +7,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\OrderFormController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\Auth\LoginController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -35,7 +36,12 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('order_detail', 'order_detail')->name('order_detail');
     Route::post('getTotalData', 'getTotalData')->name('getTotalData');
     Route::any('previous_count', 'previous_count')->name('previous_count');
-Route::any('pending_status', 'pending_status')->name('pending_status');
+    Route::any('total_users', 'total_users')->name('total_users');
+    Route::any('pending_status', 'pending_status')->name('pending_status');
+    Route::any('total_users_name', 'total_users_name')->name('total_users_name');
+
+
+
 
     Route::post('getTotalDataFte', 'getTotalDataFte')->name('getTotalDataFte');
 

@@ -1894,5 +1894,61 @@ public function revenue_detail_client_fte(Request $request){
         return Datatables::of($result)->toJson();
     }
 
+    public function total_users() {
+        $user = User::where('id', Auth::id())->first();
+        // Assuming getAllLowerLevelUserIds returns an array of user IDs
+        $user_lower_ids = User::getAllLowerLevelUserIds(Auth::id());
+        
+        // Filter out the current user's ID
+        $user_lower_ids = array_filter($user_lower_ids, function($id) use ($user) {
+            return $id != $user->id;
+        });
+        
+        // Get the count of active users
+        $active_user = User::whereIn('id', $user_lower_ids)
+                           ->where('logged_in', 1)
+                           ->count();
+    
+        // Get the count of lower level users
+        $user_lower_count = count($user_lower_ids);
+    
+        return response()->json([
+            'user_lower_count' => $user_lower_count,
+            'active_user' => $active_user,
+        ]);
+    }
 
+
+
+    public function total_users_name() {
+        // Get the current user
+        $currentUserId = Auth::id();
+        $user = User::find($currentUserId);
+    
+        // Get all lower level user IDs
+        $user_lower_ids = User::getAllLowerLevelUserIds($currentUserId);
+    
+        // Filter out the current user's ID
+        $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
+            return $id != $currentUserId;
+        });
+    
+        // Get active lower-level users
+        $active_users = User::whereIn('id', $user_lower_ids)
+            ->where('logged_in', 1) // Filter to get only logged-in users
+            ->get(['id', 'emp_id', 'username', 'logged_in']);
+        
+            return response()->json([
+                'data' => $active_users->map(function($user) {
+                    return [
+                        'id' => $user->id,
+                        'emp_id' => $user->emp_id,
+                        'username' => $user->username
+                    ];
+                }),
+            ]);
+    }
+    
+    
+    
 }
