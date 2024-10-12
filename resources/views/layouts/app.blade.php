@@ -209,11 +209,23 @@
         <script src="{{asset('assets/js/parsley.min.js')}}"></script>
         @stack('script-bottom')
     </body>
-    <div id="logout-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:20px; background-color:#f2f2f2; border:1px solid #ccc; z-index:1000;">
-        <p>You have been inactive. You will be logged out in <span id="countdown"></span> seconds.</p>
-        <button onclick="resetTimer()">Logout</button>
-        <button onclick="resetTimer()">Stay Logged In</button>
-    </div>    
+
+    <div id="logout-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:30px; background-color:#ffffff; border-radius:12px; box-shadow:0 6px 30px rgba(0, 0, 0, 0.3); z-index:1000; font-family: 'Arial', sans-serif; width: 400px;">
+        <div style="text-align: center;">
+            <h3 style="margin: 0; color: #f70707;font-weight:bold;">You have been Inactive!</h3>
+            <p style="color: #151515; margin: 15px 0; font-weight:bold; font-size:14px;">You will be logged out in <span id="countdown" style="font-weight: bold; color: #e63946; font-size:20px;"></span> seconds.</p>
+        </div>
+        <div style="margin-top: 15px; text-align: center;">
+            <button onclick="resetTimer()" style="padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.3s; font-size: 16px; font-weight: bold;">
+                Stay Logged In
+            </button>
+        </div>
+    </div>
+    
+    
+    
+
+
     <script>
         (function (e) {
             var el = document.createElement('script');
@@ -225,10 +237,27 @@
 
         let logoutTimer;
         let countdownTimer;
-        let countdown = 60; // Countdown timer starts at 500 seconds
+        let countdown = 60;
+        let isPopupVisible = false; // Track popup visibility
+    // Countdown timer starts at 500 seconds
 
-        // Reset timer on user activity
+
+    function addEventListeners() {
+        window.onmousemove = resetTimer;
+        window.onkeypress = resetTimer;
+        window.onscroll = resetTimer;
+        window.onclick = resetTimer;
+    }
+
+    function removeEventListeners() {
+        window.onmousemove = null;
+        window.onkeypress = null;
+        window.onscroll = null;
+        window.onclick = null;
+    }
+
         function resetTimer() {
+
             clearTimeout(logoutTimer); // Clear previous logout timer
             clearInterval(countdownTimer); // Clear previous countdown interval
             countdown = 60; // Reset countdown timer
@@ -240,8 +269,13 @@
             }, 240000); // 60000 ms = 1 minute
         }
 
+        
+
         // Show popup and start countdown
         function startLogoutCountdown() {
+            isPopupVisible = true; // Popup is visible
+            removeEventListeners();
+
             document.getElementById("logout-popup").style.display = "block"; // Show popup
 
             countdownTimer = setInterval(() => {
@@ -272,12 +306,10 @@
             });
         }
 
-        // Detect user activity (mouse, keyboard, or touch)
-        window.onload = resetTimer; // Start timer when page loads
-        window.onmousemove = resetTimer; // Reset timer on mouse move
-        window.onkeypress = resetTimer; // Reset timer on key press
-        window.onscroll = resetTimer; // Reset timer on Scroll
-        window.onclick = resetTimer; // Reset timer on click
+        window.onload = function() {
+        resetTimer();
+        addEventListeners();
+    };
 
 
     </script>
