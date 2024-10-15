@@ -518,7 +518,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
     
             $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                 ->where('is_active', 1)
-                ->whereIn('status_id', [1, 2, 4, 13, 14])
+                ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17])
                 ->whereIn('process_id', $processIds)
                 ->whereNotIn('status_id', [3, 5])
                 ->whereNull('completion_date')
@@ -563,7 +563,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     ->where('is_active', 1)
                     ->whereIn('process_id', $project_id)
                     ->whereIn('process_id', $processIds)
-                    ->whereIn('status_id', [1, 2, 4, 13, 14])
+                    ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17])
                     ->whereNotIn('status_id', [3, 5])
                     ->whereNull('completion_date')
                     ->whereDate('order_date', '<', $fromDate);
@@ -595,7 +595,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 $carryOverAllStatusCounts = OrderCreation::select('id')
                     ->where('is_active', 1)
                     ->whereIn('process_id', $processIds)
-                    ->whereIn('status_id', [1, 2, 4, 13, 14])
+                    ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17])
                     ->whereNotIn('status_id', [3, 5])
                     ->whereNull('completion_date')
                     ->whereDate('order_date', '<', $fromDate);
@@ -632,7 +632,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             
                     $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                         ->where('is_active', 1)
-                        ->whereIn('status_id', [1, 2, 4, 13, 14])
+                        ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17])
                         ->whereNotIn('status_id', [3, 5])
                         ->where('assignee_user_id', $user->id)
                         ->whereIn('process_id', $processIds)
@@ -681,7 +681,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             ->whereIn('process_id', $project_id)
                             ->whereIn('process_id', $processIds)
                             ->where('assignee_user_id', $user->id)
-                            ->whereIn('status_id', [1, 2, 4, 13, 14])
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17])
                             ->whereNotIn('status_id', [3, 5])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
@@ -716,7 +716,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             ->where('is_active', 1)
                             ->whereIn('process_id', $processIds)
                             ->where('assignee_user_id', $user->id)
-                            ->whereIn('status_id', [1, 2, 4, 13, 14])
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17])
                             ->whereNotIn('status_id', [3, 5])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
@@ -875,7 +875,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             
                     $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                         ->where('is_active', 1)
-                        ->whereIn('status_id', [1, 2, 4, 13, 14])
+                        ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17])
                         ->whereNotIn('status_id', [3,5])
                         ->where(function ($query) use($user){
                             $query->where('assignee_user_id', $user->id)
@@ -934,7 +934,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $query->where('assignee_user_id', $user->id)
                                 ->orWhere('assignee_qa_id', $user->id);
                         })
-                            ->whereIn('status_id', [1, 2, 4, 13, 14])
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17])
                             ->whereNotIn('status_id', [3, 5])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
@@ -977,7 +977,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $query->where('assignee_user_id', $user->id)
                                 ->orWhere('assignee_qa_id', $user->id);
                         })
-                            ->whereIn('status_id', [1, 2, 4, 13, 14])
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17])
                             ->whereNotIn('status_id', [3, 5])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
