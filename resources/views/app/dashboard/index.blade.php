@@ -1488,15 +1488,23 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
             let preQuCnt = carriedCountMap[4] || 0;
             let preCoversheetCnt = carriedCountMap[13] || 0;
             let preClarificationCnt = carriedCountMap[14] || 0;
+            let predocPurchaserCnt = carriedCountMap[15] || 0;
+            let preTypingCnt = carriedCountMap[16] || 0;
+            let preTypingQcCnt = carriedCountMap[17] || 0;
+
 
             $('#pre_wip_cnt').text(preWipCnt);
             $('#pre_hold_cnt').text(preHoldCnt);
             $('#pre_qu_cnt').text(preQuCnt);
             $('#pre_coversheet_cnt').text(preCoversheetCnt);
             $('#pre_clarification_cnt').text(preClarificationCnt);
+            $('#pre_doc_purchaser_cnt').text(predocPurchaserCnt);
+            $('#pre_typing_cnt').text(preTypingCnt);
+            $('#pre_typing_qc_cnt').text(preTypingQcCnt);
+
 
             // Calculate and update the total of the specified values
-            let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt;
+            let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt + predocPurchaserCnt + preTypingCnt + preTypingQcCnt;
             $('#carried_over_cnt').text(totalSpecificValues);
         },
         error: function (error) {
@@ -1504,27 +1512,6 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
         }
     });
 }
-
-
-
-
-// function fetchProData(client_id) {
-//     $.ajax({
-//         url: "{{ url('dashboard_dropdown') }}",
-//         type: "POST",
-//         data: {
-//             client_id: client_id,
-//             _token: '{{ csrf_token() }}'
-//         },
-//         dataType: 'json',
-//         success: function (response) {
-//             $('#product_id').html('<option selected value="All">All Products</option>');
-//             $.each(response, function (index, item) {
-//                 $("#product_id").append('<option value="' + item.id + '">(' + item.project_code + ') - ' + item.process_name + '</option>');
-//             });
-//         }
-//     });
-// }
 
 
 function datewise_datatable(fromDate, toDate, client_id, project_id, selectedDateFilter) {

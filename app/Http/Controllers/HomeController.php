@@ -171,7 +171,7 @@ class HomeController extends Controller
             } else {
                 preg_match($datePattern, $selectedDateFilter, $dateMatches);
                 $from_date = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
-                $to_date = $fromDate;
+                $to_date = $from_date;
             }
         }
 
@@ -590,7 +590,7 @@ class HomeController extends Controller
             } else {
                 preg_match($datePattern, $selectedDateFilter, $dateMatches);
                 $from_date = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
-                $to_date = $fromDate;
+                $to_date = $from_date;
             }
         }
 
