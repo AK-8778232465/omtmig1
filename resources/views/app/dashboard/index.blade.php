@@ -319,11 +319,11 @@
 <!-- !-- // -->
 
 <div class="card col-md-5 mt-3 ml-3" id="available_resource_table" style="font-size: 12px;">
-    <h4 class="text-center mt-3" style="font-weight: bold">Available Resources</h4>
+    <h4 class="text-center mt-3">Available Resources</h4>
         <div class="card-body">
             <div class="p-0">
                 <div class="d-flex">
-                    <div> <h5 class="text-center" style="font-weight: bold">No. of Users Available:</h5></div>
+                    <div> <h5 class="text-center">No. of Users Available:</h5></div>
                     <div> <h5 id="available_users" style="color:blue;font-weight: bold;margin-left:10px"></h5></div>
                     <div><h5 style="margin-left:3px">/</h5></div>
                     <div><h5 id="total_users" style="color:rgb(247, 8, 8);font-weight: bold;margin-left:3px"></h5></div>                                    
@@ -707,7 +707,7 @@
 
 
         <div class="card col-md-12 mt-3 ml-3" id="pending_status_table" style="font-size: 12px;">
-            <h5 class="text-center mt-3" style="font-weight: bold">Pending Order Status:</h5>
+            <h4 class="text-center mt-3">Pending Order Status</h4>
                 <div class="card-body">
                     <table id="pending_status" class="table table-bordered nowrap mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
@@ -1368,10 +1368,6 @@ var toDate = "";
 var client_id  = "";
 
 function pending_status(fromDate,toDate,client_id,project_id) {
-        fromDate = $('#fromDate_dcf').val();
-        toDate = $('#toDate_dcf').val();
-        client_id = $('#client_id_dcf').val();
-        project_id = $('#project_id_dcf').val();
 
     var datatable = $('#pending_status').DataTable({
     destroy: true,
@@ -1382,10 +1378,6 @@ function pending_status(fromDate,toDate,client_id,project_id) {
         url: "{{ route('pending_status') }}",
         type: 'POST',
         data: {
-                fromDate: fromDate,
-                toDate: toDate,
-                client_id: client_id,
-                project_id: project_id,
                 _token: '{{ csrf_token() }}'
             },
         dataSrc: 'data'
