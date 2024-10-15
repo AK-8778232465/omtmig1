@@ -52,6 +52,9 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('dashboard_dropdown', 'dashboard_dropdown')->name('dashboard_dropdown');
     Route::post('revenue_detail_client_fte', 'revenue_detail_client_fte')->name('revenue_detail_client_fte');
 
+    Route::post('get_lob_dashboard', 'get_lob_dashboard')->name('get_lob_dashboard');
+    Route::post('get_process_dashboard', 'get_process_dashboard')->name('get_process_dashboard');
+    Route::post('get_product_dashboard', 'get_product_dashboard')->name('get_product_dashboard');
 
 });
 
