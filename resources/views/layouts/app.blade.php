@@ -42,6 +42,18 @@
             body {
             font-family: 'Poppins', sans-serif;
         }
+
+          #overlay {
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.5); 
+            z-index: 999;
+        }
+        
         </style>
         <style>
             .menu.notification {
@@ -51,6 +63,7 @@
 
     </head>
     <body data-layout="horizontal" style="background-image: url('{{ asset('assets/images/mainbg.png') }}">
+        <div id="overlay"></div>
         <div class="topbar">
             <div id="snow"></div>
             @if (Auth::guard('web')->check())
@@ -159,6 +172,9 @@
             left: 0;
             color: #7081b9;
         }
+
+
+       
         </style>
         {{-- <script src="{{asset('plugins/bootstrap-5.3.1/js/bootstrap.bundle.min.js')}}"></script> --}}
         <script src="{{asset('assets/js/bootstrap.bundle.min.js')}}"></script>
@@ -261,12 +277,13 @@
             clearTimeout(logoutTimer); // Clear previous logout timer
             clearInterval(countdownTimer); // Clear previous countdown interval
             countdown = 60; // Reset countdown timer
-            document.getElementById("logout-popup").style.display = "none"; // Hide popup
+            document.getElementById("logout-popup").style.display = "none";
+            document.getElementById("overlay").style.display = "none"; // Hide overlay
 
             // Start a new timer for inactivity (60 seconds)
             logoutTimer = setTimeout(() => {
                 startLogoutCountdown();
-            }, 240000); // 60000 ms = 1 minute
+            }, 840000); // 60000 ms = 1 minute
         }
 
         
@@ -276,7 +293,9 @@
             isPopupVisible = true; // Popup is visible
             removeEventListeners();
 
-            document.getElementById("logout-popup").style.display = "block"; // Show popup
+            document.getElementById("logout-popup").style.display = "block";
+            document.getElementById("overlay").style.display = "block"; // Show overlay
+             // Show popup
 
             countdownTimer = setInterval(() => {
                 countdown--; // Decrease the countdown
