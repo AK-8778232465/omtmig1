@@ -1062,6 +1062,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 'stl_lob.name as lob_name',
                 'stl_process.name as process_name',
                 'stl_client.client_name',
+                'stl_item_description.client_id',
                 'stl_item_description.process_name as process', 
                 'oms_tier.Tier_id as tier_name',
                 
@@ -1816,8 +1817,35 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $projectId = $request->input('projectId');
         $clientId = $request->input('clientId');
-        $fromDate = $request->input('fromDate');
-        $toDate = $request->input('toDate');
+        // $fromDate = $request->input('fromDate');
+        // $toDate = $request->input('toDate');
+        $selectedDateFilter = $request->input('selectedDateFilter');
+
+        $fromDateRange = Session::get('fromDate');
+        $toDateRange = Session::get('toDate');
+   
+        $fromDate = null;
+        $toDate = null;
+   
+        if ($fromDateRange && $toDateRange) {
+            $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+            $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+        } else {
+            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                $fromDateText = trim($fromDateText);
+                $toDateText = trim($toDateText);
+                preg_match($datePattern, $fromDateText, $fromDateMatches);
+                preg_match($datePattern, $toDateText, $toDateMatches);
+                $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            } else {
+                preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                $toDate = $fromDate;
+            }
+        }
 
         session()->forget(['projectId', 'clientId', 'fromDate', 'toDate', 'dashboardfilters','user','processIds']);
         // Store values in session
