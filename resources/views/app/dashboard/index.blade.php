@@ -963,7 +963,7 @@
             <h4 class="text-center mt-3">Userwise Details</h4>
             <div class="card-body">
                 <div class="p-0">
-                    <table id="userwise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <table id="userwise_datatable" class="table table-bordered" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
                                 <th width="11%">Users</th>
