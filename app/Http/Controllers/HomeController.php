@@ -2311,113 +2311,131 @@ public function tat_zone_count(Request $request) {
 
     $tatstatusCountsQuery = DB::table('oms_order_creations')
         ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
+        ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
+        ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
         ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
-        ->where('oms_order_creations.is_active', 1)
-        ->where('stl_item_description.is_approved', 1)
-        ->whereIn('oms_order_creations.process_id', $processIds)
+        ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
+        ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+        ->leftJoin('oms_users as typist_users', 'oms_order_creations.typist_id', '=', 'typist_users.id')
+        ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
+        ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
+        ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
+        ->leftJoin('oms_tier','oms_order_creations.tier_id', '=', 'oms_tier.id')
+        ->leftJoin('stl_process', 'oms_order_creations.process_type_id', '=', 'stl_process.id')
         ->select(
             'oms_order_creations.id',
             'oms_order_creations.order_id as order_id',
             'oms_order_creations.status_id as status_id',
             'oms_order_creations.order_date as order_date',
             'stl_item_description.tat_value as tat_value',
-            'stl_client.id',
-            'oms_order_creations.process_id'
-        );
+            'oms_order_creations.assignee_user_id',
+            'oms_order_creations.assignee_qa_id',
+            'oms_order_creations.typist_id',
+            'oms_order_creations.typist_qc_id',
+            'oms_order_creations.associate_id',
+            'stl_client.id as client_id',
+        )
+        ->whereIn('oms_order_creations.process_id', $processIds)
+        ->where('oms_order_creations.is_active', 1)
+        ->whereNotNull('oms_order_creations.assignee_user_id')
+        ->where('stl_item_description.is_approved', 1)
+        ->where('stl_client.is_approved', 1);
 
+
+
+    if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+        if ($user->user_type_id == 6) {
+            $tatstatusCountsQuery->where('oms_order_creations.assignee_user_id', $user->id);
+        } elseif($user->user_type_id == 7) {
+            $tatstatusCountsQuery->where('oms_order_creations.assignee_qa_id', $user->id)
+            ->whereNotIn('oms_order_creations.status_id', [1]);
+        } elseif($user->user_type_id == 8) {
+            $tatstatusCountsQuery->where(function ($query) use($user) {
+                $query->where('oms_order_creations.assignee_user_id', $user->id)
+                    ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
+            });
+        } elseif($user->user_type_id == 10){
+            $tatstatusCountsQuery->where('oms_order_creations.typist_id', $user->id)
+            ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 17]);
+        } elseif($user->user_type_id == 11){
+            $tatstatusCountsQuery->where('oms_order_creations.typist_qc_id', $user->id)
+            ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 16]);
+        }
+    }
 
     if ($fromDate && $toDate) {
-        $tatstatusCountsQuery->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
+        $tatstatusCountsQuery->whereBetween('oms_order_creations.order_date', [
+            $fromDate . ' 00:00:00',
+            $toDate . ' 23:59:59'
+        ]);
     }
 
     if (!empty($client_id) && $client_id[0] !== 'All') {
-        $tatstatusCountsQuery->whereIn('stl_client.id', $client_id);
+        $tatstatusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
     }
 
     if (!empty($project_id) && $project_id[0] !== 'All') {
         $tatstatusCountsQuery->where('oms_order_creations.process_id', $project_id);
-    } else {
-        $tatstatusCountsQuery->whereIn('oms_order_creations.process_id', $processIds);
     }
 
+    $tatStatusCountsQuery = $tatstatusCountsQuery->get();
 
-    $tatstatusCounts   = $tatstatusCountsQuery->get();
-    // dd($tatstatusCounts);
+    function calculateTatValues($tatStatusCountsQuery)
+    {
+        $resultsByStatus = [];
 
-    function calculateTatValues($tatstatusCounts) {
-        $counts = [
-            'orderReachfirst' => 0,
-            'orderReachsecond' => 0,
-            'orderReachthird' => 0,
-            'orderReachfourth' => 0,
-        ];
-
-        foreach ($tatstatusCounts as $order) {
+        foreach ($tatStatusCountsQuery as $order) {
             if (!is_null($order->tat_value)) {
                 $tatValue = $order->tat_value;
+                $statusId = $order->status_id; 
                 $tatHours = $tatValue / 4;
-                $statusId = $order->status_id;
 
                 $orderDate = new \DateTime($order->order_date, new \DateTimeZone('Etc/GMT+5'));
                 $currentDate = new \DateTime('now', new \DateTimeZone('Etc/GMT+5'));
                 $diff = $currentDate->diff($orderDate);
                 $hoursDifference = ($diff->days * 24) + $diff->h + ($diff->i / 60);
 
-            if($statusId != 5){
-                if ($hoursDifference < $tatHours) {
-                    $counts['orderReachfirst'] += 1;
-                } elseif ($hoursDifference < $tatHours * 2) {
-                    $counts['orderReachsecond'] += 1;
-                } elseif ($hoursDifference < $tatHours * 3) {
-                    $counts['orderReachthird'] += 1;
-                } else {
-                    $counts['orderReachfourth'] += 1;
+                if (!isset($resultsByStatus[$statusId])) {
+                    $resultsByStatus[$statusId] = [
+                        'orderReachfirst' => 0,  
+                        'orderReachsecond' => 0, 
+                        'orderReachthird' => 0,  
+                        'orderReachfourth' => 0, 
+                    ];
                 }
+                if ($statusId == 5) {
+                    continue;
+                }
+                if ($hoursDifference >= $tatHours * 3) {
+                    $resultsByStatus[$statusId]['orderReachfourth'] += 1;
+                }elseif ($hoursDifference >= $tatHours * 2) {
+                    $resultsByStatus[$statusId]['orderReachthird'] += 1;
+                }elseif ($hoursDifference >= $tatHours * 1) {
+                    $resultsByStatus[$statusId]['orderReachsecond'] += 1;
+                }else{
+                    $resultsByStatus[$statusId]['orderReachfirst'] += 1;
             }
                 
             }
         }
 
-        return $counts;
+        return $resultsByStatus;
     }
 
-    $results = calculateTatValues($tatstatusCounts);
-
-    $totalThirdCount = $results['orderReachthird'];
-    $totalFourthCount = $results['orderReachfourth'];
-    $totalFirstCount = $results['orderReachfirst'];
-    $totalSecondCount = $results['orderReachsecond'];
-
-    $colorMapping = [
-        'totalFirstCount' => 'Green',
-        'totalSecondCount' => 'Blue',
-        'totalThirdCount' => 'Orange',
-        'totalFourthCount' => 'Red'
-    ];
+    $results = calculateTatValues($tatStatusCountsQuery);
+        $totalFirstCount = array_sum(array_column($results, 'orderReachfirst'));
+        $totalSecondCount = array_sum(array_column($results, 'orderReachsecond'));
+        $totalThirdCount = array_sum(array_column($results, 'orderReachthird'));
+        $totalFourthCount = array_sum(array_column($results, 'orderReachfourth'));
 
     return response()->json([
-        'TatStatusResults' => $results,
-        'totalFirstCount' => [
+            'green_count' => $totalFirstCount .','. ' Green', 
+            'blue_count' => $totalSecondCount .','. ' Blue',
+            'orange_count' => $totalThirdCount .','. ' Orange', 
+            'red_count' => $totalFourthCount .','. ' Red',
+        ]);        
            
-            'color' => $colorMapping['totalFirstCount'],
-            'count' => $totalFirstCount,
-        ],
-        'totalSecondCount' => [
-           
-            'color' => $colorMapping['totalSecondCount'],
-            'count' => $totalSecondCount,
-        ],
-        'totalThirdCount' => [
-            'color' => $colorMapping['totalThirdCount'],
-            'count' => $totalThirdCount,
-
-        ],
-        'totalFourthCount' => [
-            'color' => $colorMapping['totalFourthCount'],
-            'count' => $totalFourthCount,
-
-        ],
-    ]);
-}
+    }
 
 }

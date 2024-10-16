@@ -234,7 +234,6 @@
 
 <div class="container mt-2 mb-1 p-1">
     <section id="minimal-statistics">
-        <!-- // -->
         @if(Auth::user()->hasRole('Business Head'))
         <div class="switch-container d-flex justify-content-end">
                 <span class="label-left">Revenue</span>
@@ -245,52 +244,6 @@
                 <span class="label-right">Production</span>
             </div>
         @endif
-        <!-- // -->
-                <!-- <div class="row justify-content-start mb-0 mt-2 ml-2">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="fromDate_dcf">From Date</label>
-                            <input type="date" class="form-control" id="fromDate_dcf" name="fromDate_dcf">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="toDate_dcf">To Date</label>
-                            <input type="date" class="form-control" id="toDate_dcf" name="toDate_dcf">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="client"> Client </label>
-                            <select class="form-control select2-basic-multiple" name="dcf_client_id[]" id="client_id_dcf" multiple="multiple">
-                                <option selected value="All">All</option>
-                                @forelse($clients as $client)
-                                    <option value="{{ $client->id }}">{{ $client->client_no }} ({{ $client->client_name }})</option>
-                                @empty
-                                @endforelse
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-2" id="project_hide">
-                        <label for="project">Product</label>
-                        <Select class="form-control select2-basic-multiple" style="width:100%" name="dcf_project_id[]" id="product_id" multiple="multiple">
-                            <option selected value="All">All Products</option>
-                        </Select>
-                    </div>
-                    @if(Auth::user()->hasRole('Business Head'))
-                    <div class="col-2" id="billing_hide"><label for="project">Billing Type</label>
-                        <Select class="form-control select_role float-end" name="" id="billing_id_dcf">
-                            <option selected value="All">All</option>
-                            <option value="FTE">FTE</option>
-                            <option value="TXN">TXN</option>
-                        </Select>
-                    </div>
-                    @endif
-                    <div class="col-1 col-md-1 mt-4">
-                        <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
-                    </div>
-                </div> -->
-                <!-- // -->
                 <div class="container-fluid d-flex reports">
                     <div class="col-md-12">
                         <div class="row" id="hidefilter">
@@ -506,7 +459,7 @@
                     </div>
                 </div>
             </div>
-</div>
+        </div>
 
 
 
@@ -1927,22 +1880,21 @@ $(document).ready(function() {
 
     
 
+function tat_zone(fromDate, toDate, clientId, project_id, selectedDateFilter) {
 
-function tat_zone(fromDate,toDate,clientId,project_id,selectedDateFilter) {
+var fromDate = $('#fromDate_range').val();
+var toDate = $('#toDate_range').val();
+var client_id = $('#client_id_dcf').val();
+var project_id = $('#product_id').val();
 
-    var fromDate = $('#fromDate_range').val();
-    var toDate = $('#toDate_range').val();
-    var client_id = $('#client_id_dcf').val();
-    var project_id = $('#product_id').val();
-
-
-    var datatable = $('#tat_zone_datatable').DataTable({
+var datatable = $('#tat_zone_datatable').DataTable({
         destroy: true,
         processing: true,
         serverSide: false,
         searching: false, 
         paging: false, 
         info: false, 
+    ordering: false,
         ajax: {
             url: "{{ route('tat_zone_count') }}",
             type: 'POST',
@@ -1951,25 +1903,24 @@ function tat_zone(fromDate,toDate,clientId,project_id,selectedDateFilter) {
                 toDate: toDate,
                 client_id: client_id,
                 project_id: project_id,
-                selectedDateFilter:selectedDateFilter,
+            selectedDateFilter: selectedDateFilter,
                 _token: '{{ csrf_token() }}'
             },
             dataSrc: function (json) {
                 var data = [];
 
-                // Use the counts directly from the JSON response
-                var counts = [
-                    { count: json.totalFirstCount.count, color: json.totalFirstCount.color },
-                    { count: json.totalSecondCount.count, color: json.totalSecondCount.color },
-                    { count: json.totalThirdCount.count, color: json.totalThirdCount.color },
-                    { count: json.totalFourthCount.count, color: json.totalFourthCount.color }
+            var orderedCounts = [
+                json.green_count, 
+                json.blue_count, 
+                json.orange_count, 
+                json.red_count
                 ];
 
-                // Push the data into the array
-                counts.forEach(function(item) {
+            orderedCounts.forEach(function(item) {
+                var splitData = item.split(", ");
                     data.push({
-                        count: item.count,
-                        color: item.color
+                    tat_zone: splitData[1],
+                    count: splitData[0]    
                     });
                 });
 
@@ -1978,15 +1929,21 @@ function tat_zone(fromDate,toDate,clientId,project_id,selectedDateFilter) {
         },
         columns: [
             {
-                data: 'color',
+            data: 'tat_zone', 
                 title: 'TAT Zone',
                 render: function (data) {
                     return `<span>${data}</span>`; 
                 }
             },
-            { data: 'count', title: 'Count' } 
+        { 
+            data: 'count', 
+            title: 'Count', 
+            render: function (data) {
+                return `<span>${data}</span>`;
+            }
+        }
         ]
-    });
+});
 }
 
 
