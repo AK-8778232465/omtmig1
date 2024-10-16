@@ -968,12 +968,12 @@
                             <tr>
                                 <th width="11%">Users</th>
                                 <th width="9%">WIP</th>
-                                <th width="9%">Coversheet Prep</th>
-                                <th width="9%">Doc Purchase</th>
+                                <th width="9%" class="wrap-column">Coversheet Prep</th>
+                                <th width="9%" class="wrap-column">Doc Purchase</th>
                                 <th width="8%">Clarification</th>
-                                <th width="8%">Send For QC</th>
-                                <th width="8%">Typing</th>
-                                <th width="8%">Typing QC</th>
+                                <th width="9%" class="wrap-column">Send For QC</th>
+                                <th width="7%">Typing</th>
+                                <th width="9%" class="wrap-column">Typing QC</th>
                                 <th width="7%">Hold</th>
                                 <th width="8%">Cancelled</th>
                                 <th width="8%">Completed</th>
