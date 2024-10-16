@@ -973,8 +973,8 @@
                                 <th width="9%">Clarification</th>
                                 <th width="9%">Send For QC</th>
                                 <th width="9%">Typing</th>
-                                <th width="8%">Typing QC</th>
-                                <th width="8%">Hold</th>
+                                <th width="9%">Typing QC</th>
+                                <th width="9%">Hold</th>
                                 <th width="9%">Cancelled</th>
                                 <th width="9%">Completed</th>
                                 <th width="8%">All</th>
@@ -996,16 +996,16 @@
                         <thead class="text-center">
                             <tr>
                                 <th width="12%">Client</th>
-                                <th width="21%" class="wrap-column">Product</th>
+                                <th width="22%" class="wrap-column">Product</th>
                                 @if(!Auth::user()->hasRole('Qcer'))
                                 <th width="9%">WIP</th>
                                 <th width="8%">Coversheet Prep</th>
                                 @endif
-                                <th width="8%">Doc Purchase</th>
-                                <th width="8%">Clarification</th>
-                                <th width="8%">Send for QC</th>
-                                <th width="8%">Typing</th>
-                                <th width="8%">Typing QC</th>
+                                <th width="9%">Doc Purchase</th>
+                                <th width="9%">Clarification</th>
+                                <th width="9%">Send for QC</th>
+                                <th width="9%">Typing</th>
+                                <th width="9%">Typing QC</th>
                                 <th width="7%">Hold</th>
                                 <th width="8%">Cancelled</th>
                                 <th width="8%">Completed</th>
