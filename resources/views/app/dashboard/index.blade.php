@@ -2412,10 +2412,7 @@ function total_users_name() {
         lengthChange: false,
         ajax: {
             url: "{{ route('total_users_name') }}", // Adjust route if necessary
-            type: "POST",
-            data: {
-                _token: '{{ csrf_token() }}'
-            },
+            type: "GET",
             dataSrc: 'data', // Change 'data' to whatever your response wraps the array in
         },
         columns: [
