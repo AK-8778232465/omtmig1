@@ -464,31 +464,53 @@
                     </div>
             </div>
 <!-- !-- // -->
-
-<div class="card col-md-5 mt-3 ml-3" id="available_resource_table" style="font-size: 12px;">
-    <h4 class="text-center mt-3">Available Resources</h4>
-        <div class="card-body">
-            <div class="p-0">
-                <div class="d-flex">
-                    <div> <h5 class="text-center">No. of Users Available:</h5></div>
-                    <div> <h5 id="available_users" style="color:blue;font-weight: bold;margin-left:10px"></h5></div>
-                    <div><h5 style="margin-left:3px">/</h5></div>
-                    <div><h5 id="total_users" style="color:rgb(247, 8, 8);font-weight: bold;margin-left:3px"></h5></div>                                    
+<div class="col-md-12 d-flex">
+    <div class="card col-md-5 mt-3 ml-3" id="available_resource_table" style="font-size: 12px;">
+        <h4 class="text-center mt-3">Available Resources</h4>
+            <div class="card-body">
+                <div class="p-0">
+                    <div class="d-flex">
+                        <div> <h5 class="text-center">No. of Users Available:</h5></div>
+                        <div> <h5 id="available_users" style="color:blue;font-weight: bold;margin-left:10px"></h5></div>
+                        <div><h5 style="margin-left:3px">/</h5></div>
+                        <div><h5 id="total_users" style="color:rgb(247, 8, 8);font-weight: bold;margin-left:3px"></h5></div>                                    
+                    </div>
+    
+    
+                    <table id="available_resources" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                        <thead class="text-center" style="font-size: 12px;">
+                            <tr>
+                                <th width="10%">Emp Id</th>
+                                <th width="12%">Emp Name</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center" style="font-size: 12px;"></tbody>
+                    </table>
                 </div>
-
-
-                <table id="available_resources" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                    <thead class="text-center" style="font-size: 12px;">
-                        <tr>
-                            <th width="10%">Emp Id</th>
-                            <th width="12%">Emp Name</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-center" style="font-size: 12px;"></tbody>
-                </table>
             </div>
         </div>
-    </div>
+        <div class="col-md-1"></div>
+        <div class="card col-md-5 mt-3 ml-3" id="tat_zone_table" style="font-size: 12px;">
+            <h4 class="text-center mt-3">TAT</h4>
+                <div class="card-body">
+                    <div class="p-0">
+                        <table id="tat_zone_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                            <thead class="text-center" style="font-size: 12px;">
+                                <tr>
+                                    <th width="10%">TAT Zone</th>
+                                    <th width="12%">Count</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center" style="font-size: 12px;"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+</div>
+
+
+
+    
 
 
 <div id="rightContent">
@@ -1064,6 +1086,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const fteIdDcf = document.getElementById('fteClientTable');
     const pendingwise_status = document.getElementById('pending_status_table');
     const available_resource_table = document.getElementById('available_resource_table');
+    const tat_zone_table = document.getElementById('tat_zone_table');
+
 
     // Function to update the visibility based on the toggle switch state
     function updateVisibility() {
@@ -1084,6 +1108,8 @@ document.addEventListener('DOMContentLoaded', function() {
             processTypeIdDcf.style.display = 'block';
             pendingwise_status.style.display = 'block';
             available_resource_table.style.display = 'block';
+            tat_zone_table.style.display = 'block';
+
 
         } else {
             // If the switch is unchecked (Production side), hide the right content and project content
@@ -1102,6 +1128,8 @@ document.addEventListener('DOMContentLoaded', function() {
             processTypeIdDcf.style.display = 'none';
             pendingwise_status.style.display = 'none';
             available_resource_table.style.display = 'none';
+            tat_zone_table.style.display = 'none';
+
 
         }
             }
@@ -1319,6 +1347,7 @@ $(document).ready(function() {
             preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
             datewise_datatable(fromDate, toDate, client_id, projectId, selectedDateFilter)
             userwise_datatable(fromDate, toDate, client_id, projectId, selectedDateFilter);
+            tat_zone(fromDate, toDate, clientId, projectId, selectedDateFilter);
         });
         preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
         fetchOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter);
@@ -1879,6 +1908,78 @@ function pending_status() {
     ]
     });
 }
+
+$(document).ready(function() {
+    pending_status();
+});
+
+    
+
+
+function tat_zone(fromDate,toDate,clientId,project_id,selectedDateFilter) {
+
+    var fromDate = $('#fromDate_range').val();
+    var toDate = $('#toDate_range').val();
+    var client_id = $('#client_id_dcf').val();
+    var project_id = $('#product_id').val();
+
+
+    var datatable = $('#tat_zone_datatable').DataTable({
+        destroy: true,
+        processing: true,
+        serverSide: false,
+        searching: false, 
+        paging: false, 
+        info: false, 
+        ajax: {
+            url: "{{ route('tat_zone_count') }}",
+            type: 'POST',
+            data: {
+                fromDate: fromDate,
+                toDate: toDate,
+                client_id: client_id,
+                project_id: project_id,
+                selectedDateFilter:selectedDateFilter,
+                _token: '{{ csrf_token() }}'
+            },
+            dataSrc: function (json) {
+                var data = [];
+
+                // Use the counts directly from the JSON response
+                var counts = [
+                    { count: json.totalFirstCount.count, color: json.totalFirstCount.color },
+                    { count: json.totalSecondCount.count, color: json.totalSecondCount.color },
+                    { count: json.totalThirdCount.count, color: json.totalThirdCount.color },
+                    { count: json.totalFourthCount.count, color: json.totalFourthCount.color }
+                ];
+
+                // Push the data into the array
+                counts.forEach(function(item) {
+                    data.push({
+                        count: item.count,
+                        color: item.color
+                    });
+                });
+
+                return data;
+            }
+        },
+        columns: [
+            {
+                data: 'color',
+                title: 'TAT Zone',
+                render: function (data) {
+                    return `<span>${data}</span>`; 
+                }
+            },
+            { data: 'count', title: 'Count' } 
+        ]
+    });
+}
+
+
+
+
 
 
 

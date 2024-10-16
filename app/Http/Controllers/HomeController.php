@@ -2253,6 +2253,154 @@ public function revenue_detail_client_fte(Request $request){
             ]);
     }
     
+
     
+public function tat_zone_count(Request $request) {
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+    $client_id = $request->input('client_id');
+    $project_id = $request->input('project_id');
+
+    $selectedDateFilter = $request->input('selectedDateFilter');
     
+
+    $fromDateRange = $request->input('from_date');
+    $toDateRange = $request->input('to_date');
+
+    $fromDate = null;
+    $toDate = null;
+
+    if ($fromDateRange && $toDateRange) {
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $toDate = $fromDate;
+        }
+    }
+
+
+    $tatstatusCountsQuery = DB::table('oms_order_creations')
+        ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->where('oms_order_creations.is_active', 1)
+        ->where('stl_item_description.is_approved', 1)
+        ->whereIn('oms_order_creations.process_id', $processIds)
+        ->select(
+            'oms_order_creations.id',
+            'oms_order_creations.order_id as order_id',
+            'oms_order_creations.status_id as status_id',
+            'oms_order_creations.order_date as order_date',
+            'stl_item_description.tat_value as tat_value',
+            'stl_client.id',
+            'oms_order_creations.process_id'
+        );
+
+
+    if ($fromDate && $toDate) {
+        $tatstatusCountsQuery->whereBetween('oms_order_creations.order_date', [$fromDate, $toDate]);
+    }
+
+    if (!empty($client_id) && $client_id[0] !== 'All') {
+        $tatstatusCountsQuery->whereIn('stl_client.id', $client_id);
+    }
+
+    if (!empty($project_id) && $project_id[0] !== 'All') {
+        $tatstatusCountsQuery->where('oms_order_creations.process_id', $project_id);
+    } else {
+        $tatstatusCountsQuery->whereIn('oms_order_creations.process_id', $processIds);
+    }
+
+
+    $tatstatusCounts   = $tatstatusCountsQuery->get();
+    // dd($tatstatusCounts);
+
+    function calculateTatValues($tatstatusCounts) {
+        $counts = [
+            'orderReachfirst' => 0,
+            'orderReachsecond' => 0,
+            'orderReachthird' => 0,
+            'orderReachfourth' => 0,
+        ];
+
+        foreach ($tatstatusCounts as $order) {
+            if (!is_null($order->tat_value)) {
+                $tatValue = $order->tat_value;
+                $tatHours = $tatValue / 4;
+                $statusId = $order->status_id;
+
+                $orderDate = new \DateTime($order->order_date, new \DateTimeZone('Etc/GMT+5'));
+                $currentDate = new \DateTime('now', new \DateTimeZone('Etc/GMT+5'));
+                $diff = $currentDate->diff($orderDate);
+                $hoursDifference = ($diff->days * 24) + $diff->h + ($diff->i / 60);
+
+            if($statusId != 5){
+                if ($hoursDifference < $tatHours) {
+                    $counts['orderReachfirst'] += 1;
+                } elseif ($hoursDifference < $tatHours * 2) {
+                    $counts['orderReachsecond'] += 1;
+                } elseif ($hoursDifference < $tatHours * 3) {
+                    $counts['orderReachthird'] += 1;
+                } else {
+                    $counts['orderReachfourth'] += 1;
+                }
+            }
+                
+            }
+        }
+
+        return $counts;
+    }
+
+    $results = calculateTatValues($tatstatusCounts);
+
+    $totalThirdCount = $results['orderReachthird'];
+    $totalFourthCount = $results['orderReachfourth'];
+    $totalFirstCount = $results['orderReachfirst'];
+    $totalSecondCount = $results['orderReachsecond'];
+
+    $colorMapping = [
+        'totalFirstCount' => 'Green',
+        'totalSecondCount' => 'Blue',
+        'totalThirdCount' => 'Orange',
+        'totalFourthCount' => 'Red'
+    ];
+
+    return response()->json([
+        'TatStatusResults' => $results,
+        'totalFirstCount' => [
+           
+            'color' => $colorMapping['totalFirstCount'],
+            'count' => $totalFirstCount,
+        ],
+        'totalSecondCount' => [
+           
+            'color' => $colorMapping['totalSecondCount'],
+            'count' => $totalSecondCount,
+        ],
+        'totalThirdCount' => [
+            'color' => $colorMapping['totalThirdCount'],
+            'count' => $totalThirdCount,
+
+        ],
+        'totalFourthCount' => [
+            'color' => $colorMapping['totalFourthCount'],
+            'count' => $totalFourthCount,
+
+        ],
+    ]);
+}
+
 }

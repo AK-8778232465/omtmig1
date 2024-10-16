@@ -39,6 +39,7 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::any('total_users', 'total_users')->name('total_users');
     Route::any('pending_status', 'pending_status')->name('pending_status');
     Route::any('total_users_name', 'total_users_name')->name('total_users_name');
+    Route::any('tat_zone_count', 'tat_zone_count')->name('tat_zone_count');
 
 
 
