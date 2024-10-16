@@ -202,10 +202,9 @@ class OrderController extends Controller
                     $statusId = $order->status_id; 
                     $tatHours = $tatValue / 4; 
         
-                    $orderDate = new \DateTime($order->order_date, new \DateTimeZone('Etc/GMT+5'));
+                    $orderDate = new \DateTime($order->order_date, new \DateTimeZone('America/New_York'));
         
-                    $currentDate = new \DateTime('now', new \DateTimeZone('Etc/GMT+5'));
-        
+                    $currentDate = new \DateTime('now', new \DateTimeZone('America/New_York'));
                     $diff = $currentDate->diff($orderDate);
         
                     $hoursDifference = ($diff->days * 24) + $diff->h + ($diff->i / 60); 

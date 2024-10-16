@@ -2279,6 +2279,13 @@ public function tat_zone_count(Request $request) {
     $client_id = $request->input('client_id');
     $project_id = $request->input('project_id');
 
+    if (!is_array($client_id)) {
+        $client_id = [$client_id];
+    }
+    if (!is_array($project_id)) {
+        $project_id = [$project_id];
+    }
+
     $selectedDateFilter = $request->input('selectedDateFilter');
     
 
@@ -2372,11 +2379,11 @@ public function tat_zone_count(Request $request) {
     }
 
     if (!empty($client_id) && $client_id[0] !== 'All') {
-        $tatstatusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+        $tatstatusCountsQuery->whereIn('stl_client.id', $client_id);
     }
 
     if (!empty($project_id) && $project_id[0] !== 'All') {
-        $tatstatusCountsQuery->where('oms_order_creations.process_id', $project_id);
+        $tatstatusCountsQuery->whereIn('oms_order_creations.process_id', $project_id);
     }
 
     $tatStatusCountsQuery = $tatstatusCountsQuery->get();
@@ -2391,8 +2398,10 @@ public function tat_zone_count(Request $request) {
                 $statusId = $order->status_id; 
                 $tatHours = $tatValue / 4;
 
-                $orderDate = new \DateTime($order->order_date, new \DateTimeZone('Etc/GMT+5'));
-                $currentDate = new \DateTime('now', new \DateTimeZone('Etc/GMT+5'));
+                $orderDate = new \DateTime($order->order_date, new \DateTimeZone('America/New_York'));
+
+                $currentDate = new \DateTime('now', new \DateTimeZone('America/New_York'));
+
                 $diff = $currentDate->diff($orderDate);
                 $hoursDifference = ($diff->days * 24) + $diff->h + ($diff->i / 60);
 
