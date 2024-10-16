@@ -966,15 +966,18 @@
                     <table id="userwise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
-                                <th width="12%">Users</th>
-                                <th width="11%">WIP</th>
-                                <th width="11%">Coversheet Prep</th>
-                                <th width="11%">Clarification</th>
-                                <th width="11%">Send For QC</th>
-                                <th width="11%">Hold</th>
-                                <th width="11%">Cancelled</th>
-                                <th width="11%">Completed</th>
-                                <th width="11%">All</th>
+                                <th width="11%">Users</th>
+                                <th width="9%">WIP</th>
+                                <th width="9%">Coversheet Prep</th>
+                                <th width="9%">Doc Purchase</th>
+                                <th width="9%">Clarification</th>
+                                <th width="9%">Send For QC</th>
+                                <th width="9%">Typing</th>
+                                <th width="9%">Typing QC</th>
+                                <th width="9%">Hold</th>
+                                <th width="9%">Cancelled</th>
+                                <th width="9%">Completed</th>
+                                <th width="8%">All</th>
                             </tr>
                         </thead>
                         <tbody class="text-center"></tbody>
@@ -996,14 +999,17 @@
                                 <th width="22%" class="wrap-column">Product</th>
                                 @if(!Auth::user()->hasRole('Qcer'))
                                 <th width="9%">WIP</th>
-                                <th width="10%">Coversheet Prep</th>
+                                <th width="8%">Coversheet Prep</th>
                                 @endif
-                                <th width="10%">Clarification</th>
+                                <th width="9%">Doc Purchase</th>
+                                <th width="9%">Clarification</th>
                                 <th width="9%">Send for QC</th>
-                                <th width="9%">Hold</th>
-                                <th width="10%">Cancelled</th>
-                                <th width="10%">Completed</th>
-                                <th width="9%">All</th>
+                                <th width="9%">Typing</th>
+                                <th width="9%">Typing QC</th>
+                                <th width="7%">Hold</th>
+                                <th width="8%">Cancelled</th>
+                                <th width="8%">Completed</th>
+                                <th width="8%">All</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -1582,8 +1588,11 @@ function datewise_datatable(fromDate, toDate, client_id, project_id, selectedDat
                     { data: 'WIP', name: 'WIP', className: "text-center" },
                     { data: 'Coversheet Prep', name: 'Coversheet Prep', className: "text-center" },
                     @endif
+                    { data: 'Doc Purchase', name: 'Doc Purchase', className: "text-center" },
                     { data: 'Clarification', name: 'Clarification', className: "text-center" },
                     { data: 'Send for QC', name: 'Send for QC', className: "text-center" },
+                    { data: 'Typing', name: 'Typing', className: "text-center" },
+                    { data: 'Typing QC', name: 'Typing QC', className: "text-center" },
                     { data: 'Hold', name: 'Hold', className: "text-center" },
                     { data: 'Cancelled', name: 'Cancelled', className: "text-center" },
                     { data: 'Completed', name: 'Completed', className: "text-center" },
@@ -1629,8 +1638,11 @@ $('#datewise_datatable').on('draw.dt', function() {
                 { data: 'userinfo', name: 'userinfo', class: 'text-left' },
                 { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
                 { data: 'status_13', name: 'status_13' },
+                { data: 'status_15', name: 'status_15' },
                 { data: 'status_14', name: 'status_14' },
                 { data: 'status_4', name: 'status_4' },
+                { data: 'status_16', name: 'status_16' },
+                { data: 'status_17', name: 'status_17' },
                 { data: 'status_2', name: 'status_2' },
                 { data: 'status_3', name: 'status_3' },
                 { data: 'status_5', name: 'status_5' },
