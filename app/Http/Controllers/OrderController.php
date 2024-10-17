@@ -1269,7 +1269,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 5 => 'Completed',
                                 3 => 'Cancelled',
                             ];
-                } elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head')) {
+                } elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                     $statusMapping = [
                         1 => 'WIP',
                         15 => 'Doc Purchase',

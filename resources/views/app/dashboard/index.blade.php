@@ -234,7 +234,7 @@
 
 <div class="container mt-2 mb-1 p-1">
     <section id="minimal-statistics">
-        @if(Auth::user()->hasRole('Business Head'))
+            @if(Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
         <div class="switch-container d-flex justify-content-end">
                 <span class="label-left">Revenue</span>
                 <input type="checkbox" id="toggleSwitch" class="toggle-switch">
@@ -289,7 +289,7 @@
                                 </div>
                             </div>
 
-                            @if(Auth::user()->hasRole('Business Head'))
+                            @if(Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
                                 <div class="col-2" id="billing_hide" style="display: none;"><label for="project">Billing Type</label>
                                     <Select class="form-control select_role float-end" name="" id="billing_id_dcf">
                                         <option selected value="All">All</option>
@@ -328,24 +328,11 @@
                                 <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
                             </div>
                         </div>
-                        <!-- <div class= "col-md-7 d-flex row" > -->
-                            <!-- <div class="col-md-3 mt-3" id="hidefilter_2">
-                                <div class="form-group">
-                                    <label for="product_id">Product</label>
-                                    <select class="form-control select2-basic-multiple" style="width:100%" name="product_id" id="product_id" multiple="multiple">
-                                        <option selected value="All">All</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3" style="margin-top:41px;" id="hidefilter_3">
-                                <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
-                            </div> -->
-                        <!-- </div> -->
                 <!-- // -->
             <div id="leftContent" style="display: none;">
                 <div class="col-12">
                     <div class="row my-2">
-                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head'))
+                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
                             <div class="col-xl-4 col-sm-6 col-12">
                             <div class="h-100 card">
                                     <div class="card-content">
@@ -416,9 +403,10 @@
                         </div>
                     </div>
             </div>
-<!-- !-- // -->
+
+<div class="card mb-4">
 <div class="col-md-12 d-flex">
-    <div class="card col-md-5 mt-3 ml-3" id="available_resource_table" style="font-size: 12px;">
+    <div class="card col-md-5 mt-3 mb-3 ml-3" id="available_resource_table" style="font-size: 12px;">
         <h4 class="text-center mt-3">Available Resources</h4>
             <div class="card-body">
                 <div class="p-0">
@@ -428,8 +416,6 @@
                         <div><h5 style="margin-left:3px">/</h5></div>
                         <div><h5 id="total_users" style="color:rgb(247, 8, 8);font-weight: bold;margin-left:3px"></h5></div>                                    
                     </div>
-    
-    
                     <table id="available_resources" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center" style="font-size: 12px;">
                             <tr>
@@ -443,8 +429,8 @@
             </div>
         </div>
         <div class="col-md-1"></div>
-        <div class="card col-md-5 mt-3 ml-3" id="tat_zone_table" style="font-size: 12px;">
-            <h4 class="text-center mt-3">TAT</h4>
+            <div class="card col-md-5 mt-3 mb-3 ml-3" id="tat_zone_table" style="font-size: 12px;">
+                <h4 class="text-center mt-3">TAT</h4>
                 <div class="card-body">
                     <div class="p-0">
                         <table id="tat_zone_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -458,15 +444,12 @@
                         </table>
                     </div>
                 </div>
-            </div>
         </div>
-
-
-
-    
-
+        </div>
+</div>
 
 <div id="rightContent">
+    <h4 class="text-start mt-3">Volume Analysis:</h4>
     <div class="col-12">
         <div class="row my-2">
             @if(!Auth::user()->hasRole('Qcer'))
@@ -723,7 +706,7 @@
 
             </div>
             @endif
-            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
                 <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)"  style="cursor: pointer;">
                     <div class="card">
                         <div class="card-content">
@@ -790,7 +773,7 @@
     </div>
             </div>
 </section>
-        @if(Auth::user()->hasRole('Business Head'))
+        @if(Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
         <div class="card mt-5 tabledetails" id="Trans_hide" style="display: none;">
             <h4 class="text-center mt-3">Revenue Details - Transactional Billing</h4>
             <div class="card-body">
@@ -1910,10 +1893,10 @@ var datatable = $('#tat_zone_datatable').DataTable({
                 var data = [];
 
             var orderedCounts = [
-                json.green_count, 
-                json.blue_count, 
+                json.red_count,
                 json.orange_count, 
-                json.red_count
+                json.blue_count, 
+                json.green_count 
                 ];
 
             orderedCounts.forEach(function(item) {
