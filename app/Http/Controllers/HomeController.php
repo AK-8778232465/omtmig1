@@ -1051,6 +1051,7 @@ class HomeController extends Controller
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 13 THEN 13 END) AS Coversheet_Prep')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 14 THEN 14 END) AS Clarification')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 15 THEN 15 END) AS Doc_Purchase')
+        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 18 THEN 18 END) AS Ground_Abstractor')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 16 THEN 16 END) AS Typing')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 17 THEN 17 END) AS Typing_QC')
         ->groupBy('stl_client.client_name', 'stl_item_description.process_name', 'oms_order_creations.process_id', 'stl_item_description.project_code');
@@ -1106,6 +1107,7 @@ if ($fromDate && $toDate) {
         if (isset($data->Doc_Purchase)) $sum += $data->Doc_Purchase;
         if (isset($data->Typing)) $sum += $data->Typing;
         if (isset($data->Typing_QC)) $sum += $data->Typing_QC;
+        if (isset($data->Ground_Abstractor)) $sum += $data->Ground_Abstractor;
 
 
         $output[] = [
@@ -1122,7 +1124,8 @@ if ($fromDate && $toDate) {
             'Doc Purchase' => $data->Doc_Purchase,
             'Typing' => $data->Typing,
             'Typing QC' => $data->Typing_QC,
-            'All' => $data->WIP + $data->Hold + $data->Cancelled +  $data->Send_for_QC + $data->Completed +  $data->Coversheet_Prep + $data->Clarification + $data->Doc_Purchase + $data->Typing + $data->Typing_QC, // Add the sum as 'All'
+            'Ground Abstractor' => $data->Ground_Abstractor,
+            'All' => $data->WIP + $data->Hold + $data->Cancelled +  $data->Send_for_QC + $data->Completed +  $data->Coversheet_Prep + $data->Clarification + $data->Doc_Purchase + $data->Typing + $data->Typing_QC + $data->Ground_Abstractor, // Add the sum as 'All'
             // Add other fields as needed
         ];
     }
@@ -1188,6 +1191,7 @@ public function dashboard_userwise_count(Request $request)
             SUM(CASE WHEN status_id = 15 THEN 1 ELSE 0 END) as `status_15`,
             SUM(CASE WHEN status_id = 16 THEN 1 ELSE 0 END) as `status_16`,
             SUM(CASE WHEN status_id = 17 THEN 1 ELSE 0 END) as `status_17`,
+            SUM(CASE WHEN status_id = 18 THEN 1 ELSE 0 END) as `status_18`,
 
             COUNT(*) as `All`', [$fromDate, $toDate])
         ->where('oms_order_creations.is_active', 1)
@@ -1217,7 +1221,8 @@ public function dashboard_userwise_count(Request $request)
             'status_15' => $count->status_15,
             'status_16' => $count->status_16,
             'status_17' => $count->status_17,
-            'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14 + $count->status_15 + $count->status_16 + $count->status_17,
+            'status_18' => $count->status_18,
+            'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14 + $count->status_15 + $count->status_16 + $count->status_17 + $count->status_18,
         ];
     });
 
@@ -2439,10 +2444,10 @@ public function tat_zone_count(Request $request) {
         $totalFourthCount = array_sum(array_column($results, 'orderReachfourth'));
 
     return response()->json([
-            'green_count' => $totalFirstCount .','. ' Green', 
-            'blue_count' => $totalSecondCount .','. ' Blue',
-            'orange_count' => $totalThirdCount .','. ' Orange', 
             'red_count' => $totalFourthCount .','. ' Red',
+            'orange_count' => $totalThirdCount .','. ' Orange', 
+            'blue_count' => $totalSecondCount .','. ' Blue',
+            'green_count' => $totalFirstCount .','. ' Green', 
         ]);        
            
     }

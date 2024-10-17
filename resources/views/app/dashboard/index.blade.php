@@ -232,7 +232,7 @@
     </div>
 </div>
 
-<div class="container mt-2 mb-1 p-1">
+<div class="container-fluid mt-2 mb-1 p-1" style="width: 80%; height: 80%;">
     <section id="minimal-statistics">
             @if(Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
         <div class="switch-container d-flex justify-content-end">
@@ -501,7 +501,48 @@
                 </div>
             </div>
             @endif
-
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(15)"  style="cursor: pointer;">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="doc_purchaser_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_doc_purchaser_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Doc Purchaser</span>
+                                        <i class="icon-dual-success font-large-2 float-right" data-feather="credit-card"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(18)"  style="cursor: pointer;">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex  align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="ground_abstractor_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_ground_abstractor_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Ground Abstractor</span>
+                                        <i class="icon-dual-success font-large-2 float-right" data-feather="map"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Clarification -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(14)"  style="cursor: pointer;">
                 <div class="card">
@@ -547,129 +588,108 @@
                     </div>
                 </div>
             </div>
+<!-- Typing -->
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(16)"  style="cursor: pointer;">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="typing_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_typing_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Typing</span>
+                                        <i class="icon-dual-success font-large-2 float-right" data-feather="layers"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(17)"  style="cursor: pointer;">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="media d-flex">
+                                <div class="media-body">
+                                    <div class="d-flex align-items-center">
+                                        <h3 class="icon-dual-success mb-0 mr-2" id="typing_qc_cnt">0</h3>
+                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                        <h3 class="icon-dual-warning mb-0" id="pre_typing_qc_cnt">0</h3>
+                                    </div>
+                                    <div class="justify-content-between align-items-center mt-2">
+                                        <span>Typing QC</span>
+                                        <i class="icon-dual-success font-large-2 float-right" data-feather="check-square"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Hold -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(2)"  style="cursor: pointer;">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            <div class="media d-flex">
-                                <div class="media-body">
-                                    <div class="d-flex  align-items-center">
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body">
+                                                <div class="d-flex align-items-center">
                                         <h3 class="icon-dual-success mb-0 mr-2" id="hold_cnt">0</h3>
-                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                                    <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
                                         <h3 class="icon-dual-warning mb-0" id="pre_hold_cnt">0</h3>
-                                    </div>
-                                    <div class="justify-content-between align-items-center mt-2">
+                                                </div>
+                                                <div class="justify-content-between align-items-center mt-2">
                                         <span>Hold</span>
                                         <i class="icon-dual-purple font-large-2 float-right" data-feather="pause"></i>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Cancelled -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(3)"  style="cursor: pointer;">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            <div class="media d-flex">
-                                <div class="media-body">
-                                    <div class="d-flex align-items-center">
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body">
+                                                <div class="d-flex align-items-center">
                                         <h3 class="icon-dual-success mb-0 mr-2" id="cancelled_cnt">0</h3>
-                                    </div>
-                                    <div class="justify-content-between align-items-center mt-2">
+                                                </div>
+                                                <div class="justify-content-between align-items-center mt-2">
                                         <span>Cancelled</span>
                                         <i class="icon-dual-danger font-large-2 float-right" data-feather="alert-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Completed -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(5)"  style="cursor: pointer;">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            <div class="media d-flex">
-                                <div class="media-body">
-                                    <div class="d-flex align-items-center">
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body">
+                                                <div class="d-flex align-items-center">
                                         <h3 class="icon-dual-success mb-0 mr-2" id="completed_cnt">0</h3>
-                                        <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                                    <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
                                         <h3 class="icon-dual-warning mb-0" id="pre_completed_cnt">0</h3>
-                                    </div>
-                                    <div class="justify-content-between align-items-center mt-2">
+                                                </div>
+                                                <div class="justify-content-between align-items-center mt-2">
                                         <span>Completed</span>
-                                        <i class="icon-dual-success font-large-2 float-right" data-feather="check"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-                        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(15)"  style="cursor: pointer;">
-                            <div class="card">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="media-body">
-                                                <div class="d-flex align-items-center">
-                                                    <h3 class="icon-dual-success mb-0 mr-2" id="doc_purchaser_cnt">0</h3>
-                                                    <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
-                                                    <h3 class="icon-dual-warning mb-0" id="pre_doc_purchaser_cnt">0</h3>
-                                                </div>
-                                                <div class="justify-content-between align-items-center mt-2">
-                                                    <span>Doc Purchaser</span>
-                                                    <i class="icon-dual-success font-large-2 float-right" data-feather="check"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(16)"  style="cursor: pointer;">
-                            <div class="card">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="media-body">
-                                                <div class="d-flex align-items-center">
-                                                    <h3 class="icon-dual-success mb-0 mr-2" id="typing_cnt">0</h3>
-                                                    <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
-                                                    <h3 class="icon-dual-warning mb-0" id="pre_typing_cnt">0</h3>
-                                                </div>
-                                                <div class="justify-content-between align-items-center mt-2">
-                                                    <span>Typing</span>
-                                                    <i class="icon-dual-success font-large-2 float-right" data-feather="check"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(17)"  style="cursor: pointer;">
-                            <div class="card">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="media-body">
-                                                <div class="d-flex align-items-center">
-                                                    <h3 class="icon-dual-success mb-0 mr-2" id="typing_qc_cnt">0</h3>
-                                                    <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
-                                                    <h3 class="icon-dual-warning mb-0" id="pre_typing_qc_cnt">0</h3>
-                                                </div>
-                                                <div class="justify-content-between align-items-center mt-2">
-                                                    <span>Typing QC</span>
                                                     <i class="icon-dual-success font-large-2 float-right" data-feather="check"></i>
                                                 </div>
                                             </div>
@@ -873,9 +893,7 @@
         </div>
 </div>
         @endif
-
-
-        <div class="card col-md-12 mt-3 ml-3" id="pending_status_table" style="font-size: 12px;">
+        <div class="card col-md-12 mt-3" id="pending_status_table" style="font-size: 12px;">
             <h4 class="text-center mt-3">Pending Order Status</h4>
                 <div class="card-body">
                     <table id="pending_status" class="table table-bordered nowrap mt-0 " style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -899,21 +917,22 @@
             <h4 class="text-center mt-3">Userwise Details</h4>
             <div class="card-body">
                 <div class="p-0">
-                    <table id="userwise_datatable" class="table table-bordered" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <table id="userwise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
-                                <th width="11%">Users</th>
-                                <th width="9%">WIP</th>
-                                <th width="9%" class="wrap-column">Coversheet Prep</th>
-                                <th width="9%" class="wrap-column">Doc Purchase</th>
+                                <th width="10%">Users</th>
+                                <th width="7%">WIP</th>
+                                <th width="8%">Coversheet Prep</th>
+                                <th width="8%">Doc Purchase</th>
+                                <th width="8%">Ground Abstractor</th>
                                 <th width="8%">Clarification</th>
-                                <th width="9%" class="wrap-column">Send For QC</th>
+                                <th width="8%">Send For QC</th>
                                 <th width="7%">Typing</th>
-                                <th width="9%" class="wrap-column">Typing QC</th>
+                                <th width="7%">Typing QC</th>
                                 <th width="7%">Hold</th>
-                                <th width="8%">Cancelled</th>
-                                <th width="8%">Completed</th>
-                                <th width="8%">All</th>
+                                <th width="7%">Cancelled</th>
+                                <th width="7%">Completed</th>
+                                <th width="7%">All</th>
                             </tr>
                         </thead>
                         <tbody class="text-center"></tbody>
@@ -931,21 +950,22 @@
                     <table id="datewise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
                             <tr>
-                                <th width="12%">Client</th>
-                                <th width="21%" class="wrap-column">Product</th>
+                                <th width="11%">Client</th>
+                                <th width="20%" class="wrap-column">Product</th>
                                 @if(!Auth::user()->hasRole('Qcer'))
-                                <th width="9%">WIP</th>
-                                <th width="8%">Coversheet Prep</th>
+                                <th width="8%">WIP</th>
+                                <th width="7%">Coversheet Prep</th>
                                 @endif
-                                <th width="8%">Doc Purchase</th>
-                                <th width="8%">Clarification</th>
-                                <th width="8%">Send for QC</th>
-                                <th width="8%">Typing</th>
-                                <th width="8%">Typing QC</th>
-                                <th width="7%">Hold</th>
-                                <th width="8%">Cancelled</th>
-                                <th width="8%">Completed</th>
-                                <th width="8%">All</th>
+                                <th width="7%">Doc Purchase</th>
+                                <th width="7%">Ground Abstractor</th>
+                                <th width="7%">Clarification</th>
+                                <th width="7%">Send for QC</th>
+                                <th width="7%">Typing</th>
+                                <th width="7%">Typing QC</th>
+                                <th width="6%">Hold</th>
+                                <th width="7%">Cancelled</th>
+                                <th width="7%">Completed</th>
+                                <th width="7%">All</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -1397,6 +1417,7 @@ function fetchOrderData(projectId, clientId, fromDate, toDate, selectedDateFilte
             $('#doc_purchaser_cnt').text(statusCounts[15] || 0);
             $('#typing_cnt').text(statusCounts[16] || 0);
             $('#typing_qc_cnt').text(statusCounts[17] || 0);
+            $('#ground_abstractor_cnt').text(statusCounts[18] || 0);
         }
     });
 }
@@ -1462,6 +1483,8 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
             let predocPurchaserCnt = carriedCountMap[15] || 0;
             let preTypingCnt = carriedCountMap[16] || 0;
             let preTypingQcCnt = carriedCountMap[17] || 0;
+            let pregroundAbstractorCnt = carriedCountMap[18] || 0;
+
 
 
             $('#pre_wip_cnt').text(preWipCnt);
@@ -1472,10 +1495,10 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
             $('#pre_doc_purchaser_cnt').text(predocPurchaserCnt);
             $('#pre_typing_cnt').text(preTypingCnt);
             $('#pre_typing_qc_cnt').text(preTypingQcCnt);
-
+            $('#pre_ground_abstractor_cnt').text(pregroundAbstractorCnt);
 
             // Calculate and update the total of the specified values
-            let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt + predocPurchaserCnt + preTypingCnt + preTypingQcCnt;
+            let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt + predocPurchaserCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt;
             $('#carried_over_cnt').text(totalSpecificValues);
         },
         error: function (error) {
@@ -1525,6 +1548,7 @@ function datewise_datatable(fromDate, toDate, client_id, project_id, selectedDat
                     { data: 'Coversheet Prep', name: 'Coversheet Prep', className: "text-center" },
                     @endif
                     { data: 'Doc Purchase', name: 'Doc Purchase', className: "text-center" },
+                    { data: 'Ground Abstractor', name: 'Ground Abstractor', className: "text-center" },
                     { data: 'Clarification', name: 'Clarification', className: "text-center" },
                     { data: 'Send for QC', name: 'Send for QC', className: "text-center" },
                     { data: 'Typing', name: 'Typing', className: "text-center" },
@@ -1575,6 +1599,7 @@ $('#datewise_datatable').on('draw.dt', function() {
                 { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
                 { data: 'status_13', name: 'status_13' },
                 { data: 'status_15', name: 'status_15' },
+                { data: 'status_18', name: 'status_18' },
                 { data: 'status_14', name: 'status_14' },
                 { data: 'status_4', name: 'status_4' },
                 { data: 'status_16', name: 'status_16' },

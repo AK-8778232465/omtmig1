@@ -217,6 +217,12 @@
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_15_fourth_count">0</span>
                         </div></button>
+                    <button id="status_18" class="btn btn-info status-btn">Ground Abstractor<span id="status_18_count"></span><div style="">
+                        <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                        <span id="tat_status_18_third_count">0</span>
+                        <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                        <span id="tat_status_18_fourth_count">0</span>
+                    </div></button>
                     <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_14_third_count">0</span>
@@ -758,6 +764,9 @@ $(document).ready(function() {
             case 'status_17':
                 defaultStatus = 17;
                 break;
+            case 'status_18':
+                defaultStatus = 18;
+                break;
             case 'status_4':
                 defaultStatus = 4;
                 break;
@@ -1106,7 +1115,7 @@ function updateStatusCounts() {
         let statusCounts = response.StatusCounts;
         let assign = response.AssignCoverSheet;
         let total = 0;
-        for (let status = 1; status <= 17; status++) {
+        for (let status = 1; status <= 20; status++) {
           if (status !== 6) { // Exclude status 6
             let count = statusCounts[status] || 0;
             total += count;
