@@ -388,6 +388,9 @@
                 @role('Business Head')
                 $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
                 @endrole
+                @role('AVP/VP')
+                $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
+                @endrole
             }
             });
         });

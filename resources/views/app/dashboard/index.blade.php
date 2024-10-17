@@ -289,7 +289,7 @@
                                 </div>
                             </div>
 
-                            @if(Auth::user()->hasRole('Business Head'))
+                            @if(Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
                                 <div class="col-2" id="billing_hide" style="display: none;"><label for="project">Billing Type</label>
                                     <Select class="form-control select_role float-end" name="" id="billing_id_dcf">
                                         <option selected value="All">All</option>
@@ -332,7 +332,7 @@
             <div id="leftContent" style="display: none;">
                 <div class="col-12">
                     <div class="row my-2">
-                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head'))
+                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
                             <div class="col-xl-4 col-sm-6 col-12">
                             <div class="h-100 card">
                                     <div class="card-content">
@@ -706,7 +706,7 @@
 
             </div>
             @endif
-            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
                 <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)"  style="cursor: pointer;">
                     <div class="card">
                         <div class="card-content">
@@ -773,7 +773,7 @@
     </div>
             </div>
 </section>
-        @if(Auth::user()->hasRole('Business Head'))
+        @if(Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
         <div class="card mt-5 tabledetails" id="Trans_hide" style="display: none;">
             <h4 class="text-center mt-3">Revenue Details - Transactional Billing</h4>
             <div class="card-body">
