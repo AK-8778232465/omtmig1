@@ -2174,49 +2174,62 @@ public function revenue_detail_client_fte(Request $request){
     public function pending_status(Request $request)
     {
         $user = Auth::user();
-
+        $processIds = $this->getProcessIdsBasedOnUserRole($user);
+ 
         $today = Carbon::now();
-    
-
-    
+   
+ 
+   
         $status_name = DB::table('oms_status')->select('id', 'status')->get()->pluck('status', 'id')->toArray();
          
         $result = [];
-
+ 
         foreach ($status_name as $status_id => $status_name_value) {
-            $tenDaysAgo = $today->copy()->subDays(10);
-            $twentyDaysAgo = $today->copy()->subDays(20);
-            $thirtyDaysAgo = $today->copy()->subDays(30);
-        
-            $moreThan10Days = OrderCreation::where('status_id', $status_id)
-                ->whereBetween('status_updated_time', [$twentyDaysAgo, $tenDaysAgo]);
-
+            if($status_id != 5){
+                $tenDaysAgo = $today->copy()->subDays(10);
+                $twentyDaysAgo = $today->copy()->subDays(20);
+                $thirtyDaysAgo = $today->copy()->subDays(30);
+ 
+                $moreThan10Days = OrderCreation::where('status_id', $status_id)
+                    ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+                    ->whereBetween('status_updated_time', [$twentyDaysAgo, $tenDaysAgo])
+                    ->whereIn('oms_order_creations.process_id', $processIds);
+ 
                 $moreThan10DaysCount = $moreThan10Days->count();
-
-                
-            $moreThan20Days = OrderCreation::where('status_id', $status_id)
-                ->whereBetween('status_updated_time', [$thirtyDaysAgo, $twentyDaysAgo]);
-    
-                
+ 
+ 
+                $moreThan20Days = OrderCreation::where('status_id', $status_id)
+                    ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+                    ->whereBetween('status_updated_time', [$thirtyDaysAgo, $twentyDaysAgo])
+                    ->whereIn('oms_order_creations.process_id', $processIds);
+ 
                 $moreThan20DaysCount = $moreThan20Days->count();
-            
-            $moreThan30Days = OrderCreation::where('status_id', $status_id)
-                ->where('status_updated_time', '<=', $thirtyDaysAgo);
-            
                
-                
-                $moreThan30DaysCount = $moreThan30Days->count();
-
-                if ($moreThan10DaysCount > 0 || $moreThan20DaysCount > 0 || $moreThan30DaysCount > 0) {
-                    $result[] = [
-                        'status' => $status_name_value,
-                        'moreThan10Days' => $moreThan10DaysCount,
-                        'moreThan20Days' => $moreThan20DaysCount,
-                        'moreThan30Days' => $moreThan30DaysCount,
-                    ];
-                }
+   
+ 
+ 
+            $moreThan30Days = OrderCreation::where('status_id', $status_id)
+            ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+            ->where('status_updated_time', '<=', $thirtyDaysAgo)
+            ->whereIn('oms_order_creations.process_id', $processIds);
+           
+ 
+        $moreThan30DaysCount = $moreThan30Days->count();
+ 
+ 
+        if ($moreThan10DaysCount > 0 || $moreThan20DaysCount > 0 || $moreThan30DaysCount > 0) {
+            $result[] = [
+                'status' => $status_name_value,
+                'moreThan10Days' => $moreThan10DaysCount,
+                'moreThan20Days' => $moreThan20DaysCount,
+                'moreThan30Days' => $moreThan30DaysCount,
+            ];
         }
-    
+    }
+ 
+           
+        }
+   
         return Datatables::of($result)->toJson();
     }
 
