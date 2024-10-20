@@ -804,6 +804,7 @@ $('#property_county').on('change', function () {
 $('#select_client_id').on('change', function () {
     var select_client_id = $("#select_client_id").val();
     $("#lob_id").html(''); 
+   
     $.ajax({
         url: "{{ url('getlobid') }}",
         type: "POST",
@@ -814,6 +815,9 @@ $('#select_client_id').on('change', function () {
         dataType: 'json',
         success: function (response) {
             $('#lob_id').html('<option value="">Select Lob</option>');
+            $('#process_type_id').html('<option value="">Select Process</option>');
+            $('#process_code').html('<option value="">Select Product</option>');
+
             $.each(response, function (key, value) {
                 $("#lob_id").append('<option value="' + value.id + '">' + value.name + '</option>');
             });
@@ -843,6 +847,8 @@ $('#lob_id').on('change', function () {
         dataType: 'json',
         success: function (response) {
             $('#process_type_id').html('<option value="">Select Process</option>');
+            $('#process_code').html('<option value="">Select Product</option>');
+
             $.each(response, function (key, value) {
                 $("#process_type_id").append('<option value="' + value.id + '">' + value.name + '</option>');
             });
