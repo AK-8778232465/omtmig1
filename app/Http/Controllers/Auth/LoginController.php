@@ -43,7 +43,7 @@ class LoginController extends Controller
         $user = User::where('id', Auth::id())->first();
 
         if ($user) {
-            $user->update(['logged_in' => 0]); // Mark user as inactive
+            User::where('id', $user->id)->update(['logged_in' => 0]); 
         }
 
 
