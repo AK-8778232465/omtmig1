@@ -160,7 +160,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             ++$this->unsuccess_rows;
             return null;
         } else {
-            $client = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client)])->first();
+            $client_id = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client)])->first();
             if (!$client) {
                 $data['comments'] = 'Client not matched with database records';
                 OrderTemp::insert($data);
@@ -515,7 +515,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
             $orderId = OrderCreation::insert([
                 'order_date' => $order_date,
                 'order_id' => $orderId,
-                'client_id' => $client->id ?? null,
+                'client_id' => $client_id->id ?? null,
                 'process_id' => $processOrg->id,
                 'state_id' => isset($state) ? $state->id : null,
                 'county_id' => isset($county) ? $county->id : null,
