@@ -38,7 +38,7 @@ class LoginController extends Controller
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct()
     {
         $user = User::where('id', Auth::id())->first();
 
