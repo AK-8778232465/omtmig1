@@ -153,15 +153,15 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
 
 
-        $client = trim($row['Client']);
-         if(!$client) {
+        $client_id = trim($row['Client']);
+         if(!$client_id) {
             $data['comments'] = 'Client should not be empty';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
         } else {
-            $client_id = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client)])->first();
-            if (!$client) {
+            $client_id = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client_id)])->first();
+            if (!$client_id) {
                 $data['comments'] = 'Client not matched with database records';
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;
