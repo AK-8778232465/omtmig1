@@ -351,8 +351,14 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
 
         if (isset($row['Tier'])){
+            
             $Tier = trim($row['Tier']);
-            $Tier = Tier::where('tier_id', $Tier)->first();
+            $process_type_name = trim($row['Process']);
+            $process_type_name = stlprocess::whereRaw('LOWER(name) = ?', [strtolower($process_type_name)])->first();
+            $Tier = Tier::where('tier_id', $Tier)
+            ->whereRaw('JSON_CONTAINS(stl_process_id, ?)', [json_encode((string)$process_type_name->id)])
+            ->first();
+            
             if (!$Tier) {
                 $data['comments'] = 'Tier not matched with database records';
                 OrderTemp::insert($data);

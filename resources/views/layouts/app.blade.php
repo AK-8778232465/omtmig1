@@ -258,7 +258,7 @@
             // Start a new timer for inactivity (60 seconds)
             logoutTimer = setTimeout(() => {
                 startLogoutCountdown();
-            }, 30000); // 60000 ms = 1 minute
+            }, 300000); // 60000 ms = 1 minute
         }
 
         // Show popup and start countdown
