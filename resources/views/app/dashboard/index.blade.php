@@ -404,7 +404,6 @@
                     </div>
             </div>
 
-@if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')))
 <div class="card mb-4">
 <div class="col-md-12 d-flex">
     <div class="card col-md-5 mt-3 mb-3 ml-3" id="available_resource_table" style="font-size: 12px;">
@@ -448,7 +447,6 @@
         </div>
         </div>
 </div>
-@endif
 
 <div id="rightContent">
     <h4 class="text-start mt-3">Volume Analysis:</h4>
@@ -895,8 +893,6 @@
         </div>
 </div>
         @endif
-
-@if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')))
         <div class="card col-md-12 mt-3" id="pending_status_table" style="font-size: 12px;">
             <h4 class="text-center mt-3">Pending Order Status</h4>
                 <div class="card-body">
@@ -913,7 +909,6 @@
                         </table>
                 </div>
             </div>
-@endif
 
 
 
@@ -2378,9 +2373,8 @@ function total_users_name() {
         destroy: true,
         processing: true,
         serverSide: false,
-        searching: true, // Disable the search bar
+        searching: false, // Disable the search bar
         lengthChange: false,
-        pageLength: 5,
         ajax: {
             url: "{{ route('total_users_name') }}", // Adjust route if necessary
             type: "GET",
