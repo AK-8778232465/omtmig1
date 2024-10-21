@@ -40,12 +40,6 @@ class LoginController extends Controller
      */
     public function __construct()
     {
-        $user = User::where('id', Auth::id())->first();
-
-        if ($user) {
-            User::where('id', $user->id)->update(['logged_in' => 0]); 
-        }
-
 
         $this->middleware('guest')->except('logout');
     }
@@ -80,6 +74,20 @@ class LoginController extends Controller
         }
 
         return false;
+    }
+
+
+
+    public function logout(){
+        $user = User::where('id', Auth::id())->first();
+
+        if ($user) {
+            User::where('id', $user->id)->update(['logged_in' => 0]); 
+        }
+
+        Auth::logout(); 
+        return redirect('/login');
+
     }
 
 
