@@ -226,76 +226,44 @@
         @stack('script-bottom')
     </body>
 
-    <div id="logout-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:30px; background-color:#ffffff; border-radius:12px; box-shadow:0 6px 30px rgba(0, 0, 0, 0.3); z-index:1000; font-family: 'Arial', sans-serif; width: 400px;">
-        <div style="text-align: center;">
-            <h3 style="margin: 0; color: #f70707;font-weight:bold;">You have been Inactive!</h3>
-            <p style="color: #151515; margin: 15px 0; font-weight:bold; font-size:14px;">You will be logged out in <span id="countdown" style="font-weight: bold; color: #e63946; font-size:20px;"></span> seconds.</p>
-        </div>
-        <div style="margin-top: 15px; text-align: center;">
-            <button onclick="resetTimer()" style="padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.3s; font-size: 16px; font-weight: bold;">
-                Stay Logged In
-            </button>
-        </div>
-    </div>
+    <div id="logout-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:20px; background-color:#f2f2f2; border:1px solid #ccc; z-index:1000;">
+        <p>You have been inactive. You will be logged out in <span id="countdown"></span> seconds.</p>
+        <button onclick="resetTimer()">Logout</button>
+        <button onclick="resetTimer()">Stay Logged In</button>
+    </div>   
     
     
     
 
 
     <script>
-        (function (e) {
-            var el = document.createElement('script');
-            el.setAttribute('data-account', 'sukLXB6xXR');
-            el.setAttribute('src', 'https://cdn.userway.org/widget.js');
+       (function (e) {
+        var el = document.createElement('script');
+        el.setAttribute('src', 'https://cdn.userway.org/widget.js');
             document.body.appendChild(el);
         })();
 
 
         let logoutTimer;
         let countdownTimer;
-        let countdown = 30;
-        let isPopupVisible = false; // Track popup visibility
-    // Countdown timer starts at 500 seconds
+        let countdown = 30; // Countdown timer starts at 500 seconds
 
-
-    function addEventListeners() {
-        window.onmousemove = resetTimer;
-        window.onkeypress = resetTimer;
-        window.onscroll = resetTimer;
-        window.onclick = resetTimer;
-    }
-
-    function removeEventListeners() {
-        window.onmousemove = null;
-        window.onkeypress = null;
-        window.onscroll = null;
-        window.onclick = null;
-    }
-
+        // Reset timer on user activity
         function resetTimer() {
-
             clearTimeout(logoutTimer); // Clear previous logout timer
             clearInterval(countdownTimer); // Clear previous countdown interval
             countdown = 30; // Reset countdown timer
-            document.getElementById("logout-popup").style.display = "none";
-            document.getElementById("overlay").style.display = "none"; // Hide overlay
+            document.getElementById("logout-popup").style.display = "none"; // Hide popup
 
             // Start a new timer for inactivity (60 seconds)
             logoutTimer = setTimeout(() => {
                 startLogoutCountdown();
-            }, 60000); // 60000 ms = 1 minute
+            }, 30000); // 60000 ms = 1 minute
         }
-
-        
 
         // Show popup and start countdown
         function startLogoutCountdown() {
-            isPopupVisible = true; // Popup is visible
-            removeEventListeners();
-
-            document.getElementById("logout-popup").style.display = "block";
-            document.getElementById("overlay").style.display = "block"; // Show overlay
-             // Show popup
+            document.getElementById("logout-popup").style.display = "block"; // Show popup
 
             countdownTimer = setInterval(() => {
                 countdown--; // Decrease the countdown
@@ -325,10 +293,13 @@
             });
         }
 
-        window.onload = function() {
-        resetTimer();
-        addEventListeners();
-    };
+        // Detect user activity (mouse, keyboard, or touch)
+        window.onload = resetTimer; // Start timer when page loads
+        window.onmousemove = resetTimer; // Reset timer on mouse move
+        window.onkeypress = resetTimer; // Reset timer on key press
+        window.onscroll = resetTimer; // Reset timer on Scroll
+        window.onclick = resetTimer; // Reset timer on click
+
 
 
     </script>
