@@ -253,7 +253,7 @@
 
         let logoutTimer;
         let countdownTimer;
-        let countdown = 15;
+        let countdown = 60;
         let isPopupVisible = false; // Track popup visibility
     // Countdown timer starts at 500 seconds
 
@@ -276,14 +276,14 @@
 
             clearTimeout(logoutTimer); // Clear previous logout timer
             clearInterval(countdownTimer); // Clear previous countdown interval
-            countdown = 15; // Reset countdown timer
+            countdown = 60; // Reset countdown timer
             document.getElementById("logout-popup").style.display = "none";
             document.getElementById("overlay").style.display = "none"; // Hide overlay
 
             // Start a new timer for inactivity (60 seconds)
             logoutTimer = setTimeout(() => {
                 startLogoutCountdown();
-            }, 60000); // 60000 ms = 1 minute
+            }, 600000); // 60000 ms = 1 minute
         }
 
         

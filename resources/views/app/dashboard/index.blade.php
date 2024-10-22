@@ -2367,7 +2367,7 @@ function total_users() {
 
 // Call the function to execute it
 total_users();
-setInterval(total_users, 10000);
+setInterval(total_users, 600000);
 
 
 
@@ -2401,7 +2401,7 @@ function total_users_name() {
 $(document).ready(function() {
     total_users_name();
 });
-setInterval(total_users_name, 10000);
+setInterval(total_users_name, 600000);
 
 
 
