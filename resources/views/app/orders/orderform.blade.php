@@ -741,6 +741,81 @@
                 <!-- // -->
             </div>
             @endif
+            @if($orderData->client_id == 84 || $orderData->client_id == 85 || $orderData->client_id == 86)
+            <h6 class="read_value  font-weight-bold">Order Submission :</h6>
+                <div class="read_value card shadow shadow-md rounded showdow-grey mb-4">
+                        <div class="read_value card-body">
+                            <div class="row mt-4 mb-4">
+                                <div class="col-lg-4 ">
+                                    <div class="font-weight-bold">Comments :</div>
+                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4"></textarea>
+                                </div>
+                                <div class="col-lg-4 mx-5 mt-1">
+                                    <div class="row">
+                                        <div class="col-10 mb-2">
+                                            <div class="col-10 mb-2">
+                                                <div class="font-weight-bold mb-1 mt-1">Status :</div>
+                                                <input type="hidden" id="current_status_id" name="current_status_id" value="">
+                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" >
+                                                        @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
+                                                        <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                            <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
+                                                        <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                                        @endif
+
+                                                        <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+
+                                                        <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
+
+                                                        <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
+                                                        
+                                                        <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
+                                                        <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+                                                        <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-center my-4">
+                                                <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="read_value card-body">
+                                    <table id="orderstatusdetail_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>Comments</th>
+                                                <th>Status</th>
+                                                <th>User</th>
+                                                <th>Date and Time (EST)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        @if($orderstatusInfo && count($orderstatusInfo) > 0)
+                                                @foreach($orderstatusInfo as $status)
+                                                    <tr>
+                                                        <td>{{ $status->comment ?? 'N/A' }}</td>
+                                                        <td>{{ $status->status }}</td>
+                                                        <td>{{ $status->username ?? 'N/A' }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <tr>
+                                                    <td class="text-center" colspan="4">No status history available for this order.</td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   
+                <!-- // -->
+            </div>
+@endif
     </div>
     </div>
     @if($orderData->status_id == 15)

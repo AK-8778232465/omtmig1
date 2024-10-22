@@ -161,7 +161,8 @@ class OrderFormController extends Controller
         $orderData = $query->first();
 
         if(!empty($orderData)) {
-            if($orderData->client_id != 16 && $orderData->client_id != 82) {
+            $excludedClients = [16, 82, 84, 85, 86];
+            if (!in_array($orderData->client_id, $excludedClients)) {
                 return view('app.orders.comingsoon');
             }
             $countyData = Null;

@@ -303,6 +303,7 @@ class OrderController extends Controller
                 'oms_order_creations.order_id as order_id',
                 'oms_order_creations.status_id as status_id',
                 'oms_order_creations.order_date as order_date',
+                'oms_order_creations.process_type_id as process_type_id',
                 'stl_item_description.project_code as project_code',
                 'stl_item_description.qc_enabled as qc_enabled',
                 'stl_item_description.tat_value as tat_value',
@@ -1047,6 +1048,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 'oms_order_creations.order_id as order_id',
                 'oms_order_creations.status_id as status_id',
                 'oms_order_creations.order_date as order_date',
+                'oms_order_creations.process_type_id as process_type_id',
                 'stl_item_description.project_code as project_code',
                 'stl_item_description.qc_enabled as qc_enabled',
                 'stl_item_description.tat_value as tat_value',
@@ -1060,6 +1062,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 'stl_lob.name as lob_name',
                 'stl_process.name as process_name',
                 'stl_client.client_name',
+                'stl_item_description.client_id',
                 'stl_item_description.process_name as process', 
                 'oms_tier.Tier_id as tier_name',
                 
@@ -1246,7 +1249,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
         ->addColumn('status', function ($order) use ($request) {
-            if ($order->client_id == 82) {
+            if (in_array($order->client_id, [82, 84, 85, 86])) {
                                 $statusMapping = [];
                 if (Auth::user()->hasRole('Typist')) {
                                 $statusMapping = [
@@ -1267,7 +1270,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 5 => 'Completed',
                                 3 => 'Cancelled',
                             ];
-                } elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head')) {
+                } elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                     $statusMapping = [
                         1 => 'WIP',
                         15 => 'Doc Purchase',
@@ -1279,6 +1282,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         16 => 'Typing',
                         17 => 'Typing QC'
                     ];
+                    
+                    if ($order->process_type_id == 12) {
+                        unset($statusMapping[15]);
+                    }
                     
                 } else {
                                 $statusMapping = [
@@ -1292,6 +1299,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     5 => 'Completed',
                                     3 => 'Cancelled',
                                 ];
+                        
+                        if ($order->process_type_id == 12) {
+                            unset($statusMapping[15]);
+                        }
                 }
             
                         }else{
