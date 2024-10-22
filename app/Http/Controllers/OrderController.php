@@ -304,6 +304,7 @@ class OrderController extends Controller
                 'oms_order_creations.order_id as order_id',
                 'oms_order_creations.status_id as status_id',
                 'oms_order_creations.order_date as order_date',
+                'oms_order_creations.process_type_id as process_type_id',
                 'stl_item_description.project_code as project_code',
                 'stl_item_description.qc_enabled as qc_enabled',
                 'stl_item_description.tat_value as tat_value',
@@ -1048,6 +1049,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 'oms_order_creations.order_id as order_id',
                 'oms_order_creations.status_id as status_id',
                 'oms_order_creations.order_date as order_date',
+                'oms_order_creations.process_type_id as process_type_id',
                 'stl_item_description.project_code as project_code',
                 'stl_item_description.qc_enabled as qc_enabled',
                 'stl_item_description.tat_value as tat_value',
@@ -1248,7 +1250,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
         ->addColumn('status', function ($order) use ($request) {
-            if ($order->client_id == 82) {
+            if (in_array($order->client_id, [82, 84, 85, 86])) {
                                 $statusMapping = [];
                 if (Auth::user()->hasRole('Typist')) {
                                 $statusMapping = [
@@ -1285,6 +1287,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         17 => 'Typing QC'
                     ];
                     
+                    if ($order->process_type_id == 12) {
+                        unset($statusMapping[15]);
+                    }
+                    
                 } else {
                                 $statusMapping = [
                                     1 => 'WIP',
@@ -1298,6 +1304,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     5 => 'Completed',
                                     3 => 'Cancelled',
                                 ];
+                        
+                        if ($order->process_type_id == 12) {
+                            unset($statusMapping[15]);
+                        }
                 }
             
                         }else{
