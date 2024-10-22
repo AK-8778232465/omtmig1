@@ -759,7 +759,9 @@
                                                     <select class="form-control" style="width:300px" name="order_status" id="order_status" >
                                                         @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                        @if($orderData->stl_process_id != 12)
                                                             <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
+                                                        @endif                                              
                                                         <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         @endif
 
