@@ -741,7 +741,7 @@
                 <!-- // -->
             </div>
             @endif
-            @if($orderData->client_id == 84 || $orderData->client_id == 85 || $orderData->client_id == 86)
+            @if(in_array($orderData->client_id, [84, 85, 86, 87, 88, 89, 90, 91, 92]))
             <h6 class="read_value  font-weight-bold">Order Submission :</h6>
                 <div class="read_value card shadow shadow-md rounded showdow-grey mb-4">
                         <div class="read_value card-body">
@@ -817,7 +817,7 @@
                    
                 <!-- // -->
             </div>
-@endif
+        @endif
     </div>
     </div>
     @if($orderData->status_id == 15)
