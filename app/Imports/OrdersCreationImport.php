@@ -153,15 +153,15 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
 
 
-        $client = trim($row['Client']);
-         if(!$client) {
+        $client_id = trim($row['Client']);
+         if(!$client_id) {
             $data['comments'] = 'Client should not be empty';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
         } else {
-            $client_id = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client)])->first();
-            if (!$client) {
+            $client_id = Client::whereRaw('LOWER(client_name) = ?', [strtolower($client_id)])->first();
+            if (!$client_id) {
                 $data['comments'] = 'Client not matched with database records';
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;
@@ -352,7 +352,12 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         if (isset($row['Tier'])){
             $Tier = trim($row['Tier']);
-            $Tier = Tier::where('tier_id', $Tier)->first();
+            $process_type_name = trim($row['Process']);
+            $process_type_name = stlprocess::whereRaw('LOWER(name) = ?', [strtolower($process_type_name)])->first();
+            $Tier = Tier::where('tier_id', $Tier)
+            ->whereRaw('JSON_CONTAINS(stl_process_id, ?)', [json_encode((string)$process_type_name->id)])
+            ->first();
+            
             if (!$Tier) {
                 $data['comments'] = 'Tier not matched with database records';
                 OrderTemp::insert($data);

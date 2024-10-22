@@ -354,6 +354,10 @@
                                 <option selected disabled value="">Select Client</option>
                                 <option value="1">Fams</option>
                                 <option value="2">Accurate</option>
+                            <option value="3">Cypress Ascendant Services</option>
+                            <option value="4">BC Law Firm</option>
+                            <option value="5">Title 365</option>
+
                             </select>
                                             
                             <a class="btn btn-sm btn-info mx-2 mt-1" href="" id="download"><i class="fas fa-download"></i> Sample Format</a>
@@ -949,6 +953,24 @@ console.log(clientId);
             $('#municipality-container').show();
             $('#tier-container').show();
         }
+
+        if (clientId == 84) {
+            $('#typist-container').hide();
+            $('#typist-qc-container').hide();
+        } 
+
+        if (clientId == 85) {
+            $('#typist-container').hide();
+            $('#typist-qc-container').hide();
+        } 
+
+        if(clientId == 86){
+            $('#municipality-container').hide();
+            $('#tier-container').hide();
+        }
+        
+
+
     });
 
     $('#select_client_id').trigger('change');
@@ -963,7 +985,14 @@ $(document).ready(function () {
                 downloadLink.attr('href', "{{ asset('/template/Fams_sample_template.xlsx') }}");
             } else if (selectedValue == "2") {
                 downloadLink.attr('href', "{{ asset('/template/Accurate_sample_template.xlsx') }}");
-            } else {
+            } else if (selectedValue == "3") {
+                downloadLink.attr('href', "{{ asset('/template/Cypress Ascendant Services LLC_sample_template.xlsx') }}");
+            }else if (selectedValue == "4") {
+                downloadLink.attr('href', "{{ asset('/template/BC Law Firm_sample_template.xlsx') }}");
+            }else if (selectedValue == "5") {
+                downloadLink.attr('href', "{{ asset('/template/Title 365_sample_template.xlsx') }}");
+            }
+            else {
                 downloadLink.attr('href', "#");
             }
         });
