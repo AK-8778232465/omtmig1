@@ -1949,11 +1949,45 @@ public function revenue_detail_client_fte(Request $request){
     $user = Auth::user();
 
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
-    $fromDate = Carbon::parse($request->input('from_date'));
-    $toDate = Carbon::parse($request->input('to_date'));
     $client_ids = $request->input('client_id');
-    $project_id = $request->input('project_id');
+    // Add the new date filter logic here
+    $selectedDateFilter = $request->input('selectedDateFilter');
+    // dd($selectedDateFilter);
+
+    $fromDateRange = $request->input('from_date');
+    $toDateRange = $request->input('to_date');
+
+    $fromDate = null;
+    $toDate = null;
+
+    if ($fromDateRange && $toDateRange) {
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $toDate = $fromDate;
+        }
+    }
+
+
+    if (isset($fromDate)) {
+        $fromDate = Carbon::parse($fromDate);
+    }
+    if (isset($toDate)) {
+        $toDate = Carbon::parse($toDate);
+    }
 
     if ($fromDate->lte($toDate)) {
 
