@@ -2052,8 +2052,31 @@ public function revenue_detail_client_fte(Request $request){
 
             } else {
 
-                $revenue_selected += (($start_date->daysInMonth - $start_date->day + 1) / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
-                $revenue_selected += (($end_date->day) / $end_date->daysInMonth) * $unit_cost * $no_of_resources;
+                $revenue_selected = 0;
+                $current_month = $start_date->month;
+                $current_year = $start_date->year;
+        
+                // Calculate revenue for the start month
+                    $revenue_selected += (($start_date->daysInMonth - $start_date->day + 1) / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
+        
+                // Calculate revenue for the middle months
+                while (true) {
+                    $current_month++;
+                    if ($current_month > 12) {
+                        $current_month = 1;
+                        $current_year++;
+                    }
+        
+                    if ($current_year === $end_date->year && $current_month === $end_date->month) {
+                        break;
+                    }
+        
+                    $revenue_selected += $unit_cost * $no_of_resources;
+                }
+        
+                // Calculate revenue for the end month
+                    $revenue_selected += (($end_date->day) / $end_date->daysInMonth) * $unit_cost * $no_of_resources;
+
             }
 
             $output[] = [
