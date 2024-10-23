@@ -435,30 +435,30 @@
                         <div><h5 id="total_users" style="color:rgb(247, 8, 8);font-weight: bold;margin-left:3px"></h5></div>                                    
                     </div>
                     <table id="available_resources" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                        <thead class="text-center" style="font-size: 12px;">
+                        <thead class="text-left" style="font-size: 12px;">
                             <tr>
                                 <th width="10%">Emp Id</th>
                                 <th width="12%">Emp Name</th>
                             </tr>
                         </thead>
-                        <tbody class="text-center" style="font-size: 12px;"></tbody>
+                        <tbody class="text-left" style="font-size: 12px;"></tbody>
                     </table>
                 </div>
             </div>
         </div>
         <div class="col-md-1"></div>
             <div class="card col-md-5 mt-3 mb-3 ml-3" id="tat_zone_table" style="font-size: 12px;">
-                <h4 class="text-center mt-3">TAT</h4>
+                <h4 class="text-center mt-5">TAT</h4>
                 <div class="card-body">
                     <div class="p-0">
                         <table id="tat_zone_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                            <thead class="text-center" style="font-size: 12px;">
+                            <thead class="text-left" style="font-size: 12px;">
                                 <tr>
                                     <th width="10%">TAT Zone</th>
                                     <th width="12%">Count</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-center" style="font-size: 12px;"></tbody>
+                            <tbody class="text-left" style="font-size: 12px;"></tbody>
                         </table>
                     </div>
                 </div>
