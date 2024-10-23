@@ -299,7 +299,11 @@
                                 </div>
                             @endif
 
-                            <div class="col-md-3" id="hide_lob" style="display: none;">
+                            <div class="col-md-3" id="hide_lob"
+                                @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('SPOC')) 
+                                @else 
+                                    style="display: none;" 
+                                @endif>
                                 <div class="form-group">
                                     <label for="lob_id">Lob</label>
                                     <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id" multiple="multiple">
@@ -308,7 +312,20 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-2"  id="hide_process_type" style="display: none;">
+                            <!-- <div class="col-md-2"  id="hide_process_type" style="display: none;">
+                                <div class="form-group">
+                                    <label for="process_type_id">Process</label>
+                                    <select class="form-control select2-basic-multiple" style="width:100%" name="process_type_id" id="process_type_id" multiple="multiple">
+                                        <option selected value="All">All</option>
+                                    </select>
+                                </div>
+                            </div> -->
+
+                            <div class="col-md-2" id="hide_process_type"
+                                @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('SPOC')) 
+                                @else 
+                                    style="display: none;" 
+                                @endif>
                                 <div class="form-group">
                                     <label for="process_type_id">Process</label>
                                     <select class="form-control select2-basic-multiple" style="width:100%" name="process_type_id" id="process_type_id" multiple="multiple">
@@ -324,7 +341,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-3 mt-4 mb-3" style="" id="hidefilter_3">
+                            <div class="col-md-2 mt-4 mb-3" style="" id="hidefilter_3">
                                 <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
                             </div>
                         </div>
@@ -405,8 +422,8 @@
             </div>
 
 @if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')))
-<div class="card mb-4">
-<div class="col-md-12 d-flex">
+    <div class="card mb-4">
+    <div class="col-md-12 d-flex">
     <div class="card col-md-5 mt-3 mb-3 ml-3" id="available_resource_table" style="font-size: 12px;">
         <h4 class="text-center mt-3">Available Resources</h4>
             <div class="card-body">
@@ -447,13 +464,34 @@
                 </div>
         </div>
         </div>
-</div>
+    </div>
 @endif
 
 <div id="rightContent">
     <h4 class="text-start mt-3">Volume Analysis:</h4>
     <div class="col-12">
         <div class="row my-2">
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
+                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)"  style="cursor: pointer;">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-body" style = "background-color: #dee2e6;">
+                                <div class="media d-flex">
+                                    <div class="media-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h3 class="icon-dual-info mb-0 text-success" id="yet_to_assign_cnt">0</h3>
+                                        </div>
+                                        <div class="justify-content-between align-items-center mt-2 text-dark">
+                                            <span>Yet to Assign</span>
+                                            <i class="icon-dual-info font-large-2 float-right text-dark" data-feather="book-open"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
             @if(!Auth::user()->hasRole('Qcer'))
                 <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)" style="cursor: pointer;">
                     <div class="card">
@@ -723,33 +761,11 @@
                     </div>
                 </div>
             </div>
-            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('Process'))
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Process'))
             <div class="col-xl-4 col-sm-6 col-12">
 
             </div>
             @endif
-            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
-                <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)"  style="cursor: pointer;">
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-body" style = "background-color: #dee2e6;">
-                                <div class="media d-flex">
-                                    <div class="media-body">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h3 class="icon-dual-info mb-0 text-success" id="yet_to_assign_cnt">0</h3>
-                                        </div>
-                                        <div class="justify-content-between align-items-center mt-2 text-dark">
-                                            <span>Yet to Assign</span>
-                                            <i class="icon-dual-info font-large-2 float-right text-dark" data-feather="book-open"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
             <!-- Carried Over -->
             <div class="col-xl-4 col-sm-6 col-12"  >
                 <div class="card">
@@ -1574,7 +1590,7 @@ $('#datewise_datatable').on('draw.dt', function() {
 
 
 
-    @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP', 'Business Head', 'PM/TL']))
+    @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP', 'Business Head', 'PM/TL','SPOC']))
     function userwise_datatable(fromDate, toDate, client_id, projectId, selectedDateFilter){
         fromDate = $('#fromDate_range').val();
         toDate = $('#toDate_range').val();
