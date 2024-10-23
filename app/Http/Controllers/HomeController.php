@@ -2486,12 +2486,15 @@ public function tat_zone_count(Request $request) {
                         'orderReachsecond' => 0, 
                         'orderReachthird' => 0,  
                         'orderReachfourth' => 0, 
+                        'orderReachedtatvalue' => 0, 
                     ];
                 }
                 if ($statusId == 5) {
                     continue;
                 }
-                if ($hoursDifference >= $tatHours * 3) {
+                if($hoursDifference >= $tatHours * 4){
+                    $resultsByStatus[$statusId]['orderReachedtatvalue'] += 1;
+                }elseif ($hoursDifference >= $tatHours * 3) {
                     $resultsByStatus[$statusId]['orderReachfourth'] += 1;
                 }elseif ($hoursDifference >= $tatHours * 2) {
                     $resultsByStatus[$statusId]['orderReachthird'] += 1;
@@ -2512,12 +2515,14 @@ public function tat_zone_count(Request $request) {
         $totalSecondCount = array_sum(array_column($results, 'orderReachsecond'));
         $totalThirdCount = array_sum(array_column($results, 'orderReachthird'));
         $totalFourthCount = array_sum(array_column($results, 'orderReachfourth'));
+        $totalReachedTatValueCount = array_sum(array_column($results, 'orderReachedtatvalue'));
 
     return response()->json([
-            'red_count' => $totalFourthCount .','. ' Red',
-            'orange_count' => $totalThirdCount .','. ' Orange', 
-            'blue_count' => $totalSecondCount .','. ' Blue',
-            'green_count' => $totalFirstCount .','. ' Green', 
+            'reachedtat_count' => $totalReachedTatValueCount .','. ' Out of TAT',
+            'red_count' => $totalFourthCount .','. ' Red - Super Rush',
+            'orange_count' => $totalThirdCount .','. ' Orange - Rush', 
+            'blue_count' => $totalSecondCount .','. ' Blue - Priority',
+            'green_count' => $totalFirstCount .','. ' Green - Non Priority	', 
         ]);        
            
     }

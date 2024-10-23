@@ -1939,6 +1939,7 @@ var datatable = $('#tat_zone_datatable').DataTable({
                 var data = [];
 
             var orderedCounts = [
+                json.reachedtat_count,
                 json.red_count,
                 json.orange_count, 
                 json.blue_count, 
