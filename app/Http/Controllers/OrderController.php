@@ -1250,9 +1250,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
         ->addColumn('status', function ($order) use ($request) {
-            if (in_array($order->client_id, [82, 84, 85, 86])) {
+            if (in_array($order->client_id, [82, 84, 85, 86])) 
+                {
                                 $statusMapping = [];
-                if (Auth::user()->hasRole('Typist')) {
+                    if (Auth::user()->hasRole('Typist') && in_array($order->process_type_id, [12, 7])) {
                                 $statusMapping = [
                                     14 => 'Clarification',
                                     16 => 'Typing',
@@ -1263,7 +1264,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     17 => 'Typing QC',
                                 ];
 
-                } elseif (Auth::user()->hasRole('Typist/Qcer')) {
+                    } elseif (Auth::user()->hasRole('Typist/Qcer')  && in_array($order->process_type_id, [12, 7])) {
                             $statusMapping = [
                                 17 => 'Typing QC',
                                 18 => 'Ground Abstractor',
@@ -1289,6 +1290,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     if (!in_array($order->process_type_id, [12, 7, 8, 9])) {
                         unset($statusMapping[15]);
                     }
+                        if (!in_array($order->process_type_id, [12, 7])) {
+                            unset($statusMapping[16]);
+                            unset($statusMapping[17]);
+                        }
                     
                 } else {
                                 $statusMapping = [
@@ -1303,9 +1308,13 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     5 => 'Completed',
                                     3 => 'Cancelled',
                                 ];
-                        if (!in_array($order->process_type_id, [12, 7, 8, 9])) {
+                            if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86])) {
                             unset($statusMapping[15]);
                         }
+                            if (!in_array($order->process_type_id, [12, 7])) {
+                                unset($statusMapping[16]);
+                                unset($statusMapping[17]);
+                            }
                 }
             
                         }else{
@@ -1347,9 +1356,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     3 => 'Cancelled',
                                 ];
                         }
+                            } else {
 
-                    } else {
-                        if (!$order->assignee_qa_id && Auth::user()->hasRole('PM/TL')){
+                            if (!$order->assignee_qa_id && Auth::user()->hasRole('PM/TL'))
+                                {
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
