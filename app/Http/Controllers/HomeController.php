@@ -2527,4 +2527,35 @@ public function tat_zone_count(Request $request) {
 
     }
 
+
+    public function resourceTable() {
+
+        $currentUserId = Auth::id();
+        $user = User::find($currentUserId);
+
+        $user_lower_ids = User::getAllLowerLevelUserIds($currentUserId);
+
+        $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
+            return $id != $currentUserId;
+        });
+
+        $active_users = User::select('oms_users.id', 'oms_users.emp_id', 'oms_users.username', 'oms_users.logged_in', 'reporting_user.username as reporting_username')
+        ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+        ->whereIn('oms_users.id', $user_lower_ids)
+        ->get();
+
+
+        return response()->json([
+            'data' => $active_users->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'emp_id' => $user->emp_id,
+                    'username' => $user->username,
+                    'status' => $user->logged_in ? 'Available' : 'UnAvailable',
+                    'reporting_to' => $user->reporting_username ?? 'N/A'
+                ];
+            }),
+        ]);
+    }
+
 }
