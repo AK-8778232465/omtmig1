@@ -38,7 +38,7 @@
             align-items: center;
             justify-content: center;
             margin: 20px;
-            
+
         }
 
         /* The actual switch (hidden) */
@@ -113,8 +113,8 @@
     }
     #customfromRange {
     flex-wrap: wrap;
-    align-items: center; 
-    gap: 15px; 
+    align-items: center;
+    gap: 15px;
 }
 
 #customfromRange label {
@@ -130,7 +130,7 @@
 
 #customfromRange .input-group-text {
     font-weight: bold;
-    color: #007bff; 
+    color: #007bff;
 }
 
 
@@ -143,8 +143,8 @@
 #customToRange {
     display: flex;
     flex-wrap: wrap;
-    align-items: center; 
-    gap: 15px; 
+    align-items: center;
+    gap: 15px;
 }
 
 
@@ -300,9 +300,9 @@
                             @endif
 
                             <div class="col-md-3" id="hide_lob"
-                                @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('SPOC')) 
-                                @else 
-                                    style="display: none;" 
+                                @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('SPOC'))
+                                @else
+                                    style="display: none;"
                                 @endif>
                                 <div class="form-group">
                                     <label for="lob_id">Lob</label>
@@ -322,9 +322,9 @@
                             </div> -->
 
                             <div class="col-md-2" id="hide_process_type"
-                                @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('SPOC')) 
-                                @else 
-                                    style="display: none;" 
+                                @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('SPOC'))
+                                @else
+                                    style="display: none;"
                                 @endif>
                                 <div class="form-group">
                                     <label for="process_type_id">Process</label>
@@ -420,6 +420,7 @@
                         </div>
                     </div>
             </div>
+        
 
 @if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')))
     <div class="card mb-4">
@@ -433,7 +434,7 @@
                         <div> <h5 class="text-center">No. of Users Available:</h5></div>
                         <div> <h5 id="available_users" style="color:blue;font-weight: bold;margin-left:10px"></h5></div>
                         <div><h5 style="margin-left:3px">/</h5></div>
-                        <div><h5 id="total_users" style="color:rgb(247, 8, 8);font-weight: bold;margin-left:3px"></h5></div>                                    
+                        <div><h5 id="total_users" style="color:rgb(247, 8, 8);font-weight: bold;margin-left:3px"></h5></div>
                     </div>
                     <table id="available_resources" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-left" style="font-size: 12px;">
@@ -469,34 +470,7 @@
                 </div>
         </div>
         </div>
-</div>
-@endif
-
-
-
-{{-- carry over count --}}
-@if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')))
-<div class="d-flex justify-content-center">
-   <div class="card col-md-8 mt-3 mb-3 ml-3 carry_over_monthly_table" id="carry_over_monthly_table" style="font-size: 12px;">
-    <h4 class="text-center mt-3">Order Inflow Data</h4>
-        <div class="card-body">
-            <div class="p-0">
-                <table id="carry_over_monthly" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                    <thead class="text-center" style="font-size: 12px;">
-                        <tr>
-                            <th width="10%"></th>
-                            <th width="12%">Carry Forward</th>
-                            <th width="12%">Received</th>
-                            <th width="12%">Completed</th>
-                            <th width="12%">Pending</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-center" style="font-size: 12px;"></tbody>
-                </table>
-            </div>
-        </div>
     </div>
-</div>
 @endif
 
 <div id="rightContent">
@@ -546,7 +520,7 @@
                         </div>
                     </div>
                 </div>
-            
+
 
             <!-- Existing sections -->
 
@@ -1132,8 +1106,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const pendingwise_status = document.getElementById('pending_status_table');
     const available_resource_table = document.getElementById('available_resource_table');
     const tat_zone_table = document.getElementById('tat_zone_table');
-    const carry_over_monthly_table = document.getElementById('carry_over_monthly_table');
-
 
 
     // Function to update the visibility based on the toggle switch state
@@ -1156,7 +1128,6 @@ document.addEventListener('DOMContentLoaded', function() {
             pendingwise_status.style.display = 'block';
             available_resource_table.style.display = 'block';
             tat_zone_table.style.display = 'block';
-            carry_over_monthly_table.style.display = 'block';
 
 
         } else {
@@ -1177,7 +1148,6 @@ document.addEventListener('DOMContentLoaded', function() {
             pendingwise_status.style.display = 'none';
             available_resource_table.style.display = 'none';
             tat_zone_table.style.display = 'none';
-            carry_over_monthly_table.style.display = 'none';
 
 
         }
@@ -1397,7 +1367,6 @@ $(document).ready(function() {
             datewise_datatable(fromDate, toDate, client_id, projectId, selectedDateFilter)
             userwise_datatable(fromDate, toDate, client_id, projectId, selectedDateFilter);
             tat_zone(fromDate, toDate, clientId, projectId, selectedDateFilter);
-            carry_over_monthly(fromDate, toDate, clientId, projectId, selectedDateFilter)
         });
         preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
         fetchOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter);
@@ -1974,7 +1943,7 @@ $(document).ready(function() {
     pending_status();
 });
 
-    
+
 
 function tat_zone(fromDate, toDate, clientId, project_id, selectedDateFilter) {
     var fromDate = $('#fromDate_range').val();
@@ -1986,9 +1955,9 @@ function tat_zone(fromDate, toDate, clientId, project_id, selectedDateFilter) {
         destroy: true,
         processing: true,
         serverSide: false,
-        searching: false, 
-        paging: false, 
-        info: false, 
+        searching: false,
+        paging: false,
+        info: false,
     ordering: false,
         ajax: {
             url: "{{ route('tat_zone_count') }}",
@@ -2007,9 +1976,9 @@ function tat_zone(fromDate, toDate, clientId, project_id, selectedDateFilter) {
             var orderedCounts = [
                 json.reachedtat_count,
                 json.red_count,
-                json.orange_count, 
-                json.blue_count, 
-                json.green_count 
+                json.orange_count,
+                json.blue_count,
+                json.green_count
                 ];
 
                 orderedCounts.forEach(function (item) {
@@ -2028,7 +1997,7 @@ function tat_zone(fromDate, toDate, clientId, project_id, selectedDateFilter) {
         },
         columns: [
             {
-            data: 'tat_zone', 
+            data: 'tat_zone',
                 title: 'TAT Zone',
                 render: function (data) {
                     var color = '';
@@ -2053,9 +2022,9 @@ function tat_zone(fromDate, toDate, clientId, project_id, selectedDateFilter) {
                     return `<span style="color:${color};">${data}</span>`;
                 }
             },
-        { 
-            data: 'count', 
-            title: 'Count', 
+        {
+            data: 'count',
+            title: 'Count',
             render: function (data) {
                     // Inline CSS for center alignment
                     return `<span style="display: block; text-align: center;">${data}</span>`;
@@ -2387,7 +2356,7 @@ $(document).ready(function () {
             _token: '{{ csrf_token() }}'
         },
         dataType: 'json',
-        success: function (response) {            
+        success: function (response) {
             $('#process_type_id').html('<option selected value="All">All</option>');
             $('#product_id').html('<option selected value="All">All</option>');
 
@@ -2411,7 +2380,7 @@ $(document).ready(function () {
     });
 }
 function fetchProcessTypeData(process_type_id, client_id, lob_id, selectedDateFilter) {
-    $("#product_id").html(''); 
+    $("#product_id").html('');
     $.ajax({
         url: "{{ url('get_product_dashboard') }}",
         type: "POST",
@@ -2423,7 +2392,7 @@ function fetchProcessTypeData(process_type_id, client_id, lob_id, selectedDateFi
             _token: '{{ csrf_token() }}'
         },
         dataType: 'json',
-        success: function (response) {            
+        success: function (response) {
             $('#product_id').html('<option selected value="All">All</option>');
 
             if(response && response.length > 0) {
@@ -2483,13 +2452,13 @@ function total_users_name() {
         destroy: true,
         processing: true,
         serverSide: false,
-        searching: true, 
+        searching: true,
         lengthChange: false,
         pageLength: 5,
         ajax: {
-            url: "{{ route('total_users_name') }}", 
+            url: "{{ route('total_users_name') }}",
             type: "GET",
-            dataSrc: 'data', 
+            dataSrc: 'data',
         },
         columns: [
             { data: 'emp_id', name: 'emp_id' }, // Maps to Emp Id
@@ -2510,60 +2479,6 @@ setInterval(total_users_name, 600000);
 
 
 
-function carry_over_monthly(fromDate, toDate, clientId, projectId, selectedDateFilter) {
-    var from_date = $('#fromDate_range').val();
-    var to_date = $('#toDate_range').val();
-    var client_id = $('#client_id_dcf').val();
-    var project_id = $('#product_id').val();
-
-    datatable = $('#carry_over_monthly').DataTable({
-        destroy: true,
-        processing: true,
-        serverSide: true,
-        searching: false,
-        paging: false,          // Disable pagination
-        lengthChange: false, 
-        info: false,
-        ajax: {
-            url: "{{ route('carry_over_monthly_count') }}",
-            type: 'POST',
-            data: {
-                from_date: from_date,
-                to_date: to_date,
-                client_id: client_id,
-                project_id: project_id,
-                selectedDateFilter: selectedDateFilter,
-                _token: '{{ csrf_token() }}'
-            },
-            dataSrc: function(json) {
-                // Combine monthly and daily data into a single array
-                return [
-                    {
-                        monthLabel: "MONTHLY",
-                        carry_forward: json.data[0].carry_forward,
-                        received: json.data[0].received,
-                        completed: json.data[0].completed,
-                        pending: json.data[0].pending
-                    },
-                    {
-                        monthLabel: "DAILY",
-                        carry_forward: json.data[1].carry_forward,
-                        received: json.data[1].received,
-                        completed: json.data[1].completed,
-                        pending: json.data[1].pending
-                    }
-                ];
-            }
-        },
-        columns: [
-            { data: 'monthLabel', name: 'monthLabel' },
-            { data: 'carry_forward', name: 'carry_forward' },
-            { data: 'received', name: 'received' }, 
-            { data: 'completed', name: 'completed' }, 
-            { data: 'pending', name: 'pending' } 
-        ],
-    });
-}
 
 
 
@@ -2573,38 +2488,38 @@ $(document).ready(function() {
             destroy: true,
             processing: true,
             serverSide: false,
-            searching: true, 
+            searching: true,
             lengthChange: false,
             pageLength: 5,
             ajax: {
-                url: "{{ route('resourceTable') }}", 
+                url: "{{ route('resourceTable') }}",
                 type: "GET",
-                dataSrc: 'data', 
+                dataSrc: 'data',
             },
             columns: [
-            { data: 'emp_id', name: 'emp_id', className: "text-left" }, 
+            { data: 'emp_id', name: 'emp_id', className: "text-left" },
             { data: 'username', name: 'username', className: "text-left" },
             {
-                    data: 'status', 
-                    name: 'status', 
+                    data: 'status',
+                    name: 'status',
                     className: "text-left",
                     render: function(data, type, row) {
                         return '<strong style="color: ' + (data === 'Available' ? 'green' : 'red') + ';">' + data + '</strong>';
                     }
                 },
-            { data: 'reporting_to', name: 'reporting_to', className: "text-left" } 
+            { data: 'reporting_to', name: 'reporting_to', className: "text-left" }
         ],
         columnDefs: [
-                { targets: 0, width: '10%' }, 
+                { targets: 0, width: '10%' },
                 { targets: 1, width: '15%' },
-                { targets: 2, width: '10%' },  
-                { targets: 3, width: '15%' },  
+                { targets: 2, width: '10%' },
+                { targets: 3, width: '15%' },
             ],
         autoWidth: false
         });
     });
 });
-  
+
 
 
 </script>
