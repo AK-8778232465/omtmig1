@@ -40,9 +40,7 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::any('pending_status', 'pending_status')->name('pending_status');
     Route::any('total_users_name', 'total_users_name')->name('total_users_name');
     Route::any('tat_zone_count', 'tat_zone_count')->name('tat_zone_count');
-    Route::any('carry_over_monthly_count', 'carry_over_monthly_count')->name('carry_over_monthly_count');
-
-
+    Route::any('resourceTable', 'resourceTable')->name('resourceTable');
 
 
 
@@ -103,7 +101,7 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,S
     Route::get('edit_client/{clientid?}', 'edit_client')->name('edit_client');
     Route::post('/clientupdate', 'clientupdate')->name('clientupdate');
 
-    
+
 
 
 
@@ -155,7 +153,7 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::post('/updateOrder', 'updateOrder')->name('updateOrder');
     Route::post('/delete_order', 'delete_order')->name('delete_order');
     Route::any('/progressBar', 'progressBar')->name('progressBar');
-    
+
     Route::any('/getStatus', 'getStatus')->name('getStatus');
     Route::any('/getlobid', 'getlobid')->name('getlobid');
 
