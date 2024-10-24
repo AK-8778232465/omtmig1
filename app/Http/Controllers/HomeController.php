@@ -143,19 +143,44 @@ class HomeController extends Controller
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
 
         // Define default request data values
-        $from_date = $request->input('from_date');
-        $to_date = $request->input('to_date');
+        // $from_date = $request->input('from_date');
+        // $to_date = $request->input('to_date');
         $project_id = $request->input('project_id', ['All']); // Default to 'All'
         $client_id = $request->input('client_id', ['All']); // Default to 'All'
+        $selectedDateFilter = $request->input('selectedDateFilter');
 
+        $fromDateRange = $request->input('from_date');
+        $toDateRange = $request->input('to_date');
 
-        // Ensure project_id and client_id are arrays
+        $from_date = null;
+        $to_date = null;
+
+        if ($fromDateRange && $toDateRange) {
+            $from_date = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+            $to_date = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+        } else {
+            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                $fromDateText = trim($fromDateText);
+                $toDateText = trim($toDateText);
+                preg_match($datePattern, $fromDateText, $fromDateMatches);
+                preg_match($datePattern, $toDateText, $toDateMatches);
+                $from_date = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                $to_date = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            } else {
+                preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                $from_date = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                $to_date = $from_date;
+            }
+        }
+
         if (!is_array($project_id)) {
-            $project_id = explode(',', $project_id); // Convert string to array
+            $project_id = explode(',', $project_id);
         }
 
         if (!is_array($client_id)) {
-            $client_id = explode(',', $client_id); // Convert string to array
+            $client_id = explode(',', $client_id);
         }
 
         $statusCountsQuery = OrderCreation::query()->with('process', 'client')
@@ -220,7 +245,6 @@ class HomeController extends Controller
                     ->selectRaw('count(*) as count, status_id')
                     ->where('is_active', 1)
                     ->pluck('count', 'status_id');
-        // Additional conditions based on user type
         $yetToAssignUser = 0;
         $yetToAssignQa = 0;
 
@@ -537,11 +561,38 @@ class HomeController extends Controller
     {
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
-        $from_date = $request->input('from_date');
-        $to_date = $request->input('to_date');
+        // $from_date = $request->input('from_date');
+        // $to_date = $request->input('to_date');
         $project_id = $request->input('project_id', ['All']); // Default to 'All'
         $client_id = $request->input('client_id', ['All']); // Default to 'All'
 
+        $selectedDateFilter = $request->input('selectedDateFilter');
+
+        $fromDateRange = $request->input('from_date');
+        $toDateRange = $request->input('to_date');
+
+        $from_date = null;
+        $to_date = null;
+
+        if ($fromDateRange && $toDateRange) {
+            $from_date = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+            $to_date = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+        } else {
+            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                $fromDateText = trim($fromDateText);
+                $toDateText = trim($toDateText);
+                preg_match($datePattern, $fromDateText, $fromDateMatches);
+                preg_match($datePattern, $toDateText, $toDateMatches);
+                $from_date = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                $to_date = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            } else {
+                preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                $from_date = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                $to_date = $from_date;
+            }
+        }
 
         // Ensure project_id and client_id are arrays
         if (!is_array($project_id)) {
@@ -950,10 +1001,38 @@ class HomeController extends Controller
 {
     $user = Auth::user();
 
-    $fromDate = $request->input('from_date');
-    $toDate = $request->input('to_date');
+    // $fromDate = $request->input('from_date');
+    // $toDate = $request->input('to_date');
     $client_id = $request->input('client_id');
     $project_id = $request->input('project_id');
+
+    $selectedDateFilter = $request->input('selectedDateFilter');
+
+        $fromDateRange = $request->input('from_date');
+        $toDateRange = $request->input('to_date');
+
+        $fromDate = null;
+        $toDate = null;
+
+        if ($fromDateRange && $toDateRange) {
+            $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+            $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+        } else {
+            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                $fromDateText = trim($fromDateText);
+                $toDateText = trim($toDateText);
+                preg_match($datePattern, $fromDateText, $fromDateMatches);
+                preg_match($datePattern, $toDateText, $toDateMatches);
+                $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            } else {
+                preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                $toDate = $fromDate;
+            }
+        }
 
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
 
@@ -971,6 +1050,10 @@ class HomeController extends Controller
 
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 13 THEN 13 END) AS Coversheet_Prep')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 14 THEN 14 END) AS Clarification')
+        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 15 THEN 15 END) AS Doc_Purchase')
+        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 18 THEN 18 END) AS Ground_Abstractor')
+        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 16 THEN 16 END) AS Typing')
+        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 17 THEN 17 END) AS Typing_QC')
         ->groupBy('stl_client.client_name', 'stl_item_description.process_name', 'oms_order_creations.process_id', 'stl_item_description.project_code');
 
     if ($user->user_type_id == 6) {
@@ -1021,6 +1104,11 @@ if ($fromDate && $toDate) {
         if (isset($data->Completed)) $sum += $data->Completed;
         if (isset($data->Coversheet_Prep)) $sum += $data->Coversheet_Prep;
         if (isset($data->Clarification)) $sum += $data->Clarification;
+        if (isset($data->Doc_Purchase)) $sum += $data->Doc_Purchase;
+        if (isset($data->Typing)) $sum += $data->Typing;
+        if (isset($data->Typing_QC)) $sum += $data->Typing_QC;
+        if (isset($data->Ground_Abstractor)) $sum += $data->Ground_Abstractor;
+
 
         $output[] = [
             'client_name' => $data->client_name,
@@ -1033,7 +1121,11 @@ if ($fromDate && $toDate) {
             'Completed' => $data->Completed,
             'Coversheet Prep' => $data->Coversheet_Prep,
             'Clarification' => $data->Clarification,
-            'All' => $data->WIP + $data->Hold + $data->Cancelled +  $data->Send_for_QC + $data->Completed +  $data->Coversheet_Prep + $data->Clarification, // Add the sum as 'All'
+            'Doc Purchase' => $data->Doc_Purchase,
+            'Typing' => $data->Typing,
+            'Typing QC' => $data->Typing_QC,
+            'Ground Abstractor' => $data->Ground_Abstractor,
+            'All' => $data->WIP + $data->Hold + $data->Cancelled +  $data->Send_for_QC + $data->Completed +  $data->Coversheet_Prep + $data->Clarification + $data->Doc_Purchase + $data->Typing + $data->Typing_QC + $data->Ground_Abstractor, // Add the sum as 'All'
             // Add other fields as needed
         ];
     }
@@ -1045,11 +1137,40 @@ public function dashboard_userwise_count(Request $request)
 {
     $user = Auth::user();
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-    $fromDate = $request->input('from_date');
-    $toDate = $request->input('to_date');
+
     $client_id = $request->input('client_id');
     $project_id = $request->input('project_id');
 
+    $selectedDateFilter = $request->input('selectedDateFilter');
+
+    $fromDateRange = $request->input('from_date');
+    $toDateRange = $request->input('to_date');
+
+    $fromDate = null;
+    $toDate = null;
+
+    // Handle date ranges
+    if ($fromDateRange && $toDateRange) {
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $toDate = $fromDate;
+        }
+    }
+
+    // Build query
     $statusCountsQuery = OrderCreation::query();
     $statusCountsQuery
         ->whereNotNull('assignee_user_id')
@@ -1059,19 +1180,23 @@ public function dashboard_userwise_count(Request $request)
         })
         ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
         ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->select('oms_users.emp_id', 'oms_users.username') // Include fields used in GROUP BY
         ->selectRaw('
-            CONCAT(oms_users.emp_id, " (", oms_users.username, ")") as userinfo,
             SUM(CASE WHEN status_id = 1 THEN 1 ELSE 0 END) as `status_1`,
             SUM(CASE WHEN status_id = 2 THEN 1 ELSE 0 END) as `status_2`,
             SUM(CASE WHEN status_id = 3 THEN 1 ELSE 0 END) as `status_3`,
             SUM(CASE WHEN status_id = 4 THEN 1 ELSE 0 END) as `status_4`,
-        SUM(CASE WHEN status_id = 5 AND DATE_FORMAT(completion_date, "%Y-%m-%d") BETWEEN ? AND ? THEN 1 ELSE 0 END) as `status_5`,
+            SUM(CASE WHEN status_id = 5 AND DATE_FORMAT(completion_date, "%Y-%m-%d") BETWEEN ? AND ? THEN 1 ELSE 0 END) as `status_5`,
             SUM(CASE WHEN status_id = 13 THEN 1 ELSE 0 END) as `status_13`,
             SUM(CASE WHEN status_id = 14 THEN 1 ELSE 0 END) as `status_14`,
+            SUM(CASE WHEN status_id = 15 THEN 1 ELSE 0 END) as `status_15`,
+            SUM(CASE WHEN status_id = 16 THEN 1 ELSE 0 END) as `status_16`,
+            SUM(CASE WHEN status_id = 17 THEN 1 ELSE 0 END) as `status_17`,
+            SUM(CASE WHEN status_id = 18 THEN 1 ELSE 0 END) as `status_18`,
             COUNT(*) as `All`', [$fromDate, $toDate])
         ->where('oms_order_creations.is_active', 1)
         ->whereIn('oms_order_creations.process_id', $processIds)
-        ->groupBy('oms_order_creations.assignee_user_id');
+        ->groupBy('oms_users.emp_id', 'oms_users.username'); // Add necessary columns to GROUP BY
 
     if (!empty($project_id) && $project_id[0] !== 'All') {
         $statusCountsQuery->whereIn('oms_order_creations.process_id', $project_id);
@@ -1085,7 +1210,7 @@ public function dashboard_userwise_count(Request $request)
 
     $dataForDataTables = $statusCounts->map(function ($count) {
         return [
-            'userinfo' => $count->userinfo,
+            'userinfo' => $count->emp_id . " (" . $count->username . ")",
             'status_1' => $count->status_1,
             'status_2' => $count->status_2,
             'status_3' => $count->status_3,
@@ -1093,12 +1218,17 @@ public function dashboard_userwise_count(Request $request)
             'status_5' => $count->status_5,
             'status_13' => $count->status_13,
             'status_14' => $count->status_14,
-            'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14,
+            'status_15' => $count->status_15,
+            'status_16' => $count->status_16,
+            'status_17' => $count->status_17,
+            'status_18' => $count->status_18,
+            'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14 + $count->status_15 + $count->status_16 + $count->status_17 + $count->status_18,
         ];
     });
 
     return Datatables::of($dataForDataTables)->toJson();
 }
+
 
     private function getProcessIdsBasedOnUserRole($user)
     {
@@ -1117,9 +1247,38 @@ public function dashboard_userwise_count(Request $request)
             $user = Auth::user();
             $processIds = $this->getProcessIdsBasedOnUserRole($user);
 
-            $fromDate = $request->input('from_date');
-            $toDate = $request->input('to_date');
+            // $fromDate = $request->input('from_date');
+            // $toDate = $request->input('to_date');
             $client_ids = $request->input('client_id');
+
+
+            $selectedDateFilter = $request->input('selectedDateFilter');
+
+            $fromDateRange = $request->input('from_date');
+            $toDateRange = $request->input('to_date');
+
+            $fromDate = null;
+            $toDate = null;
+
+            if ($fromDateRange && $toDateRange) {
+                $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+                $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+            } else {
+                $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+                if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                    list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                    $fromDateText = trim($fromDateText);
+                    $toDateText = trim($toDateText);
+                    preg_match($datePattern, $fromDateText, $fromDateMatches);
+                    preg_match($datePattern, $toDateText, $toDateMatches);
+                    $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                    $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+                } else {
+                    preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                    $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                    $toDate = $fromDate;
+                }
+            }
 
             $query = DB::table('stl_item_description')
                 ->select(
@@ -1198,9 +1357,37 @@ public function dashboard_userwise_count(Request $request)
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
 
-        $fromDate = $request->input('fromDate');
-        $toDate = $request->input('toDate');
+        // $fromDate = $request->input('fromDate');
+        // $toDate = $request->input('toDate');
         $client_ids = $request->input('client_id');
+
+        $selectedDateFilter = $request->input('selectedDateFilter');
+
+        $fromDateRange = $request->input('from_date');
+        $toDateRange = $request->input('to_date');
+
+        $fromDate = null;
+        $toDate = null;
+
+        if ($fromDateRange && $toDateRange) {
+            $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+            $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+        } else {
+            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                $fromDateText = trim($fromDateText);
+                $toDateText = trim($toDateText);
+                preg_match($datePattern, $fromDateText, $fromDateMatches);
+                preg_match($datePattern, $toDateText, $toDateMatches);
+                $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            } else {
+                preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                $toDate = $fromDate;
+            }
+        }
 
         $query = DB::table('stl_item_description')
             ->select(
@@ -1276,10 +1463,38 @@ public function dashboard_userwise_count(Request $request)
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
 
-        $fromDate = $request->input('from_date');
-        $toDate = $request->input('to_date');
+        // $fromDate = $request->input('from_date');
+        // $toDate = $request->input('to_date');
         $client_ids = $request->input('client_id');
         $process_id = $request->input('projectId');
+
+        $selectedDateFilter = $request->input('selectedDateFilter');
+
+        $fromDateRange = $request->input('from_date');
+        $toDateRange = $request->input('to_date');
+
+        $fromDate = null;
+        $toDate = null;
+
+        if ($fromDateRange && $toDateRange) {
+            $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+            $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+        } else {
+            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                $fromDateText = trim($fromDateText);
+                $toDateText = trim($toDateText);
+                preg_match($datePattern, $fromDateText, $fromDateMatches);
+                preg_match($datePattern, $toDateText, $toDateMatches);
+                $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            } else {
+                preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                $toDate = $fromDate;
+            }
+        }
 
         $query = DB::table('stl_item_description')
             ->select(
@@ -1352,9 +1567,37 @@ public function dashboard_userwise_count(Request $request)
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
 
-        $fromDate = $request->input('from_date');
-        $toDate = $request->input('to_date');
+        // $fromDate = $request->input('from_date');
+        // $toDate = $request->input('to_date');
         $client_ids = $request->input('client_id');
+
+        $selectedDateFilter = $request->input('selectedDateFilter');
+
+        $fromDateRange = $request->input('from_date');
+        $toDateRange = $request->input('to_date');
+
+        $fromDate = null;
+        $toDate = null;
+
+        if ($fromDateRange && $toDateRange) {
+            $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+            $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+        } else {
+            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                $fromDateText = trim($fromDateText);
+                $toDateText = trim($toDateText);
+                preg_match($datePattern, $fromDateText, $fromDateMatches);
+                preg_match($datePattern, $toDateText, $toDateMatches);
+                $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            } else {
+                preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                $toDate = $fromDate;
+            }
+        }
 
         $query = DB::table('stl_item_description')
             ->select(
@@ -1397,13 +1640,37 @@ public function revenue_detail_process_fte(Request $request) {
     $user = Auth::user();
 
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
-    $fromDate = Carbon::parse($request->input('from_date'));
-    $toDate = Carbon::parse($request->input('to_date'));
     $client_ids = $request->input('client_id');
-    $project_id = $request->input('project_id');
+    // Add the new date filter logic here
+    $selectedDateFilter = $request->input('selectedDateFilter');
 
-    if ($fromDate->lte($toDate)) {
+    $fromDateRange = $request->input('from_date');
+    $toDateRange = $request->input('to_date');
+
+    $fromDate = null;
+    $toDate = null;
+
+    if ($fromDateRange && $toDateRange) {
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $toDate = $fromDate;
+        }
+    }
+
+    if ($fromDate && $toDate && Carbon::parse($fromDate)->lte(Carbon::parse($toDate))) {
 
     $query = DB::table('service_audit AS sa')
 
@@ -1431,9 +1698,9 @@ public function revenue_detail_process_fte(Request $request) {
       ->where('sid.is_active', 1)
       ->where('sid.billing_type_id', 2)
       ->whereIn('sa.description_id', $processIds)
-    ->where('sa.effective_date', '<=', $toDate->format('Y-m-d'));
+            ->where('sa.effective_date', '<=', $toDate);
 
-    if (!empty($client_ids) && $client_ids[0] !== 'All') {
+        if (!empty($request->input('client_id')) && $client_ids[0] !== 'All') {
         $query->whereIn('sc.id', $client_ids);
     }
 
@@ -1443,8 +1710,8 @@ public function revenue_detail_process_fte(Request $request) {
     foreach ($auditRecords as $key => $auditRecord) {
 
     $revenue_selected = 0;
-    $start_date = $fromDate->greaterThan(Carbon::parse($auditRecord->start_date)) ? $fromDate : Carbon::parse($auditRecord->start_date);
-    $end_date = $toDate->lessThan(Carbon::parse($auditRecord->end_date)) ? $toDate : Carbon::parse($auditRecord->end_date)->subDay() ;
+            $start_date = Carbon::parse($fromDate)->greaterThan(Carbon::parse($auditRecord->start_date)) ? Carbon::parse($fromDate) : Carbon::parse($auditRecord->start_date);
+            $end_date = Carbon::parse($toDate)->lessThan(Carbon::parse($auditRecord->end_date)) ? Carbon::parse($toDate) : Carbon::parse($auditRecord->end_date)->subDay();
 
     if ($end_date->lt($start_date)) {
         continue;
@@ -1455,8 +1722,7 @@ public function revenue_detail_process_fte(Request $request) {
 
       $days = $end_date->diffInDays($start_date);
 
-
-      if (($key === count($auditRecords) - 1)||($key < count($auditRecords) - 1)) {
+            if (($key === count($auditRecords) - 1) || ($key < count($auditRecords) - 1)) {
         $days++;
       }
 
@@ -1504,15 +1770,15 @@ public function revenue_detail_process_fte(Request $request) {
             'days' => $days,
             'revenue_selected' => number_format($revenue_selected, 2, '.'),
         ];
+        }
 
-    }
     return response()->json(['data' => $output]);
-    }
-    else {
+
+    } else {
         return response()->json(['data' => []]);
     }
-
 }
+
 
 
 public function revenue_detail_processDetail_fte(Request $request)
@@ -1684,11 +1950,45 @@ public function revenue_detail_client_fte(Request $request){
     $user = Auth::user();
 
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
-    $fromDate = Carbon::parse($request->input('from_date'));
-    $toDate = Carbon::parse($request->input('to_date'));
     $client_ids = $request->input('client_id');
-    $project_id = $request->input('project_id');
+    // Add the new date filter logic here
+    $selectedDateFilter = $request->input('selectedDateFilter');
+    // dd($selectedDateFilter);
+
+    $fromDateRange = $request->input('from_date');
+    $toDateRange = $request->input('to_date');
+
+    $fromDate = null;
+    $toDate = null;
+
+    if ($fromDateRange && $toDateRange) {
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $toDate = $fromDate;
+        }
+    }
+
+
+    if (isset($fromDate)) {
+        $fromDate = Carbon::parse($fromDate);
+    }
+    if (isset($toDate)) {
+        $toDate = Carbon::parse($toDate);
+    }
 
     if ($fromDate->lte($toDate)) {
 
@@ -1753,7 +2053,29 @@ public function revenue_detail_client_fte(Request $request){
 
             } else {
 
+                $revenue_selected = 0;
+                $current_month = $start_date->month;
+                $current_year = $start_date->year;
+
+                // Calculate revenue for the start month
                 $revenue_selected += (($start_date->daysInMonth - $start_date->day + 1) / $start_date->daysInMonth) * $unit_cost * $no_of_resources;
+
+                // Calculate revenue for the middle months
+                while (true) {
+                    $current_month++;
+                    if ($current_month > 12) {
+                        $current_month = 1;
+                        $current_year++;
+                    }
+
+                    if ($current_year === $end_date->year && $current_month === $end_date->month) {
+                        break;
+                    }
+
+                    $revenue_selected += $unit_cost * $no_of_resources;
+                }
+
+                // Calculate revenue for the end month
                 $revenue_selected += (($end_date->day) / $end_date->daysInMonth) * $unit_cost * $no_of_resources;
             }
 
@@ -1796,4 +2118,444 @@ public function revenue_detail_client_fte(Request $request){
         }
 
     }
+
+    public function get_lob_dashboard(Request $request)
+    {
+        $client_id = $request->client_id;
+        $product_id = $request->product_id;
+
+        if (!is_array($client_id)) {
+            $client_id = [$client_id];
+        }
+        if (in_array('All', $client_id)) {
+            $getlob = DB::table('stl_lob')
+                            ->select('id', 'name')
+                            ->get();
+        } else {
+            $filteredLob = DB::table('stl_lob')->select('id', 'client_id', 'name')->get();
+            $getlob = $filteredLob->filter(function($item) use ($client_id) {
+            $clientIds = json_decode($item->client_id, true);
+            // Check if there's any overlap between the request client_ids and the stored client_ids
+            return !empty(array_intersect($client_id, $clientIds));
+        });
+        }
+
+        if (in_array('All', $client_id)) {
+            $getproduct = DB::table('stl_item_description')
+                        ->select('id', 'process_name', 'project_code')
+                        ->get();
+        }else{
+            $getproduct = DB::table('stl_item_description')
+                        ->select('id', 'process_name', 'project_code')
+                        ->whereIn('client_id', $client_id)
+                        ->get();
+        }
+
+
+        return response()->json([
+            'lob' => $getlob,
+            'products' => $getproduct
+        ]);
+    }
+
+    public function get_process_dashboard(Request $request)
+    {
+        $lob_id = $request->lob_id;
+        $client_id = $request->client_id;
+
+        if (!is_array($lob_id)) {
+            $lob_id = [$lob_id];
+        }
+        if (in_array('All', $lob_id)) {
+            $getprocess = DB::table('stl_process')
+                            ->select('id', 'name')
+                            ->get();
+        } else {
+            $getprocess = DB::table('stl_process')
+                            ->select('id', 'name', 'lob_id')
+                            ->whereIn('lob_id', $lob_id)
+                            ->get();
+
+        }
+
+    if($lob_id && $client_id){
+        $get_product = DB::table('stl_item_description')
+                    ->select('id', 'process_name', 'project_code')
+                    ->whereIn('client_id', $client_id)
+                    ->whereIn('lob_id', $lob_id)
+                    ->get();
+    }
+
+        return response()->json([
+            'process' => $getprocess,
+            'products' => $get_product
+        ]);
+    }
+
+    public function get_product_dashboard(Request $request)
+    {
+        $process_type_id = $request->process_type_id;
+        $client_id = $request->client_id;
+        $lob_id = $request->lob_id;
+
+        if (!is_array($process_type_id)) {
+            $process_type_id = [$process_type_id];
+        }
+        if (!is_array($client_id)) {
+            $client_id = [$client_id];
+        }
+        if (!is_array($lob_id)) {
+            $lob_id = [$lob_id];
+        }
+        if (in_array('All', $process_type_id)) {
+            $getprocess = DB::table('stl_item_description')
+                            ->select('id', 'process_name', 'project_code')
+                            ->whereIn('client_id', $client_id)
+                            ->whereIn('lob_id', $lob_id)
+                            ->get();
+        } else {
+            $getprocess = DB::table('stl_item_description')
+                            ->select('id', 'process_name', 'project_code')
+                            ->whereIn('process_id', $process_type_id)
+                            ->whereIn('client_id', $client_id)
+                            ->whereIn('lob_id', $lob_id)
+                            ->get();
+        }
+
+        return response()->json($getprocess);
+    }
+
+
+
+
+    public function pending_status(Request $request)
+    {
+        $user = Auth::user();
+        $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+        $today = Carbon::now();
+
+
+
+        $status_name = DB::table('oms_status')->select('id', 'status')->get()->pluck('status', 'id')->toArray();
+
+        $result = [];
+
+        foreach ($status_name as $status_id => $status_name_value) {
+            if($status_id != 5){
+                $tenDaysAgo = $today->copy()->subDays(10);
+                $twentyDaysAgo = $today->copy()->subDays(20);
+                $thirtyDaysAgo = $today->copy()->subDays(30);
+
+                $moreThan10Days = OrderCreation::where('status_id', $status_id)
+                    ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+                    ->whereBetween('status_updated_time', [$twentyDaysAgo, $tenDaysAgo])
+                    ->whereIn('oms_order_creations.process_id', $processIds);
+
+                $moreThan10DaysCount = $moreThan10Days->count();
+
+
+                $moreThan20Days = OrderCreation::where('status_id', $status_id)
+                    ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+                    ->whereBetween('status_updated_time', [$thirtyDaysAgo, $twentyDaysAgo])
+                    ->whereIn('oms_order_creations.process_id', $processIds);
+
+                $moreThan20DaysCount = $moreThan20Days->count();
+
+
+
+
+            $moreThan30Days = OrderCreation::where('status_id', $status_id)
+            ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+            ->where('status_updated_time', '<=', $thirtyDaysAgo)
+            ->whereIn('oms_order_creations.process_id', $processIds);
+
+
+        $moreThan30DaysCount = $moreThan30Days->count();
+
+
+        if ($moreThan10DaysCount > 0 || $moreThan20DaysCount > 0 || $moreThan30DaysCount > 0) {
+            $result[] = [
+                'status' => $status_name_value,
+                'moreThan10Days' => $moreThan10DaysCount,
+                'moreThan20Days' => $moreThan20DaysCount,
+                'moreThan30Days' => $moreThan30DaysCount,
+            ];
+        }
+    }
+
+
+        }
+
+        return Datatables::of($result)->toJson();
+    }
+
+    public function total_users() {
+        $user = User::where('id', Auth::id())->first();
+        // Assuming getAllLowerLevelUserIds returns an array of user IDs
+        $user_lower_ids = User::getAllLowerLevelUserIds(Auth::id());
+
+        // Filter out the current user's ID
+        $user_lower_ids = array_filter($user_lower_ids, function($id) use ($user) {
+            return $id != $user->id;
+        });
+
+        // Get the count of active users
+        $active_user = User::whereIn('id', $user_lower_ids)
+                           ->where('logged_in', 1)
+                           ->count();
+
+        // Get the count of lower level users
+        $user_lower_count = count($user_lower_ids);
+
+        return response()->json([
+            'user_lower_count' => $user_lower_count,
+            'active_user' => $active_user,
+        ]);
+    }
+
+
+
+    public function total_users_name() {
+        // Get the current user
+        $currentUserId = Auth::id();
+        $user = User::find($currentUserId);
+
+        // Get all lower level user IDs
+        $user_lower_ids = User::getAllLowerLevelUserIds($currentUserId);
+
+        // Filter out the current user's ID
+        $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
+            return $id != $currentUserId;
+        });
+
+        // Get active lower-level users
+        $active_users = User::whereIn('id', $user_lower_ids)
+            ->where('logged_in', 1) // Filter to get only logged-in users
+            ->get(['id', 'emp_id', 'username', 'logged_in']);
+
+            return response()->json([
+                'data' => $active_users->map(function($user) {
+                    return [
+                        'id' => $user->id,
+                        'emp_id' => $user->emp_id,
+                        'username' => $user->username
+                    ];
+                }),
+            ]);
+    }
+
+
+
+public function tat_zone_count(Request $request) {
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+    $client_id = $request->input('client_id');
+    $project_id = $request->input('project_id');
+
+    if (!is_array($client_id)) {
+        $client_id = [$client_id];
+    }
+    if (!is_array($project_id)) {
+        $project_id = [$project_id];
+    }
+
+    $selectedDateFilter = $request->input('selectedDateFilter');
+
+
+    $fromDateRange = $request->input('from_date');
+    $toDateRange = $request->input('to_date');
+
+    $fromDate = null;
+    $toDate = null;
+
+    if ($fromDateRange && $toDateRange) {
+        $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $fromDate = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $toDate = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $fromDate = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $toDate = $fromDate;
+        }
+    }
+
+
+    $tatstatusCountsQuery = DB::table('oms_order_creations')
+        ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
+        ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
+        ->leftJoin('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+        ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->leftJoin('oms_users as assignee_users', 'oms_order_creations.assignee_user_id', '=', 'assignee_users.id')
+        ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
+        ->leftJoin('oms_users as typist_users', 'oms_order_creations.typist_id', '=', 'typist_users.id')
+        ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
+        ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
+        ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
+        ->leftJoin('oms_tier','oms_order_creations.tier_id', '=', 'oms_tier.id')
+        ->leftJoin('stl_process', 'oms_order_creations.process_type_id', '=', 'stl_process.id')
+        ->select(
+            'oms_order_creations.id',
+            'oms_order_creations.order_id as order_id',
+            'oms_order_creations.status_id as status_id',
+            'oms_order_creations.order_date as order_date',
+            'stl_item_description.tat_value as tat_value',
+            'oms_order_creations.assignee_user_id',
+            'oms_order_creations.assignee_qa_id',
+            'oms_order_creations.typist_id',
+            'oms_order_creations.typist_qc_id',
+            'oms_order_creations.associate_id',
+            'stl_client.id as client_id',
+        )
+        ->whereIn('oms_order_creations.process_id', $processIds)
+        ->where('oms_order_creations.is_active', 1)
+        ->whereNotNull('oms_order_creations.assignee_user_id')
+        ->where('stl_item_description.is_approved', 1)
+        ->where('stl_client.is_approved', 1);
+
+
+
+    if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+        if ($user->user_type_id == 6) {
+            $tatstatusCountsQuery->where('oms_order_creations.assignee_user_id', $user->id);
+        } elseif($user->user_type_id == 7) {
+            $tatstatusCountsQuery->where('oms_order_creations.assignee_qa_id', $user->id)
+            ->whereNotIn('oms_order_creations.status_id', [1]);
+        } elseif($user->user_type_id == 8) {
+            $tatstatusCountsQuery->where(function ($query) use($user) {
+                $query->where('oms_order_creations.assignee_user_id', $user->id)
+                    ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
+            });
+        } elseif($user->user_type_id == 10){
+            $tatstatusCountsQuery->where('oms_order_creations.typist_id', $user->id)
+            ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 17]);
+        } elseif($user->user_type_id == 11){
+            $tatstatusCountsQuery->where('oms_order_creations.typist_qc_id', $user->id)
+            ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 16]);
+        }
+    }
+
+    if ($fromDate && $toDate) {
+        $tatstatusCountsQuery->whereBetween('oms_order_creations.order_date', [
+            $fromDate . ' 00:00:00',
+            $toDate . ' 23:59:59'
+        ]);
+    }
+
+    if (!empty($client_id) && $client_id[0] !== 'All') {
+        $tatstatusCountsQuery->whereIn('stl_client.id', $client_id);
+    }
+
+    if (!empty($project_id) && $project_id[0] !== 'All') {
+        $tatstatusCountsQuery->whereIn('oms_order_creations.process_id', $project_id);
+    }
+
+    $tatStatusCountsQuery = $tatstatusCountsQuery->get();
+
+    function calculateTatValues($tatStatusCountsQuery)
+    {
+        $resultsByStatus = [];
+
+        foreach ($tatStatusCountsQuery as $order) {
+            if (!is_null($order->tat_value)) {
+                $tatValue = $order->tat_value;
+                $statusId = $order->status_id;
+                $tatHours = $tatValue / 4;
+
+                $orderDate = new \DateTime($order->order_date, new \DateTimeZone('America/New_York'));
+
+                $currentDate = new \DateTime('now', new \DateTimeZone('America/New_York'));
+
+                $diff = $currentDate->diff($orderDate);
+                $hoursDifference = ($diff->days * 24) + $diff->h + ($diff->i / 60);
+
+                if (!isset($resultsByStatus[$statusId])) {
+                    $resultsByStatus[$statusId] = [
+                        'orderReachfirst' => 0,
+                        'orderReachsecond' => 0,
+                        'orderReachthird' => 0,
+                        'orderReachfourth' => 0,
+                        'orderReachedtatvalue' => 0,
+                    ];
+                }
+                if ($statusId == 5) {
+                    continue;
+                }
+                if($hoursDifference >= $tatHours * 4){
+                    $resultsByStatus[$statusId]['orderReachedtatvalue'] += 1;
+                }elseif ($hoursDifference >= $tatHours * 3) {
+                    $resultsByStatus[$statusId]['orderReachfourth'] += 1;
+                }elseif ($hoursDifference >= $tatHours * 2) {
+                    $resultsByStatus[$statusId]['orderReachthird'] += 1;
+                }elseif ($hoursDifference >= $tatHours * 1) {
+                    $resultsByStatus[$statusId]['orderReachsecond'] += 1;
+                }else{
+                    $resultsByStatus[$statusId]['orderReachfirst'] += 1;
+            }
+
+            }
+        }
+
+        return $resultsByStatus;
+    }
+
+    $results = calculateTatValues($tatStatusCountsQuery);
+        $totalFirstCount = array_sum(array_column($results, 'orderReachfirst'));
+        $totalSecondCount = array_sum(array_column($results, 'orderReachsecond'));
+        $totalThirdCount = array_sum(array_column($results, 'orderReachthird'));
+        $totalFourthCount = array_sum(array_column($results, 'orderReachfourth'));
+        $totalReachedTatValueCount = array_sum(array_column($results, 'orderReachedtatvalue'));
+
+    return response()->json([
+            'reachedtat_count' => $totalReachedTatValueCount .','. ' Out of TAT',
+            'red_count' => $totalFourthCount .','. ' Super Rush',
+            'orange_count' => $totalThirdCount .','. ' Rush',
+            'blue_count' => $totalSecondCount .','. ' Priority',
+            'green_count' => $totalFirstCount .','. ' Non Priority',
+        ]);
+
+    }
+
+
+    public function resourceTable() {
+
+        $currentUserId = Auth::id();
+        $user = User::find($currentUserId);
+
+        $user_lower_ids = User::getAllLowerLevelUserIds($currentUserId);
+
+        $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
+            return $id != $currentUserId;
+        });
+
+        $active_users = User::select('oms_users.id', 'oms_users.emp_id', 'oms_users.username', 'oms_users.logged_in', 'reporting_user.username as reporting_username')
+        ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+        ->whereIn('oms_users.id', $user_lower_ids)
+        ->get();
+
+
+        return response()->json([
+            'data' => $active_users->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'emp_id' => $user->emp_id,
+                    'username' => $user->username,
+                    'status' => $user->logged_in ? 'Available' : 'UnAvailable',
+                    'reporting_to' => $user->reporting_username ?? 'N/A'
+                ];
+            }),
+        ]);
+    }
+
 }

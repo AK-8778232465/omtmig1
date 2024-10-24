@@ -7,6 +7,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\OrderFormController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\Auth\LoginController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -35,6 +36,13 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('order_detail', 'order_detail')->name('order_detail');
     Route::post('getTotalData', 'getTotalData')->name('getTotalData');
     Route::any('previous_count', 'previous_count')->name('previous_count');
+    Route::any('total_users', 'total_users')->name('total_users');
+    Route::any('pending_status', 'pending_status')->name('pending_status');
+    Route::any('total_users_name', 'total_users_name')->name('total_users_name');
+    Route::any('tat_zone_count', 'tat_zone_count')->name('tat_zone_count');
+    Route::any('resourceTable', 'resourceTable')->name('resourceTable');
+
+
 
     Route::post('getTotalDataFte', 'getTotalDataFte')->name('getTotalDataFte');
 
@@ -45,6 +53,9 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::post('dashboard_dropdown', 'dashboard_dropdown')->name('dashboard_dropdown');
     Route::post('revenue_detail_client_fte', 'revenue_detail_client_fte')->name('revenue_detail_client_fte');
 
+    Route::post('get_lob_dashboard', 'get_lob_dashboard')->name('get_lob_dashboard');
+    Route::post('get_process_dashboard', 'get_process_dashboard')->name('get_process_dashboard');
+    Route::post('get_product_dashboard', 'get_product_dashboard')->name('get_product_dashboard');
 
 });
 

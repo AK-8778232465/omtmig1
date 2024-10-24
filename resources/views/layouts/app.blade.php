@@ -42,6 +42,18 @@
             body {
             font-family: 'Poppins', sans-serif;
         }
+
+          #overlay {
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.5); 
+            z-index: 999;
+        }
+        
         </style>
         <style>
             .menu.notification {
@@ -51,6 +63,7 @@
 
     </head>
     <body data-layout="horizontal" style="background-image: url('{{ asset('assets/images/mainbg.png') }}">
+        <div id="overlay"></div>
         <div class="topbar">
             <div id="snow"></div>
             @if (Auth::guard('web')->check())
@@ -209,6 +222,23 @@
         <script src="{{asset('assets/js/parsley.min.js')}}"></script>
         @stack('script-bottom')
     </body>
+
+    <div id="logout-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:30px; background-color:#ffffff; border-radius:12px; box-shadow:0 6px 30px rgba(0, 0, 0, 0.3); z-index:1000; font-family: 'Arial', sans-serif; width: 400px;">
+        <div style="text-align: center;">
+            <h3 style="margin: 0; color: #f70707;font-weight:bold;">You have been Inactive!</h3>
+            <p style="color: #151515; margin: 15px 0; font-weight:bold; font-size:14px;">You will be logged out in <span id="countdown" style="font-weight: bold; color: #e63946; font-size:20px;"></span> seconds.</p>
+        </div>
+        <div style="margin-top: 15px; text-align: center;">
+            <button onclick="resetTimer()" style="padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.3s; font-size: 16px; font-weight: bold;">
+                Stay Logged In
+            </button>
+        </div>
+    </div>
+    
+    
+    
+
+
     <script>
         (function (e) {
             var el = document.createElement('script');
@@ -216,6 +246,88 @@
             el.setAttribute('src', 'https://cdn.userway.org/widget.js');
             document.body.appendChild(el);
         })();
+
+
+        let logoutTimer;
+        let countdownTimer;
+        let countdown = 60;
+        let isPopupVisible = false; // Track popup visibility
+    // Countdown timer starts at 500 seconds
+
+
+    function addEventListeners() {
+        window.onmousemove = resetTimer;
+        window.onkeypress = resetTimer;
+        window.onscroll = resetTimer;
+        window.onclick = resetTimer;
+    }
+
+    function removeEventListeners() {
+        window.onmousemove = null;
+        window.onkeypress = null;
+        window.onscroll = null;
+        window.onclick = null;
+    }
+
+        function resetTimer() {
+
+            clearTimeout(logoutTimer); // Clear previous logout timer
+            clearInterval(countdownTimer); // Clear previous countdown interval
+            countdown = 60; // Reset countdown timer
+            document.getElementById("logout-popup").style.display = "none";
+            document.getElementById("overlay").style.display = "none"; // Hide overlay
+
+            // Start a new timer for inactivity (60 seconds)
+            logoutTimer = setTimeout(() => {
+                startLogoutCountdown();
+            }, 600000); // 60000 ms = 1 minute
+        }
+
+        
+
+        // Show popup and start countdown
+        function startLogoutCountdown() {
+            isPopupVisible = true; // Popup is visible
+            removeEventListeners();
+
+            document.getElementById("logout-popup").style.display = "block";
+            document.getElementById("overlay").style.display = "block"; // Show overlay
+             // Show popup
+
+            countdownTimer = setInterval(() => {
+                countdown--; // Decrease the countdown
+
+                document.getElementById("countdown").textContent = countdown; // Update countdown display
+
+                
+                if (countdown === 0) {
+                    clearInterval(countdownTimer); // Stop the countdown interval
+                    logoutUser(); // Log out user
+                }
+            }, 1000); // 1000 ms = 1 second
+        }
+
+        // Trigger logout by making an AJAX call
+        function logoutUser() {
+            // Send a logout request to the server
+            fetch("{{ route('logout') }}", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = "{{ route('login') }}"; // Redirect to login page after logout
+                }
+            });
+        }
+
+        window.onload = function() {
+        resetTimer();
+        addEventListeners();
+    };
+
+
     </script>
 </html>
 

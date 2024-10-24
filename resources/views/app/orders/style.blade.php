@@ -158,8 +158,29 @@
         background-color: #7680ff;
     }
 
+    
+
+    .goto-order1 {
+        background-color: #41B680;
+    }
+    .goto-order2 {
+        background-color: #0000FF;
+    }
+    .goto-order3 {
+        background-color: orange;
+    }
+    .goto-order4 {
+        background-color: red;
+    }
+    .goto-order5 {
+        background-color: #9ba7ca;
+    }
+    .goto-order6 {
+        background-color: #654321;
+    }
+    
+
     .goto-order:hover {
-        background-color: #3f4bfd;
         cursor: pointer;
     }
 </style>

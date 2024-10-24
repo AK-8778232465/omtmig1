@@ -191,8 +191,8 @@
             <div class="col-md-2">
                 <div class="form-group">
                     <label for="client">Client</label>
-                    <select class="form-control select2-basic-multiple" name="dcf_client_id[]" id="client_id_dcf" multiple="multiple">
-                        <option selected value="All">All</option>
+                    <select class="form-control select2-basic-multiple" name="dcf_client_id" id="client_id_dcf">
+                        <option selected value="">Select Client</option>
                         @forelse($clients as $client)
                         <option value="{{ $client->id }}">{{ $client->client_no }} ({{ $client->client_name }})</option>
                         @empty
@@ -204,8 +204,8 @@
             <div class="col-md-2">
                 <div class="form-group">
                     <label for="lob_id">Lob</label>
-                    <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id" multiple="multiple">
-                        <option selected value="Select Lob">Select Lob</option>
+                    <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id">
+                        <option selected value="">Select Lob</option>
                     </select>
                 </div>
             </div>
@@ -232,21 +232,19 @@
                 </div>
             </div>
         </div>
-
-<div class= "col-md-7 d-flex row" >
+        <div class= "col-md-7 d-flex row" >
         <div class="col-md-4 mt-3" id="hidefilter_2">
             <div class="form-group">
                 <label for="product_id">Product</label>
                 <select class="form-control select2-basic-multiple" style="width:100%" name="product_id" id="product_id" multiple="multiple">
-                    <option selected value="All">All Products</option>
+                    <option selected value="All">All</option>
                 </select>
             </div>
         </div>
         <div class="col-md-3" style="margin-top:41px;" id="hidefilter_3">
             <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
         </div>
-</div>
-
+        </div>
         <div class="card col-md-10 mt-5 tabledetails" id="userwise_table" style="font-size: 12px;">
             <h4 class="text-center mt-3">Userwise Details</h4>
                 <div class="card-body">
@@ -612,23 +610,23 @@ $(document).ready(function() {
             if (isClientChanging) return;
             isClientChanging = true;
             var selectedClientOption = $(this).val();
-            $("#client_id_dcf").val(selectedClientOption && selectedClientOption.includes('All') ? ['All'] : selectedClientOption);
-            if ($("#client_id_dcf").val() !== selectedClientOption) {
-                $("#client_id_dcf").trigger('change');
+            if (selectedClientOption === 'All') {
+                $("#client_id_dcf").val('All');
             }
             isClientChanging = false;
         });
 
+        $(document).ready(function() {
         var isLobChanging = false;
         $(document).on('change', '#lob_id', function() {
             if (isLobChanging) return;
             isLobChanging = true;
             var selectedLobOption = $(this).val();
-            $("#lob_id").val(selectedLobOption && selectedLobOption.includes('Select Lob') ? ['Select Lob'] : selectedLobOption);
-            if ($("#lob_id").val() !== selectedLobOption) {
-                $("#lob_id").trigger('change');
+                if (selectedLobOption === 'Select Lob') {
+                    $("#lob_id").val('Select Lob');
             }
             isLobChanging = false;
+        });
         });
 
         var isProcessChanging = false;
@@ -822,21 +820,27 @@ $('#newreports_datatable').on('draw.dt', function () {
 });
 
 
-    function fetchProData(client_id) {
+    function fetchProData(client_id, product_id) {
         $.ajax({
             url: "{{ url('get_lob') }}",
             type: "POST",
             data: {
                 client_id: client_id,
+                product_id:product_id,
                 _token: '{{ csrf_token() }}'
             },
             dataType: 'json',
             success: function (response) {
                 $('#lob_id').html('<option selected value="Select Lob">Select Lob</option>');
-                $.each(response, function (index, item) {
+                $('#product_id').html('<option selected value="All">All</option>');
+
+
+                $.each(response.lob, function (index, item) {
                     $("#lob_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+                });
 
-
+                $.each(response.products, function (index, item) {
+                $("#product_id").append('<option value="' + item.id + '">' + item.process_name + ' (' + item.project_code + ')</option>');
                 });
             },
             error: function (xhr, status, error) {
@@ -847,20 +851,30 @@ $('#newreports_datatable').on('draw.dt', function () {
 
     $('#lob_id').on('change', function () {
     var lob_id = $(this).val();
+    var client_id = $('#client_id_dcf').val();
     $("#process_type_id").html(''); 
+    $("#product_id").html(''); 
+
         $.ajax({
             url: "{{ url('get_process') }}",
             type: "POST",
             data: {
                 lob_id: lob_id,
+                client_id: client_id,
                 _token: '{{ csrf_token() }}'
             },
             dataType: 'json',
             success: function (response) {
                 $('#process_type_id').html('<option selected value="All">All</option>');
-                $.each(response, function (index, item) {
-                    $("#process_type_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+                $('#product_id').html('<option selected value="All">All</option>');
 
+
+                $.each(response.process, function (index, item) {
+                    $("#process_type_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+                });
+
+                $.each(response.products, function (index, item) {
+                $("#product_id").append('<option value="' + item.id + '">' + item.process_name + ' (' + item.project_code + ')</option>');
                 });
             },
             error: function (xhr, status, error) {
@@ -1002,8 +1016,14 @@ $('#newreports_datatable').on('draw.dt', function () {
 
 $('#client_id_dcf').on('change', function () {
     let client_id = $("#client_id_dcf").val();
-    $("#lob_id").html('<option selected value="All">All</option>');
-    fetchProData(client_id);
+    let product_id = $("#product_id").val();
+
+    $("#lob_id").html('<option selected value="Select Lob">Select Lob</option>');
+    $("#product_id").html('<option selected value="All">All</option>');
+    $("#process_type_id").html('<option selected value="All">All</option>');
+
+
+    fetchProData(client_id,product_id);
 });
 
 $(document).ready(function() {

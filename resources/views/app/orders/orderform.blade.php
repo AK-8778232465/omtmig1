@@ -38,6 +38,10 @@
     color: red;
     font-size: 14px;
         }
+        .timer-brown {
+            color: #654321;
+            font-size: 14px;
+        }
 
         #headline.timer-red {
     color: white;  
@@ -57,6 +61,10 @@
         #headline.timer-orange {
             color: white;
             background-color: orange !important;
+        }
+        #headline.timer-brown {
+            color: white;
+            background-color: #654321 !important;
         }
 
         .sticky-container {
@@ -239,8 +247,8 @@
                     <div class="card-body">
                         <div class="row">
                         <div class="col-md-3 mb-2">
-                            <div class="font-weight-bold">Client ID</div>
-                            <select class="form-control select2dropdown" name="client_id" id="client_id_">
+                            <div class="font-weight-bold">Client ID<span style="color:red;">*</span></div>
+                            <select class="form-control select2dropdown" name="client_id" id="client_id_" required>
                                 <option value="">Select Client ID</option>
                                 @foreach($clientIdList as $client)
                                     <option value="{{ $client->id }}"
@@ -251,14 +259,14 @@
                             </select>
                         </div>
                             <div class="col-md-3 mb-2">
-                                <div class="font-weight-bold">Portal Fee Cost</div>
+                                <div class="font-weight-bold">Portal Fee Cost<span style="color:red;">*</span></div>
                                 <input type="text" id="portal_fee_cost_id" name="portal_fee_cost_id" class="form-control" 
                                     placeholder="Enter Portal Fee Cost" 
-                                    value="{{ $userinput ? $userinput->portal_fee_cost : '' }}">
+                                    value="{{ $userinput ? $userinput->portal_fee_cost : '' }}" required>
                             </div>
                             <div class="col-md-3 mb-2">
-                                <div class="font-weight-bold">Source</div>
-                                    <select class="form-control select2dropdown" name="source_id" id="source_id">
+                                <div class="font-weight-bold">Source<span style="color:red;">*</span></div>
+                                    <select class="form-control select2dropdown" name="source_id" id="source_id" required>
                                         <option value="">Select Source Info</option>
                                     @foreach ($sourcedetails as $source)
                                     <option value="{{ $source->id }}" {{ ($userinput->source ?? '') == $source->id ? 'selected' : '' }}>
@@ -275,22 +283,22 @@
                         <!-- </div>
                             <div class="row mt-3 mb-2"> -->
                                 <div class="col-md-3 mb-2">
-                                    <div class="font-weight-bold">Copy Cost</div>
+                                    <div class="font-weight-bold">Copy Cost<span style="color:red;">*</span></div>
                                     <input type="text" id="copy_cost_id" name="copy_cost_id" class="form-control" 
                                         placeholder="Enter Copy Cost" 
-                                        value="{{ $userinput ? $userinput->copy_cost : '' }}">
+                                        value="{{ $userinput ? $userinput->copy_cost : '' }}" required>
                                 </div>
                                 <div class="col-md-3 mb-2">
-                                    <div class="font-weight-bold">No of Search Done</div>
+                                    <div class="font-weight-bold">No of Search Done<span style="color:red;">*</span></div>
                                     <input type="text" id="no_of_search_id" name="no_of_search_id" class="form-control" 
                                         placeholder="Enter No of Search" 
-                                        value="{{ $userinput ? $userinput->no_of_search_done : '' }}">
+                                        value="{{ $userinput ? $userinput->no_of_search_done : '' }}" required>
                                 </div>
                                 <div class="col-md-3 mb-2">
-                                    <div class="font-weight-bold">No of Documents Retrieved in TP/Other Applications:</div>
+                                    <div class="font-weight-bold">No of Documents Retrieved in TP/Other Applications<span style="color:red;">*</span></div>
                                     <input type="text" id="document_retrive_id" name="document_retrive_id" class="form-control" 
                                         placeholder="Enter No of Documents Retrieved" 
-                                        value="{{ $userinput ? $userinput->no_of_documents_retrieved : '' }}">
+                                        value="{{ $userinput ? $userinput->no_of_documents_retrieved : '' }}" required>
                                 </div>
                                 <div class="col-md-3 mb-2">
                                     <div class="font-weight-bold">Title Point Account</div>
@@ -559,6 +567,7 @@
                                             <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
                                             <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
                                             <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                            <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                         </select>
                                     </div>
                                 </div>
@@ -621,6 +630,7 @@
                                                     <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
                                                     <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
                                                     <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                                    <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -689,11 +699,12 @@
                                                         @endif
 
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-
+                                                        @if(in_array($orderData->stl_process_id, [12, 7]))
                                                         <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
 
                                                         <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                                        
+                                                        @endif
+                                                        <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                         <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                                                         <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                                                         <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
@@ -741,7 +752,7 @@
                 <!-- // -->
             </div>
             @endif
-            @if($orderData->client_id == 84 || $orderData->client_id == 85 || $orderData->client_id == 86)
+            @if(in_array($orderData->client_id, [84, 85, 86, 87, 88, 89, 90, 91, 92]))
             <h6 class="read_value  font-weight-bold">Order Submission :</h6>
                 <div class="read_value card shadow shadow-md rounded showdow-grey mb-4">
                         <div class="read_value card-body">
@@ -759,18 +770,19 @@
                                                     <select class="form-control" style="width:300px" name="order_status" id="order_status" >
                                                         @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                        @if($orderData->stl_process_id != 12)
+                                                        <!-- @if(in_array($orderData->stl_process_id, [12, 7, 8, 9]) || !in_array($orderData->client_id, [84, 85, 86]))
                                                             <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
-                                                        @endif                                              
+                                                        @endif                                               -->
                                                         <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         @endif
 
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-
+                                                        @if(in_array($orderData->stl_process_id, [12, 7]))
                                                         <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
 
                                                         <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                                        
+                                                        @endif
+                                                        <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                         <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                                                         <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                                                         <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
@@ -817,7 +829,7 @@
                    
                 <!-- // -->
             </div>
-@endif
+        @endif
     </div>
     </div>
     @if($orderData->status_id == 15)
@@ -958,6 +970,29 @@ $('#city').on('change', function () {
 
 
 function order_submition(orderId, type) {
+    var getID = $("#getID").val();
+    if (getID == 82) {
+        const requiredFields = [
+            { id: "#client_id_", message: "Client ID is required." },
+            { id: "#portal_fee_cost_id", message: "Portal Fee Cost is required." },
+            { id: "#source_id", message: "Source is required." },
+            { id: "#copy_cost_id", message: "Copy Cost is required." },
+            { id: "#no_of_search_id", message: "No of Search Done is required." },
+            { id: "#document_retrive_id", message: "No of Documents Retrieved is required." }
+        ];
+
+        for (const field of requiredFields) {
+            if (!$(field.id).val()) {
+                Swal.fire({
+                    title: "Please fill the Column",
+                    text: field.message,
+                    icon: "error"
+                });
+                return false;
+            }
+        }
+    }
+
         var checklistItems = [];
         $("input[name='checks[]']:checked").each(function() {
             checklistItems.push($(this).val());
@@ -1276,8 +1311,10 @@ function initializeTimer() {
             applyTimerClass("timer-gold");
         } else if (elapsedHours <= phaseDuration * 3) {
             applyTimerClass("timer-orange");
-        } else {
+        } else if (elapsedHours <= phaseDuration * 4) {
             applyTimerClass("timer-red");
+        } else {
+            applyTimerClass("timer-brown");
         }
     }
 

@@ -132,7 +132,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    @role('Super Admin|Business Head|SPOC|PM/TL')
+                                    @role('Super Admin|Business Head|SPOC|PM/TL|AVP/VP')
                                     <a href="#"><span class="edit_user ml-2"  data-id="{{ $users->id }}">
                                         <img class="menuicon tbl_editbtn" src="{{asset('assets/images/edit.svg')}}" >&nbsp;
                                     </span></a>
@@ -386,6 +386,9 @@
                 $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
                 @endrole
                 @role('Business Head')
+                $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
+                @endrole
+                @role('AVP/VP')
                 $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
                 @endrole
             }

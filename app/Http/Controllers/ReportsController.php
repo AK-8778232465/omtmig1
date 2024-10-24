@@ -29,6 +29,8 @@ class ReportsController extends Controller
     public function get_lob(Request $request)
     {
         $client_id = $request->client_id;
+        $product_id = $request->product_id;
+
         if (!is_array($client_id)) {
             $client_id = [$client_id];
         }
@@ -45,17 +47,34 @@ class ReportsController extends Controller
         });
         }
 
-        return response()->json($getlob); // Return JSON response
+        if (in_array('All', $client_id)) {
+            $getproduct = DB::table('stl_item_description')
+                        ->select('id', 'process_name', 'project_code')
+                        ->get();
+        }else{
+            $getproduct = DB::table('stl_item_description')
+                        ->select('id', 'process_name', 'project_code')
+                        ->whereIn('client_id', $client_id)
+                        ->get();
+        }
+
+
+        return response()->json([
+            'lob' => $getlob,
+            'products' => $getproduct
+        ]); 
     }
 
 
     public function get_process(Request $request)
     {
         $lob_id = $request->lob_id;
+        $client_id = $request->client_id;
+
         if (!is_array($lob_id)) {
             $lob_id = [$lob_id];
         }
-        if (in_array('All', $lob_id)) {
+        if (in_array('Select Lob', $lob_id)) {
             $getprocess = DB::table('stl_process')
                             ->select('id', 'name')
                             ->get();
@@ -67,7 +86,18 @@ class ReportsController extends Controller
 
         }
 
-        return response()->json($getprocess); 
+    if($lob_id && $client_id){
+        $get_product = DB::table('stl_item_description')
+                    ->select('id', 'process_name', 'project_code')
+                    ->where('client_id', $client_id)
+                    ->where('lob_id', $lob_id)
+                    ->get();
+    }
+    
+        return response()->json([
+            'process' => $getprocess,
+            'products' => $get_product
+        ]); 
     }
 
 
@@ -89,7 +119,7 @@ class ReportsController extends Controller
         } else {
             $getprocess = DB::table('stl_item_description')
                             ->select('id', 'process_name', 'project_code')
-                            ->where('process_id', $process_type_id)
+                            ->whereIn('process_id', $process_type_id)
                             ->where('client_id', $client_id)
                             ->where('lob_id', $lob_id)
                             ->get();
@@ -165,15 +195,15 @@ class ReportsController extends Controller
         }
 
         if (!empty($client_id) && $client_id[0] !== 'All') {
-            $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+            $statusCountsQuery->where('stl_item_description.client_id', $client_id);
         }
 
         if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
             $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
 
-        if (!empty($lob_id) && $lob_id[0] !== 'All') {
-            $statusCountsQuery->whereIn('oms_order_creations.lob_id', $lob_id);
+        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+            $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
         }
 
         $statusCounts = $statusCountsQuery->get();
@@ -298,7 +328,7 @@ private function getProcessIdsBasedOnUserRole($user)
             ->where('stl_client.is_approved', 1);
 
         if (!empty($client_id) && $client_id[0] !== 'All') {
-            $query->whereIn('stl_item_description.client_id', $client_id);
+            $query->where('stl_item_description.client_id', $client_id);
         }
 
         if (!empty($product_id) && $product_id[0] !== 'All') {
@@ -309,8 +339,8 @@ private function getProcessIdsBasedOnUserRole($user)
             $query->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
 
-        if (!empty($lob_id) && $lob_id[0] !== 'All') {
-            $query->whereIn('oms_order_creations.lob_id', $lob_id);
+        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+            $query->where('oms_order_creations.lob_id', $lob_id);
         }
         $results = $query->orderBy('oms_order_creations.id', 'desc')->get();
         $results = $results->map(function($item) {
@@ -421,15 +451,15 @@ private function getProcessIdsBasedOnUserRole($user)
         }
     
         if (!empty($client_id) && $client_id[0] !== 'All') {
-            $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+            $statusCountsQuery->where('stl_item_description.client_id', $client_id);
         }    
     
 if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
             $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
 
-        if (!empty($lob_id) && $lob_id[0] !== 'All') {
-            $statusCountsQuery->whereIn('oms_order_creations.lob_id', $lob_id);
+        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+            $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
         }
         $statusCounts = $statusCountsQuery->get();
     
@@ -466,7 +496,7 @@ if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
                     ->where('oms_order_creations.is_active', 1)
                     ->where('oms_order_creations.status_id', 5)
                     ->where('oms_order_creations.assignee_user_id', $userid)
-                    ->whereIn('stl_item_description.client_id', $client_id)
+                    ->where('stl_item_description.client_id', $client_id)
                     ->count();
             } else {
                 $completedCount = DB::table('oms_order_creations')
@@ -592,7 +622,16 @@ public function orderTimeTaken(Request $request) {
         }
     
         if (!empty($client_id) && $client_id[0] !== 'All') {
-            $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+            $statusCountsQuery->where('stl_item_description.client_id', $client_id);
+        }
+
+        
+        if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
+        }
+    
+        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+            $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
         }
     
         if(!empty($product_id) && $product_id[0] !== 'All'){
@@ -797,10 +836,11 @@ public function attendance_report(Request $request)
 public function production_report(Request $request) {
     $user = Auth::user();
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-    $client_id = $request->input('client_id');
-    $lob_id = $request->input('lob_id');
-    $process_type_id = $request->input('process_type_id');
-    $product_id = $request->input('product_id');
+    
+    $clientId = $request->input('client_id');
+    $lobId = $request->input('lob_id');
+    $processTypeId = $request->input('process_type_id');
+    $productId = $request->input('product_id');
     $selectedDateFilter = $request->input('selectedDateFilter');
     $fromDateRange = $request->input('fromDate_range');
     $toDateRange = $request->input('toDate_range');
@@ -809,6 +849,74 @@ public function production_report(Request $request) {
     $length = $request->input('length');
     $searchValue = $request->input('search.value'); 
     
+    // Date filtering logic
+    list($fromDate, $toDate) = $this->getDateRange($selectedDateFilter, $fromDateRange, $toDateRange);
+
+    $statusCountsQuery = DB::table('production_tracker')
+        ->leftJoin('oms_order_creations as order_creation_main', 'production_tracker.order_id', '=', 'order_creation_main.id')
+        ->leftJoin('oms_users as assignee_user', 'order_creation_main.assignee_user_id', '=', 'assignee_user.id')
+        ->leftJoin('oms_users as qa_user', 'order_creation_main.assignee_qa_id', '=', 'qa_user.id')
+        ->leftJoin('oms_users as typist_user', 'order_creation_main.typist_id', '=', 'typist_user.id')
+        ->leftJoin('oms_users as typist_qc_user', 'order_creation_main.typist_qc_id', '=', 'typist_qc_user.id')
+        ->leftJoin('stl_item_description', 'order_creation_main.process_id', '=', 'stl_item_description.id')
+        ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->leftJoin('stl_lob', 'order_creation_main.lob_id', '=', 'stl_lob.id')
+        ->leftJoin('stl_process', 'order_creation_main.process_type_id', '=', 'stl_process.id')
+        ->leftJoin('oms_state', 'order_creation_main.state_id', '=', 'oms_state.id')
+        ->leftJoin('county', 'order_creation_main.county_id', '=', 'county.id')
+        ->leftJoin('oms_status', 'order_creation_main.status_id', '=', 'oms_status.id')
+        ->leftJoin('oms_vendor_information', 'production_tracker.accurate_client_id', '=', 'oms_vendor_information.id')
+        ->leftJoin('oms_accurate_source', 'production_tracker.source', '=', 'oms_accurate_source.id')
+
+        ->select(
+            'order_creation_main.order_date as order_date',
+            DB::raw("CONCAT(assignee_user.emp_id, '(', assignee_user.username, ')') as assignee_empid"),
+            DB::raw("CONCAT(qa_user.emp_id, '(', qa_user.username, ')') as qa_empid"),
+            DB::raw("CONCAT(typist_user.emp_id, '(', typist_user.username, ')') as typist_empid"),
+            DB::raw("CONCAT(typist_qc_user.emp_id, '(', typist_qc_user.username, ')') as typist_qc_empid"),
+            'stl_item_description.process_name as process_name',
+            'oms_vendor_information.accurate_client_id as acc_client_id',
+            'order_creation_main.order_id as order_num',
+            'oms_state.short_code as short_code',
+            'county.county_name as county_name',
+            'production_tracker.portal_fee_cost as portal_fee_cost',
+            'oms_accurate_source.source_name as source_name',
+            'production_tracker.production_date as production_date',
+            'production_tracker.copy_cost as copy_cost',
+            'production_tracker.no_of_search_done as no_of_search_done',
+            'production_tracker.no_of_documents_retrieved as no_of_documents_retrieved',
+            'production_tracker.title_point_account as title_point_account',
+            'production_tracker.purchase_link as purchase_link',
+            'production_tracker.username as production_username',
+            'production_tracker.password as password',
+            'order_creation_main.completion_date as completion_date',
+            'oms_status.status as status',
+            'stl_item_description.tat_value as tat_value',
+            'order_creation_main.comment as comment'
+        )
+        ->where('order_creation_main.is_active', 1)
+        ->where('stl_item_description.is_approved', 1);
+
+    if ($fromDate && $toDate) {
+        $statusCountsQuery->whereBetween('order_creation_main.order_date', [$fromDate, $toDate]);
+    }
+
+    $this->applyFilters($statusCountsQuery, $processIds, $clientId, $lobId, $processTypeId, $productId, $searchValue);
+
+    $this->applySorting($statusCountsQuery, $request);
+
+    $totalRecords = $statusCountsQuery->count();
+    $result = $statusCountsQuery->skip($start)->take($length)->get();
+
+    return response()->json([
+        'draw' => intval($draw),
+        'recordsTotal' => $totalRecords,
+        'recordsFiltered' => $totalRecords,
+        'data' => $result
+    ]);
+}
+
+private function getDateRange($selectedDateFilter, $fromDateRange, $toDateRange) {
     $fromDate = null;
     $toDate = null;
 
@@ -832,78 +940,40 @@ public function production_report(Request $request) {
         }
     }
 
-    $statusCountsQuery = DB::table('production_tracker')
-        ->leftJoin('oms_order_creations as order_creation_main', 'production_tracker.order_id', '=', 'order_creation_main.id')
-        ->leftJoin('oms_users as assignee_user', 'order_creation_main.assignee_user_id', '=', 'assignee_user.id')
-        ->leftJoin('oms_users as qa_user', 'order_creation_main.assignee_qa_id', '=', 'qa_user.id')
-        ->leftJoin('oms_users as typist_user', 'order_creation_main.typist_id', '=', 'typist_user.id')
-        ->leftJoin('oms_users as typist_qc_user', 'order_creation_main.typist_qc_id', '=', 'typist_qc_user.id')
-        ->leftJoin('stl_item_description', 'order_creation_main.process_id', '=', 'stl_item_description.id')
-        ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
-        ->leftJoin('stl_lob', 'order_creation_main.lob_id', '=', 'stl_lob.id')
-        ->leftJoin('stl_process', 'order_creation_main.process_type_id', '=', 'stl_process.id')
-        ->leftJoin('oms_state', 'order_creation_main.state_id', '=', 'oms_state.id')
-        ->leftJoin('county', 'order_creation_main.county_id', '=', 'county.id')
-        ->leftJoin('oms_status', 'order_creation_main.status_id', '=', 'oms_status.id')
-        ->leftJoin('oms_vendor_information', 'production_tracker.accurate_client_id', '=', 'oms_vendor_information.id')
-        ->select(
-            'order_creation_main.order_date as order_date',
-            'assignee_user.emp_id as assignee_empid',
-            'qa_user.emp_id as qa_empid',
-            'typist_user.emp_id as typist_empid',
-            'typist_qc_user.emp_id as typist_qc_empid',
-            'stl_item_description.process_name as process_name',
-            'oms_vendor_information.accurate_client_id as acc_client_id',
-            'order_creation_main.order_id as order_num',
-            'oms_state.short_code as short_code',
-            'county.county_name as county_name',
-            'production_tracker.portal_fee_cost as portal_fee_cost',
-            'production_tracker.source as source',
-            'production_tracker.production_date as production_date',
-            'production_tracker.copy_cost as copy_cost',
-            'production_tracker.no_of_search_done as no_of_search_done',
-            'production_tracker.no_of_documents_retrieved as no_of_documents_retrieved',
-            'production_tracker.title_point_account as title_point_account',
-            'production_tracker.purchase_link as purchase_link',
-            'production_tracker.username as production_username',
-            'production_tracker.password as password',
-            'order_creation_main.completion_date as completion_date',
-            'oms_status.status as status',
-            'stl_item_description.tat_value as tat_value',
-            'order_creation_main.comment as comment'
-        )
-        ->where('order_creation_main.is_active', 1)
-        ->where('stl_item_description.is_approved', 1);
-
-    if ($fromDate && $toDate) {
-        $statusCountsQuery->whereBetween('order_creation_main.order_date', [$fromDate, $toDate]);
-    }
-
-    if (!empty($processIds)) {
-        $statusCountsQuery->whereIn('order_creation_main.process_id', $processIds);
-    }
-
-    if (!empty($product_id) && $product_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('order_creation_main.process_id', $product_id);
-    }
-
-    if (!empty($client_id) && $client_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
-    }
-    if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('order_creation_main.process_type_id', $process_type_id);
-    }
-
-if (!empty($lob_id) && $lob_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('order_creation_main.lob_id', $lob_id);
+    return [$fromDate, $toDate];
 }
 
+private function applyFilters($query, $processIds, $clientId, $lobId, $processTypeId, $productId, $searchValue) {
+    if (!empty($processIds)) {
+        $query->whereIn('order_creation_main.process_id', $processIds);
+    }
+
+    if (!empty($productId) && $productId[0] !== 'All') {
+        $query->whereIn('order_creation_main.process_id', $productId);
+    }
+
+    if (!empty($clientId) && $clientId[0] !== 'All') {
+        $query->where('stl_item_description.client_id', $clientId);
+    }
+
+    if (!empty($processTypeId) && $processTypeId[0] !== 'All') {
+        $query->whereIn('order_creation_main.process_type_id', $processTypeId);
+    }
+
+    if (!empty($lobId) && $lobId[0] !== 'Select Lob') {
+        $query->where('order_creation_main.lob_id', $lobId);
+    }
+
     if (!empty($searchValue)) {
-        $statusCountsQuery->where(function($query) use ($searchValue) {
-            $query->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
+        $query->where(function($q) use ($searchValue) {
+            $q->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('assignee_user.username', 'like', "%{$searchValue}%")
                   ->orWhere('qa_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('qa_user.username', 'like', "%{$searchValue}%")
                   ->orWhere('typist_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('typist_user.username', 'like', "%{$searchValue}%")
                   ->orWhere('typist_qc_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('typist_qc_user.username', 'like', "%{$searchValue}%")
                   ->orWhere('stl_item_description.process_name', 'like', "%{$searchValue}%")
                   ->orWhere('order_creation_main.order_id', 'like', "%{$searchValue}%")
                   ->orWhere('oms_state.short_code', 'like', "%{$searchValue}%")
@@ -913,7 +983,9 @@ if (!empty($lob_id) && $lob_id[0] !== 'All') {
                   ->orWhere('oms_status.status', 'like', "%{$searchValue}%");
         });
     }
+}
 
+private function applySorting($query, Request $request) {
     $orderColumnIndex = $request->input('order.0.column'); 
     $orderDirection = $request->input('order.0.dir'); 
 
@@ -923,13 +995,17 @@ if (!empty($lob_id) && $lob_id[0] !== 'All') {
         'qa_user.emp_id',
         'typist_user.emp_id',
         'typist_qc_user.emp_id',
+        'assignee_user.username',
+        'qa_user.username',
+        'typist_user.username',
+        'typist_qc_user.username',
         'stl_item_description.process_name',
         'oms_vendor_information.accurate_client_id',
         'order_creation_main.order_id',
         'oms_state.short_code',
         'county.county_name',
         'production_tracker.portal_fee_cost',
-        'production_tracker.source',
+        'oms_accurate_source.source_name',
         'production_tracker.production_date',
         'production_tracker.copy_cost',
         'production_tracker.no_of_search_done',
@@ -945,19 +1021,10 @@ if (!empty($lob_id) && $lob_id[0] !== 'All') {
     ];
 
     if (isset($columns[$orderColumnIndex])) {
-        $statusCountsQuery->orderBy($columns[$orderColumnIndex], $orderDirection);
+        $query->orderBy($columns[$orderColumnIndex], $orderDirection);
     }
-
-    $totalRecords = $statusCountsQuery->count();
-    $result = $statusCountsQuery->skip($start)->take($length)->get();
-
-    return response()->json([
-        'draw' => intval($draw),  
-        'recordsTotal' => $totalRecords,
-        'recordsFiltered' => $totalRecords, 
-        'data' => $result
-    ]);
 }
+
 
 public function exportProductionReport(Request $request) {
     $user = Auth::user();
@@ -1009,19 +1076,20 @@ public function exportProductionReport(Request $request) {
         ->leftJoin('county', 'order_creation_main.county_id', '=', 'county.id')
         ->leftJoin('oms_status', 'order_creation_main.status_id', '=', 'oms_status.id')
         ->leftJoin('oms_vendor_information', 'production_tracker.accurate_client_id', '=', 'oms_vendor_information.id')
+        ->leftJoin('oms_accurate_source', 'production_tracker.source', '=', 'oms_accurate_source.id')
         ->select(
             'order_creation_main.order_date as order_date',
-            'assignee_user.emp_id as assignee_empid',
-            'qa_user.emp_id as qa_empid',
-            'typist_user.emp_id as typist_empid',
-            'typist_qc_user.emp_id as typist_qc_empid',
+            DB::raw("CONCAT(assignee_user.emp_id, '(', assignee_user.username, ')') as assignee_empid"),
+            DB::raw("CONCAT(qa_user.emp_id, '(', qa_user.username, ')') as qa_empid"),
+            DB::raw("CONCAT(typist_user.emp_id, '(', typist_user.username, ')') as typist_empid"),
+            DB::raw("CONCAT(typist_qc_user.emp_id, '(', typist_qc_user.username, ')') as typist_qc_empid"),
             'stl_item_description.process_name as process_name',
             'oms_vendor_information.accurate_client_id as acc_client_id',
             'order_creation_main.order_id as order_num',
             'oms_state.short_code as short_code',
             'county.county_name as county_name',
             'production_tracker.portal_fee_cost as portal_fee_cost',
-            'production_tracker.source as source',
+            'oms_accurate_source.source_name as source_name',
             'production_tracker.production_date as production_date',
             'production_tracker.copy_cost as copy_cost',
             'production_tracker.no_of_search_done as no_of_search_done',
@@ -1051,7 +1119,7 @@ public function exportProductionReport(Request $request) {
     }
 
     if (!empty($client_id) && $client_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
+        $statusCountsQuery->where('stl_item_description.client_id', $client_id);
     }
 
     if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
@@ -1059,15 +1127,19 @@ public function exportProductionReport(Request $request) {
     }
 
     if (!empty($lob_id) && $lob_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('order_creation_main.lob_id', $lob_id);
+        $statusCountsQuery->where('order_creation_main.lob_id', $lob_id);
     }
 
     if (!empty($searchValue)) {
-        $statusCountsQuery->where(function($query) use ($searchValue) {
-            $query->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
+        $query->where(function($q) use ($searchValue) {
+            $q->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('assignee_user.username', 'like', "%{$searchValue}%")
                 ->orWhere('qa_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('qa_user.username', 'like', "%{$searchValue}%")
                 ->orWhere('typist_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('typist_user.username', 'like', "%{$searchValue}%")
                 ->orWhere('typist_qc_user.emp_id', 'like', "%{$searchValue}%")
+              ->orWhere('typist_qc_user.username', 'like', "%{$searchValue}%")
                 ->orWhere('stl_item_description.process_name', 'like', "%{$searchValue}%")
                 ->orWhere('order_creation_main.order_id', 'like', "%{$searchValue}%")
                 ->orWhere('oms_state.short_code', 'like', "%{$searchValue}%")
