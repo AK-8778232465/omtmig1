@@ -38,6 +38,10 @@
     color: red;
     font-size: 14px;
         }
+        .timer-brown {
+            color: #654321;
+            font-size: 14px;
+        }
 
         #headline.timer-red {
     color: white;  
@@ -57,6 +61,10 @@
         #headline.timer-orange {
             color: white;
             background-color: orange !important;
+        }
+        #headline.timer-brown {
+            color: white;
+            background-color: #654321 !important;
         }
 
         .sticky-container {
@@ -1301,8 +1309,10 @@ function initializeTimer() {
             applyTimerClass("timer-gold");
         } else if (elapsedHours <= phaseDuration * 3) {
             applyTimerClass("timer-orange");
-        } else {
+        } else if (elapsedHours <= phaseDuration * 4) {
             applyTimerClass("timer-red");
+        } else {
+            applyTimerClass("timer-brown");
         }
     }
 
