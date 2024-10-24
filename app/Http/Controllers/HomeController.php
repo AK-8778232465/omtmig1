@@ -2527,4 +2527,334 @@ public function tat_zone_count(Request $request) {
            
     }
 
+    public function carry_over_monthly_count(Request $request){
+
+        $user = Auth::user();
+        $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+        $client_id = $request->input('client_id');
+        $project_id = $request->input('project_id');
+        $selectedDateFilter = $request->input('selectedDateFilter');
+    
+        $currentDate = Carbon::now();
+        $previousDate = Carbon::now()->subDay();
+
+        $fromDateRange = $request->input('from_date');
+        $toDateRange = $request->input('to_date');
+   
+        $from_date = null;
+        $to_date = null;
+   
+        if ($fromDateRange && $toDateRange) {
+            $from_date = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+            $to_date = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+        } else {
+            $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+            if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+                list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+                $fromDateText = trim($fromDateText);
+                $toDateText = trim($toDateText);
+                preg_match($datePattern, $fromDateText, $fromDateMatches);
+                preg_match($datePattern, $toDateText, $toDateMatches);
+                $from_date = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+                $to_date = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+            } else {
+                preg_match($datePattern, $selectedDateFilter, $dateMatches);
+                $from_date = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+                $to_date = $from_date;
+            }
+        }
+
+        if (!is_array($project_id)) {
+            $project_id = explode(',', $project_id); 
+        }
+
+        if (!is_array($client_id)) {
+            $client_id = explode(',', $client_id); 
+        }
+
+
+        $statusCountsQuery = OrderCreation::query()->with('process', 'client')
+        ->whereHas('process', function ($query) {
+            $query->where('stl_item_description.is_approved', 1);
+        })
+        ->whereHas('client', function ($query) {
+            $query->where('stl_client.is_approved', 1);
+        });
+
+        $statusCountsQuery2 = clone $statusCountsQuery;
+        $statusCountsQuery3 = clone $statusCountsQuery;
+        
+
+
+        //daily
+        $statusCountsQuery4 = clone $statusCountsQuery;
+        $statusCountsQuery5 = clone $statusCountsQuery;
+
+//
+
+
+        if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+            // Case: Project_id is 'All' and client_id is not 'All'
+            $carry_forward= $statusCountsQuery->with('process', 'client')
+                ->whereIn('process_id', $processIds)
+                ->where('is_active', 1)
+                ->where('status_id', '!=', 5)
+                ->where('status_id', '!=', 3)
+                ->where('completion_date', null)
+                ->whereDate('order_date', '<', $from_date)
+                ->whereHas('process', function ($query) use ($client_id) {
+                    $query->whereIn('client_id', $client_id);
+                });
+        } else {
+            if (!in_array('All', $project_id)) {
+                // Case: project_id is specified (not 'All')
+                $carry_forward = $statusCountsQuery->whereIn('process_id', $processIds)
+                ->whereIn('process_id', $project_id)
+                ->where('is_active', 1)
+                ->where('status_id', '!=', 5)
+                ->where('status_id', '!=', 3)
+                ->where('completion_date', null)
+                ->whereDate('order_date', '<', $from_date);
+                // dd('jo');
+            } else {
+                // Case: project_id is 'All'
+                $carry_forward = $statusCountsQuery->whereIn('process_id', $processIds)
+                    ->where('is_active', 1)
+                    ->where('status_id', '!=', 5)
+                    ->where('status_id', '!=', 3)
+                    ->where('completion_date', null)
+                    ->whereDate('order_date', '<', $from_date);
+            }
+        }
+
+        $carry_forward = $carry_forward->count();
+
+
+
+
+
+        if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+            // Case: Project_id is 'All' and client_id is not 'All'
+            $received = $statusCountsQuery2->whereIn('process_id', $processIds)
+                ->where('is_active', 1)
+                ->where('status_id', '!=', 5)
+                ->where('completion_date', null)
+                ->whereDate('order_date', '>=', $from_date)
+                ->whereDate('order_date', '<=', $to_date)
+                ->whereHas('process', function ($query) use ($client_id) {
+                    $query->whereIn('client_id', $client_id);
+                });
+        } else {
+            if (!in_array('All', $project_id)) {
+                // Case: project_id is specified (not 'All')
+                $received = $statusCountsQuery2->whereIn('process_id', $processIds)
+                ->whereIn('process_id', $project_id)
+                ->where('is_active', 1)
+                ->where('status_id', '!=', 5)
+                ->where('completion_date', null)
+                ->whereDate('order_date', '>=', $from_date)
+                ->whereDate('order_date', '<=', $to_date)->get();
+            } else {
+                // Case: project_id is 'All'
+                $received = $statusCountsQuery2->whereIn('process_id', $processIds)
+                    ->where('is_active', 1)
+                    ->where('status_id', '!=', 5)
+                    ->where('completion_date', null)
+                    ->whereDate('order_date', '>=', $from_date)
+                    ->whereDate('order_date', '<=', $to_date);
+            }
+        }
+
+
+        $received = $received->count();
+
+
+
+        if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+            // Case: Project_id is 'All' and client_id is not 'All'
+            $completed = $statusCountsQuery3
+            ->whereDate('completion_date', '>=', $from_date)
+            ->whereDate('completion_date', '<=', $to_date)
+            ->whereDate('order_date', '>=', $from_date)
+            ->whereDate('order_date', '<=', $to_date)
+            ->whereIn('process_id', $processIds)
+            ->where('status_id', 5)
+            ->where('is_active', 1)
+            ->whereHas('process', function ($query) use ($client_id) {
+                $query->whereIn('client_id', $client_id);
+            });
+        } else {
+            if (!in_array('All', $project_id)) {
+                // Case: project_id is specified (not 'All')
+                $completed = $statusCountsQuery3
+                ->whereDate('completion_date', '>=', $from_date)
+                ->whereDate('completion_date', '<=', $to_date)
+                ->whereDate('order_date', '>=', $from_date)
+                ->whereDate('order_date', '<=', $to_date)
+                ->whereIn('process_id', $processIds)
+                ->whereIn('process_id', $project_id)
+                ->where('status_id', 5)
+                ->where('is_active', 1);
+            } else {
+                // Case: project_id is 'All'
+                $completed = $statusCountsQuery3
+                ->whereDate('completion_date', '>=', $from_date)
+                ->whereDate('completion_date', '<=', $to_date)
+                ->whereDate('order_date', '>=', $from_date)
+                ->whereDate('order_date', '<=', $to_date)
+                ->whereIn('process_id', $processIds)
+                ->where('status_id', 5)
+                ->where('is_active', 1);
+            }
+        }
+
+
+        $completed = $completed->count();
+    
+    
+
+        $pending = $carry_forward + $received - $completed;
+
+        if ($pending < 0) {
+            $pending = 0;
+        }
+
+
+        //daily
+
+
+        if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+            // Case: Project_id is 'All' and client_id is not 'All'
+            $daily_carry_forward = $statusCountsQuery4->with('process', 'client')
+                ->whereIn('process_id', $processIds)
+                ->where('is_active', 1)
+                ->where('status_id', '!=', 5)
+                ->where('status_id', '!=', 3)
+                ->where('completion_date', null)
+                ->whereDate('order_date', '=', $previousDate);
+        } else {
+            if (!in_array('All', $project_id)) {
+                // Case: project_id is specified (not 'All')
+                $daily_carry_forward = $statusCountsQuery4->whereIn('process_id', $processIds)
+                    ->whereIn('process_id', $project_id)
+                    ->where('is_active', 1)
+                    ->where('status_id', '!=', 5)
+                    ->where('status_id', '!=', 3)
+                    ->where('completion_date', null)
+                    ->whereDate('order_date', '=', $previousDate);
+            } else {
+                // Case: project_id is 'All'
+                $daily_carry_forward = $statusCountsQuery4->whereIn('process_id', $processIds)
+                    ->where('is_active', 1)
+                    ->where('status_id', '!=', 5)
+                    ->where('status_id', '!=', 3)
+                    ->where('completion_date', null)
+                    ->whereDate('order_date', '=', $previousDate);
+            }
+        }
+
+        $daily_carry_forward = $daily_carry_forward->count();
+
+
+
+
+        if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+            // Case: Project_id is 'All' and client_id is not 'All'
+            $daily_received = $statusCountsQuery2->whereIn('process_id', $processIds)
+                ->where('is_active', 1)
+                ->where('status_id', '!=', 5)
+                ->where('completion_date', null)
+                ->whereDate('order_date', '=', $currentDate);
+        } else {
+            if (!in_array('All', $project_id)) {
+                // Case: project_id is specified (not 'All')
+                $daily_received = $statusCountsQuery2->whereIn('process_id', $processIds)
+                ->whereIn('process_id', $project_id)
+                ->where('is_active', 1)
+                ->where('status_id', '!=', 5)
+                ->where('completion_date', null)
+                ->whereDate('order_date', '=', $currentDate);
+            } else {
+                // Case: project_id is 'All'
+                $daily_received = $statusCountsQuery2->whereIn('process_id', $processIds)
+                    ->where('is_active', 1)
+                    ->where('status_id', '!=', 5)
+                    ->where('completion_date', null)
+                    ->whereDate('order_date', '=', $currentDate);
+            }
+        }
+
+
+        $daily_received = $daily_received->count();
+
+
+
+
+
+        if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+            // Case: Project_id is 'All' and client_id is not 'All'
+            $daily_completed = $statusCountsQuery5
+            ->whereDate('order_date', '>=', $previousDate)
+            ->whereDate('completion_date', '=', $currentDate)
+            ->whereIn('process_id', $processIds)
+            ->where('status_id', 5)
+            ->where('is_active', 1)
+            ->whereHas('process', function ($query) use ($client_id) {
+                $query->whereIn('client_id', $client_id);
+            });
+        } else {
+            if (!in_array('All', $project_id)) {
+                $daily_completed = $statusCountsQuery5
+                ->whereDate('order_date', '>=', $previousDate)
+                ->whereDate('completion_date', '=', $currentDate)
+                ->whereIn('process_id', $processIds)
+                ->whereIn('process_id', $project_id)
+                ->where('status_id', 5)
+                ->where('is_active', 1)
+                ->whereHas('process', function ($query) use ($client_id) {
+                    $query->whereIn('client_id', $client_id);
+                });
+            } else {
+                $daily_completed = $statusCountsQuery5
+                ->whereDate('order_date', '>=', $previousDate)
+                ->whereDate('completion_date', '=', $currentDate)
+                ->whereIn('process_id', $processIds)
+                ->where('status_id', 5)
+                ->where('is_active', 1);
+            }
+        }
+
+
+        $daily_completed = $daily_completed->count();
+
+        $daily_pending = $daily_carry_forward + $daily_received - $daily_completed;
+
+        if ($daily_pending < 0) {
+            $daily_pending = 0;
+        }
+       
+        return response()->json([
+            'data' => [
+                [
+                    'monthLabel' => 'MONTHLY',
+                    'carry_forward' => $carry_forward,
+                    'received' => $received,
+                    'completed' => $completed,
+                    'pending' => $pending,
+                ],
+                [
+                    'monthLabel' => 'DAILY',
+                    'carry_forward' => $daily_carry_forward,
+                    'received' => $daily_received,
+                    'completed' => $daily_completed,
+                    'pending' => $daily_pending,
+
+                ]
+            ]
+        ]);    
+
+
+    }
+
 }
