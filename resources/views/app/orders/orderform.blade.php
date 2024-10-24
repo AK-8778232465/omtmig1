@@ -777,11 +777,11 @@
                                                         @endif
 
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                                        <!-- @if(in_array($orderData->stl_process_id, [12, 7]))
+                                                        @if(in_array($orderData->stl_process_id, [12, 7]))
                                                         <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
 
                                                         <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                                        @endif -->
+                                                        @endif
                                                         <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                         <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                                                         <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
