@@ -425,6 +425,7 @@
     <div class="card mb-4">
     <div class="col-md-12 d-flex">
     <div class="card col-md-5 mt-3 mb-3 ml-3" id="available_resource_table" style="font-size: 12px;">
+        <a href="#" data-toggle="modal" data-target="#dataModal" style="position: absolute; top: 10px; right: 15px; color: blue; font-weight: bold;">*Resources List</a>
         <h4 class="text-center mt-3">Available Resources</h4>
             <div class="card-body">
                 <div class="p-0">
@@ -1023,6 +1024,36 @@
         </div>
      @endif
 </div>
+
+
+<div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataModalLabel">Available Resources</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table id="resourceTable" class="table table-bordered">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Emp Id</th>
+                            <th>Emp Name</th>
+                            <th>Status</th>
+                            <th>Reporting to</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic content will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 {{-- Js --}}
 <script>
@@ -2511,7 +2542,43 @@ function carry_over_monthly(fromDate, toDate, clientId, projectId, selectedDateF
 
 
 
-
+$(document).ready(function() {
+    $('#dataModal').on('show.bs.modal', function () {
+        var table = $('#resourceTable').DataTable({
+            destroy: true,
+            processing: true,
+            serverSide: false,
+            searching: true, 
+            lengthChange: false,
+            pageLength: 5,
+            ajax: {
+                url: "{{ route('resourceTable') }}", 
+                type: "GET",
+                dataSrc: 'data', 
+            },
+            columns: [
+            { data: 'emp_id', name: 'emp_id', className: "text-left" }, 
+            { data: 'username', name: 'username', className: "text-left" },
+            {
+                    data: 'status', 
+                    name: 'status', 
+                    className: "text-left",
+                    render: function(data, type, row) {
+                        return '<strong style="color: ' + (data === 'Available' ? 'green' : 'red') + ';">' + data + '</strong>';
+                    }
+                },
+            { data: 'reporting_to', name: 'reporting_to', className: "text-left" } 
+        ],
+        columnDefs: [
+                { targets: 0, width: '10%' }, 
+                { targets: 1, width: '15%' },
+                { targets: 2, width: '10%' },  
+                { targets: 3, width: '15%' },  
+            ],
+        autoWidth: false
+        });
+    });
+});
   
 
 
