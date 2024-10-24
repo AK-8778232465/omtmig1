@@ -2519,10 +2519,10 @@ public function tat_zone_count(Request $request) {
 
     return response()->json([
             'reachedtat_count' => $totalReachedTatValueCount .','. ' Out of TAT',
-            'red_count' => $totalFourthCount .','. ' Red - Super Rush',
-            'orange_count' => $totalThirdCount .','. ' Orange - Rush', 
-            'blue_count' => $totalSecondCount .','. ' Blue - Priority',
-            'green_count' => $totalFirstCount .','. ' Green - Non Priority	', 
+            'red_count' => $totalFourthCount .','. ' Super Rush',
+            'orange_count' => $totalThirdCount .','. ' Rush', 
+            'blue_count' => $totalSecondCount .','. ' Priority',
+            'green_count' => $totalFirstCount .','. ' Non Priority', 
         ]);        
            
     }

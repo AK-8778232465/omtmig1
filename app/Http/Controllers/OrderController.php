@@ -218,10 +218,10 @@ class OrderController extends Controller
                     if ($statusId == 5) {
                         continue;
                     }
-                    if ($hoursDifference >= $tatHours * 3) {
+                    if ($hoursDifference >= $tatHours * 3 && $hoursDifference < $tatHours * 4) {
                         $resultsByStatus[$statusId]['orderReachfourth'] += 1;
                     } 
-                    elseif ($hoursDifference >= $tatHours * 2) {
+                    elseif ($hoursDifference >= $tatHours * 2 && $hoursDifference < $tatHours * 3) {
                         $resultsByStatus[$statusId]['orderReachthird'] += 1;
                     }
                 }
@@ -1445,8 +1445,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 $className = 'goto-order2'; 
             } elseif ($elapsedHours < ($tatValueInHours*3)) {
                 $className = 'goto-order3'; 
-            } else {
+            } elseif ($elapsedHours < ($tatValueInHours*3)) {
                 $className = 'goto-order4'; 
+            } else {
+                $className = 'goto-order6'; 
             }
             }
         

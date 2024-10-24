@@ -175,6 +175,9 @@
     .goto-order5 {
         background-color: #9ba7ca;
     }
+    .goto-order6 {
+        background-color: #654321;
+    }
     
 
     .goto-order:hover {

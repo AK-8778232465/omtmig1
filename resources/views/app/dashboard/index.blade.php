@@ -452,14 +452,18 @@
                 <div class="card-body">
                     <div class="p-0">
                         <table id="tat_zone_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                            <thead class="text-left" style="font-size: 12px;">
+                            <thead style="font-size: 12px;">
                                 <tr>
-                                    <th width="10%">TAT Zone</th>
-                                    <th width="12%">Count</th>
+                                    <th class="text-left" width="10%">TAT Zone</th>
+                                    <th class="text-center" width="12%">Count</th>
                                 </tr>
                             </thead>
                             <tbody class="text-left" style="font-size: 12px;"></tbody>
                         </table>
+                         <!-- Note below the DataTable -->
+                        <p id="tat_note" style="margin-top: 10px; font-size: 14px; color: #555;">
+                            <b>Note:</b> Each TAT zone represents 25% of the total TAT.
+                        </p>
                     </div>
                 </div>
         </div>
@@ -1942,13 +1946,12 @@ $(document).ready(function() {
     
 
 function tat_zone(fromDate, toDate, clientId, project_id, selectedDateFilter) {
+    var fromDate = $('#fromDate_range').val();
+    var toDate = $('#toDate_range').val();
+    var client_id = $('#client_id_dcf').val();
+    var project_id = $('#product_id').val();
 
-var fromDate = $('#fromDate_range').val();
-var toDate = $('#toDate_range').val();
-var client_id = $('#client_id_dcf').val();
-var project_id = $('#product_id').val();
-
-var datatable = $('#tat_zone_datatable').DataTable({
+    var datatable = $('#tat_zone_datatable').DataTable({
         destroy: true,
         processing: true,
         serverSide: false,
@@ -1978,11 +1981,14 @@ var datatable = $('#tat_zone_datatable').DataTable({
                 json.green_count 
                 ];
 
-            orderedCounts.forEach(function(item) {
+                orderedCounts.forEach(function (item) {
                 var splitData = item.split(", ");
+                    var tat_zone_value = splitData[1].trim(); // Ensure trimming of extra spaces
+                    var count_value = splitData[0].trim();
+
                     data.push({
-                    tat_zone: splitData[1],
-                    count: splitData[0]    
+                        tat_zone: tat_zone_value,
+                        count: count_value
                     });
                 });
 
@@ -1994,18 +2000,38 @@ var datatable = $('#tat_zone_datatable').DataTable({
             data: 'tat_zone', 
                 title: 'TAT Zone',
                 render: function (data) {
-                    return `<span>${data}</span>`; 
+                    var color = '';
+                    var cleanedData = data.toLowerCase().trim(); // Case-insensitive match and trim
+
+                    // Determine the color based on the TAT zone
+                    if (cleanedData === 'out of tat') {
+                        color = 'brown';
+                    } else if (cleanedData === 'super rush') {
+                        color = 'red';
+                    } else if (cleanedData === 'rush') {
+                        color = 'orange';
+                    } else if (cleanedData === 'priority') {
+                        color = 'blue';
+                    } else if (cleanedData === 'non priority') {
+                        color = 'green'; // This should correctly match "Non Priority"
+                    } else {
+                        color = 'black'; // Default color for unknown cases
+                    }
+
+                    // Return the colored span
+                    return `<span style="color:${color};">${data}</span>`;
                 }
             },
         { 
             data: 'count', 
             title: 'Count', 
             render: function (data) {
-                return `<span>${data}</span>`;
+                    // Inline CSS for center alignment
+                    return `<span style="display: block; text-align: center;">${data}</span>`;
             }
         }
         ]
-});
+    });
 }
 
 
@@ -2422,18 +2448,17 @@ setInterval(total_users, 600000);
 
 
 function total_users_name() {
-    // Initialize the DataTable
     var table = $('#available_resources').DataTable({
         destroy: true,
         processing: true,
         serverSide: false,
-        searching: true, // Disable the search bar
+        searching: true, 
         lengthChange: false,
         pageLength: 5,
         ajax: {
-            url: "{{ route('total_users_name') }}", // Adjust route if necessary
+            url: "{{ route('total_users_name') }}", 
             type: "GET",
-            dataSrc: 'data', // Change 'data' to whatever your response wraps the array in
+            dataSrc: 'data', 
         },
         columns: [
             { data: 'emp_id', name: 'emp_id' }, // Maps to Emp Id
