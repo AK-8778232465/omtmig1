@@ -1287,7 +1287,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         16 => 'Typing',
                         17 => 'Typing QC'
                     ];
-                    if (!in_array($order->process_type_id, [12, 7, 8, 9])) {
+                        if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86])) {
                         unset($statusMapping[15]);
                     }
                         if (!in_array($order->process_type_id, [12, 7])) {
