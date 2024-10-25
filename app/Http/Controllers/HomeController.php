@@ -2528,6 +2528,139 @@ public function tat_zone_count(Request $request) {
 
     }
 
+    public function carry_over_monthly_count(Request $request){
+
+        $user = Auth::user();
+        $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+
+        $currentDate = Carbon::now();
+
+
+        $firstDateOfCurrentMonth = Carbon::now()->startOfMonth();
+
+        $statusCountsQuery = OrderCreation::query()->with('process', 'client')
+        ->whereHas('process', function ($query) {
+            $query->where('stl_item_description.is_approved', 1);
+        })
+        ->whereHas('client', function ($query) {
+            $query->where('stl_client.is_approved', 1);
+        });
+
+        $statusCountsQuery2 = clone $statusCountsQuery;
+        $statusCountsQuery3 = clone $statusCountsQuery;
+
+
+
+        //daily
+        $statusCountsQuery4 = clone $statusCountsQuery;
+        $statusCountsQuery5 = clone $statusCountsQuery;
+        $statusCountsQuery6 = clone $statusCountsQuery;
+
+//
+
+
+        $carry_forward= $statusCountsQuery->with('process', 'client')
+            ->whereIn('process_id', $processIds)
+            ->where('is_active', 1)
+            ->where('status_id', '!=', 3)
+            ->whereDate('order_date', '<', $firstDateOfCurrentMonth);
+
+        $carry_forward = $carry_forward->count();
+
+
+
+
+
+            $received = $statusCountsQuery2->with('process', 'client')
+                ->whereIn('process_id', $processIds)
+                ->where('is_active', 1)
+                ->whereDate('order_date', '>=', $firstDateOfCurrentMonth);
+
+            $received = $received->count();
+
+
+
+
+            $completed = $statusCountsQuery3->with('process', 'client')
+            ->whereDate('completion_date', '>=', $firstDateOfCurrentMonth)
+            ->whereDate('completion_date', '<=', $currentDate)
+            ->whereIn('process_id', $processIds)
+            ->where('status_id', 5)
+            ->where('is_active', 1);
+
+            $completed = $completed->count();
+
+
+
+        $pending = $carry_forward + $received - $completed;
+
+        if ($pending < 0) {
+            $pending = 0;
+        }
+
+
+        //daily
+
+
+        $daily_carry_forward = $statusCountsQuery4->with('process', 'client')
+            ->whereIn('process_id', $processIds)
+            ->where('is_active', 1)
+            ->where('status_id', '!=', 3)
+            ->whereDate('order_date', '<', $currentDate);
+
+
+        $daily_carry_forward = $daily_carry_forward->count();
+
+
+
+
+
+        $daily_received = $statusCountsQuery5->with('process', 'client')
+        ->whereIn('process_id', $processIds)
+            ->where('is_active', 1)
+            ->whereDate('order_date', '=', $currentDate);
+
+        $daily_received = $daily_received->count();
+
+
+
+        $daily_completed = $statusCountsQuery6->with('process', 'client')
+        ->whereDate('completion_date', '=', $currentDate)
+        ->whereIn('process_id', $processIds)
+        ->where('status_id', 5)
+        ->where('is_active', 1);
+
+        $daily_completed = $daily_completed->count();
+
+        $daily_pending = $daily_carry_forward + $daily_received - $daily_completed;
+
+        if ($daily_pending < 0) {
+            $daily_pending = 0;
+        }
+
+        return response()->json([
+            'data' => [
+                [
+                    'monthLabel' => 'MONTHLY',
+                    'carry_forward' => $carry_forward,
+                    'received' => $received,
+                    'completed' => $completed,
+                    'pending' => $pending,
+                ],
+                [
+                    'monthLabel' => 'DAILY',
+                    'carry_forward' => $daily_carry_forward,
+                    'received' => $daily_received,
+                    'completed' => $daily_completed,
+                    'pending' => $daily_pending,
+
+                ]
+            ]
+        ]);
+
+
+    }
 
     public function resourceTable() {
 
@@ -2552,7 +2685,7 @@ public function tat_zone_count(Request $request) {
                     'id' => $user->id,
                     'emp_id' => $user->emp_id,
                     'username' => $user->username,
-                    'status' => $user->logged_in ? 'Available' : 'UnAvailable',
+                    'status' => $user->logged_in ? 'Available' : 'Unavailable',
                     'reporting_to' => $user->reporting_username ?? 'N/A'
                 ];
             }),
