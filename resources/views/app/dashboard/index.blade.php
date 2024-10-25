@@ -470,7 +470,34 @@
                 </div>
         </div>
         </div>
+</div>
+@endif
+
+
+
+{{-- carry over count --}}
+@if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')))
+<div class="d-flex justify-content-center">
+   <div class="card col-md-8 mt-3 mb-3 ml-3 carry_over_monthly_table" id="carry_over_monthly_table" style="font-size: 12px;">
+    <h4 class="text-center mt-3">Order Inflow Data</h4>
+        <div class="card-body">
+            <div class="p-0">
+                <table id="carry_over_monthly" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <thead class="text-center" style="font-size: 12px;">
+                        <tr>
+                            <th width="10%"></th>
+                            <th width="12%">Carry Forward</th>
+                            <th width="12%">Received</th>
+                            <th width="12%">Completed</th>
+                            <th width="12%">Pending</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center" style="font-size: 12px;"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
+</div>
 @endif
 
 <div id="rightContent">
@@ -1106,6 +1133,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const pendingwise_status = document.getElementById('pending_status_table');
     const available_resource_table = document.getElementById('available_resource_table');
     const tat_zone_table = document.getElementById('tat_zone_table');
+    const carry_over_monthly_table = document.getElementById('carry_over_monthly_table');
+
 
 
     // Function to update the visibility based on the toggle switch state
@@ -1128,6 +1157,7 @@ document.addEventListener('DOMContentLoaded', function() {
             pendingwise_status.style.display = 'block';
             available_resource_table.style.display = 'block';
             tat_zone_table.style.display = 'block';
+            carry_over_monthly_table.style.display = 'block';
 
 
         } else {
@@ -1148,6 +1178,7 @@ document.addEventListener('DOMContentLoaded', function() {
             pendingwise_status.style.display = 'none';
             available_resource_table.style.display = 'none';
             tat_zone_table.style.display = 'none';
+            carry_over_monthly_table.style.display = 'none';
 
 
         }
@@ -2479,7 +2510,55 @@ setInterval(total_users_name, 600000);
 
 
 
+function carry_over_monthly() {
+    datatable = $('#carry_over_monthly').DataTable({
+        destroy: true,
+        processing: true,
+        serverSide: true,
+        searching: false,
+        paging: false,
+        lengthChange: false,
+        info: false,
+        ajax: {
+            url: "{{ route('carry_over_monthly_count') }}",
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            dataSrc: function(json) {
+                return [
+                    {
+                        monthLabel: "MONTHLY",
+                        carry_forward: json.data[0].carry_forward,
+                        received: json.data[0].received,
+                        completed: json.data[0].completed,
+                        pending: json.data[0].pending
+                    },
+                    {
+                        monthLabel: "DAILY",
+                        carry_forward: json.data[1].carry_forward,
+                        received: json.data[1].received,
+                        completed: json.data[1].completed,
+                        pending: json.data[1].pending
+                    }
+                ];
+            }
+        },
+        columns: [
+            { data: 'monthLabel', name: 'monthLabel'},
+            { data: 'carry_forward', name: 'carry_forward'},
+            { data: 'received', name: 'received'},
+            { data: 'completed', name: 'completed'},
+            { data: 'pending', name: 'pending'}
+        ],
+        ordering: false
+    });
+}
 
+
+$(document).ready(function() {
+    carry_over_monthly();
+});
 
 
 $(document).ready(function() {
