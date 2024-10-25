@@ -137,7 +137,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-lg-4 mt-4">
+                        <div class="col-lg-4 mt-4" id="hide_reasign">
                             <input  type="checkbox" id="re_assign" name="re_assign"><label style="font-size: 0.8rem !important;" class="mx-2" for="">Re-Assign</label>
                         </div>
                     </div>
@@ -1592,6 +1592,12 @@ $(document).on('focus', '.status-dropdown', function() {
 
                 var orderDate = res['order_date'].replace(' ', 'T');
                 $("#order_date_ed").val(orderDate);
+
+                if (res['status_id'] === 5) {
+                $("#hide_reasign").hide();
+                } else {
+                    $("#hide_reasign").show();
+                }
 
 				$("#myModalEdit").modal('show');
 			}

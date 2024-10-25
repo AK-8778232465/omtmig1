@@ -1137,8 +1137,7 @@ public function dashboard_userwise_count(Request $request)
 {
     $user = Auth::user();
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
-    // $fromDate = $request->input('from_date');
-    // $toDate = $request->input('to_date');
+
     $client_id = $request->input('client_id');
     $project_id = $request->input('project_id');
 
@@ -1150,6 +1149,7 @@ public function dashboard_userwise_count(Request $request)
     $fromDate = null;
     $toDate = null;
 
+    // Handle date ranges
     if ($fromDateRange && $toDateRange) {
         $fromDate = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
         $toDate = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
@@ -1170,6 +1170,7 @@ public function dashboard_userwise_count(Request $request)
         }
     }
 
+    // Build query
     $statusCountsQuery = OrderCreation::query();
     $statusCountsQuery
         ->whereNotNull('assignee_user_id')
@@ -1179,8 +1180,8 @@ public function dashboard_userwise_count(Request $request)
         })
         ->leftJoin('oms_users', 'oms_order_creations.assignee_user_id', '=', 'oms_users.id')
         ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->select('oms_users.emp_id', 'oms_users.username') // Include fields used in GROUP BY
         ->selectRaw('
-            CONCAT(oms_users.emp_id, " (", oms_users.username, ")") as userinfo,
             SUM(CASE WHEN status_id = 1 THEN 1 ELSE 0 END) as `status_1`,
             SUM(CASE WHEN status_id = 2 THEN 1 ELSE 0 END) as `status_2`,
             SUM(CASE WHEN status_id = 3 THEN 1 ELSE 0 END) as `status_3`,
@@ -1196,7 +1197,7 @@ public function dashboard_userwise_count(Request $request)
             COUNT(*) as `All`', [$fromDate, $toDate])
         ->where('oms_order_creations.is_active', 1)
         ->whereIn('oms_order_creations.process_id', $processIds)
-        ->groupBy('oms_order_creations.assignee_user_id');
+        ->groupBy('oms_users.emp_id', 'oms_users.username'); // Add necessary columns to GROUP BY
 
     if (!empty($project_id) && $project_id[0] !== 'All') {
         $statusCountsQuery->whereIn('oms_order_creations.process_id', $project_id);
@@ -1210,7 +1211,7 @@ public function dashboard_userwise_count(Request $request)
 
     $dataForDataTables = $statusCounts->map(function ($count) {
         return [
-            'userinfo' => $count->userinfo,
+            'userinfo' => $count->emp_id . " (" . $count->username . ")",
             'status_1' => $count->status_1,
             'status_2' => $count->status_2,
             'status_3' => $count->status_3,

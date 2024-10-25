@@ -815,7 +815,7 @@
             </div>
         </div>
     </div>
-            </div>
+</div>
 </section>
         @if(Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
         <div class="card mt-5 tabledetails" id="Trans_hide" style="display: none;">
