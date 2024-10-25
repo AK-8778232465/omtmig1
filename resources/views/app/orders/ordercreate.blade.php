@@ -160,22 +160,22 @@
 
     #selectclient {
         width: 120px;
-        
+
     }
-  
+
     .select2-container--default .select2-results__option {
         text-align: left;
-        padding-left: 10px; 
+        padding-left: 10px;
     }
 
 
     .select2-container--default .select2-selection--single .select2-selection__rendered {
-        text-align: left; 
-        padding-left: 10px; 
-    } 
+        text-align: left;
+        padding-left: 10px;
+    }
 
 
-  
+
 </style>
 <div class="container-fluid mt-2">
     <div class="frame d-flex align-items-center justify-content-center" style="height: 100%; width: 100%;">
@@ -199,7 +199,7 @@
                                 <option value="{{ $client->id }}" data-client-id="{{ $client->id }}">{{ $client->client_name }}</option>
                                 @endforeach
                             </select>
-                            
+
                         </div>
 
                         <div class="form-group col-lg-3 mb-3 pb-0">
@@ -314,7 +314,7 @@
                                 @endforeach
                             </select>
                         </div>
-    
+
                         <div class="form-group col-lg-3 mb-3 pb-0" id="typist-qc-container">
                             <label class="font-weight-bold">Typist QC</label>
                             <select id="typist_qc_id" name="typist_qc_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist QC"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
@@ -325,7 +325,7 @@
                             </select>
                         </div>
                         {{-- 4th end --}}
-                        
+
                     </div>
 
                     <div class="text-center form-group row mb-3 pb-2">
@@ -348,7 +348,7 @@
                     </div>
 
                     <div class="form-group col-lg-6 mb-2 mt-2 pb-0 text-center" style="margin-top: auto;">
-                        
+
                         <h6 style="margin-right: 370px;"><strong>Sample:</strong></h6>
                             <select class="form-control select2dropdown" style="width:200px;" id="selectclient">
                             <option selected disabled value="">Select Client</option>
@@ -367,9 +367,9 @@
                             <option value="13">Beeline</option>
 
                         </select>
-                                            
+
                             <a class="btn btn-sm btn-info mx-2 mt-1" href="" id="download"><i class="fas fa-download"></i> Sample Format</a>
-                       
+
                             <button type="submit" class="btn btn-sm btn-primary mt-1" maxlength="100">
                             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="13" height="14" x="0" y="0" viewBox="0 0 459.904 459.904" style="enable-background:new 0 0 512 512" xml:space="preserve" class="">
                                 <g>
@@ -501,7 +501,7 @@
 
         // Get the pasted data
         var pastedData = event.clipboardData.getData('text').trim();
-        
+
         // Check if the pasted data matches the expected format
         if (isValidFormat(pastedData)) {
             var parsedDate = parseDate(pastedData);
@@ -539,7 +539,7 @@
             var minutes = match[5];
             var seconds = match[6];
             var ampm = match[7];
-            
+
             // Convert 12-hour format to 24-hour format
             if (ampm === 'PM' && hours !== 12) hours += 12;
             if (ampm === 'AM' && hours === 12) hours = 0;
@@ -815,8 +815,8 @@ $('#property_county').on('change', function () {
 
 $('#select_client_id').on('change', function () {
     var select_client_id = $("#select_client_id").val();
-    $("#lob_id").html(''); 
-   
+    $("#lob_id").html('');
+
     $.ajax({
         url: "{{ url('getlobid') }}",
         type: "POST",
@@ -847,7 +847,7 @@ $('#lob_id').on('change', function () {
     var lob_id = $("#lob_id").val();
     var select_client_id = $("#select_client_id").val();
 
-    $("#process_type_id").html(''); 
+    $("#process_type_id").html('');
     $.ajax({
         url: "{{ url('getprocesstypeid') }}",
         type: "POST",
@@ -878,8 +878,8 @@ $('#process_type_id').on('change', function () {
     var select_client_id = $("#select_client_id").val();
 
     $("#process_code").html('');
-    $("#tier_id").html(''); 
-    
+    $("#tier_id").html('');
+
     $.ajax({
         url: "{{ url('getprocess_code') }}",
         type: "POST",
@@ -898,7 +898,7 @@ $('#process_type_id').on('change', function () {
 
             $('#tier_id').html('<option value="">Select Tier</option>');
             $.each(response.tiers, function (key, value) {
-                if (value.Tier_id !== undefined) { 
+                if (value.Tier_id !== undefined) {
                     $("#tier_id").append('<option value="' + value.id + '">' + value.Tier_id + '</option>');
                 } else {
                     console.error('Tier_id is undefined for one of the records.');
@@ -965,18 +965,18 @@ console.log(clientId);
         if (clientId == 84) {
             $('#typist-container').hide();
             $('#typist-qc-container').hide();
-        } 
+        }
 
         if (clientId == 85) {
             $('#typist-container').hide();
             $('#typist-qc-container').hide();
-        } 
+        }
 
         if(clientId == 86){
             $('#municipality-container').hide();
             $('#tier-container').hide();
         }
-        
+
 
 
     });
@@ -988,7 +988,7 @@ $(document).ready(function () {
         $('#selectclient').on('change', function () {
             var selectedValue = $(this).val();
             var downloadLink = $('#download');
-            
+
             if (selectedValue == "1") {
                 downloadLink.attr('href', "{{ asset('/template/Fams_sample_template.xlsx') }}");
             } else if (selectedValue == "2") {
@@ -1002,7 +1002,7 @@ $(document).ready(function () {
             }else if (selectedValue == "6") {
                 downloadLink.attr('href', "{{ asset('/template/ATA National Title_sample_template.xlsx') }}");
             }else if (selectedValue == "7") {
-                downloadLink.attr('href', "{{ asset('/template/Reliable Property Reports,Inc_sample_template.xlsx') }}");
+                downloadLink.attr('href', "{{ asset('/template/Reliable Property Reports, Inc_sample_template.xlsx') }}");
             }else if (selectedValue == "8") {
                 downloadLink.attr('href', "{{ asset('/template/Radian Settlement Services Inc_sample_template.xlsx') }}");
             }else if (selectedValue == "9") {
