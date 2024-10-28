@@ -2727,7 +2727,6 @@ public function tat_zone_count(Request $request) {
                     'id' => $user->id,
                     'emp_id' => $user->emp_id,
                     'username' => $user->username,
-                    'status' => $user->logged_in ? 'Available' : 'Unavailable',
                     'reporting_to' => $user->reporting_username ?? 'N/A'
                 ];
             }),

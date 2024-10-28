@@ -1081,7 +1081,6 @@
                         <tr>
                             <th>Emp Id</th>
                             <th>Emp Name</th>
-                            <th>Status</th>
                             <th>Reporting to</th>
                         </tr>
                     </thead>
@@ -2656,21 +2655,12 @@ $(document).ready(function() {
             columns: [
             { data: 'emp_id', name: 'emp_id', className: "text-left" },
             { data: 'username', name: 'username', className: "text-left" },
-            {
-                    data: 'status',
-                    name: 'status',
-                    className: "text-left",
-                    render: function(data, type, row) {
-                        return '<strong style="color: ' + (data === 'Available' ? 'green' : 'red') + ';">' + data + '</strong>';
-                    }
-                },
             { data: 'reporting_to', name: 'reporting_to', className: "text-left" }
         ],
         columnDefs: [
                 { targets: 0, width: '10%' },
                 { targets: 1, width: '15%' },
-                { targets: 2, width: '10%' },
-                { targets: 3, width: '15%' },
+                { targets: 2, width: '15%' },
             ],
         autoWidth: false
         });
