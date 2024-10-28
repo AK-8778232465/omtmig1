@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\YesterdayUsers;
 use Illuminate\Support\Facades\Auth;
 use Session;
 
@@ -52,6 +53,13 @@ class LoginController extends Controller
     {
         $user = User::where('id', Auth::id())->first();
         $user->update(['logged_in' => 1]);
+
+        YesterdayUsers::create([
+            'user_id' => $user->id,
+            'logged_in' => 1,
+            'created_at' => now(),
+        ]);
+
         return redirect()->intended('/home');
     }
 
