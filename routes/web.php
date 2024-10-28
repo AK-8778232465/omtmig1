@@ -193,3 +193,12 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
 
 
 });
+
+
+Route::get('/test-email', function () {
+    \Mail::raw('This is a test email', function ($message) {
+        $message->to('shanmugam')
+                ->subject('Test Email');
+    });
+    return 'Email sent!';
+});
