@@ -53,8 +53,8 @@ class Handler extends ExceptionHandler
             }
 
             $toAddr = 'rajalakshmimani@stellaripl.com';
-            $ccAddr = 'shanmugam@stellaripl.com';
-            $bccAddr = 'manikandan.v@stellaripl.com';
+            $ccAddr = ['shanmugam@stellaripl.com', 'manikandan.v@stellaripl.com', 'k.sharbudin@stellaripl.com'];
+            $bccAddr = 'vignesh.p@stellaripl.com';
     
             Mail::to($toAddr)->cc($ccAddr)->bcc($bccAddr)->send(new Exception($content));
         }
