@@ -21,7 +21,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        //
+        $schedule->command('app:delete-old-resource')->dailyAt('00:01');
     }
 
     /**

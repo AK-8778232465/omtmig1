@@ -42,6 +42,13 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
     Route::any('tat_zone_count', 'tat_zone_count')->name('tat_zone_count');
     Route::any('carry_over_monthly_count', 'carry_over_monthly_count')->name('carry_over_monthly_count');
     Route::any('resourceTable', 'resourceTable')->name('resourceTable');
+    Route::any('yesterday_resourceTable', 'yesterday_resourceTable')->name('yesterday_resourceTable');
+
+    Route::get('delete_old_resource', 'delete_old_resource')->name('delete_old_resource');
+
+
+
+
 
 
 
