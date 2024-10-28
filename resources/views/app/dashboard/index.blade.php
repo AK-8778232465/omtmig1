@@ -426,7 +426,12 @@
     <div class="card mb-4">
     <div class="col-md-12 d-flex">
     <div class="card col-md-5 mt-3 mb-3 ml-3" id="available_resource_table" style="font-size: 12px;">
-        <a href="#" data-toggle="modal" data-target="#dataModal" style="position: absolute; top: 10px; right: 15px; color: blue; font-weight: bold;">*Resources List</a>
+        <a href="#" data-toggle="modal" data-target="#dataModal" style="position: absolute; top: 10px; right: 15px; color: rgb(14, 98, 29); font-weight: bold; font-size:13px;">*Resources List</a>
+        <a href="" data-toggle="modal" data-target="" style="position: absolute; top: 25px; right: 45px; color: rgb(14, 98, 29);; font-weight: bold;font-size:12px;">(Live)</a>
+        <a href="#" data-toggle="modal" data-target="#yesterday_dataModal" style="position: absolute; top: 43px; right: 15px; color: rgb(255, 55, 0); font-weight: bold; font-size:13px;">*Resources List</a>
+        <a href="" data-toggle="modal" data-target="" style="position: absolute; top: 59px; right: 25px; color: rgb(255, 55, 0); font-weight: bold;font-size:12px;">(Yesterday)</a>
+
+
         <h4 class="text-center mt-3">Available Resources</h4>
             <div class="card-body">
                 <div class="p-0">
@@ -1058,6 +1063,37 @@
         </div>
     </div>
 </div>
+
+
+
+<div class="modal fade" id="yesterday_dataModal" tabindex="-1" role="dialog" aria-labelledby="yesterday_dataModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="yesterday_dataModal">Yesterday Available Resources</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table id="yesterday_resourceTable" class="table table-bordered">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Emp Id</th>
+                            <th>Emp Name</th>
+                            <th>Status</th>
+                            <th>Reporting to</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic content will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 {{-- Js --}}
@@ -2599,6 +2635,47 @@ $(document).ready(function() {
     });
 });
 
+
+
+
+
+$(document).ready(function() {
+    $('#yesterday_dataModal').on('show.bs.modal', function () {
+        var table = $('#yesterday_resourceTable').DataTable({
+            destroy: true,
+            processing: true,
+            serverSide: false,
+            searching: true,
+            lengthChange: false,
+            pageLength: 5,
+            ajax: {
+                url: "{{ route('yesterday_resourceTable') }}",
+                type: "GET",
+                dataSrc: 'data',
+            },
+            columns: [
+            { data: 'emp_id', name: 'emp_id', className: "text-left" },
+            { data: 'username', name: 'username', className: "text-left" },
+            {
+                    data: 'status',
+                    name: 'status',
+                    className: "text-left",
+                    render: function(data, type, row) {
+                        return '<strong style="color: ' + (data === 'Available' ? 'green' : 'red') + ';">' + data + '</strong>';
+                    }
+                },
+            { data: 'reporting_to', name: 'reporting_to', className: "text-left" }
+        ],
+        columnDefs: [
+                { targets: 0, width: '10%' },
+                { targets: 1, width: '15%' },
+                { targets: 2, width: '10%' },
+                { targets: 3, width: '15%' },
+            ],
+        autoWidth: false
+        });
+    });
+});
 
 
 </script>

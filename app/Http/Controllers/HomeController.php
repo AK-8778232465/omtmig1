@@ -17,6 +17,7 @@ use App\Models\OrderCreation;
 use App\Models\State;
 use App\Models\Status;
 use App\Models\stl_item_description;
+use App\Models\YesterdayUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -2691,5 +2692,60 @@ public function tat_zone_count(Request $request) {
             }),
         ]);
     }
+
+
+    public function yesterday_resourceTable() {
+        $currentUserId = Auth::id();
+        $user = User::find($currentUserId);
+
+        $user_lower_ids = User::getAllLowerLevelUserIds($currentUserId);
+        $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
+            return $id != $currentUserId;
+        });
+
+        // Get the date for yesterday
+        $yesterday = now()->subDay()->toDateString();
+
+
+        $yesterday_active_users = DB::table('oms_users')
+        ->select(
+            'oms_users.id',
+            'oms_users.username',
+            'oms_users.emp_id',
+            'oms_users.logged_in',
+            'reporting_user.username as reporting_username',
+        )
+        ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+        ->leftJoin('yesterday_active_users', 'yesterday_active_users.user_id', '=', 'oms_users.id')
+        ->whereIn('oms_users.id', $user_lower_ids)
+        ->whereDate('yesterday_active_users.created_at', $yesterday)
+        ->get();
+
+
+        return response()->json([
+            'data' => $yesterday_active_users->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'emp_id' => $user->emp_id,
+                    'username' => $user->username,
+                    'status' => $user->logged_in ? 'Available' : 'Unavailable',
+                    'reporting_to' => $user->reporting_username ?? 'N/A'
+                ];
+            }),
+        ]);
+    }
+
+
+    public function delete_old_resource() {
+        $deletedCount = YesterdayUsers::where('created_at', '<', now()->subDays(2))->delete();
+
+        if ($deletedCount) {
+            return response()->json(['message' => 'Old records deleted successfully.', 'deleted' => $deletedCount]);
+        } else {
+            return response()->json(['message' => 'No old records found to delete.']);
+        }
+    }
+
+
 
 }
