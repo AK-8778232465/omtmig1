@@ -443,12 +443,6 @@
     <div class="card mb-4">
     <div class="col-md-12 d-flex">
     <div class="card col-md-5 mt-3 mb-3 ml-3" id="available_resource_table" style="font-size: 12px;">
-        <a href="#" data-toggle="modal" data-target="#dataModal" style="position: absolute; top: 10px; right: 15px; color: rgb(14, 98, 29); font-weight: bold; font-size:13px;">*Resources List</a>
-        <a href="" data-toggle="modal" data-target="" style="position: absolute; top: 25px; right: 45px; color: rgb(14, 98, 29);; font-weight: bold;font-size:12px;">(Live)</a>
-        <a href="#" data-toggle="modal" data-target="#yesterday_dataModal" style="position: absolute; top: 43px; right: 15px; color: rgb(255, 55, 0); font-weight: bold; font-size:13px;">*Resources List</a>
-        <a href="" data-toggle="modal" data-target="" style="position: absolute; top: 59px; right: 25px; color: rgb(255, 55, 0); font-weight: bold;font-size:12px;">(Yesterday)</a>
-
-
         <h4 class="text-center mt-3">Available Resources</h4>
         <div class="card-body">
             <div class="p-0">
