@@ -160,6 +160,23 @@
     width: 100px;
 }
 
+
+.dataTables_filter {
+    display: none; 
+}
+
+
+.fa-calendar-minus {
+            font-size: 30px; 
+            color: #741b1b;   
+        }
+
+.fa-calendar-plus {
+    font-size: 30px;
+    color:rgb(14, 98, 29);
+    margin-left:5px;
+}
+
     </style>
 {{-- Order Wise --}}
 <div class="modal fade vh-75" id="orderDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -433,26 +450,43 @@
 
 
         <h4 class="text-center mt-3">Available Resources</h4>
-            <div class="card-body">
-                <div class="p-0">
-                    <div class="d-flex">
-                        <div> <h5 class="text-center">No. of Users Available:</h5></div>
-                        <div> <h5 id="available_users" style="color:blue;font-weight: bold;margin-left:10px"></h5></div>
-                        <div><h5 style="margin-left:3px">/</h5></div>
-                        <div><h5 id="total_users" style="color:rgb(247, 8, 8);font-weight: bold;margin-left:3px"></h5></div>
+        <div class="card-body">
+            <div class="p-0">
+                <div class="d-flex align-items-center mb-3">
+                    <div>
+                        <h5 class="text-center">No. of Users Available:</h5>
                     </div>
-                    <table id="available_resources" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                        <thead class="text-left" style="font-size: 12px;">
-                            <tr>
-                                <th width="10%">Emp Id</th>
-                                <th width="12%">Emp Name</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-left" style="font-size: 12px;"></tbody>
-                    </table>
+                    <div>
+                        <h5 id="available_users" style="color:blue;font-weight: bold;margin-left:10px"></h5>
+                    </div>
+                    <div>
+                        <h5 style="margin-left:3px">/</h5>
+                    </div>
+                    <div>
+                        <h5 id="total_users" style="color:rgb(247, 8, 8);font-weight: bold;margin-left:3px"></h5>
+                    </div>
+                    <div class="search-wrapper" style="margin-left: 20px; position: relative;">
+                        <input type="text" id="search-input" placeholder="Search..." style="padding: 5px 30px 5px 10px;">
+                        <i class="fas fa-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+                    </div>
+                    <div style="margin-left: auto;">                    
+                        <i class="fas fa-calendar-minus" data-toggle="modal" data-target="#yesterday_dataModal"></i>
+                        <i class="fas fa-calendar-plus" data-toggle="modal" data-target="#dataModal"></i>
+                    </div>
                 </div>
+
+                <table id="available_resources" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <thead class="text-center" style="font-size: 12px;">
+                        <tr>
+                            <th width="10%">Emp Id</th>
+                            <th width="12%">Emp Name</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center" style="font-size: 12px;"></tbody>
+                </table>
             </div>
         </div>
+    </div>
         <div class="col-md-1"></div>
             <div class="card col-md-5 mt-3 mb-3 ml-3" id="tat_zone_table" style="font-size: 12px;">
                 <h4 class="text-center mt-5">TAT</h4>
@@ -2518,7 +2552,7 @@ function total_users_name() {
         destroy: true,
         processing: true,
         serverSide: false,
-        searching: true,
+        searching: true, // Keep searching enabled
         lengthChange: false,
         pageLength: 5,
         ajax: {
@@ -2527,16 +2561,21 @@ function total_users_name() {
             dataSrc: 'data',
         },
         columns: [
-            { data: 'emp_id', name: 'emp_id' }, // Maps to Emp Id
-            { data: 'username', name: 'username' } // Maps to Emp Name
+            { data: 'emp_id', name: 'emp_id', className: "text-left" },
+            { data: 'username', name: 'username', className: "text-left" }
         ],
         columnDefs: [
-            { width: "20px", targets: [0, 1] } // Set width for both columns
+            { width: "20px", targets: [0, 1] }
         ],
         autoWidth: false
+    });
 
+    // Link the custom search input to the DataTable
+    $('#search-input').on('keyup', function () {
+        table.search(this.value).draw();
     });
 }
+
 
 $(document).ready(function() {
     total_users_name();
