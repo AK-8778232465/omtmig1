@@ -769,5 +769,117 @@ class OrderFormController extends Controller
             'getUserInputdetails' => $getUserInputdetails
         ]);
     }
+
+    public function taxform_submit(Request $request)
+    {
+        // Define an array to map old field names to new field names
+        $fieldMapping = [
+            'tax_status' => 'tax_form',
+            'get_data' => 'selected_type',
+            'search_input' => 'search_data',
+            'order_id' => 'order_id',
+            'type_id' => 'type_dd',
+            'fiscal_yr_id' => 'fiscal_year',
+            'tax_id' => 'tax_id_number',
+            'tax_described_id' => 'tax_described_number',
+            'tax_state_id' => 'tax_state_number',
+            'taxing_id' => 'taxing_entity_dd',
+            'phone_num' => 'phone_number',
+            'street_address1' => 'street_address1',
+            'street_address2' => 'street_address2',
+            'zip_id' => 'zip_number',
+            'city_id' => 'city_number',
+            'state' => 'state_dd',
+            'total_annual_tax' => 'total_annual_tax',
+            'payment_frequency' => 'payment_frequency_dd',
+            'land' => 'land_data',
+            'improvement' => 'improvements',
+            'exemption_mortgage' => 'exemption_mortgage',
+            'exemption_homeowner' => 'exemption_homeowner',
+            'exemption_homestead' => 'exemption_homestead',
+            'exemption_additional' => 'exemption_additional',
+            'others' => 'others',
+            'net_value' => 'net_value',
+            'first_amount_id' => 'first_installment_amount',
+            'first_texes_out_id' => 'first_installment_texes_out',
+            'first_discount_expires_id' => 'first_installment_discount_expires',
+            'first_tax_due_id' => 'first_installment_tax_due',
+            'first_tax_delinquent_id' => 'first_installment_tax_delinquent',
+            'first_good_through_id' => 'first_installment_good_through',
+            'first_tax_paid_id' => 'first_installment_tax_paid',
+            'second_amount_id' => 'second_installment_amount',
+            'second_texes_out_id' => 'second_installment_texes_out',
+            'second_discount_expires_id' => 'second_installment_discount_expires',
+            'second_tax_due_id' => 'second_installment_tax_due',
+            'second_tax_delinquent_id' => 'second_installment_tax_delinquent',
+            'second_good_through_id' => 'second_installment_good_through',
+            'second_tax_paid_id' => 'second_installment_tax_paid',
+            'third_amount_id' => 'third_installment_amount',
+            'third_texes_out_id' => 'third_installment_texes_out',
+            'third_discount_expires_id' => 'third_installment_discount_expires',
+            'third_tax_due_id' => 'third_installment_tax_due',
+            'third_tax_delinquent_id' => 'third_installment_tax_delinquent',
+            'third_good_through_id' => 'third_installment_good_through',
+            'third_tax_paid_id' => 'third_installment_tax_paid',
+            'fourth_amount_id' => 'fourth_installment_amount',
+            'fourth_texes_out_id' => 'fourth_installment_texes_out',
+            'fourth_discount_expires_id' => 'fourth_installment_discount_expires',
+            'fourth_tax_due_id' => 'fourth_installment_tax_due',
+            'fourth_tax_delinquent_id' => 'fourth_installment_tax_delinquent',
+            'fourth_good_through_id' => 'fourth_installment_good_through',
+            'fourth_tax_paid_id' => 'fourth_installment_tax_paid',
+            'exampleFormControlTextarea1' => 'notes'
+        ];
+    
+        // Initialize an array for the renamed fields
+        $renamedData = [];
+    
+        // Loop through the field mapping to rename the fields
+        foreach ($fieldMapping as $oldField => $newField) {
+            $renamedData[$newField] = $request->input($oldField);
+        }
+    
+        // Encode the renamed data as JSON
+        $jsonData = json_encode($renamedData);
+    
+        // Check if the order_id already exists
+        $existingRecord = DB::table('taxes')->where('order_id', $renamedData['order_id'])->first();
+    
+        if ($existingRecord) {
+            // Update existing record
+            $updated = DB::table('taxes')
+                ->where('order_id', $renamedData['order_id'])
+                ->update([
+                    'json' => $jsonData,
+                    'updated_by' => Auth::id(),
+                    'updated_at' => Carbon::now(),
+                ]);
+    
+            $status = $updated ? 'success' : 'error';
+            $message = $updated ? 'Data updated successfully' : 'Failed to update data';
+        } else {
+            // Insert new record
+            $inserted = DB::table('taxes')->insert([
+                'order_id' => $renamedData['order_id'],
+                'json' => $jsonData,
+                'updated_by' => Auth::id(),
+                'updated_at' => Carbon::now(),
+            ]);
+    
+            $status = $inserted ? 'success' : 'error';
+            $message = $inserted ? 'Data inserted successfully' : 'Failed to insert data';
+        }
+    
+        // Prepare the response with the renamed fields
+        $responseData = [
+            'status' => $status,
+            'data' => $renamedData,
+            'message' => $message,
+        ];
+    
+        // Return the response as JSON
+        return response()->json($responseData, $status === 'success' ? 201 : 500);
+    }    
+
     
 }
