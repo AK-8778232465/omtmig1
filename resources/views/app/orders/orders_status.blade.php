@@ -1664,7 +1664,21 @@ $(document).on('focus', '.status-dropdown', function() {
 
     $('#updateorderfrm').on('submit', function(event){
 		event.preventDefault();
-		if($('#updateorderfrm').parsley().isValid()){
+
+        var orderDate = new Date($('#order_date_ed').val());
+        var currentDate = new Date();
+
+        if (orderDate > currentDate) {
+        Swal.fire({
+            title: "Error",
+            text: "Order Received Date cannot be in the future.",
+            icon: "error"
+        });
+        return; 
+    }
+
+
+    if ($('#updateorderfrm').parsley().isValid()) {
 			var url = '{{ route("updateOrder") }}';
 			var formData = new FormData(this);
 			$.ajax({
