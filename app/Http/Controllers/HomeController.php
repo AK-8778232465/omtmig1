@@ -2295,7 +2295,7 @@ public function revenue_detail_client_fte(Request $request){
     public function total_users() {
         $user = User::where('id', Auth::id())->first();
         // Assuming getAllLowerLevelUserIds returns an array of user IDs
-        $user_lower_ids = User::getAllLowerLevelUserIds(Auth::id());
+        $user_lower_ids = User::getAllLowerLevelUserIds_all(Auth::id());
 
         // Filter out the current user's ID
         $user_lower_ids = array_filter($user_lower_ids, function($id) use ($user) {
@@ -2324,7 +2324,7 @@ public function revenue_detail_client_fte(Request $request){
         $user = User::find($currentUserId);
 
         // Get all lower level user IDs
-        $user_lower_ids = User::getAllLowerLevelUserIds($currentUserId);
+        $user_lower_ids = User::getAllLowerLevelUserIds_all($currentUserId);
 
         // Filter out the current user's ID
         $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
@@ -2698,7 +2698,7 @@ public function tat_zone_count(Request $request) {
         $currentUserId = Auth::id();
         $user = User::find($currentUserId);
 
-        $user_lower_ids = User::getAllLowerLevelUserIds($currentUserId);
+        $user_lower_ids = User::getAllLowerLevelUserIds_all($currentUserId);
         $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
             return $id != $currentUserId;
         });
