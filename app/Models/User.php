@@ -63,6 +63,15 @@ class User extends Authenticatable
         return $userIds->toArray();
     }
 
+    public static function getAllLowerLevelUserIds_all($parentId)
+    {
+        $userIds = collect([$parentId]);
+
+        self::recursiveLowerLevelUserIds_all($parentId, $userIds);
+
+        return $userIds->toArray();
+    }
+
     protected static function recursiveLowerLevelUserIds($parentId, &$userIds)
     {
         $lowerLevelUserIds = self::where('reporting_to', $parentId)
@@ -75,4 +84,18 @@ class User extends Authenticatable
             self::recursiveLowerLevelUserIds($lowerLevelUserId, $userIds);
         }
     }
+
+
+    protected static function recursiveLowerLevelUserIds_all($parentId, &$userIds)
+    {
+        $lowerLevelUserIds = self::where('reporting_to', $parentId)
+            ->pluck('id')
+            ->toArray();
+
+        foreach ($lowerLevelUserIds as $lowerLevelUserId) {
+            $userIds[] = $lowerLevelUserId;
+            self::recursiveLowerLevelUserIds_all($lowerLevelUserId, $userIds);
+        }
+    }
+
 }
