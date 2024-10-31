@@ -1375,7 +1375,7 @@ $(document).on('change', 'input.check-one', function() {
 
     if (anyCheckboxChecked) {   
 
-        if ($(this).data('id') == 82) {
+        if ($(this).data('id') == 82 || $(this).data('id') == 86) {
                 $('#assign_tab').removeClass('d-none');
                 $('#typist_div').removeClass('d-none');
                 var task_status = $('#statusButtons').find('.btn-primary').attr('id');
@@ -1408,7 +1408,7 @@ $(document).on('change', 'input.check-one', function() {
 $(document).on('change', 'input.check-one', function() {
     var anyCheckboxChecked = $('input.check-one:checked').length > 0;
     if (anyCheckboxChecked) {
-        if ($(this).data('id') == 82) {
+        if ($(this).data('id') == 82 || $(this).data('id') == 86) {
         $('#assign_tab').removeClass('d-none');
         $('#typist_qc_div').removeClass('d-none');
 
