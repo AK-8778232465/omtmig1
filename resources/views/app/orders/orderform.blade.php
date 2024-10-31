@@ -82,6 +82,22 @@
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
 
+    .btn-active {
+        background-color: orange;
+        color: white;
+    }
+
+    .btn-inactive {
+        background-color: #9ba7ca;
+        color: white;
+    }
+    #hide_card {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 8px; /* Adjust the radius as needed */
+    border-bottom-right-radius: 8px;
+}
+
 </style>
 <div class="col-lg-12">
     <div class="col-lg-12 mt-2" id="ip_div">
@@ -502,25 +518,613 @@
                         </div>
                     @endif
                     @if(!in_array($orderData->stl_process_id, [2, 4, 6]))
-                <h6 class="font-weight-bold">Order Submission :</h6>
-                <div class="card shadow shadow-md rounded showdow-grey mb-4">
-                    <div class="card-body">
+        <!-- //s -->
+        <div class="container-fluid">
+            <div class="card shadow shadow-md rounded showdow-grey p-4">
+                <div class="row mb-3 pl-3">
+                    <div class="col-2 d-flex align-items-center">
+                        <label for="tax_status" class="mr-2 font-weight-bold">Tax:</label>
+                        <select class="form-control" name="tax_status" id="tax_status">
+                            <option value="online">Online</option>
+                            <option value="offline">Offline</option>
+                        </select>
+                    </div>
+                    <div class="col-2 d-flex align-items-center">
+                        <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
+                        <select class="form-control" name="get_data" id="get_data">
+                            <option value="apn">APN</option>
+                            <option value="address">Address</option>
+                        </select>
+                    </div>
+                    <div class="col-2 d-flex align-items-center">
+                        <input class="form-control" id="search_input" name="search_input" type="text" placeholder="Enter APN/Address">
+                    </div>
+                    <div class="col-md-2 align-items-center">
+                        <button type="submit" class="btn btn-primary" id="fetchButton">fetch</button>
+                    </div>
+                </div>
+                <div class="row justify-content-start mb-0" style="margin-left: 1px;" id="statusButtons">
+                    <div class="bg-info p-0 text-white" style="text-decoration: none; font-size:0.4rem;">
+                        <button type="button" class="btn btn-inactive" id="showOrderForm"
+                            style="padding: 5px 10px; font-size: 0.8rem;">Order Submission
+                        </button>
+                        <button type="button" class="btn btn-inactive" id="showTaxForm"
+                            style="padding: 5px 10px; font-size: 0.8rem;">TAX
+                        </button>
+                    </div>
+                </div>
+                <div class="card p-1" id="hide_card">
+                    <!-- <div class="card p-0"> -->
+                    <!-- Tax Form - Hidden by Default -->
+                    <div id="taxForm" class="p-3" style="display:none; ">
+                        <h5>Taxes :</h5>
+                        <form id="taxFormValues">
+                        <input type="hidden" name="order_id" value="{{$orderData->id}}">
+                            <!-- Top Section -->
+                            <div class="form-row">
+                                <!-- Left Column -->
+                                <div class="col-6">
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Type :<span
+                                                style="color:red;">*</span></label>
+                                        <select class="form-control" style="flex: 1;" id="type_id" name="type_id" required>
+                                            <option>Select Tax Type</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- <div class="form-group" style="display: flex; align-items: center;">
+                                        <label class="required"
+                                            style="margin-right: 10px; width: 150px;">Calendar/Fiscal Year :<span
+                                                style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Calendar/Fiscal Year"
+                                            style="flex: 1;" id="fiscal_yr_id" name="fiscal_yr_id" required>
+                                    </div> -->
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">
+                                            Calendar/Fiscal Year: <span style="color:red;">*</span>
+                                        </label>
+                                        <input class="form-control" type="number" placeholder="Enter Calendar/Fiscal Year" 
+                                            style="flex: 1;" id="fiscal_yr_id" name="fiscal_yr_id" required min="0" step="1">
+                                    </div>
+
+                                    <!-- <div class="form-group" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Tax ID Number :<span style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Tax ID Number"
+                                            style="flex: 1;" id="tax_id" name="tax_id" required>
+                                    </div> -->
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">
+                                            Tax ID Number: <span style="color:red;">*</span>
+                                        </label>
+                                        <input class="form-control" type="text" placeholder="Enter Tax ID Number" 
+                                            style="flex: 1;" id="tax_id" name="tax_id" required 
+                                            pattern="^[a-zA-Z0-9]+$" 
+                                            title="Tax ID must contain only letters and numbers without special characters">
+                                    </div>
+
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Tax ID Number Described :</label>
+                                        <input class="form-control" type="text"
+                                            placeholder="Enter Tax ID Number Described" style="flex: 1;" id="tax_described_id" name="tax_described_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">State ID Number :</label>
+                                        <input class="form-control" type="text" placeholder="Enter State ID Number"
+                                            style="flex: 1;" id="tax_state_id" name="tax_state_id">
+                                    </div>
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="col-6">
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Taxing Entity
+                                            :<span style="color:red;">*</span></label>
+                                        <select class="form-control" style="flex: 1;" id="taxing_id" name="taxing_id" required>
+                                            <option>Select Taxing Entity</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Phone :</label>
+                                        <input class="form-control" type="tel" 
+                                            placeholder="(XXX) YYY-ZZZZ x123"
+                                            style="flex: 1;" 
+                                            id="phone_num" 
+                                            name="phone_num">
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Street Address 1 :</label>
+                                        <input class="form-control" type="text" placeholder="Enter Street Address 1"
+                                            style="flex: 1;" id="street_address1" name="street_address1">
+                                    </div>
+
+                                    <div class="form-group ml-3"
+                                        style="display: flex;align-items: center;margin-bottom: 0px;">
+                                        <label style="margin-right: 10px; width: 150px;">Street Address 2 :</label>
+                                        <input class="form-control" type="text" placeholder="Enter Street Address 2"
+                                            style="flex: 1;" id="street_address2" name="street_address2">
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center; margin-bottom: 0px;">
+                                        <label style="margin-right: 10px; width: 150px;">Zip :</label>
+                                        <input class="form-control" type="text" placeholder="Enter Zip"
+                                            style="flex: 1;" id="zip_id" name="zip_id"
+                                            maxlength="5">
+                                        <div class="p-4">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="override_id" name="override_id" value="1"> Override
+                                            </label>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">City :</label>
+                                        <input class="form-control" type="text" placeholder="Enter City"
+                                            style="flex: 1;" id="city_id" name="city_id">
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">State
+                                            :</label>
+                                        <select class="form-control" style="flex: 1;" id="state" name="state">
+                                            <option>Select State</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr style="border: 1px solid #ccc; margin: 20px 0;">
+                            <!-- Middle Section -->
+                            <div class="form-row">
+                                <!-- Left Column -->
+                                <div class="col-6">
+                                    <!-- <div class="form-group" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Total Annual
+                                            Tax :<span style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Total Annual Tax"
+                                            style="flex: 1;" id="total_annual_tax" name="total_annual_tax" required>
+                                    </div> -->
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Total Annual Tax :<span style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Total Annual Tax" style="flex: 1;" id="total_annual_tax" 
+                                            name="total_annual_tax" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
+                                    </div>
+
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Payment
+                                            Frequency :<span style="color:red;">*</span></label>
+                                        <select class="form-control" style="flex: 1;" id="payment_frequency" name="payment_frequency" required>
+                                            <option>Select Payment Frequency</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="col-6">
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Land :<span
+                                                style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Land"
+                                            style="flex: 1;" id="land" name="land" required>
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Improvements
+                                            :<span style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Improvements"
+                                            style="flex: 1;" id="improvement" name="improvement" required>
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Exemption (Mortgage) :</label>
+                                        <input class="form-control" type="text" placeholder="Enter Exemption (Mortgage)"
+                                            style="flex: 1;" id="exemption_mortgage" name="exemption_mortgage">
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Exemption (Home Owners)
+                                            :</label>
+                                        <input class="form-control" type="text"
+                                            placeholder="Enter Exemption (Home Owners)" style="flex: 1;" id="exemption_homeowner" name="exemption_homeowner">
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Exemption (Homestead
+                                            Supplement) :</label>
+                                        <input class="form-control" type="text"
+                                            placeholder="Enter Exemption (Homestead Supplement)" style="flex: 1;" id="exemption_homestead" name="exemption_homestead">
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Exemption (Additional)
+                                            :</label>
+                                        <input class="form-control" type="text"
+                                            placeholder="Enter Exemption (Additional)" style="flex: 1;" id="exemption_additional" name="exemption_additional">
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Other :</label>
+                                        <input class="form-control" type="text" placeholder="Enter Other"
+                                            style="flex: 1;" id="others" name="others">
+                                    </div>
+
+                                    <div class="form-group ml-3" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Net Valuation :</label>
+                                        <input class="form-control" type="text" placeholder="Enter Net Valuation"
+                                            style="flex: 1;" id="net_value" name="net_value">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr style="border: 1px solid #ccc; margin: 20px 0;">
+                            <!-- Installments Section -->
+                            <div class="row installments-section">
+                                <!-- First Installment -->
+                                <div class="col-3 installment">
+                                    <h6 class="installment-title">First Installment</h6>
+
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="first_estimate_id" name="first_estimate_id" value="1"> Estimated
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group"
+                                        style="display: flex;align-items: center;margin-bottom: 5px;">
+                                        <label style="margin-right: 10px; width: 150px;">Amount :<span
+                                                style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Amount"
+                                            style="flex: 1;" id="first_amount_id" name="first_amount_id" required>
+                                    </div>
+
+                                    <!-- <div class="checkbox-group">
+                                        <div class="form-group"
+                                            style="display: flex;align-items: center;margin-bottom: 0px;">
+                                            <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
+                                                <input type="checkbox" id="first_partially_paid_id" name="first_partially_paid_id" value="1"> Partially Paid
+                                            </label>
+                                            <input class="form-control ml-1" type="text"
+                                                placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="first_paid_id" name="first_paid_id" value="1"> Paid
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="first_due_id" name="first_due_id" value="1"> Due
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="first_delinquent_id"name="first_delinquent_id" value="1"> Delinquent
+                                            </label>
+                                        </div>
+                                    </div> -->
+
+                                    <div class="checkbox-group">
+                                        <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
+                                            <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
+                                                <input type="checkbox" id="first_partially_paid_id" name="first_partially_paid_id" value="1" onclick="onlyOne(this)"> Partially Paid
+                                            </label>
+                                            <input class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="first_paid_id" name="first_paid_id" value="1" onclick="onlyOne(this)"> Paid
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="first_due_id" name="first_due_id" value="1" onclick="onlyOne(this)"> Due
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="first_delinquent_id" name="first_delinquent_id" value="1" onclick="onlyOne(this)"> Delinquent
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_texes_out_id" name="first_texes_out_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Discount Expires :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_discount_expires_id" name="first_discount_expires_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Due :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_due_id" name="first_tax_due_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Delinquent :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_delinquent_id" name="first_tax_delinquent_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Good through :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_good_through_id" name="first_good_through_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Paid :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_paid_id" name="first_tax_paid_id">
+                                    </div>
+                                </div>
+
+                                <!-- Second Installment -->
+                                <div class="col-3 installment">
+                                    <h6 class="installment-title">Second Installment</h6>
+
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="second_estimate_id" name="second_estimate_id" value="1"> Estimated
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group"
+                                        style="display: flex;align-items: center;margin-bottom: 5px;">
+                                        <label style="margin-right: 10px; width: 150px;">Amount :<span
+                                                style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Amount"
+                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" required>
+                                    </div>
+
+                                    <div class="checkbox-group">
+                                        <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
+                                            <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
+                                                <input type="checkbox" id="second_partially_paid_id" name="second_partially_paid_id" value="1" onclick="onlyOne(this)"> Partially Paid
+                                            </label>
+                                            <input class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"> Paid
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="second_due_id" name="second_due_id" value="1" onclick="onlyOne(this)"> Due
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="second_delinquent_id" name="second_delinquent_id" value="1" onclick="onlyOne(this)"> Delinquent
+                                            </label>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_texes_out_id" name="second_texes_out_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Discount Expires :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_discount_expires_id" name="second_discount_expires_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Due :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_due_id" name="second_tax_due_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Delinquent :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_delinquent_id" name="second_tax_delinquent_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Good through :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_good_through_id" name="second_good_through_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Paid :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_paid_id" name="second_tax_paid_id">
+                                    </div>
+                                </div>
+
+                                <!-- Third Installment -->
+                                <div class="col-3 installment">
+                                    <h6 class="installment-title">Third Installment</h6>
+
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="third_estimate_id" name="third_estimate_id" value="1"> Estimated
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group"
+                                        style="display: flex;align-items: center;margin-bottom: 5px;">
+                                        <label style="margin-right: 10px; width: 150px;">Amount :<span
+                                                style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Amount"
+                                            style="flex: 1;" id="third_amount_id" name="third_amount_id" required>
+                                    </div>
+
+                                    <div class="checkbox-group">
+                                        <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
+                                            <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
+                                                <input type="checkbox" id="third_partially_paid_id" name="third_partially_paid_id" value="1" onclick="onlyOne(this)"> Partially Paid
+                                            </label>
+                                            <input class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="third_paid_id" name="third_paid_id" value="1" onclick="onlyOne(this)"> Paid
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="third_due_id" name="third_due_id" value="1" onclick="onlyOne(this)"> Due
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="third_delinquent_id" name="third_delinquent_id" value="1" onclick="onlyOne(this)"> Delinquent
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_texes_out_id" name="third_texes_out_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Discount Expires :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_discount_expires_id" name="third_discount_expires_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Due :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_due_id" name="third_tax_due_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Delinquent :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_delinquent_id" name="third_tax_delinquent_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Good through :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_good_through_id" name="third_good_through_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Paid :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_paid_id" name="third_tax_paid_id">
+                                    </div>
+                                </div>
+
+                                <!-- Fourth Installment -->
+                                <div class="col-3 installment">
+                                    <h6 class="installment-title">Fourth Installment</h6>
+
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="fourth_estimate_id" name="fourth_estimate_id" value="1"> Estimated
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group"
+                                        style="display: flex;align-items: center;margin-bottom: 5px;">
+                                        <label style="margin-right: 10px; width: 150px;">Amount :<span
+                                                style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Amount"
+                                            style="flex: 1;" id="fourth_amount_id" name="fourth_amount_id" required>
+                                    </div>
+
+                                    <div class="checkbox-group">
+                                        <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
+                                            <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
+                                                <input type="checkbox" id="fourth_partially_paid_id" name="fourth_partially_paid_id" value="1" onclick="onlyOne(this)"> Partially Paid
+                                            </label>
+                                            <input class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="fourth_paid_id" name="fourth_paid_id" value="1" onclick="onlyOne(this)"> Paid
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="fourth_due_id" name="fourth_due_id" value="1" onclick="onlyOne(this)"> Due
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="fourth_delinquent_id" name="fourth_delinquent_id" value="1" onclick="onlyOne(this)"> Delinquent
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_texes_out_id" name="fourth_texes_out_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Discount Expires :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_discount_expires_id" name="fourth_discount_expires_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Due :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_due_id"  name="fourth_tax_due_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Delinquent :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_delinquent_id" name="fourth_tax_delinquent_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Good through :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_good_through_id" name="fourth_good_through_id">
+                                    </div>
+
+                                    <div class="form-group" style="display: flex; align-items: center;">
+                                        <label style="margin-right: 10px; width: 150px;">Paid :</label>
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_paid_id" name="fourth_tax_paid_id">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Notes Section -->
+                            <div class="form-group">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" name="exampleFormControlTextarea1" rows="3"
+                                    placeholder="Enter Notes"></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <button type="submit" class="btn btn-primary">SUBMIT</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Order Submission Form - Hidden by Default -->
+                    <div id="orderForm" class="p-3" style="display:none;">
+                        <!-- <h6 class="font-weight-bold">Order Submission :</h6> -->
+                        <h5 style="margin-bottom: 0px; margin-top: 5px;">Order Submission :</h5>
+                        <div class="mb-4">
+                            <div>
                             @if(isset($checklist_conditions) && count($checklist_conditions) > 0)
                                 <div class="font-weight-bold"> Special Checklist :</div>
                                 <div class="row mt-1 mb-4  mx-5 ">
-                                    <div class="col-12 row bg-danger justify-content-center" id="checklist-container" style="border-radius:14px;">
+                                    <div class="col-12 row bg-danger justify-content-center" id="checklist-container"
+                                        style="border-radius:14px;">
                                         @php $counter = 0; @endphp
                                         @foreach($checklist_conditions as $checklist_condition)
-                                            <div class="row col-12 {{ $counter > 0 ? '' : 'box' }}" style="{{  $counter > 0 ? 'margin-top: -9px; padding-top: 0;' : '' }}">
-                                                <input type="checkbox" class="p-0 checklist-item" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
-                                                <label class="text-white font-weight-bold text-uppercase px-1" style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
+                                        <div class="row col-12 {{ $counter > 0 ? '' : 'box' }}"
+                                            style="{{  $counter > 0 ? 'margin-top: -9px; padding-top: 0;' : '' }}">
+                                            <input type="checkbox" class="p-0 checklist-item" name="checks[]"
+                                                id="check_{{ $checklist_condition->id }}"
+                                                value="{{ $checklist_condition->id }}">
+                                            <label class="text-white font-weight-bold text-uppercase px-1"
+                                                style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
                                             </div>
                                             @php $counter++; @endphp
                                         @endforeach
                                     </div>
                                 </div>
                             @endif
-                            <div class="row mt-4 mb-4">
+                                <div class="row mt-2 mb-4">
                                 <div class="col-12 card-body ">
                                     @if(isset($checklist_conditions_2) && count($checklist_conditions_2) > 0)
                                     <div class="font-weight-bold">Checklist :</div>
@@ -529,8 +1133,11 @@
                                             @php $counter = 0; @endphp
                                             @foreach($checklist_conditions_2 as $checklist_condition)
                                                 <div class="row col-12 ">
-                                                    <input type="checkbox" class="p-0" name="checks[]" id="check_{{ $checklist_condition->id }}" value="{{ $checklist_condition->id }}">
-                                                    <label class="text-black   px-1" >{{ $checklist_condition->check_condition }}</label>
+                                                    <input type="checkbox" class="p-0" name="checks[]"
+                                                        id="check_{{ $checklist_condition->id }}"
+                                                        value="{{ $checklist_condition->id }}">
+                                                    <label
+                                                        class="text-black   px-1">{{ $checklist_condition->check_condition }}</label>
                                             </div>
                                                 @php $counter++; @endphp
                                         @endforeach
@@ -540,13 +1147,17 @@
                                 </div>
                                 <div class="col-lg-4 ">
                                     <div class="font-weight-bold">Comments :</div>
-                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4"></textarea>
+                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2"
+                                            id="order_comment" cols="30" rows="4"></textarea>
                                 </div>
                                 <div class="col-lg-5 mx-5 mt-1">
                                         <div class="row">
                                         <div class="col-10 mb-2">
-                                            <div class="font-weight-bold mb-1 mt-1"><span style="color:red;">*</span>Primary Source :</div>
-                                                <select id="primary_source" name="primary_source" class="form-control select2dropdown required-field" data-parsley-required="true">
+                                                <div class="font-weight-bold mb-1 mt-1"><span
+                                                        style="color:red;">*</span>Primary Source :</div>
+                                                <select id="primary_source" name="primary_source"
+                                                    class="form-control select2dropdown required-field"
+                                                    data-parsley-required="true">
                                                     <option disabled selected value="">Select Primary Source</option>
                                                     @foreach($primarySource as $source)
                                                         <option value="{{ $source->id }}" 
@@ -556,31 +1167,48 @@
                                                     @endforeach
                                                 </select>
                                         </div>
-                                            <div class="col-10 mb-2">
+                                            <div class="col-12 mb-2">
                                     <div class="font-weight-bold mb-1 mt-1">Status :</div>
-                                        <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                        <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
-                                            <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                            <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                            <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
-                                            <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                            <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
-                                            <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
-                                            <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
-                                            <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
+                                                <input type="hidden" id="current_status_id" name="current_status_id"
+                                                    value="{{ $orderData->status_id }}">
+                                                <select style="width: 83%;" class="form-control" name="order_status"
+                                                    id="order_status" @if(!isset($orderData->assignee_user)) disabled
+                                                    @endif>
+                                                    <option value="1" id="status_1" @if($orderData->status_id == 1)
+                                                        selected @endif>WIP</option>
+                                                    <option value="2" id="status_2" @if($orderData->status_id == 2)
+                                                        selected @endif>Hold</option>
+                                                    <option value="3" id="status_3" @if($orderData->status_id == 3)
+                                                        selected @endif>Cancelled</option>
+                                                    <option value="4" id="status_4" @if($orderData->status_id == 4)
+                                                        selected @endif>Send for QC</option>
+                                                    <option value="5" id="status_5" @if($orderData->status_id == 5)
+                                                        selected @endif>Completed</option>
+                                                    <option value="13" id="status_13" @if($orderData->status_id == 13)
+                                                        selected @endif>Coversheet Prep</option>
+                                                    <option value="14" id="status_14" @if($orderData->status_id == 14)
+                                                        selected @endif>Clarification</option>
+                                                    <option value="18" id="status_18" @if($orderData->status_id == 18)
+                                                        selected @endif>Ground Abstractor</option>
                                         </select>
                                     </div>
                                 </div>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-center my-4">
-                                    <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
-                                    <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit" name="coversheetsubmit" onclick="order_submition({{$orderData->id}},2)" type="submit">Coversheet Prep & Submit</button>
-                                </div>
+                                    <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
+                                        onclick="order_submition({{$orderData->id}},1)" type="submit">Submit
+                                    </button>
+                                    <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit"
+                                        name="coversheetsubmit" onclick="order_submition({{$orderData->id}},2)"
+                                        type="submit">Coversheet Prep & Submit
+                                    </button>
                         </div>
                     </div>
+                            <!-- s -->
                         <div class="card-body">
-                            <table id="orderstatusdetail_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
+                                    style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                 <thead>
                                     <tr>
                                         <th>Comments</th>
@@ -596,17 +1224,23 @@
                                                 <td>{{ $status->comment ?? 'N/A' }}</td>
                                                 <td>{{ $status->status }}</td>
                                                 <td>{{ $status->username ?? 'N/A' }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}
+                                            </td>
                                             </tr>
                                         @endforeach
                                     @else
                                         <tr>
-                                            <td class="text-center" colspan="4">No status history available for this order.</td>
+                                            <td class="text-center" colspan="4">No status history available for this
+                                                order.</td>
                                         </tr>
                                     @endif
                                 </tbody>
                             </table>
                         </div>
+                            <!-- e -->
+                        </div>
+                    </div>
+                </div>
                     @endif
                     @if(in_array($orderData->stl_process_id, [2, 4, 6]))
                     <h6 class="font-weight-bold">Order Submission :</h6>
@@ -615,35 +1249,52 @@
                                     <div class="row mt-4 mb-4">
                                 <div class="col-lg-4 ">
                                     <div class="font-weight-bold">Comments :</div>
-                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4"></textarea>
+                                <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment"
+                                    cols="30" rows="4"></textarea>
                                 </div>
                                     <div class="col-lg-5 mx-5 mt-1">
                                         <div class="row">
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
-                                                <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                <select style="width:300px"  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
-                                                    <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                    <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                                    <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
-                                                    <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                                    <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
-                                                    <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
-                                                    <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
-                                                    <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
+                                        <input type="hidden" id="current_status_id" name="current_status_id"
+                                            value="{{ $orderData->status_id }}">
+                                        <select style="width:300px" class="form-control" name="order_status"
+                                            id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                            <option value="1" id="status_1" @if($orderData->status_id == 1) selected
+                                                @endif>WIP</option>
+                                            <option value="2" id="status_2" @if($orderData->status_id == 2) selected
+                                                @endif>Hold</option>
+                                            <option value="3" id="status_3" @if($orderData->status_id == 3) selected
+                                                @endif>Cancelled</option>
+                                            <option value="4" id="status_4" @if($orderData->status_id == 4) selected
+                                                @endif>Send for QC</option>
+                                            <option value="5" id="status_5" @if($orderData->status_id == 5) selected
+                                                @endif>Completed</option>
+                                            <option value="13" id="status_13" @if($orderData->status_id == 13) selected
+                                                @endif>Coversheet Prep</option>
+                                            <option value="14" id="status_14" @if($orderData->status_id == 14) selected
+                                                @endif>Clarification</option>
+                                            <option value="18" id="status_18" @if($orderData->status_id == 18) selected
+                                                @endif>Ground Abstractor</option>
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-center my-4">
-                                    <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
-                                    <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit" name="coversheetsubmit" onclick="order_submition({{$orderData->id}},2)" type="submit">Coversheet Prep & Submit</button>
+                            <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
+                                onclick="order_submition({{$orderData->id}},1)" type="submit">Submit
+                            </button>
+                            <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit" name="coversheetsubmit"
+                                onclick="order_submition({{$orderData->id}},2)" type="submit">Coversheet Prep &
+                                Submit
+                            </button>
                                 </div>
                         </div>
                     </div>
                         <div class="card-body">
-                            <table id="orderstatusdetail_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
+                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                 <thead>
                                     <tr>
                                         <th>Comments</th>
@@ -674,8 +1325,10 @@
                 </div>
             </div>
         </div>
-                @endif
-                <!-- // -->
+</div>
+</div>
+@endif
+<!-- // -->
                 @if($orderData->client_id == 82)
                 <h6 class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> font-weight-bold">Order Submission :</h6>
                 <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
@@ -888,13 +1541,211 @@ $(document).ready(function() {
 </script>
 @endif
 
+@if(!in_array($orderData->stl_process_id, [2, 4, 6]))
+<script>
+    let isTaxFormVisible = false;
+    let isOrderFormVisible = false;
+
+function updateHideCardVisibility() {
+    // Hide 'hide_card' if both forms are hidden, otherwise show it
+    document.getElementById('hide_card').style.display = (isTaxFormVisible || isOrderFormVisible) ? 'block' : 'none';
+}
+
+document.getElementById('showTaxForm').addEventListener('click', function() {
+    // Toggle visibility of the Tax form
+    isTaxFormVisible = !isTaxFormVisible;
+    document.getElementById('taxForm').style.display = isTaxFormVisible ? 'block' : 'none';
+
+    // Toggle button color for Tax button
+    this.classList.toggle('btn-active', isTaxFormVisible);
+    this.classList.toggle('btn-inactive', !isTaxFormVisible);
+
+    // Hide Order form if it is open and reset its button
+    if (isOrderFormVisible) {
+        isOrderFormVisible = false;
+        document.getElementById('orderForm').style.display = 'none';
+        document.getElementById('showOrderForm').classList.remove('btn-active');
+        document.getElementById('showOrderForm').classList.add('btn-inactive');
+    }
+
+    // Update visibility of hide_card
+    updateHideCardVisibility();
+});
+
+document.getElementById('showOrderForm').addEventListener('click', function() {
+    // Toggle visibility of the Order form
+    isOrderFormVisible = !isOrderFormVisible;
+    document.getElementById('orderForm').style.display = isOrderFormVisible ? 'block' : 'none';
+
+    // Toggle button color for Order button
+    this.classList.toggle('btn-active', isOrderFormVisible);
+    this.classList.toggle('btn-inactive', !isOrderFormVisible);
+
+    // Hide Tax form if it is open and reset its button
+    if (isTaxFormVisible) {
+        isTaxFormVisible = false;
+        document.getElementById('taxForm').style.display = 'none';
+        document.getElementById('showTaxForm').classList.remove('btn-active');
+        document.getElementById('showTaxForm').classList.add('btn-inactive');
+    }
+
+    // Update visibility of hide_card
+    updateHideCardVisibility();
+});
+
+// Initial check for hide_card visibility
+updateHideCardVisibility();
+
+
+// $(document).ready(function() {
+//   $("#taxFormValues").on("submit", function(event) {
+//     event.preventDefault(); 
+//     var formData = $(this).serialize();
+//     $.ajax({
+//       url: "{{ url('taxform_submit') }}",
+//       type: "POST",
+//       data: formData,
+//       headers: {
+//         'X-CSRF-TOKEN': $('input[name="_token"]').val()
+//       },
+//       success: function(response) {
+//         Swal.fire({
+//           title: 'Success!',
+//           text: response.message,
+//           icon: 'success',
+//           confirmButtonText: 'OK'
+//         });
+//       },
+//       error: function(error) {        
+//         Swal.fire({
+//           title: 'Error!',
+//           text: 'Failed to send data. Please try again.',
+//           icon: 'error',
+//           confirmButtonText: 'OK'
+//         });
+//       }
+//     });
+//   });
+// });
+
+
+$(document).ready(function() {
+  $("#taxFormValues").on("submit", function(event) {
+    event.preventDefault(); 
+    var formData = $(this).serialize();
+
+    // Append additional data from the specified input fields
+    var taxStatus = $("#tax_status").val();
+    var getData = $("#get_data").val();
+    var searchInput = $("#search_input").val();
+
+    // Create an object to hold the serialized data and additional fields
+    var additionalData = {
+      tax_status: taxStatus,
+      get_data: getData,
+      search_input: searchInput
+    };
+
+    // Convert the additionalData object to a query string
+    var additionalDataString = $.param(additionalData);
+    
+    // Combine the original form data with the additional data
+    var combinedData = formData + '&' + additionalDataString;
+
+    $.ajax({
+      url: "{{ url('taxform_submit') }}",
+      type: "POST",
+      data: combinedData,
+      headers: {
+        'X-CSRF-TOKEN': $('input[name="_token"]').val()
+      },
+      success: function(response) {
+        Swal.fire({
+          title: 'Success!',
+          text: response.message,
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+      },
+      error: function(error) {        
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to send data. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    });
+  });
+});
+
+
+$(document).ready(function() {
+    $("#phone_num").on("input", function() {
+        var input = $(this).val();
+        input = input.replace(/[^0-9x]/g, '');
+
+        if (input.length <= 10) {
+            input = input.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+        } else {
+            input = input.replace(/(\d{3})(\d{3})(\d{4})(\d+)/, "($1) $2-$3 x$4");
+        }
+        $(this).val(input);
+    });
+});
+
+    document.getElementById('tax_status').addEventListener('change', function() {
+        var fetchButton = document.getElementById('fetchButton');
+        fetchButton.style.display = this.value === 'online' ? 'inline-block' : 'none';
+    });
+
+    window.onload = function() {
+        var fetchButton = document.getElementById('fetchButton');
+        fetchButton.style.display = document.getElementById('tax_status').value === 'online' ? 'inline-block' : 'none';
+    };
+
+      function validateDecimalInput(event) {
+        const value = event.target.value;
+        // Allow only numbers with optional decimal points and two decimal places
+        if (!/^\d*\.?\d{0,2}$/.test(value)) {
+            event.target.value = value.slice(0, -1); // Remove last character if invalid
+        }
+    }
+
+    // Attach event listeners to each input field
+    const decimalFields = [
+        'land', 'improvement', 'exemption_mortgage', 'exemption_homeowner',
+        'exemption_homestead', 'exemption_additional', 'others', 'total_annual_tax',
+        'net_value','first_amount_id','second_amount_id','third_amount_id','fourth_amount_id'
+    ];
+
+    decimalFields.forEach(id => {
+        document.getElementById(id).addEventListener('input', validateDecimalInput);
+    });
+
+//     function onlyOne(checkbox) {
+//     const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]');
+//     checkboxes.forEach((cb) => {
+//         if (cb !== checkbox) cb.checked = false;
+//     });
+// }
+
+function onlyOne(checkbox) {
+    const checkboxes = checkbox.closest('.checkbox-group').querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach((cb) => {
+        if (cb !== checkbox) cb.checked = false;
+    });
+}
+
+</script>
+@endif
+
 <script>
 
 $(document).ready(function() {
-    // Handle the change event on the select element
     $('#order_status').change(function() {
         let status = $(this).val();
-        @if(Auth::user()->hasRole('Process')) // Get the selected value
+        @if(Auth::user()->hasRole('Process'))
         if (status == 14 || status == 4 || status == 2 || status == 5) {
             $('#order_status').prop('disabled', true);
         } else {
