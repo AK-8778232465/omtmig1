@@ -521,24 +521,23 @@
         <!-- //s -->
         <div class="container-fluid">
             <div class="card shadow shadow-md rounded showdow-grey p-4">
-            @foreach($getjsonDetails as $jsonData)
                 <div class="row mb-3 pl-3">
                     <div class="col-2 d-flex align-items-center">
                         <label for="tax_status" class="mr-2 font-weight-bold">Tax:</label>
                         <select class="form-control" name="tax_status" id="tax_status">
-                        <option value="online" {{ (isset($jsonData['tax_form']) && $jsonData['tax_form'] == 'online') ? 'selected' : '' }}>Online</option>
-                        <option value="offline" {{ (isset($jsonData['tax_form']) && $jsonData['tax_form'] == 'offline') ? 'selected' : '' }}>Offline</option>
+                            <option value="online">Online</option>
+                            <option value="offline">Offline</option>
                         </select>
                     </div>
                     <div class="col-2 d-flex align-items-center">
                         <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
                         <select class="form-control" name="get_data" id="get_data">
-                        <option value="apn" {{ (isset($jsonData['selected_type']) && $jsonData['selected_type'] == 'apn') ? 'selected' : '' }}>APN</option>
-                        <option value="address" {{ (isset($jsonData['selected_type']) && $jsonData['selected_type'] == 'address') ? 'selected' : '' }}>Address</option>
+                            <option value="apn">APN</option>
+                            <option value="address">Address</option>
                         </select>
                     </div>
                     <div class="col-2 d-flex align-items-center">
-                        <input class="form-control" id="search_input" name="search_input" type="text" placeholder="Enter APN/Address" value="{{ $jsonData['search_data'] }}">
+                        <input class="form-control" id="search_input" name="search_input" type="text" placeholder="Enter APN/Address">
                     </div>
                     <div class="col-md-2 align-items-center">
                         <button type="submit" class="btn btn-primary" id="fetchButton">fetch</button>
@@ -568,7 +567,7 @@
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Type :<span
                                                 style="color:red;">*</span></label>
-                                        <select class="form-control" style="flex: 1;" id="type_id" name="type_id" value="" required>
+                                        <select class="form-control" style="flex: 1;" id="type_id" name="type_id" required>
                                             <option>Select Tax Type</option>
                                         </select>
                                     </div>
@@ -585,7 +584,7 @@
                                             Calendar/Fiscal Year: <span style="color:red;">*</span>
                                         </label>
                                         <input class="form-control" type="number" placeholder="Enter Calendar/Fiscal Year" 
-                                            style="flex: 1;" id="fiscal_yr_id" name="fiscal_yr_id" required min="0" step="1" value="{{ $jsonData['fiscal_year'] }}">
+                                            style="flex: 1;" id="fiscal_yr_id" name="fiscal_yr_id" required min="0" step="1">
                                     </div>
 
                                     <!-- <div class="form-group" style="display: flex; align-items: center;">
@@ -601,20 +600,20 @@
                                         <input class="form-control" type="text" placeholder="Enter Tax ID Number" 
                                             style="flex: 1;" id="tax_id" name="tax_id" required 
                                             pattern="^[a-zA-Z0-9]+$" 
-                                            title="Tax ID must contain only letters and numbers without special characters" value="{{ $jsonData['tax_id_number'] }}">
+                                            title="Tax ID must contain only letters and numbers without special characters">
                                     </div>
 
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Tax ID Number Described :</label>
                                         <input class="form-control" type="text"
-                                            placeholder="Enter Tax ID Number Described" style="flex: 1;" id="tax_described_id" name="tax_described_id" value="{{ $jsonData['tax_described_number'] }}">
+                                            placeholder="Enter Tax ID Number Described" style="flex: 1;" id="tax_described_id" name="tax_described_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">State ID Number :</label>
                                         <input class="form-control" type="text" placeholder="Enter State ID Number"
-                                            style="flex: 1;" id="tax_state_id" name="tax_state_id" value="{{ $jsonData['tax_state_number'] }}">
+                                            style="flex: 1;" id="tax_state_id" name="tax_state_id">
                                     </div>
                                 </div>
 
@@ -634,34 +633,30 @@
                                             placeholder="(XXX) YYY-ZZZZ x123"
                                             style="flex: 1;" 
                                             id="phone_num" 
-                                            name="phone_num" 
-                                            value="{{ $jsonData['phone_number'] }}">
+                                            name="phone_num">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Street Address 1 :</label>
                                         <input class="form-control" type="text" placeholder="Enter Street Address 1"
-                                            style="flex: 1;" id="street_address1" name="street_address1" value="{{ $jsonData['street_address1'] }}">
+                                            style="flex: 1;" id="street_address1" name="street_address1">
                                     </div>
 
                                     <div class="form-group ml-3"
                                         style="display: flex;align-items: center;margin-bottom: 0px;">
                                         <label style="margin-right: 10px; width: 150px;">Street Address 2 :</label>
                                         <input class="form-control" type="text" placeholder="Enter Street Address 2"
-                                            style="flex: 1;" id="street_address2" name="street_address2" value="{{ $jsonData['street_address2'] }}">
+                                            style="flex: 1;" id="street_address2" name="street_address2">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center; margin-bottom: 0px;">
                                         <label style="margin-right: 10px; width: 150px;">Zip :</label>
                                         <input class="form-control" type="text" placeholder="Enter Zip"
                                             style="flex: 1;" id="zip_id" name="zip_id"
-                                            maxlength="5"
-                                            value="{{ $jsonData['zip_number'] }}">
+                                            maxlength="5">
                                         <div class="p-4">
                                             <label class="checkbox-label">
-                                            <!-- Hidden input to submit "0" if checkbox is unchecked -->
-                                            <input type="hidden" name="override_id" value="0">
-                                            <input type="checkbox" id="override_id" name="override_id" value="1" {{ isset($jsonData['override_id']) && $jsonData['override_id'] == 1 ? 'checked' : '' }}> Override
+                                                <input type="checkbox" id="override_id" name="override_id" value="1"> Override
                                             </label>
                                         </div>
                                     </div>
@@ -670,18 +665,14 @@
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">City :</label>
                                         <input class="form-control" type="text" placeholder="Enter City"
-                                            style="flex: 1;" id="city_id" name="city_id" value="{{ $jsonData['city_number'] }}">
+                                            style="flex: 1;" id="city_id" name="city_id">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
-                                        <label class="required" style="margin-right: 10px; width: 150px;">State:</label>
+                                        <label class="required" style="margin-right: 10px; width: 150px;">State
+                                            :</label>
                                         <select class="form-control" style="flex: 1;" id="state" name="state">
-                                            <option value="">Select State</option>
-                                            @foreach ($stateList as $state)
-                                                <option value="{{ $state->id }}" {{ (isset($jsonData['state_dd']) && $jsonData['state_dd'] == $state->id) ? 'selected' : '' }}>
-                                                    {{ $state->short_code }}
-                                                </option>
-                                            @endforeach
+                                            <option>Select State</option>
                                         </select>
                                     </div>
                                 </div>
@@ -692,17 +683,24 @@
                             <div class="form-row">
                                 <!-- Left Column -->
                                 <div class="col-6">
+                                    <!-- <div class="form-group" style="display: flex; align-items: center;">
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Total Annual
+                                            Tax :<span style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" placeholder="Enter Total Annual Tax"
+                                            style="flex: 1;" id="total_annual_tax" name="total_annual_tax" required>
+                                    </div> -->
+
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Total Annual Tax :<span style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Total Annual Tax" style="flex: 1;" id="total_annual_tax" 
-                                            name="total_annual_tax" value="{{ $jsonData['total_annual_tax'] }}" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
+                                            name="total_annual_tax" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
                                     </div>
 
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Payment
                                             Frequency :<span style="color:red;">*</span></label>
-                                        <select class="form-control" style="flex: 1;" id="payment_frequency" name="payment_frequency" value="{{ $jsonData['payment_frequency_dd'] }}" required>
+                                        <select class="form-control" style="flex: 1;" id="payment_frequency" name="payment_frequency" required>
                                             <option>Select Payment Frequency</option>
                                         </select>
                                     </div>
@@ -714,53 +712,53 @@
                                         <label class="required" style="margin-right: 10px; width: 150px;">Land :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Land"
-                                            style="flex: 1;" id="land" name="land" value="{{ $jsonData['land_data'] }}" required>
+                                            style="flex: 1;" id="land" name="land" required>
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Improvements
                                             :<span style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Improvements"
-                                            style="flex: 1;" id="improvement" name="improvement" value="{{ $jsonData['improvements'] }}" required> 
+                                            style="flex: 1;" id="improvement" name="improvement" required>
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Exemption (Mortgage) :</label>
                                         <input class="form-control" type="text" placeholder="Enter Exemption (Mortgage)"
-                                            style="flex: 1;" id="exemption_mortgage" name="exemption_mortgage" value="{{ $jsonData['exemption_mortgage'] }}">
+                                            style="flex: 1;" id="exemption_mortgage" name="exemption_mortgage">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Exemption (Home Owners)
                                             :</label>
                                         <input class="form-control" type="text"
-                                            placeholder="Enter Exemption (Home Owners)" style="flex: 1;" id="exemption_homeowner" name="exemption_homeowner" value="{{ $jsonData['exemption_homeowner'] }}">
+                                            placeholder="Enter Exemption (Home Owners)" style="flex: 1;" id="exemption_homeowner" name="exemption_homeowner">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Exemption (Homestead
                                             Supplement) :</label>
                                         <input class="form-control" type="text"
-                                            placeholder="Enter Exemption (Homestead Supplement)" style="flex: 1;" id="exemption_homestead" name="exemption_homestead" value="{{ $jsonData['exemption_homestead'] }}">
+                                            placeholder="Enter Exemption (Homestead Supplement)" style="flex: 1;" id="exemption_homestead" name="exemption_homestead">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Exemption (Additional)
                                             :</label>
                                         <input class="form-control" type="text"
-                                            placeholder="Enter Exemption (Additional)" style="flex: 1;" id="exemption_additional" name="exemption_additional" value="{{ $jsonData['exemption_additional'] }}">
+                                            placeholder="Enter Exemption (Additional)" style="flex: 1;" id="exemption_additional" name="exemption_additional">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Other :</label>
                                         <input class="form-control" type="text" placeholder="Enter Other"
-                                            style="flex: 1;" id="others" name="others" value="{{ $jsonData['others'] }}">
+                                            style="flex: 1;" id="others" name="others">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Net Valuation :</label>
                                         <input class="form-control" type="text" placeholder="Enter Net Valuation"
-                                            style="flex: 1;" id="net_value" name="net_value" value="{{ $jsonData['net_value'] }}">
+                                            style="flex: 1;" id="net_value" name="net_value">
                                     </div>
                                 </div>
                             </div>
@@ -774,9 +772,7 @@
 
                                     <div class="checkbox-group">
                                         <label class="checkbox-label">
-                                            <!-- Hidden input to ensure 0 is submitted if checkbox is unchecked -->
-                                            <input type="hidden" name="first_estimate_id" value="0">
-                                            <input type="checkbox" id="first_estimate_id" name="first_estimate_id" value="1" {{ isset($jsonData['first_estimate_id']) && $jsonData['first_estimate_id'] == 1 ? 'checked' : '' }}> Estimated
+                                            <input type="checkbox" id="first_estimate_id" name="first_estimate_id" value="1"> Estimated
                                         </label>
                                     </div>
 
@@ -785,15 +781,41 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="first_amount_id" name="first_amount_id" value="{{ $jsonData['first_installment_amount'] }}" required>
+                                            style="flex: 1;" id="first_amount_id" name="first_amount_id" required>
                                     </div>
+
+                                    <!-- <div class="checkbox-group">
+                                        <div class="form-group"
+                                            style="display: flex;align-items: center;margin-bottom: 0px;">
+                                            <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
+                                                <input type="checkbox" id="first_partially_paid_id" name="first_partially_paid_id" value="1"> Partially Paid
+                                            </label>
+                                            <input class="form-control ml-1" type="text"
+                                                placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="first_paid_id" name="first_paid_id" value="1"> Paid
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="first_due_id" name="first_due_id" value="1"> Due
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="first_delinquent_id"name="first_delinquent_id" value="1"> Delinquent
+                                            </label>
+                                        </div>
+                                    </div> -->
 
                                     <div class="checkbox-group">
                                         <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
                                             <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
-                                                <input type="checkbox" id="first_partially_paid_id" name="first_partially_paid_id" value="1" onclick="toggleReadonly(this, 'first_partially_paid_amount')"> Partially Paid
+                                                <input type="checkbox" id="first_partially_paid_id" name="first_partially_paid_id" value="1" onclick="onlyOne(this)"> Partially Paid
                                             </label>
-                                            <input id="first_partially_paid_amount" name="first_partially_paid_amount" value="{{ $jsonData['first_partially_paid_amount'] }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
@@ -814,32 +836,32 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_texes_out_id" name="first_texes_out_id" value="{{ $jsonData['first_installment_texes_out'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_texes_out_id" name="first_texes_out_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Discount Expires :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_discount_expires_id" name="first_discount_expires_id" value="{{ $jsonData['first_installment_discount_expires'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_discount_expires_id" name="first_discount_expires_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Due :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_due_id" name="first_tax_due_id" value="{{ $jsonData['first_installment_tax_due'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_due_id" name="first_tax_due_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Delinquent :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_delinquent_id" name="first_tax_delinquent_id" value="{{ $jsonData['first_installment_tax_delinquent'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_delinquent_id" name="first_tax_delinquent_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Good through :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_good_through_id" name="first_good_through_id" value="{{ $jsonData['first_installment_good_through'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_good_through_id" name="first_good_through_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Paid :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_paid_id" name="first_tax_paid_id" value="{{ $jsonData['first_installment_tax_paid'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_paid_id" name="first_tax_paid_id">
                                     </div>
                                 </div>
 
@@ -849,9 +871,7 @@
 
                                     <div class="checkbox-group">
                                         <label class="checkbox-label">
-                                            <!-- Hidden input to ensure 0 is submitted if checkbox is unchecked -->
-                                            <input type="hidden" name="second_estimate_id" value="0">
-                                            <input type="checkbox" id="second_estimate_id" name="second_estimate_id" value="1" {{ isset($jsonData['second_estimate_id']) && $jsonData['second_estimate_id'] == 1 ? 'checked' : '' }}> Estimated
+                                            <input type="checkbox" id="second_estimate_id" name="second_estimate_id" value="1"> Estimated
                                         </label>
                                     </div>
 
@@ -860,15 +880,15 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" value="{{ $jsonData['second_installment_amount'] }}" required>
+                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" required>
                                     </div>
 
                                     <div class="checkbox-group">
                                         <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
                                             <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
-                                                <input type="checkbox" id="second_partially_paid_id" name="second_partially_paid_id" value="1" onclick="toggleReadonly(this, 'second_partially_paid_amount')"> Partially Paid
+                                                <input type="checkbox" id="second_partially_paid_id" name="second_partially_paid_id" value="1" onclick="onlyOne(this)"> Partially Paid
                                             </label>
-                                            <input id="second_partially_paid_amount" name="second_partially_paid_amount" value="{{ $jsonData['second_partially_paid_amount'] }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
@@ -890,32 +910,32 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="second_texes_out_id" name="second_texes_out_id" value="{{ $jsonData['second_installment_texes_out'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_texes_out_id" name="second_texes_out_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Discount Expires :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="second_discount_expires_id" name="second_discount_expires_id" value="{{ $jsonData['second_installment_discount_expires'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_discount_expires_id" name="second_discount_expires_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Due :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_due_id" name="second_tax_due_id" value="{{ $jsonData['second_installment_tax_due'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_due_id" name="second_tax_due_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Delinquent :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_delinquent_id" name="second_tax_delinquent_id" value="{{ $jsonData['second_installment_tax_delinquent'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_delinquent_id" name="second_tax_delinquent_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Good through :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="second_good_through_id" name="second_good_through_id" value="{{ $jsonData['second_installment_good_through'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_good_through_id" name="second_good_through_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Paid :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_paid_id" name="second_tax_paid_id" value="{{ $jsonData['second_installment_tax_paid'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_paid_id" name="second_tax_paid_id">
                                     </div>
                                 </div>
 
@@ -925,9 +945,7 @@
 
                                     <div class="checkbox-group">
                                         <label class="checkbox-label">
-                                            <!-- Hidden input to ensure 0 is submitted if checkbox is unchecked -->
-                                            <input type="hidden" name="third_estimate_id" value="0">
-                                            <input type="checkbox" id="third_estimate_id" name="third_estimate_id" value="1" {{ isset($jsonData['third_estimate_id']) && $jsonData['third_estimate_id'] == 1 ? 'checked' : '' }}> Estimated
+                                            <input type="checkbox" id="third_estimate_id" name="third_estimate_id" value="1"> Estimated
                                         </label>
                                     </div>
 
@@ -936,15 +954,15 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="third_amount_id" name="third_amount_id" value="{{ $jsonData['third_installment_amount'] }}" required>
+                                            style="flex: 1;" id="third_amount_id" name="third_amount_id" required>
                                     </div>
 
                                     <div class="checkbox-group">
                                         <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
                                             <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
-                                                <input type="checkbox" id="third_partially_paid_id" name="third_partially_paid_id" value="1" onclick="toggleReadonly(this, 'third_partially_paid_amount')"> Partially Paid
+                                                <input type="checkbox" id="third_partially_paid_id" name="third_partially_paid_id" value="1" onclick="onlyOne(this)"> Partially Paid
                                             </label>
-                                            <input id="third_partially_paid_amount" name="third_partially_paid_amount" value="{{ $jsonData['third_partially_paid_amount'] }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
@@ -965,32 +983,32 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="third_texes_out_id" name="third_texes_out_id" value="{{ $jsonData['third_installment_texes_out'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_texes_out_id" name="third_texes_out_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Discount Expires :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="third_discount_expires_id" name="third_discount_expires_id" value="{{ $jsonData['third_installment_discount_expires'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_discount_expires_id" name="third_discount_expires_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Due :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_due_id" name="third_tax_due_id" value="{{ $jsonData['third_installment_tax_due'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_due_id" name="third_tax_due_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Delinquent :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_delinquent_id" name="third_tax_delinquent_id" value="{{ $jsonData['third_installment_tax_delinquent'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_delinquent_id" name="third_tax_delinquent_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Good through :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="third_good_through_id" name="third_good_through_id" value="{{ $jsonData['third_installment_good_through'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_good_through_id" name="third_good_through_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Paid :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_paid_id" name="third_tax_paid_id" value="{{ $jsonData['third_installment_tax_paid'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_paid_id" name="third_tax_paid_id">
                                     </div>
                                 </div>
 
@@ -1000,9 +1018,7 @@
 
                                     <div class="checkbox-group">
                                         <label class="checkbox-label">
-                                            <!-- Hidden input to ensure 0 is submitted if checkbox is unchecked -->
-                                            <input type="hidden" name="fourth_estimate_id" value="0">
-                                            <input type="checkbox" id="fourth_estimate_id" name="fourth_estimate_id" value="1" {{ isset($jsonData['fourth_estimate_id']) && $jsonData['fourth_estimate_id'] == 1 ? 'checked' : '' }}> Estimated
+                                            <input type="checkbox" id="fourth_estimate_id" name="fourth_estimate_id" value="1"> Estimated
                                         </label>
                                     </div>
 
@@ -1011,15 +1027,15 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="fourth_amount_id" name="fourth_amount_id" value="{{ $jsonData['fourth_installment_amount'] }}" required>
+                                            style="flex: 1;" id="fourth_amount_id" name="fourth_amount_id" required>
                                     </div>
 
                                     <div class="checkbox-group">
                                         <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
                                             <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
-                                                <input type="checkbox" id="fourth_partially_paid_id" name="fourth_partially_paid_id" value="1" onclick="toggleReadonly(this, 'fourth_partially_paid_amount')"> Partially Paid
+                                                <input type="checkbox" id="fourth_partially_paid_id" name="fourth_partially_paid_id" value="1" onclick="onlyOne(this)"> Partially Paid
                                             </label>
-                                            <input id="fourth_partially_paid_amount" name="fourth_partially_paid_amount" value="{{ $jsonData['fourth_partially_paid_amount'] }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
@@ -1040,39 +1056,39 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_texes_out_id" name="fourth_texes_out_id" value="{{ $jsonData['fourth_installment_texes_out'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_texes_out_id" name="fourth_texes_out_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Discount Expires :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_discount_expires_id" name="fourth_discount_expires_id" value="{{ $jsonData['fourth_installment_discount_expires'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_discount_expires_id" name="fourth_discount_expires_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Due :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_due_id"  name="fourth_tax_due_id" value="{{ $jsonData['fourth_installment_tax_due'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_due_id"  name="fourth_tax_due_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Delinquent :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_delinquent_id" name="fourth_tax_delinquent_id" value="{{ $jsonData['fourth_installment_tax_delinquent'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_delinquent_id" name="fourth_tax_delinquent_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Good through :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_good_through_id" name="fourth_good_through_id" value="{{ $jsonData['fourth_installment_good_through'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_good_through_id" name="fourth_good_through_id">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Paid :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_paid_id" name="fourth_tax_paid_id" value="{{ $jsonData['fourth_installment_tax_paid'] }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_paid_id" name="fourth_tax_paid_id">
                                     </div>
                                 </div>
                             </div>
                             <!-- Notes Section -->
                             <div class="form-group">
                                 <textarea class="form-control" id="exampleFormControlTextarea1" name="exampleFormControlTextarea1" rows="3"
-                                    placeholder="Enter Notes">{{ $jsonData['notes'] }}</textarea>
+                                    placeholder="Enter Notes"></textarea>
                             </div>
 
                             <div class="row">
@@ -1080,7 +1096,6 @@
                                     <button type="submit" class="btn btn-primary">SUBMIT</button>
                                 </div>
                             </div>
-                            @endforeach
                         </form>
                     </div>
                     <!-- Order Submission Form - Hidden by Default -->
@@ -1582,6 +1597,38 @@ document.getElementById('showOrderForm').addEventListener('click', function() {
 updateHideCardVisibility();
 
 
+// $(document).ready(function() {
+//   $("#taxFormValues").on("submit", function(event) {
+//     event.preventDefault(); 
+//     var formData = $(this).serialize();
+//     $.ajax({
+//       url: "{{ url('taxform_submit') }}",
+//       type: "POST",
+//       data: formData,
+//       headers: {
+//         'X-CSRF-TOKEN': $('input[name="_token"]').val()
+//       },
+//       success: function(response) {
+//         Swal.fire({
+//           title: 'Success!',
+//           text: response.message,
+//           icon: 'success',
+//           confirmButtonText: 'OK'
+//         });
+//       },
+//       error: function(error) {        
+//         Swal.fire({
+//           title: 'Error!',
+//           text: 'Failed to send data. Please try again.',
+//           icon: 'error',
+//           confirmButtonText: 'OK'
+//         });
+//       }
+//     });
+//   });
+// });
+
+
 $(document).ready(function() {
   $("#taxFormValues").on("submit", function(event) {
     event.preventDefault(); 
@@ -1676,17 +1723,19 @@ $(document).ready(function() {
         document.getElementById(id).addEventListener('input', validateDecimalInput);
     });
 
+//     function onlyOne(checkbox) {
+//     const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]');
+//     checkboxes.forEach((cb) => {
+//         if (cb !== checkbox) cb.checked = false;
+//     });
+// }
+
 function onlyOne(checkbox) {
     const checkboxes = checkbox.closest('.checkbox-group').querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach((cb) => {
         if (cb !== checkbox) cb.checked = false;
     });
 }
-
-function toggleReadonly(checkbox, inputId) {
-        const inputField = document.getElementById(inputId);
-        inputField.readOnly = !checkbox.checked;
-    }
 
 </script>
 @endif

@@ -427,30 +427,10 @@ class OrderFormController extends Controller
                     }
                 }
                 
-                // $getjsonDetails = DB::table('taxes')
-                //     ->where('order_id', $orderData->id)
-                //     ->pluck('json') // Use pluck to get the 'json' field as an array
-                //     ->map(function ($item) {
-                //         return json_decode(json_decode($item), true);
-                //     });
-
-                $getjsonDetails = DB::table('taxes')
-                    ->where('order_id', $orderData->id)
-                    ->pluck('json')
-                    ->toArray();
-                
-                // Decode each JSON entry only as needed
-                $getjsonDetails = array_map(function ($item) {
-                    $decodedItem = json_decode($item, true);
-                    // Check if the result is an array (i.e., already fully decoded); if not, decode again
-                    return is_array($decodedItem) ? $decodedItem : json_decode($decodedItem, true);
-                }, $getjsonDetails);
-            
-
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
-            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails'));
+            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo'));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
-            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails'));
+            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo'));
         } else {
             return redirect('/orders_status');
         }
@@ -808,15 +788,6 @@ class OrderFormController extends Controller
             'street_address1' => 'street_address1',
             'street_address2' => 'street_address2',
             'zip_id' => 'zip_number',
-            'override_id' => 'override_id',
-            'first_estimate_id' => 'first_estimate_id',
-            'second_estimate_id' => 'second_estimate_id',
-            'third_estimate_id' => 'third_estimate_id',
-            'fourth_estimate_id' => 'fourth_estimate_id',
-            'first_partially_paid_amount' => 'first_partially_paid_amount',
-            'second_partially_paid_amount' => 'second_partially_paid_amount',
-            'third_partially_paid_amount' => 'third_partially_paid_amount',
-            'fourth_partially_paid_amount' => 'fourth_partially_paid_amount',
             'city_id' => 'city_number',
             'state' => 'state_dd',
             'total_annual_tax' => 'total_annual_tax',
