@@ -521,7 +521,22 @@
         <!-- //s -->
         <div class="container-fluid">
             <div class="card shadow shadow-md rounded showdow-grey p-4">
-                <div class="row mb-3 pl-3">
+                <div class="row justify-content-start mb-0" style="margin-left: 1px;" id="statusButtons">
+                    <div class="bg-info p-0 text-white" style="text-decoration: none; font-size:0.4rem;">
+                        <button type="button" class="btn btn-inactive" id="showOrderForm"
+                            style="padding: 5px 10px; font-size: 0.8rem;">Order Submission
+                        </button>
+                        <button type="button" class="btn btn-inactive" id="showTaxForm"
+                            style="padding: 5px 10px; font-size: 0.8rem;">TAX
+                        </button>
+                    </div>
+                </div>
+                <div class="card p-1" id="hide_card">
+                    <!-- <div class="card p-0"> -->
+                    <!-- Tax Form - Hidden by Default -->
+                    <div id="taxForm" class="p-3" style="display:none; ">
+                        <h5>Taxes :</h5>
+                        <div class="row mb-5 mt-2">
                     <div class="col-2 d-flex align-items-center">
                         <label for="tax_status" class="mr-2 font-weight-bold">Tax:</label>
                         <select class="form-control" name="tax_status" id="tax_status">
@@ -543,21 +558,6 @@
                         <button type="submit" class="btn btn-primary" id="fetchButton">fetch</button>
                     </div>
                 </div>
-                <div class="row justify-content-start mb-0" style="margin-left: 1px;" id="statusButtons">
-                    <div class="bg-info p-0 text-white" style="text-decoration: none; font-size:0.4rem;">
-                        <button type="button" class="btn btn-inactive" id="showOrderForm"
-                            style="padding: 5px 10px; font-size: 0.8rem;">Order Submission
-                        </button>
-                        <button type="button" class="btn btn-inactive" id="showTaxForm"
-                            style="padding: 5px 10px; font-size: 0.8rem;">TAX
-                        </button>
-                    </div>
-                </div>
-                <div class="card p-1" id="hide_card">
-                    <!-- <div class="card p-0"> -->
-                    <!-- Tax Form - Hidden by Default -->
-                    <div id="taxForm" class="p-3" style="display:none; ">
-                        <h5>Taxes :</h5>
                         <form id="taxFormValues">
                         <input type="hidden" name="order_id" value="{{$orderData->id}}">
                             <!-- Top Section -->
@@ -565,10 +565,15 @@
                                 <!-- Left Column -->
                                 <div class="col-6">
                                     <div class="form-group" style="display: flex; align-items: center;">
-                                        <label class="required" style="margin-right: 10px; width: 150px;">Type :<span
-                                                style="color:red;">*</span></label>
-                                        <select class="form-control" style="flex: 1;" id="type_id" name="type_id" value="" required>
-                                            <option>Select Tax Type</option>
+                                    <label class="required" style="margin-right: 10px; width: 150px;">Type :<span style="color:red;">*</span></label>
+                                    <select class="form-control" style="flex: 1;" id="type_id" name="type_id" required>
+                                        <option selected disabled value="">Select Tax Type</option>
+                                        @foreach ($taxType as $type)
+                                            <option value="{{ $type->id }}" 
+                                                {{ isset($getjsonDetails[0]['type_dd']) && $getjsonDetails[0]['type_dd'] == $type->id ? 'selected' : '' }}>
+                                                {{ $type->tax_type }}
+                                            </option>
+                                        @endforeach
                                         </select>
                                     </div>
 
@@ -624,6 +629,12 @@
                                             :<span style="color:red;">*</span></label>
                                         <select class="form-control" style="flex: 1;" id="taxing_id" name="taxing_id" required>
                                             <option>Select Taxing Entity</option>
+                                            @foreach ($taxEntity as $entity)
+                                                <option value="{{ $entity->id }}" 
+                                                    {{ isset($getjsonDetails[0]['taxing_entity_dd']) && $getjsonDetails[0]['taxing_entity_dd'] == $entity->id ? 'selected' : '' }}>
+                                                    {{ $entity->tax_entity_name }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                     </div>
 
@@ -699,10 +710,15 @@
 
 
                                     <div class="form-group" style="display: flex; align-items: center;">
-                                        <label class="required" style="margin-right: 10px; width: 150px;">Payment
-                                            Frequency :<span style="color:red;">*</span></label>
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Payment Frequency :<span style="color:red;">*</span></label>
                                         <select class="form-control" style="flex: 1;" id="payment_frequency" name="payment_frequency" value="{{ $getjsonDetails[0]['payment_frequency_dd'] ?? '' }}" required>
                                             <option>Select Payment Frequency</option>
+                                            @foreach ($taxPaymentFrequency as $frequency)
+                                                <option value="{{ $frequency->id }}" 
+                                                    {{ isset($getjsonDetails[0]['payment_frequency_dd']) && $getjsonDetails[0]['payment_frequency_dd'] == $frequency->id ? 'selected' : '' }}>
+                                                    {{ $frequency->payment_frequency }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -1526,24 +1542,20 @@ $(document).ready(function() {
 
 @if(!in_array($orderData->stl_process_id, [2, 4, 6]))
 <script>
-    let isTaxFormVisible = false;
-    let isOrderFormVisible = false;
+let isTaxFormVisible = false;
+let isOrderFormVisible = false;
 
 function updateHideCardVisibility() {
-    // Hide 'hide_card' if both forms are hidden, otherwise show it
     document.getElementById('hide_card').style.display = (isTaxFormVisible || isOrderFormVisible) ? 'block' : 'none';
 }
 
 document.getElementById('showTaxForm').addEventListener('click', function() {
-    // Toggle visibility of the Tax form
     isTaxFormVisible = !isTaxFormVisible;
     document.getElementById('taxForm').style.display = isTaxFormVisible ? 'block' : 'none';
 
-    // Toggle button color for Tax button
     this.classList.toggle('btn-active', isTaxFormVisible);
     this.classList.toggle('btn-inactive', !isTaxFormVisible);
 
-    // Hide Order form if it is open and reset its button
     if (isOrderFormVisible) {
         isOrderFormVisible = false;
         document.getElementById('orderForm').style.display = 'none';
@@ -1551,20 +1563,16 @@ document.getElementById('showTaxForm').addEventListener('click', function() {
         document.getElementById('showOrderForm').classList.add('btn-inactive');
     }
 
-    // Update visibility of hide_card
     updateHideCardVisibility();
 });
 
 document.getElementById('showOrderForm').addEventListener('click', function() {
-    // Toggle visibility of the Order form
     isOrderFormVisible = !isOrderFormVisible;
     document.getElementById('orderForm').style.display = isOrderFormVisible ? 'block' : 'none';
 
-    // Toggle button color for Order button
     this.classList.toggle('btn-active', isOrderFormVisible);
     this.classList.toggle('btn-inactive', !isOrderFormVisible);
 
-    // Hide Tax form if it is open and reset its button
     if (isTaxFormVisible) {
         isTaxFormVisible = false;
         document.getElementById('taxForm').style.display = 'none';
@@ -1572,12 +1580,13 @@ document.getElementById('showOrderForm').addEventListener('click', function() {
         document.getElementById('showTaxForm').classList.add('btn-inactive');
     }
 
-    // Update visibility of hide_card
     updateHideCardVisibility();
 });
 
-// Initial check for hide_card visibility
 updateHideCardVisibility();
+
+document.getElementById('showOrderForm').click();
+
 
 $(document).ready(function() {
   $("#taxFormValues").on("submit", function(event) {
@@ -1672,13 +1681,6 @@ $(document).ready(function() {
     decimalFields.forEach(id => {
         document.getElementById(id).addEventListener('input', validateDecimalInput);
     });
-
-//     function onlyOne(checkbox) {
-//     const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]');
-//     checkboxes.forEach((cb) => {
-//         if (cb !== checkbox) cb.checked = false;
-//     });
-// }
 
 function onlyOne(checkbox) {
     const checkboxes = checkbox.closest('.checkbox-group').querySelectorAll('input[type="checkbox"]');
