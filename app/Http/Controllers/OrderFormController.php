@@ -427,10 +427,91 @@ class OrderFormController extends Controller
                     }
                 }
                 
+                $getjsonDetails = DB::table('taxes')
+                ->where('order_id', $orderData->id)
+                ->pluck('json')
+                ->toArray();
+            
+            // Check if $getjsonDetails is empty, and if so, set each entry as null
+            if (empty($getjsonDetails)) {
+                $getjsonDetails = [
+                    'tax_form' => null,
+                    'selected_type' => null,
+                    'search_data' => null,
+                    'order_id' => null,
+                    'type_dd' => null,
+                    'fiscal_year' => null,
+                    'tax_id_number' => null,
+                    'tax_described_number' => null,
+                    'tax_state_number' => null,
+                    'taxing_entity_dd' => null,
+                    'phone_number' => null,
+                    'street_address1' => null,
+                    'street_address2' => null,
+                    'zip_number' => null,
+                    'override_id' => null,
+                    'first_estimate_id' => null,
+                    'second_estimate_id' => null,
+                    'third_estimate_id' => null,
+                    'fourth_estimate_id' => null,
+                    'first_partially_paid_amount' => null,
+                    'second_partially_paid_amount' => null,
+                    'third_partially_paid_amount' => null,
+                    'fourth_partially_paid_amount' => null,
+                    'city_number' => null,
+                    'state_dd' => null,
+                    'total_annual_tax' => null,
+                    'payment_frequency_dd' => null,
+                    'land_data' => null,
+                    'improvements' => null,
+                    'exemption_mortgage' => null,
+                    'exemption_homeowner' => null,
+                    'exemption_homestead' => null,
+                    'exemption_additional' => null,
+                    'others' => null,
+                    'net_value' => null,
+                    'first_installment_amount' => null,
+                    'first_installment_texes_out' => null,
+                    'first_installment_discount_expires' => null,
+                    'first_installment_tax_due' => null,
+                    'first_installment_tax_delinquent' => null,
+                    'first_installment_good_through' => null,
+                    'first_installment_tax_paid' => null,
+                    'second_installment_amount' => null,
+                    'second_installment_texes_out' => null,
+                    'second_installment_discount_expires' => null,
+                    'second_installment_tax_due' => null,
+                    'second_installment_tax_delinquent' => null,
+                    'second_installment_good_through' => null,
+                    'second_installment_tax_paid' => null,
+                    'third_installment_amount' => null,
+                    'third_installment_texes_out' => null,
+                    'third_installment_discount_expires' => null,
+                    'third_installment_tax_due' => null,
+                    'third_installment_tax_delinquent' => null,
+                    'third_installment_good_through' => null,
+                    'third_installment_tax_paid' => null,
+                    'fourth_installment_amount' => null,
+                    'fourth_installment_texes_out' => null,
+                    'fourth_installment_discount_expires' => null,
+                    'fourth_installment_tax_due' => null,
+                    'fourth_installment_tax_delinquent' => null,
+                    'fourth_installment_good_through' => null,
+                    'fourth_installment_tax_paid' => null,
+                    'notes' => null
+                ];
+            } else {
+                // Decode each JSON entry as usual if data exists
+                $getjsonDetails = array_map(function ($item) {
+                    $decodedItem = json_decode($item, true);
+                    return is_array($decodedItem) ? $decodedItem : json_decode($decodedItem, true);
+                }, $getjsonDetails);
+            }
+            
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
-            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo'));
+            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails'));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
-            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo'));
+            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails'));
         } else {
             return redirect('/orders_status');
         }
@@ -788,6 +869,15 @@ class OrderFormController extends Controller
             'street_address1' => 'street_address1',
             'street_address2' => 'street_address2',
             'zip_id' => 'zip_number',
+            'override_id' => 'override_id',
+            'first_estimate_id' => 'first_estimate_id',
+            'second_estimate_id' => 'second_estimate_id',
+            'third_estimate_id' => 'third_estimate_id',
+            'fourth_estimate_id' => 'fourth_estimate_id',
+            'first_partially_paid_amount' => 'first_partially_paid_amount',
+            'second_partially_paid_amount' => 'second_partially_paid_amount',
+            'third_partially_paid_amount' => 'third_partially_paid_amount',
+            'fourth_partially_paid_amount' => 'fourth_partially_paid_amount',
             'city_id' => 'city_number',
             'state' => 'state_dd',
             'total_annual_tax' => 'total_annual_tax',
