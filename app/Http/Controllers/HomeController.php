@@ -2667,7 +2667,7 @@ public function tat_zone_count(Request $request) {
         $currentUserId = Auth::id();
         $user = User::find($currentUserId);
 
-        $user_lower_ids = User::getAllLowerLevelUserIds($currentUserId);
+        $user_lower_ids = User::getAllLowerLevelUserIds_all($currentUserId);
 
         $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
             return $id != $currentUserId;
