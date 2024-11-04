@@ -555,7 +555,9 @@
                              <input class="form-control" id="search_input" name="search_input" type="text" placeholder="Enter APN/Address" value="{{ $getjsonDetails[0]['search_data'] ?? '' }}">
                     </div>
                     <div class="col-md-2 align-items-center">
+                                <input type="hidden" id="order_id" value="{{($orderData->id)}}">
                         <button type="submit" class="btn btn-primary" id="fetchButton">fetch</button>
+                                <button type="submit" class="btn btn-primary" id="SaveButton">Save</button>
                     </div>
                 </div>
                         <form id="taxFormValues">
@@ -577,13 +579,6 @@
                                         </select>
                                     </div>
 
-                                    <!-- <div class="form-group" style="display: flex; align-items: center;">
-                                        <label class="required"
-                                            style="margin-right: 10px; width: 150px;">Calendar/Fiscal Year :<span
-                                                style="color:red;">*</span></label>
-                                        <input class="form-control" type="text" placeholder="Enter Calendar/Fiscal Year"
-                                            style="flex: 1;" id="fiscal_yr_id" name="fiscal_yr_id" required>
-                                    </div> -->
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">
                                             Calendar/Fiscal Year: <span style="color:red;">*</span>
@@ -591,12 +586,6 @@
                                         <input class="form-control" type="number" placeholder="Enter Calendar/Fiscal Year" 
                                             style="flex: 1;" id="fiscal_yr_id" name="fiscal_yr_id" required min="0" step="1" value="{{ $getjsonDetails[0]['fiscal_year'] ?? '' }}">
                                     </div>
-
-                                    <!-- <div class="form-group" style="display: flex; align-items: center;">
-                                        <label class="required" style="margin-right: 10px; width: 150px;">Tax ID Number :<span style="color:red;">*</span></label>
-                                        <input class="form-control" type="text" placeholder="Enter Tax ID Number"
-                                            style="flex: 1;" id="tax_id" name="tax_id" required>
-                                    </div> -->
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">
@@ -1194,15 +1183,17 @@
                                 </div>
                                     </div>
                                 </div>
+                                @if(!(isset($getjsonDetails['hidebutton']) == 1))
                                 <div class="d-flex justify-content-center my-4">
                                     <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
-                                        onclick="order_submition({{$orderData->id}},1)" type="submit">Submit
+                                            onclick="order_submition({{ $orderData->id }}, 1)" type="submit">Submit
                                     </button>
                                     <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit"
-                                        name="coversheetsubmit" onclick="order_submition({{$orderData->id}},2)"
+                                            name="coversheetsubmit" onclick="order_submition({{ $orderData->id }}, 2)"
                                         type="submit">Coversheet Prep & Submit
                                     </button>
                         </div>
+                                @endif
                     </div>
                             <!-- s -->
                         <div class="card-body">
@@ -1653,15 +1644,30 @@ $(document).ready(function() {
     });
 });
 
+    window.addEventListener('DOMContentLoaded', function() {
+    var taxStatusValue = document.getElementById('tax_status').value;
+    var fetchButton = document.getElementById('fetchButton');
+    var saveButton = document.getElementById('SaveButton');
+
+    // Check the initial value of tax_status and display the correct button
+    if (taxStatusValue === 'online') {
+        fetchButton.style.display = 'inline-block';
+        saveButton.style.display = 'none';
+    } else if (taxStatusValue === 'offline') {
+        fetchButton.style.display = 'none';
+        saveButton.style.display = 'inline-block';
+    }
+});
+
+
     document.getElementById('tax_status').addEventListener('change', function() {
         var fetchButton = document.getElementById('fetchButton');
+    var SaveButton = document.getElementById('SaveButton');
+    
+    // Show Fetch button for 'online', Save button for 'offline'
         fetchButton.style.display = this.value === 'online' ? 'inline-block' : 'none';
-    });
-
-    window.onload = function() {
-        var fetchButton = document.getElementById('fetchButton');
-        fetchButton.style.display = document.getElementById('tax_status').value === 'online' ? 'inline-block' : 'none';
-    };
+    SaveButton.style.display = this.value === 'offline' ? 'inline-block' : 'none';
+});
 
       function validateDecimalInput(event) {
         const value = event.target.value;
@@ -1694,6 +1700,61 @@ function toggleReadonly(checkbox, inputId) {
         inputField.readOnly = !checkbox.checked;
     }
 
+
+$(function() {
+    $('#SaveButton').on('click', function(e) {
+        e.preventDefault();
+
+        // Collect data from form
+        const taxStatus = $('#tax_status').val();
+        const getData = $('#get_data').val();
+        const searchInput = $('#search_input').val();
+        const orderId = $("#order_id").val();
+
+        // Validate that all fields are filled
+        if (taxStatus && getData && searchInput) {
+            // AJAX request
+            $.ajax({
+                url: '{{ url("moveToTaxStatus") }}',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    orderId: orderId,
+                    tax_status: taxStatus,
+                    get_data: getData,
+                    search_input: searchInput,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    // Display success message with Swal
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Tax Form Moved To Accounts Team',
+                        confirmButtonText: 'OK'
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // Display error message with Swal
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        } else {
+            // Display warning if fields are missing
+            Swal.fire({
+                icon: 'warning',
+                title: 'Incomplete Data',
+                text: 'Please fill in all fields before saving.',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+});
 </script>
 @endif
 

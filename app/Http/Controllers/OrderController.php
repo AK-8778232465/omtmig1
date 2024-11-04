@@ -57,10 +57,10 @@ class OrderController extends Controller
                 });
             } elseif($user->user_type_id == 10){
                 $statusCountsQuery->where('typist_id', $user->id)
-                ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18]);
+                ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18, 19]);
             }elseif($user->user_type_id == 11){
                 $statusCountsQuery->where('typist_qc_id', $user->id)
-                ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18]);
+                ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18, 19]);
 
             }
         }
@@ -183,10 +183,10 @@ class OrderController extends Controller
                 });
             } elseif($user->user_type_id == 10){
                 $tatstatusCountsQuery->where('oms_order_creations.typist_id', $user->id)
-                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 17, 18]);
+                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 17, 18, 19]);
             } elseif($user->user_type_id == 11){
                 $tatstatusCountsQuery->where('oms_order_creations.typist_qc_id', $user->id)
-                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 16, 18]);
+                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 16, 18, 19]);
             }
         }
 
@@ -343,7 +343,7 @@ class OrderController extends Controller
             
             if (
                 isset($request->status) &&
-                in_array($request->status, [1, 2, 3, 4, 5, 13, 14, 15, 16, 17, 18]) &&
+                in_array($request->status, [1, 2, 3, 4, 5, 13, 14, 15, 16, 17, 18, 19]) &&
                 $request->status != 'All' &&
                 $request->status != 6 &&
                 $request->status != 7
@@ -436,10 +436,10 @@ class OrderController extends Controller
                     });
                 } elseif(in_array($user->user_type_id, [10])){
                     $query->where('oms_order_creations.typist_id', $user->id)
-                    ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18]);
+                    ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18, 19]);
                 }elseif(in_array($user->user_type_id, [11])){
                     $query->where('oms_order_creations.typist_qc_id', $user->id)
-                    ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18]);
+                    ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18, 19]);
                 }else {
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
@@ -1525,10 +1525,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $statusList = Status::select('id', 'status')->get();
         $countyList = County::select('id', 'county_name')->get();
 
-        // Set the default status based on your requirements, for example, 'WIP'
         $defaultStatus = Status::where('status', 'WIP')->first();
 
-        // Get the selected status from the request or use the default status
         $selectedStatus = $request->input('status', $defaultStatus->id);
 
         return view('app.orders.orders_status', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList', 'selectedStatus', 'typists', 'typists_qcs'));

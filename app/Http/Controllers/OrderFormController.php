@@ -498,7 +498,8 @@ class OrderFormController extends Controller
                     'fourth_installment_tax_delinquent' => null,
                     'fourth_installment_good_through' => null,
                     'fourth_installment_tax_paid' => null,
-                    'notes' => null
+                    'notes' => null,
+                    'hidebutton' => 1,
                 ];
             } else {
                 $getjsonDetails = array_map(function ($item) {
@@ -978,6 +979,22 @@ class OrderFormController extends Controller
         // Return the response as JSON
         return response()->json($responseData, $status === 'success' ? 201 : 500);
     }    
+
+    public function moveToTaxStatus(Request $request)
+{
+    if ($request->has(['tax_status', 'get_data', 'search_input'])) {
+        
+        DB::table('oms_order_creations')
+            ->where('id', $request->orderId)
+            ->update([
+                'status_id' => 19,
+            ]);
+
+        return response()->json(['message' => 'Order status updated successfully'], 200);
+    }
+
+    return response()->json(['error' => 'Missing required fields'], 400);
+}
 
     
 }
