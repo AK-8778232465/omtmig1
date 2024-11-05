@@ -227,11 +227,11 @@
                         <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                         <span id="tat_status_18_fourth_count">0</span>
                     </div></button>
-                    <button id="status_19" class="btn btn-info status-btn">TAX<span id="status_19_count"></span><div style="">
-                        <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
-                        <span id="tat_status_19_third_count">0</span>
-                        <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
-                        <span id="tat_status_19_fourth_count">0</span>
+                    <button id="status_tax" class="btn btn-info status-btn">TAX<span id="status_tax_count"></span><div style="">
+                        <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px;"></div>
+                        <!-- <span id="tat_status_19_third_count">0</span> -->
+                        <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                        <!-- <span id="tat_status_19_fourth_count">0</span> -->
                     </div></button>
                     <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
@@ -777,9 +777,6 @@ $(document).ready(function() {
             case 'status_18':
                 defaultStatus = 18;
                 break;
-            case 'status_19':
-                defaultStatus = 19;
-                break;
             case 'status_4':
                 defaultStatus = 4;
                 break;
@@ -794,6 +791,9 @@ $(document).ready(function() {
                 break;
             case 'status_All':
                 defaultStatus = 'All'; // Adjust if 'All' should be treated differently
+                break;
+            case 'status_tax':
+                defaultStatus = 'tax';
                 break;
             default:
                 defaultStatus = null; // Set a default fallback
@@ -1114,6 +1114,12 @@ $(document).ready(function() {
             @endif
         }
 
+        if(status == 'tax'){
+            $('.status-dropdown').prop('disabled', true);
+            datatable.column(15).visible(false);
+            datatable.column(16).visible(false);
+        }
+
     });
 
 function updateStatusCounts() {
@@ -1125,6 +1131,7 @@ function updateStatusCounts() {
     },
     success: function(response) {
       if (response.StatusCounts !== undefined) {
+        let taxCount = response.tax_bucket_count;
         let statusCounts = response.StatusCounts;
         let assign = response.AssignCoverSheet;
         let total = 0;
@@ -1169,6 +1176,8 @@ function updateStatusCounts() {
         // Display total third and fourth counts in the All sections
         $('#tat_status_All_third_count').text(allThirdCount);
         $('#tat_status_All_fourth_count').text(allFourthCount);
+
+        $('#status_tax_count').text(' (' + taxCount + ')');
       }
     },
     error: function(error) {

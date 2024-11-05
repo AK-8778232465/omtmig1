@@ -435,9 +435,9 @@ class OrderFormController extends Controller
             // Check if $getjsonDetails is empty, and if so, set each entry as null
             if (empty($getjsonDetails)) {
                 $getjsonDetails = [
-                    'tax_form' => null,
-                    'selected_type' => null,
-                    'search_data' => null,
+                    // 'tax_form' => null,
+                    // 'selected_type' => null,
+                    // 'search_data' => null,
                     'order_id' => null,
                     'type_dd' => null,
                     'fiscal_year' => null,
@@ -458,6 +458,18 @@ class OrderFormController extends Controller
                     'second_partially_paid_amount' => null,
                     'third_partially_paid_amount' => null,
                     'fourth_partially_paid_amount' => null,
+                    'first_paid_id'=>null,
+                    'second_paid_id' => null,
+                    'third_paid_id' => null,
+                    'fourth_paid_id' => null,
+                    'first_due_id' => null,
+                    'second_due_id' => null,
+                    'third_due_id' => null,
+                    'fourth_due_id' => null,
+                    'first_delinquent_id' => null,
+                    'second_delinquent_id' => null,
+                    'third_delinquent_id' => null,
+                    'fourth_delinquent_id' => null,
                     'city_number' => null,
                     'state_dd' => null,
                     'total_annual_tax' => null,
@@ -511,16 +523,28 @@ class OrderFormController extends Controller
             $taxEntity = DB::table('oms_tax_entity')->get();
             $taxPaymentFrequency = DB::table('oms_tax_payment_frequency')->get();
 
-            // return response()->json($taxType);
-            
+            $getTaxJson = DB::table('oms_order_creations')
+                ->where('id', $orderData->id)
+                ->pluck('tax_json')
+                ->first();
+                 // Use first() to get a single item instead of an array
+
+            $getTaxJson = json_decode($getTaxJson, true);
+
+            $getTaxBucket = DB::table('oms_order_creations')
+                ->where('id', $orderData->id)
+                ->get();
+
+                // return response()->json($getTaxBucket);
+
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions',
                                                         'stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo',
-                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency'));
+                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket'));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
-                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency'));
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket'));
         } else {
             return redirect('/orders_status');
         }
@@ -864,9 +888,9 @@ class OrderFormController extends Controller
     {
         // Define an array to map old field names to new field names
         $fieldMapping = [
-            'tax_status' => 'tax_form',
-            'get_data' => 'selected_type',
-            'search_input' => 'search_data',
+            // 'tax_status' => 'tax_form',
+            // 'get_data' => 'selected_type',
+            // 'search_input' => 'search_data',
             'order_id' => 'order_id',
             'type_id' => 'type_dd',
             'fiscal_yr_id' => 'fiscal_year',
@@ -887,6 +911,18 @@ class OrderFormController extends Controller
             'second_partially_paid_amount' => 'second_partially_paid_amount',
             'third_partially_paid_amount' => 'third_partially_paid_amount',
             'fourth_partially_paid_amount' => 'fourth_partially_paid_amount',
+            'first_paid_id' => 'first_paid_id',
+            'second_paid_id' => 'second_paid_id',
+            'third_paid_id' => 'third_paid_id',
+            'fourth_paid_id' => 'fourth_paid_id',
+            'first_due_id' => 'first_due_id',
+            'second_due_id' => 'second_due_id',
+            'third_due_id' => 'third_due_id',
+            'fourth_due_id' => 'fourth_due_id',
+            'first_delinquent_id' => 'first_delinquent_id',
+            'second_delinquent_id' => 'second_delinquent_id',
+            'third_delinquent_id' => 'third_delinquent_id',
+            'fourth_delinquent_id' => 'fourth_delinquent_id',
             'city_id' => 'city_number',
             'state' => 'state_dd',
             'total_annual_tax' => 'total_annual_tax',
@@ -937,7 +973,72 @@ class OrderFormController extends Controller
         foreach ($fieldMapping as $oldField => $newField) {
             $renamedData[$newField] = $request->input($oldField);
         }
-    
+
+        if (isset($renamedData['first_paid_id']) && $renamedData['first_paid_id'] == '1') {
+            $renamedData['first_due_id'] = 'null';
+            $renamedData['first_delinquent_id'] = 'null';
+        }
+
+        if (isset($renamedData['first_due_id']) && $renamedData['first_due_id'] == '1') {
+            $renamedData['first_paid_id'] = 'null';
+            $renamedData['first_delinquent_id'] = 'null';
+        }
+
+        if (isset($renamedData['first_delinquent_id']) && $renamedData['first_delinquent_id'] == '1') {
+            $renamedData['first_due_id'] = 'null';
+            $renamedData['first_paid_id'] = 'null';
+        }
+
+
+        if (isset($renamedData['second_paid_id']) && $renamedData['second_paid_id'] == '1') {
+            $renamedData['second_due_id'] = 'null';
+            $renamedData['second_delinquent_id'] = 'null';
+        }
+
+        if (isset($renamedData['second_due_id']) && $renamedData['second_due_id'] == '1') {
+            $renamedData['second_paid_id'] = 'null';
+            $renamedData['second_delinquent_id'] = 'null';
+        }
+
+        if (isset($renamedData['second_delinquent_id']) && $renamedData['second_delinquent_id'] == '1') {
+            $renamedData['second_due_id'] = 'null';
+            $renamedData['second_paid_id'] = 'null';
+        }
+
+
+
+
+        if (isset($renamedData['third_paid_id']) && $renamedData['third_paid_id'] == '1') {
+            $renamedData['third_due_id'] = 'null';
+            $renamedData['third_delinquent_id'] = 'null';
+        }
+
+        if (isset($renamedData['third_due_id']) && $renamedData['third_due_id'] == '1') {
+            $renamedData['third_paid_id'] = 'null';
+            $renamedData['third_delinquent_id'] = 'null';
+        }
+
+        if (isset($renamedData['third_delinquent_id']) && $renamedData['third_delinquent_id'] == '1') {
+            $renamedData['third_due_id'] = 'null';
+            $renamedData['third_paid_id'] = 'null';
+        }
+
+
+        if (isset($renamedData['fourth_paid_id']) && $renamedData['fourth_paid_id'] == '1') {
+            $renamedData['fourth_due_id'] = 'null';
+            $renamedData['fourth_delinquent_id'] = 'null';
+        }
+
+        if (isset($renamedData['fourth_due_id']) && $renamedData['fourth_due_id'] == '1') {
+            $renamedData['fourth_paid_id'] = 'null';
+            $renamedData['fourth_delinquent_id'] = 'null';
+        }
+
+        if (isset($renamedData['fourth_delinquent_id']) && $renamedData['fourth_delinquent_id'] == '1') {
+            $renamedData['fourth_due_id'] = 'null';
+            $renamedData['fourth_paid_id'] = 'null';
+        }
+
         // Encode the renamed data as JSON
         $jsonData = json_encode($renamedData);
     
@@ -953,7 +1054,10 @@ class OrderFormController extends Controller
                     'updated_by' => Auth::id(),
                     'updated_at' => Carbon::now(),
                 ]);
-    
+            $tax_bucket_update = DB::table('oms_order_creations')->where('id', $renamedData['order_id'])->update([
+                'tax_bucket' => null,
+                ]);
+
             $status = $updated ? 'success' : 'error';
             $message = $updated ? 'Data updated successfully' : 'Failed to update data';
         } else {
@@ -964,7 +1068,13 @@ class OrderFormController extends Controller
                 'updated_by' => Auth::id(),
                 'updated_at' => Carbon::now(),
             ]);
-    
+
+            $tax_bucket_update = DB::table('oms_order_creations')->where('id', $renamedData['order_id'])->update([
+                'tax_bucket' => null,
+            ]);
+
+
+
             $status = $inserted ? 'success' : 'error';
             $message = $inserted ? 'Data inserted successfully' : 'Failed to insert data';
         }
@@ -981,20 +1091,28 @@ class OrderFormController extends Controller
     }    
 
     public function moveToTaxStatus(Request $request)
-{
-    if ($request->has(['tax_status', 'get_data', 'search_input'])) {
-        
-        DB::table('oms_order_creations')
-            ->where('id', $request->orderId)
-            ->update([
-                'status_id' => 19,
+    {
+        if ($request->has(['tax_status', 'get_data', 'search_input'])) {
+
+            $jsondata = json_encode([
+                'tax_status' => $request->tax_status,
+                'get_data' => $request->get_data,
+                'search_input' => $request->search_input,
             ]);
 
-        return response()->json(['message' => 'Order status updated successfully'], 200);
+            DB::table('oms_order_creations')
+                ->where('id', $request->orderId)
+                ->update([
+                    'tax_json' => $jsondata,
+                    'tax_bucket' => 1,
+                ]);
+
+            return response()->json(['message' => 'Order status updated successfully'], 200);
+        }
+
+        return response()->json(['error' => 'Missing required fields'], 400);
     }
 
-    return response()->json(['error' => 'Missing required fields'], 400);
-}
 
-    
+
 }

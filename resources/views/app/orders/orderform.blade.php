@@ -166,7 +166,7 @@
                             @if($orderData->client_id == 16)
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">Tier</div>
-                                <select name="tier_id" id="tier_id" class="form-control" style="width: 100%">
+                                <select name="tier_id" id="tier_id" class="form-control" style="width: 100%"  {{ !is_null($getTaxBucket[0]->tax_bucket) ? 'disabled' : '' }}>
                                     <option value="">Select Tier</option>
                                     @foreach($tierList as $tier)
                                         <option value="{{ $tier->id }}" {{ $orderData->tier_id == $tier->id ? 'selected' : '' }}>
@@ -195,7 +195,8 @@
                             </div>
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">State</div>
-                                <select class="form-control select2dropdown" style="width:100%" name="property_state" id="property_state" aria-hidden="true">
+                                <select class="form-control select2dropdown" style="width:100%" name="property_state" id="property_state" aria-hidden="true"
+                                {{ !is_null($getTaxBucket[0]->tax_bucket) ? 'disabled' : '' }}>
                                     <option value="">Select State</option>
                                     @foreach ($stateList as $state)
                                         <option value="{{ $state->id }}" {{ $orderData->property_state == $state->id ? 'selected' : '' }}>
@@ -206,7 +207,8 @@
                             </div>
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">County</div>
-                                <select class="form-control select2dropdown" style="width:100%" name="property_county" id="property_county" aria-hidden="true">
+                                <select class="form-control select2dropdown" style="width:100%" name="property_county" id="property_county" aria-hidden="true"
+                                {{ !is_null($getTaxBucket[0]->tax_bucket) ? 'disabled' : '' }}>
                                     <option value="">Select County</option>
                                     @foreach ($countyList as $county)
                                         <option value="{{ $county->id }}" {{ $orderData->property_county == $county->id ? 'selected' : '' }}>
@@ -221,7 +223,7 @@
                         @if($orderData->client_id == 16)
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">Municipality</div>
-                                <select id="city" name="city" class="form-control select2dropdown" data-parsley-required="true">
+                                <select id="city" name="city" class="form-control select2dropdown" data-parsley-required="true" {{ !is_null($getTaxBucket[0]->tax_bucket) ? 'disabled' : '' }}>
                                     <option value="">Select Municipality</option>
                                     @foreach($cityList as $city)
                                         <option value="{{ $city->id }}" {{ ($orderData->city_id == $city->id) ? 'selected' : '' }}>
@@ -532,34 +534,41 @@
                     </div>
                 </div>
                 <div class="card p-1" id="hide_card">
+                <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
                     <!-- <div class="card p-0"> -->
                     <!-- Tax Form - Hidden by Default -->
                     <div id="taxForm" class="p-3" style="display:none; ">
                         <h5>Taxes :</h5>
                         <div class="row mb-5 mt-2">
-                    <div class="col-2 d-flex align-items-center">
-                        <label for="tax_status" class="mr-2 font-weight-bold">Tax:</label>
-                        <select class="form-control" name="tax_status" id="tax_status">
-                            <option value="online"  {{ (isset($getjsonDetails['tax_form']) && $getjsonDetails['tax_form'] == 'online') ? 'selected' : '' }}>Online</option>
-                            <option value="offline" {{ (isset($getjsonDetails['tax_form']) && $getjsonDetails['tax_form'] == 'offline') ? 'selected' : '' }}>Offline</option>
-                        </select>
-                    </div>
-                    <div class="col-2 d-flex align-items-center">
-                        <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
-                        <select class="form-control" name="get_data" id="get_data">
-                            <option value="apn" {{ (isset($getjsonDetails['selected_type']) && $getjsonDetails['selected_type'] == 'apn') ? 'selected' : '' }}>APN</option>
-                            <option value="address" {{ (isset($getjsonDetails['selected_type']) && $getjsonDetails['selected_type'] == 'address') ? 'selected' : '' }}>Address</option>
-                        </select>
-                    </div>
-                    <div class="col-2 d-flex align-items-center">
-                             <input class="form-control" id="search_input" name="search_input" type="text" placeholder="Enter APN/Address" value="{{ $getjsonDetails[0]['search_data'] ?? '' }}">
-                    </div>
-                    <div class="col-md-2 align-items-center">
-                                <input type="hidden" id="order_id" value="{{($orderData->id)}}">
-                        <button type="submit" class="btn btn-primary" id="fetchButton">fetch</button>
+                            <div class="col-2 d-flex align-items-center">
+                                <label for="tax_status" class="mr-2 font-weight-bold">Tax:</label>
+                                <select class="form-control" name="tax_status" id="tax_status">
+                                    <option value="">Select Tax</option>
+                                    <option value="online" {{ isset($getTaxJson['tax_status']) && $getTaxJson['tax_status'] == 'online' ? 'selected' : '' }}>Online</option>
+                                    <option value="offline" {{ isset($getTaxJson['tax_status']) && $getTaxJson['tax_status'] == 'offline' ? 'selected' : '' }}>Offline</option>
+                                </select>
+                            </div>
+                            <div class="col-2 d-flex align-items-center">
+                                <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
+                                <select class="form-control" name="get_data" id="get_data">
+                                    <option value="">Select Source</option>
+                                    <option value="apn" {{ isset($getTaxJson['get_data']) && $getTaxJson['get_data'] == 'apn' ? 'selected' : '' }}>APN</option>
+                                    <option value="address" {{ isset($getTaxJson['get_data']) && $getTaxJson['get_data'] == 'address' ? 'selected' : '' }}>Address</option>
+                                </select>
+                            </div>
+                            <div class="col-2 d-flex align-items-center">
+                                <input class="form-control" id="search_input" name="search_input" type="text" placeholder="Enter APN/Address" value="{{ isset($getTaxJson['search_input']) ? $getTaxJson['search_input'] : '' }}">
+                            </div>
+                            <div class="col-md-2 align-items-center">
+                                <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
+                                <button type="submit" class="btn btn-primary" id="fetchButton">Fetch</button>
+
+                                @if(!is_null($getTaxBucket[0]->tax_bucket) && !is_null($getTaxBucket[0]->tax_json))
                                 <button type="submit" class="btn btn-primary" id="SaveButton">Save</button>
-                    </div>
-                </div>
+                                @endif
+                            </div>
+                        </div>
+
                         <form id="taxFormValues">
                         <input type="hidden" name="order_id" value="{{$orderData->id}}">
                             <!-- Top Section -->
@@ -801,17 +810,20 @@
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="first_paid_id" name="first_paid_id" value="1" onclick="onlyOne(this)"> Paid
+                                                <input type="checkbox" id="first_paid_id" name="first_paid_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['first_paid_id'] == 1 ? 'checked' : '' }} > Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="first_due_id" name="first_due_id" value="1" onclick="onlyOne(this)"> Due
+                                                <input type="checkbox" id="first_due_id" name="first_due_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['first_due_id'] == 1 ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="first_delinquent_id" name="first_delinquent_id" value="1" onclick="onlyOne(this)"> Delinquent
+                                                <input type="checkbox" id="first_delinquent_id" name="first_delinquent_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['first_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
                                             </label>
                                         </div>
                                     </div>
@@ -876,17 +888,20 @@
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"> Paid
+                                                <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['second_paid_id'] == 1 ? 'checked' : '' }}> Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="second_due_id" name="second_due_id" value="1" onclick="onlyOne(this)"> Due
+                                                <input type="checkbox" id="second_due_id" name="second_due_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['second_due_id'] == 1 ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="second_delinquent_id" name="second_delinquent_id" value="1" onclick="onlyOne(this)"> Delinquent
+                                                <input type="checkbox" id="second_delinquent_id" name="second_delinquent_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['second_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
                                             </label>
                                         </div>
                                     </div>
@@ -952,17 +967,20 @@
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="third_paid_id" name="third_paid_id" value="1" onclick="onlyOne(this)"> Paid
+                                                <input type="checkbox" id="third_paid_id" name="third_paid_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['third_paid_id'] == 1 ? 'checked' : '' }}> Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="third_due_id" name="third_due_id" value="1" onclick="onlyOne(this)"> Due
+                                                <input type="checkbox" id="third_due_id" name="third_due_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['third_due_id'] == 1 ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="third_delinquent_id" name="third_delinquent_id" value="1" onclick="onlyOne(this)"> Delinquent
+                                                <input type="checkbox" id="third_delinquent_id" name="third_delinquent_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['third_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
                                             </label>
                                         </div>
                                     </div>
@@ -1027,17 +1045,20 @@
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="fourth_paid_id" name="fourth_paid_id" value="1" onclick="onlyOne(this)"> Paid
+                                                <input type="checkbox" id="fourth_paid_id" name="fourth_paid_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['fourth_paid_id'] == 1 ? 'checked' : '' }}> Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="fourth_due_id" name="fourth_due_id" value="1" onclick="onlyOne(this)"> Due
+                                                <input type="checkbox" id="fourth_due_id" name="fourth_due_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['fourth_due_id'] == 1 ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="fourth_delinquent_id" name="fourth_delinquent_id" value="1" onclick="onlyOne(this)"> Delinquent
+                                                <input type="checkbox" id="fourth_delinquent_id" name="fourth_delinquent_id" value="1" onclick="onlyOne(this)"
+                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['fourth_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
                                             </label>
                                         </div>
                                     </div>
@@ -1178,14 +1199,14 @@
                                                         selected @endif>Clarification</option>
                                                     <option value="18" id="status_18" @if($orderData->status_id == 18)
                                                         selected @endif>Ground Abstractor</option>
-                                        </select>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                    </div>
-                                </div>
-                                @if(!(isset($getjsonDetails['hidebutton']) == 1))
-                                <div class="d-flex justify-content-center my-4">
-                                    <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
+                                @if(is_null($getTaxBucket[0]->tax_bucket))
+                                    <div class="d-flex justify-content-center my-4">
+                                        <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
                                             onclick="order_submition({{ $orderData->id }}, 1)" type="submit">Submit
                                     </button>
                                     <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit"
@@ -1650,7 +1671,10 @@ $(document).ready(function() {
     var saveButton = document.getElementById('SaveButton');
 
     // Check the initial value of tax_status and display the correct button
-    if (taxStatusValue === 'online') {
+    if (taxStatusValue === '') {
+        fetchButton.style.display = 'none';
+        saveButton.style.display = 'none';
+    } else if (taxStatusValue === 'online') {
         fetchButton.style.display = 'inline-block';
         saveButton.style.display = 'none';
     } else if (taxStatusValue === 'offline') {

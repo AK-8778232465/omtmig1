@@ -57,10 +57,10 @@ class OrderController extends Controller
                 });
             } elseif($user->user_type_id == 10){
                 $statusCountsQuery->where('typist_id', $user->id)
-                ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18, 19]);
+                ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18]);
             }elseif($user->user_type_id == 11){
                 $statusCountsQuery->where('typist_qc_id', $user->id)
-                ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18, 19]);
+                ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18]);
 
             }
         }
@@ -127,6 +127,18 @@ class OrderController extends Controller
             })
             ->count();
 
+        $tax_bucket_count = OrderCreation::with('process', 'client')
+            ->where('tax_bucket', 1)
+            ->where('is_active', 1)
+            ->whereIn('process_id', $processIds)
+            ->whereHas('process', function ($query) {
+                $query->where('stl_item_description.is_approved', 1);
+            })
+            ->whereHas('client', function ($query) {
+                $query->where('stl_client.is_approved', 1);
+            })
+            ->count();
+
         if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
             // $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
@@ -183,10 +195,10 @@ class OrderController extends Controller
                 });
             } elseif($user->user_type_id == 10){
                 $tatstatusCountsQuery->where('oms_order_creations.typist_id', $user->id)
-                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 17, 18, 19]);
+                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 17, 18]);
             } elseif($user->user_type_id == 11){
                 $tatstatusCountsQuery->where('oms_order_creations.typist_qc_id', $user->id)
-                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 16, 18, 19]);
+                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 16, 18]);
             }
         }
 
@@ -236,6 +248,7 @@ class OrderController extends Controller
         $totalFourthCount = array_sum(array_column($results, 'orderReachfourth'));
 
         return response()->json([
+            'tax_bucket_count' => $tax_bucket_count,
             'StatusCounts' => $statusCounts,
             'AssignCoverSheet' => $assign_coverSheet,
             'TatStatusResults' => $results,  
@@ -316,6 +329,7 @@ class OrderController extends Controller
                 'oms_order_creations.assignee_qa_id',
                 'oms_order_creations.typist_id',
                 'oms_order_creations.typist_qc_id',
+                'oms_order_creations.tax_bucket',
                 'oms_order_creations.associate_id',
                 'stl_lob.name as lob_name',
                 'stl_process.name as process_name',
@@ -343,7 +357,7 @@ class OrderController extends Controller
             
             if (
                 isset($request->status) &&
-                in_array($request->status, [1, 2, 3, 4, 5, 13, 14, 15, 16, 17, 18, 19]) &&
+                in_array($request->status, [1, 2, 3, 4, 5, 13, 14, 15, 16, 17, 18]) &&
                 $request->status != 'All' &&
                 $request->status != 6 &&
                 $request->status != 7
@@ -436,10 +450,10 @@ class OrderController extends Controller
                     });
                 } elseif(in_array($user->user_type_id, [10])){
                     $query->where('oms_order_creations.typist_id', $user->id)
-                    ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18, 19]);
+                    ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18]);
                 }elseif(in_array($user->user_type_id, [11])){
                     $query->where('oms_order_creations.typist_qc_id', $user->id)
-                    ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18, 19]);
+                    ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18]);
                 }else {
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
@@ -1108,6 +1122,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
     }
     $query->whereIn('oms_order_creations.process_id', $processIds);
 
+    if ($request->status == 'tax'){
+        $query->where('oms_order_creations.tax_bucket', 1);
+    }
 
     if ($searchType == 1 && !empty($searchInputs)) {
 
