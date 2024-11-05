@@ -161,7 +161,9 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::post('/updateOrder', 'updateOrder')->name('updateOrder');
     Route::post('/delete_order', 'delete_order')->name('delete_order');
     Route::any('/progressBar', 'progressBar')->name('progressBar');
-    
+    Route::post('unassign_user', 'unassign_user')->name('unassign_user');
+    Route::post('unassign_qcer', 'unassign_qcer')->name('unassign_qcer');
+
     Route::any('/getStatus', 'getStatus')->name('getStatus');
     Route::any('/getlobid', 'getlobid')->name('getlobid');
 

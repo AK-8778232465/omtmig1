@@ -430,6 +430,35 @@ public function getlobid(Request $request){
         }
     }
 
+public function unassign_user(Request $request)
+{
+    $orderId = $request->input('order_id');
+
+    $order = OrderCreation::find($orderId);
+    if ($order) {
+        $order->assignee_user_id = null; // Unassign the user
+        $order->save();
+        return response()->json(['success' => true]);
+    }
+
+    return response()->json(['success' => false], 404);
+}
+
+
+public function unassign_qcer(Request $request)
+{
+    $orderId = $request->input('order_id');
+
+    $order = OrderCreation::find($orderId);
+    if ($order) {
+        $order->assignee_qa_id = null; // Unassign the user
+        $order->save();
+        return response()->json(['success' => true]);
+    }
+
+    return response()->json(['success' => false], 404);
+}
+
     public function delete_order(Request $request)
 {
     try {
