@@ -2718,6 +2718,7 @@ public function tat_zone_count(Request $request) {
         ->leftJoin('yesterday_active_users', 'yesterday_active_users.user_id', '=', 'oms_users.id')
         ->whereIn('oms_users.id', $user_lower_ids)
         ->whereDate('yesterday_active_users.created_at', $yesterday)
+        ->distinct()
         ->get();
 
 

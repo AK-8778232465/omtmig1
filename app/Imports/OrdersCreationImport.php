@@ -278,7 +278,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         $assignee_user = isset($row['Emp ID-Order Assigned']) ? trim($row['Emp ID-Order Assigned']) : null;
 
         if ($assignee_user) {
-            $assignee_user = User::where('emp_id', $assignee_user)->whereIn('user_type_id', [6,8])->first();
+            $assignee_user = User::where('emp_id', $assignee_user)->whereIn('user_type_id', [6,8,9])->first();
         }
 
         $assignee_qa = isset($row['Assignee_QA']) ? trim($row['Assignee_QA']) : null;
