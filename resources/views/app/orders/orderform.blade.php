@@ -563,9 +563,7 @@
                                 <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
                                 <button type="submit" class="btn btn-primary" id="fetchButton">Fetch</button>
 
-                                @if(!is_null($getTaxBucket[0]->tax_bucket) && !is_null($getTaxBucket[0]->tax_json))
                                 <button type="submit" class="btn btn-primary" id="SaveButton">Save</button>
-                                @endif
                             </div>
                         </div>
 

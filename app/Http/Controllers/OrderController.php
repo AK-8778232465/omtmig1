@@ -1566,8 +1566,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     ->whereNull('assignee_qa_id')
                     ->update(['assignee_qa_id' => $input['user_id']]);
             }
- 
-            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3])) {
+
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3, 16, 17])) {
                 if ($input['user_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update(['assignee_user_id' => $input['user_id']]);
@@ -1586,8 +1586,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 }
 
             }
- 
-            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3]) && $input['user_id'] != null && $input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_id'] != null && $input['typist_qc_id'] != null) {
+
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3, 16, 17]) && $input['user_id'] != null && $input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_id'] != null && $input['typist_qc_id'] != null) {
                 OrderCreation::whereIn('id', $orderIds)
                     ->update([
                         'assignee_user_id' => $input['user_id'],
@@ -1597,8 +1597,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         'typist_qc_id' => $input['typist_qc_id']
                     ]);
             }
- 
-            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3])) {
+
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3,16, 17])) {
                 if ($input['user_id'] != null && $input['qcer_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([
