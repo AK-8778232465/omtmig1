@@ -152,6 +152,8 @@
                                 @endforeach
                             </select>
                         </div>
+                        <button type="button" class="btn btn-info" id="unassign_user">Unassign User</button>
+
                         <div class="col-lg-4 mb-4" id="hide_qa">
                             <label class="font-weight-bold text-right">Assign QA</label>
                             <select id="assign_qa_ed" name="assign_qa" type="text" class="select2dropdown form-control">
@@ -161,7 +163,9 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button type="button" class="btn btn-danger mr-2">Close</button>
+                        <button type="button" class="btn btn-info" id="unassign_qcer">Unassign QC</button>
+
+                        <button type="button" class="btn btn-danger">Close</button>
                         <button type="submit" class="btn btn-primary">Update</button>
                     </div>
 
@@ -1579,6 +1583,8 @@ $(document).on('focus', '.status-dropdown', function() {
      $('#order_datatable').on('click','.edit_order',function () {
         $('#re_assign').prop('checked', false);
         $('#hide_user, #hide_qa').hide();
+        $('#unassign_user, #unassign_qcer').hide();
+
 		var id = $(this).data('id');
 		var url = '{{ route("edit_order") }}';
 		$.ajax({
@@ -1624,15 +1630,23 @@ $(document).on('focus', '.status-dropdown', function() {
         $('#re_assign').change(function() {
             if(this.checked) {
                 $("#hide_user").show();
+                $("#unassign_user").show();
+
                 console.log($("#assign_qa_ed").val());
                 if ($("#assign_qa_ed").val() != null || $("#assign_qa_ed").val() != undefined) {
                     $("#hide_qa").show();
+                    $("#unassign_qcer").show();
+
                 } else {
                     $("#hide_qa").hide();
+                    $("#unassign_qcer").hide();
+
                 }
                 $('.select2dropdown').select2();
             } else {
                 $('#hide_user, #hide_qa').hide();
+                $('#unassign_user, #unassign_qcer').hide();
+
             }
         });
         $("#re_assign").show();
@@ -1741,6 +1755,111 @@ $(document).on('focus', '.status-dropdown', function() {
 			});
 		}
 	});
+
+
+
+    $('#unassign_user').on('click', function(event) {
+    event.preventDefault();
+    const orderId = $('#id_ed').val();
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to Unassign the order? This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Unassign it!',
+        cancelButtonText: 'No, cancel!'
+    }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                method: 'POST',
+                url: "{{ route('unassign_user') }}",
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    order_id: orderId,
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire(
+                            'Unassigned!',
+                            'The user has been unassigned.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'Failed to unassign the user. Please try again.',
+                            'error'
+                        );
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire(
+                        'Error!',
+                        'There was a problem unassigning the user.',
+                        'error'
+                    );
+                }
+            });
+        }
+    });
+});
+
+
+
+        $('#unassign_qcer').on('click', function() {
+            const orderId = $('#id_ed').val();
+            event.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you want to Unassign the order? This action cannot be undone.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, Unassign it!',
+                    cancelButtonText: 'No, cancel!'
+                }).then((result) => {
+                    if (result.value) {
+                    $.ajax({
+                        method: 'POST',
+                        url: "{{ route('unassign_qcer') }}",
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            order_id: orderId,
+                        },
+                        success: function(response) {
+                    if (response.success) {
+                        Swal.fire(
+                            'Unassigned!',
+                            'The Qcer has been unassigned.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'Failed to unassign the user. Please try again.',
+                            'error'
+                        );
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire(
+                        'Error!',
+                        'There was a problem unassigning the user.',
+                        'error'
+                    );
+                }
+            });
+        }
+    });
+});
 
 
     $(document).on("click", "#assignBtn", function (event) {
