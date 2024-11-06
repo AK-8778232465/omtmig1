@@ -1397,7 +1397,7 @@ $(document).on('change', 'input.check-one', function() {
 
     if (anyCheckboxChecked) {   
 
-        if ($(this).data('id') == 82 || $(this).data('id') == 86) {
+        if ($(this).data('id') == 82 || $(this).data('id') == 86 || $(this).data('id') == 84 || $(this).data('id') == 85) {
                 $('#assign_tab').removeClass('d-none');
                 $('#typist_div').removeClass('d-none');
                 var task_status = $('#statusButtons').find('.btn-primary').attr('id');

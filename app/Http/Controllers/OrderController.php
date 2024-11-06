@@ -1475,7 +1475,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 $className = 'goto-order2'; 
             } elseif ($elapsedHours < ($tatValueInHours*3)) {
                 $className = 'goto-order3'; 
-            } elseif ($elapsedHours < ($tatValueInHours*3)) {
+            } elseif ($elapsedHours < ($tatValueInHours*4)) {
                 $className = 'goto-order4'; 
             } else {
                 $className = 'goto-order6'; 

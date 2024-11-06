@@ -232,7 +232,7 @@
                                 </select>
                             </div>
                         @endif
-                        @if($orderData->client_id == 82)
+                        @if($orderData->client_id == 82 || $orderData->client_id == 84 || $orderData->client_id == 85 || $orderData->client_id == 86)
                             <div class="col-md-3 mt-0 mb-2">
                                 <div class="font-weight-bold">User Name</div>
                                 <div>{!! !empty($orderData->assignee_user) ? $orderData->assignee_user : '-' !!}</div>
@@ -1429,7 +1429,7 @@
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                     <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" >
+                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
                                                         @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                         <!-- @if(in_array($orderData->stl_process_id, [12, 7, 8, 9]) || !in_array($orderData->client_id, [84, 85, 86]))
