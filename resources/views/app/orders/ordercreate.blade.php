@@ -962,20 +962,15 @@ console.log(clientId);
             $('#tier-container').show();
         }
 
-        if (clientId == 84) {
-            $('#typist-container').hide();
-            $('#typist-qc-container').hide();
-        }
-
-        if (clientId == 85) {
-            $('#typist-container').hide();
-            $('#typist-qc-container').hide();
-        }
-
-        if(clientId == 86){
+        if(clientId == 86 || clientId == 84 || clientId == 85){
             $('#municipality-container').hide();
             $('#tier-container').hide();
         }
+
+
+
+
+
 
 
 
