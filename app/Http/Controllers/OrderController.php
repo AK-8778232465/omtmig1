@@ -1413,6 +1413,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 3 => 'Cancelled',
 
                             ];
+                            if (in_array($order->client_id, [2,13])) {
+                                unset($statusMapping[13]);
+                            }
                         }
                         }
                     }
