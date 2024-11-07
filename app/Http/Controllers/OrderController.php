@@ -1267,7 +1267,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
         ->addColumn('status', function ($order) use ($request) {
-            if (in_array($order->client_id, [82, 84, 85, 86])) 
+            if (in_array($order->client_id, [82, 84, 85, 86, 87, 89, 91]))
                 {
                                 $statusMapping = [];
                     if (Auth::user()->hasRole('Typist') && in_array($order->process_type_id, [12, 7])) {
@@ -1304,7 +1304,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         16 => 'Typing',
                         17 => 'Typing QC'
                     ];
-                        if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86])) {
+                        if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86, 13, 2, 87, 88, 89, 90, 91, 92])) {
                         unset($statusMapping[15]);
                     }
                         if (!in_array($order->process_type_id, [12, 7])) {

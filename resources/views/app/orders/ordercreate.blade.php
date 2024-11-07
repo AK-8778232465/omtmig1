@@ -962,7 +962,7 @@ console.log(clientId);
             $('#tier-container').show();
         }
 
-        if(clientId == 86 || clientId == 84 || clientId == 85){
+        if(clientId == 86 || clientId == 84 || clientId == 85 || clientId == 87 || clientId == 89 || clientId == 91){
             $('#municipality-container').hide();
             $('#tier-container').hide();
         }

@@ -232,7 +232,7 @@
                                 </select>
                             </div>
                         @endif
-                        @if($orderData->client_id == 82 || $orderData->client_id == 84 || $orderData->client_id == 85 || $orderData->client_id == 86)
+                        @if($orderData->client_id == 82 || $orderData->client_id == 84 || $orderData->client_id == 85 || $orderData->client_id == 86 || $orderData->client_id == 87 || $orderData->client_id == 89 || $orderData->client_id == 91)
                             <div class="col-md-3 mt-0 mb-2">
                                 <div class="font-weight-bold">User Name</div>
                                 <div>{!! !empty($orderData->assignee_user) ? $orderData->assignee_user : '-' !!}</div>
