@@ -20,6 +20,15 @@ use Illuminate\Support\Facades\Http;
 use Session;
 use DataTables;
 use Carbon\Carbon;
+use FPDF;
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade as PDF;
+use Intervention\Image\Facades\Image;
+use PhpOffice\PhpWord\IOFactory;
+use setasign\Fpdi\Fpdi;
+use App\Models\SupportingDocs;
+
+
 
 class OrderFormController extends Controller
 {
@@ -67,6 +76,7 @@ class OrderFormController extends Controller
             'oms_order_creations.assignee_qa_id',
             'oms_order_creations.typist_id',
             'oms_order_creations.typist_qc_id',
+            'oms_order_creations.tax_bucket',
             'stl_item_description.lob_id as lob_id',
             'stl_lob.name as lob_name',
             'stl_client.client_name',
@@ -435,9 +445,6 @@ class OrderFormController extends Controller
             // Check if $getjsonDetails is empty, and if so, set each entry as null
             if (empty($getjsonDetails)) {
                 $getjsonDetails = [
-                    // 'tax_form' => null,
-                    // 'selected_type' => null,
-                    // 'search_data' => null,
                     'order_id' => null,
                     'type_dd' => null,
                     'fiscal_year' => null,
@@ -535,16 +542,29 @@ class OrderFormController extends Controller
                 ->where('id', $orderData->id)
                 ->get();
 
+            $orderTaxInfo = DB::table('oms_tax_comments_histroy')
+                ->leftJoin('oms_users', 'oms_tax_comments_histroy.updated_by', '=', 'oms_users.id')
+                ->select(
+                    'oms_tax_comments_histroy.comment',
+                    'oms_users.emp_id',
+                    'oms_users.username',
+                    'oms_tax_comments_histroy.updated_at'
+                )
+                ->where('oms_tax_comments_histroy.order_id', $orderData->id)
+                ->whereNotNull('oms_tax_comments_histroy.comment')
+                ->orderBy('oms_tax_comments_histroy.id', 'desc')
+                ->get();
+
                 // return response()->json($getTaxBucket);
 
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions',
                                                         'stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo',
-                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket'));
+                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo'));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
-                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket'));
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo'));
         } else {
             return redirect('/orders_status');
         }
@@ -888,9 +908,6 @@ class OrderFormController extends Controller
     {
         // Define an array to map old field names to new field names
         $fieldMapping = [
-            // 'tax_status' => 'tax_form',
-            // 'get_data' => 'selected_type',
-            // 'search_input' => 'search_data',
             'order_id' => 'order_id',
             'type_id' => 'type_dd',
             'fiscal_yr_id' => 'fiscal_year',
@@ -1078,6 +1095,15 @@ class OrderFormController extends Controller
             $status = $inserted ? 'success' : 'error';
             $message = $inserted ? 'Data inserted successfully' : 'Failed to insert data';
         }
+    
+            DB::table('oms_tax_comments_histroy')
+                    ->insert([
+                        'order_id'=> $renamedData['order_id'],
+                        'comment' => $renamedData['notes'],
+                        'updated_by' => Auth::id(),
+                        'updated_at' => Carbon::now('America/New_York'),
+                    ]);
+
     
         // Prepare the response with the renamed fields
         $responseData = [

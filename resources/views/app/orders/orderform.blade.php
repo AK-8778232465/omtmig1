@@ -98,6 +98,42 @@
     border-bottom-right-radius: 8px;
 }
 
+/* Tick icon specific to #showTaxForm with data-status="tick" */
+#showTaxForm[data-status="tick"]::after {
+    content: '✓';
+    font-size: 0.6rem;
+    color: white;
+    background-color: green;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#showTaxForm[data-status="cross"]::after {
+    content: '!';
+    font-size: 0.6rem;
+    color: white;
+    background-color: red;
+    width: 17px;
+    height: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+
 </style>
 <div class="col-lg-12">
     <div class="col-lg-12 mt-2" id="ip_div">
@@ -525,11 +561,17 @@
             <div class="card shadow shadow-md rounded showdow-grey p-4">
                 <div class="row justify-content-start mb-0" style="margin-left: 1px;" id="statusButtons">
                     <div class="bg-info p-0 text-white" style="text-decoration: none; font-size:0.4rem;">
-                        <button type="button" class="btn btn-inactive" id="showOrderForm"
-                            style="padding: 5px 10px; font-size: 0.8rem;">Order Submission
+                            <button type="button" class="btn btn-inactive" id="showOrderForm" style="padding: 5px 25px; font-size: 0.9rem;">
+                                Order Submission
                         </button>
                         <button type="button" class="btn btn-inactive" id="showTaxForm"
-                            style="padding: 5px 10px; font-size: 0.8rem;">TAX
+                                    style="padding: 5px 25px; font-size: 0.9rem; position: relative;"
+                                    @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null)
+                                        data-status="tick"
+                                    @else
+                                        data-status="cross"
+                                    @endif>
+                                TAX
                         </button>
                     </div>
                 </div>
@@ -540,6 +582,32 @@
                     <div id="taxForm" class="p-3" style="display:none; ">
                         <h5>Taxes :</h5>
                         <div class="row mb-5 mt-2">
+                            `@if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null)
+                                <div class="col-2 d-flex align-items-center">
+                                    <label for="tax_status" class="mr-2 font-weight-bold">Tax:</label>
+                                    <select class="form-control" name="tax_status" id="tax_status" disabled>
+                                        <option value="">Select Tax</option>
+                                        <option value="online" {{ isset($getTaxJson['tax_status']) && $getTaxJson['tax_status'] == 'online' ? 'selected' : '' }}>Online</option>
+                                        <option value="offline" {{ isset($getTaxJson['tax_status']) && $getTaxJson['tax_status'] == 'offline' ? 'selected' : '' }}>Offline</option>
+                                    </select>
+                                </div>
+                                <div class="col-2 d-flex align-items-center">
+                                    <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
+                                    <select class="form-control" name="get_data" id="get_data" disabled>
+                                        <option value="">Select Source</option>
+                                        <option value="apn" {{ isset($getTaxJson['get_data']) && $getTaxJson['get_data'] == 'apn' ? 'selected' : '' }}>APN</option>
+                                        <option value="address" {{ isset($getTaxJson['get_data']) && $getTaxJson['get_data'] == 'address' ? 'selected' : '' }}>Address</option>
+                                    </select>
+                                </div>
+                                <div class="col-2 d-flex align-items-center">
+                                    <input class="form-control" id="search_input" name="search_input" type="text" placeholder="Enter APN/Address" value="{{ isset($getTaxJson['search_input']) ? $getTaxJson['search_input'] : '' }}" readonly>
+                                </div>
+                                <div class="col-md-2 align-items-center">
+                                    <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
+                                    <button type="submit" class="btn btn-primary" id="fetchButton" disabled>Fetch</button>
+                                    <button type="submit" class="btn btn-primary" id="SaveButton" disabled>Save</button>
+                                </div>
+                            @else
                             <div class="col-2 d-flex align-items-center">
                                 <label for="tax_status" class="mr-2 font-weight-bold">Tax:</label>
                                 <select class="form-control" name="tax_status" id="tax_status">
@@ -565,6 +633,7 @@
 
                                 <button type="submit" class="btn btn-primary" id="SaveButton">Save</button>
                             </div>
+                            @endif`
                         </div>
 
                         <form id="taxFormValues">
@@ -809,19 +878,19 @@
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="first_paid_id" name="first_paid_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['first_paid_id'] == 1 ? 'checked' : '' }} > Paid
+                                                    {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['first_paid_id']) && $getjsonDetails[0]['first_paid_id'] == 1 ? 'checked' : '' }} > Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="first_due_id" name="first_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['first_due_id'] == 1 ? 'checked' : '' }}> Due
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['first_due_id']) && $getjsonDetails[0]['first_due_id'] == 1 ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="first_delinquent_id" name="first_delinquent_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['first_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['first_delinquent_id']) && $getjsonDetails[0]['first_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
                                             </label>
                                         </div>
                                     </div>
@@ -887,19 +956,19 @@
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['second_paid_id'] == 1 ? 'checked' : '' }}> Paid
+                                                    {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['second_paid_id']) && $getjsonDetails[0]['second_paid_id'] == 1 ? 'checked' : '' }}> Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="second_due_id" name="second_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['second_due_id'] == 1 ? 'checked' : '' }}> Due
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['second_due_id']) && $getjsonDetails[0]['second_due_id'] == 1 ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="second_delinquent_id" name="second_delinquent_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['second_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['second_delinquent_id']) && $getjsonDetails[0]['second_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
                                             </label>
                                         </div>
                                     </div>
@@ -966,19 +1035,19 @@
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="third_paid_id" name="third_paid_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['third_paid_id'] == 1 ? 'checked' : '' }}> Paid
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['third_paid_id']) && $getjsonDetails[0]['third_paid_id'] == 1 ? 'checked' : '' }}> Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="third_due_id" name="third_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['third_due_id'] == 1 ? 'checked' : '' }}> Due
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['third_due_id']) && $getjsonDetails[0]['third_due_id'] == 1 ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="third_delinquent_id" name="third_delinquent_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['third_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['third_delinquent_id']) && $getjsonDetails[0]['third_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
                                             </label>
                                         </div>
                                     </div>
@@ -1044,19 +1113,19 @@
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="fourth_paid_id" name="fourth_paid_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['fourth_paid_id'] == 1 ? 'checked' : '' }}> Paid
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourth_paid_id']) && $getjsonDetails[0]['fourth_paid_id'] == 1 ? 'checked' : '' }}> Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="fourth_due_id" name="fourth_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['fourth_due_id'] == 1 ? 'checked' : '' }}> Due
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourth_due_id']) && $getjsonDetails[0]['fourth_due_id'] == 1 ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="fourth_delinquent_id" name="fourth_delinquent_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && $getjsonDetails[0]['fourth_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourth_delinquent_id']) && $getjsonDetails[0]['fourth_delinquent_id'] == 1 ? 'checked' : '' }}> Delinquent
                                             </label>
                                         </div>
                                     </div>
@@ -1092,17 +1161,80 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- <label for="files" style="font-size: 24px;"><i class="fas fa-paperclip" style="font-size: 24px;"></i> Attach Files:</label> -->
+                            <label for="files"><i class="fas fa-paperclip" style="font-size: 24px;"></i></label>
+                            <input type="file" id="attachment" name="attachment[]" multiple>
+
+                            <!-- The actual file input field (hidden for user interaction) -->
+                                <input type="file" id="attachment" name="attachment[]" multiple style="display: none;">
+
+                                <!-- Container to display uploaded file names -->
+                                <div class="ml-2 mt-2" id="file-list">
+                                    <!-- File names will be shown here -->
+                                </div>
+
+                                <!-- Modal to display uploaded file content (hidden by default) -->
+                                <div id="file-modal" style="display: none; background-color: rgba(0, 0, 0, 0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center;">
+                                    <div style="background-color: white; padding: 20px; max-width: 800px; margin: auto;">
+                                        <h4>File Preview</h4>
+                                        <div id="file-preview-container">
+                                            <!-- File content will be shown here -->
+                                        </div>
+                                        <div id="merged-file-preview">
+                                            <!-- Merged file preview will be displayed here -->
+                                        </div>
+                                        <button class="btn btn-warning" id="close-modal" style="margin-top: 10px;">Close</button>
+                                    </div>
+                                </div>
+                                <button id="merge-button" style="display: none; margin-top: 10px;">Merge Selected Files</button>
+
                             <!-- Notes Section -->
-                            <div class="form-group">
+                            <div class="form-group mt-2">
+                                <label for="">Comments :</label>
                                 <textarea class="form-control" id="exampleFormControlTextarea1" name="exampleFormControlTextarea1" rows="3"
                                     placeholder="Enter Notes">{{ $getjsonDetails[0]['notes'] ?? '' }}</textarea>
                             </div>
-
+                            @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null)
                             <div class="row">
-                                <div class="col-md-12 text-center">
+                            </div>
+                            @else
+                            <div class="row">
+                                    <div class="col-md-12 text-center modelopenhide">
                                     <button type="submit" class="btn btn-primary">SUBMIT</button>
                                 </div>
                             </div>
+                            @endif
+                            <!-- /s history -->
+                            <div class="card-body">
+                                <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
+                                    style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Comments</th>
+                                        <th>User</th>
+                                        <th>Date and Time (EST)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if($orderTaxInfo && count($orderTaxInfo) > 0)
+                                        @foreach($orderTaxInfo as $status)
+                                            <tr>
+                                                <td>{{ $status->comment ?? 'N/A' }}</td>
+                                                <td>{{ $status->username ?? 'N/A' }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($status->updated_at)->format('m-d-Y H:i:s') }}
+                                            </td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td class="text-center" colspan="4">No history available for this
+                                                order.</td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                             <!-- /e history -->
                         </form>
                     </div>
                     <!-- Order Submission Form - Hidden by Default -->
@@ -1648,6 +1780,502 @@ $(document).ready(function() {
   });
 });
 
+// $(document).ready(function() {
+//   // Display file names and show merge option only if more than one file is selected
+//   $("#attachment").on("change", function() {
+//     var fileList = $(this)[0].files;
+
+//     if (fileList.length > 1) {
+//       var output = "<ul>";
+//       for (var i = 0; i < fileList.length; i++) {
+//         output += "<li>" + fileList[i].name + "</li>";
+//       }
+//       output += "</ul>";
+//       $("#file-list").html(output);
+      
+//       // Show the merge option if more than one file is selected
+//       $("#merge-option").show();
+//     } else {
+//       // Clear the file list and hide the merge option if only one file is selected
+//       $("#file-list").empty();
+//       $("#merge-option").hide();
+//     }
+//   });
+
+//   // Submit form with AJAX
+//   $("#taxFormValues").on("submit", function(event) {
+//     event.preventDefault(); 
+
+//     var formData = new FormData(this);
+
+//     // Append additional data from the specified input fields
+//     formData.append('tax_status', $("#tax_status").val());
+//     formData.append('get_data', $("#get_data").val());
+//     formData.append('search_input', $("#search_input").val());
+
+//     $.ajax({
+//       url: "{{ url('taxform_submit') }}",
+//       type: "POST",
+//       data: formData,
+//       processData: false,
+//       contentType: false,
+//       headers: {
+//         'X-CSRF-TOKEN': $('input[name="_token"]').val()
+//       },
+//       success: function(response) {
+//         Swal.fire({
+//           title: 'Success!',
+//           text: response.message,
+//           icon: 'success',
+//           confirmButtonText: 'OK'
+//         });
+//       },
+//       error: function(error) {        
+//         Swal.fire({
+//           title: 'Error!',
+//           text: 'Failed to send data. Please try again.',
+//           icon: 'error',
+//           confirmButtonText: 'OK'
+//         });
+//       }
+//     });
+//   });
+// });
+
+// $(document).ready(function() {
+//     // Display file names and show merge option only if more than one file is selected
+//     $("#attachment").on("change", function() {
+//         var fileList = $(this)[0].files;
+
+//         if (fileList.length > 1) {
+//             var output = "<ul>";
+//             for (var i = 0; i < fileList.length; i++) {
+//                 output += `<li><a href="#" class="file-download" data-file-index="${i}">${fileList[i].name}</a></li>`;
+//             }
+//             output += "</ul>";
+//             $("#file-list").html(output);
+
+//             // Show the merge option if more than one file is selected
+//             $("#merge-option").show();
+//             $("#merged-file").hide();
+//         } else {
+//             // Clear the file list and hide the merge option if only one file is selected
+//             $("#file-list").empty();
+//             $("#merge-option").hide();
+//             $("#merged-file").hide();
+//         }
+//     });
+
+//     // Handle file download (directly from file input)
+//     $(document).on('click', '.file-download', function(e) {
+//         e.preventDefault();
+//         var index = $(this).data('file-index');
+//         var file = $("#attachment")[0].files[index];
+//         var url = URL.createObjectURL(file);
+//         var a = document.createElement('a');
+//         a.href = url;
+//         a.download = file.name;
+//         a.click();
+//     });
+
+//     // Handle merge option (trigger file merge)
+//     $("#mergeFiles").on("change", function() {
+//         if (this.checked) {
+//             var files = $("#attachment")[0].files;
+//             var formData = new FormData();
+//             for (var i = 0; i < files.length; i++) {
+//                 formData.append('files[]', files[i]);
+//             }
+
+//             // Send files to the server for merging
+//             $.ajax({
+//                 url: "{{ url('mergeFiles') }}", // Adjust this URL to your backend endpoint for merging
+//                 type: "POST",
+//                 data: formData,
+//                 processData: false,
+//                 contentType: false,
+//                 success: function(response) {
+//                     if (response.status === 'success') {
+//                         $("#merged-file-link").attr('href', response.merged_file_url);
+//                         $("#merged-file").show();
+//                     } else {
+//                         alert('Failed to merge files');
+//                     }
+//                 },
+//                 error: function() {
+//                     alert('Error merging files');
+//                 }
+//             });
+//         } else {
+//             $("#merged-file").hide();
+//         }
+//     });
+// });
+
+// $(document).ready(function() {
+//     // Trigger the file input dialog when clicking on the file names
+//     $(document).on("click", ".file-name", function() {
+//         // Get the corresponding file from the list
+//         var fileName = $(this).data('filename');
+//         var file = getFileByName(fileName);
+        
+//         // Hide the sticky-container
+//         $(".sticky-container").hide();
+        
+
+//         // Show the modal with the file preview
+//         if (file) {
+//             showFilePreview(file);
+//         }
+//     });
+
+//     // Handle file selection and display file names
+//     $("#attachment").on("change", function() {
+//         var fileList = $(this)[0].files;
+//         var output = '';
+        
+//         if (fileList.length > 0) {
+//             // Loop through selected files
+//             for (var i = 0; i < fileList.length; i++) {
+//                 var file = fileList[i];
+//                 var fileName = file.name;
+                
+//                 // Display the file name and make it clickable
+//                 output += `<div class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</div>`;
+//             }
+            
+//             // Show the uploaded files
+//             $("#file-list").html(output);
+//         }
+//     });
+
+//     // Close the modal when clicking on the close button
+//     $("#close-modal").on("click", function() {
+//         $("#file-modal").hide();  // Hide the modal
+//         $(".sticky-container").show();  // Show the sticky-container again
+//     });
+
+//     // Function to get file by name (assuming the files are stored in an array)
+//     function getFileByName(fileName) {
+//         var fileList = $("#attachment")[0].files;
+//         for (var i = 0; i < fileList.length; i++) {
+//             if (fileList[i].name === fileName) {
+//                 return fileList[i];
+//             }
+//         }
+//         return null;
+//     }
+
+//     // Function to show the file preview in the modal
+//     function showFilePreview(file) {
+//         var reader = new FileReader();
+        
+//         reader.onload = function(e) {
+//             var filePreviewContainer = $("#file-preview-container");
+            
+//             if (file.type.startsWith('image/')) {
+//                 // Show image preview
+//                 filePreviewContainer.html(`<img src="${e.target.result}" style="max-width: 100%; height: auto;" />`);
+//             } else if (file.type === 'application/pdf') {
+//                 // Show PDF preview
+//                 filePreviewContainer.html(`<embed src="${e.target.result}" width="100%" height="400px" />`);
+//             } else {
+//                 // Show text content (for text-based files)
+//                 filePreviewContainer.html(`<pre>${e.target.result}</pre>`);
+//             }
+            
+//             // Show the modal
+//             $("#file-modal").show();
+//             $(".modelopenhide").hide();
+//         };
+
+//         // Read the file as a data URL
+//         reader.readAsDataURL(file);
+//     }
+// });
+
+
+
+
+// $(document).ready(function() {
+//     // Trigger the file input dialog when clicking on the file names
+//     $(document).on("click", ".file-name", function() {
+//         // Get the corresponding file from the list
+//         var fileName = $(this).data('filename');
+//         var file = getFileByName(fileName);
+        
+//         $(".sticky-container").hide();
+//         $(".topbar").hide();
+//         // Show the modal with the file preview
+//         if (file) {
+//             showFilePreview(file);
+//         }
+//     });
+
+//     // Handle file selection and display file names
+//     $("#attachment").on("change", function() {
+//         var fileList = $(this)[0].files;
+//         var output = '';
+        
+//         if (fileList.length > 0) {
+//             // Loop through selected files
+//             for (var i = 0; i < fileList.length; i++) {
+//                 var file = fileList[i];
+//                 var fileName = file.name;
+                
+//                 // Display the file name and make it clickable
+//                 output += `<div class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</div>`;
+//             }
+            
+//             // Show the uploaded files
+//             $("#file-list").html(output);
+//         }
+//     });
+
+//   // Close the modal without submitting the form
+// $("#close-modal").on("click", function(event) {
+//     event.preventDefault();  // Prevent any default action
+//     $("#file-modal").hide();  // Hide the modal
+//     $(".sticky-container").show();
+//     $(".topbar").show();
+//     $(".modelopenhide").show();
+// });
+
+//     // Function to get file by name (assuming the files are stored in an array)
+//     function getFileByName(fileName) {
+//         var fileList = $("#attachment")[0].files;
+//         for (var i = 0; i < fileList.length; i++) {
+//             if (fileList[i].name === fileName) {
+//                 return fileList[i];
+//             }
+//         }
+//         return null;
+//     }
+
+//     // Function to show the file preview in the modal
+//     function showFilePreview(file) {
+//         var reader = new FileReader();
+        
+//         reader.onload = function(e) {
+//             var filePreviewContainer = $("#file-preview-container");
+            
+//             if (file.type.startsWith('image/')) {
+//                 // Show image preview
+//                 filePreviewContainer.html(`<img src="${e.target.result}" style="max-width: 100%; height: auto;" />`);
+//             } else if (file.type === 'application/pdf') {
+//                 // Show PDF preview
+//                 filePreviewContainer.html(`<embed src="${e.target.result}" width="100%" height="400px" />`);
+//             } else {
+//                 // Show text content (for text-based files)
+//                 filePreviewContainer.html(`<pre>${e.target.result}</pre>`);
+//             }
+            
+//             // Show the modal
+//             $("#file-modal").show();
+//             $(".modelopenhide").hide();
+//         };
+
+//         // Read the file as a data URL
+//         reader.readAsDataURL(file);
+//     }
+// });
+
+
+$(document).ready(function() {
+    // Handle file selection and display clickable file names
+    $("#attachment").on("change", function() {
+        var fileList = $(this)[0].files;
+        var output = '';
+
+        if (fileList.length > 0) {
+            // Loop through selected files and display each file name
+            for (var i = 0; i < fileList.length; i++) {
+                var fileName = fileList[i].name;
+
+                // Display each file name as clickable text with a hand cursor
+                output += `<div><span class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</span></div>`;
+            }
+            // Show the clickable file names in #file-list
+            $("#file-list").html(output);
+        }
+    });
+
+    // Bind click event to file name text for preview
+    $("#file-list").on("click", ".file-name", function() {
+        var fileName = $(this).data("filename"); // Get the clicked file name
+        var file = getFileByName(fileName);
+
+        if (file) {
+            showFilePreview(file);  // Show the preview in modal if the file exists
+            $("#file-modal").show(); // Display modal
+            $(".sticky-container, .topbar, .modelopenhide").hide(); // Hide other elements
+        }
+    });
+
+    // Close modal without form submission
+    $("#close-modal").on("click", function(event) {
+        event.preventDefault();
+        $("#file-modal").hide();  // Hide modal
+        $(".sticky-container, .topbar, .modelopenhide").show(); // Restore hidden elements
+    });
+
+    // Helper function to retrieve file by name
+    function getFileByName(fileName) {
+        var fileList = $("#attachment")[0].files;
+        for (var i = 0; i < fileList.length; i++) {
+            if (fileList[i].name === fileName) {
+                return fileList[i];
+            }
+        }
+        return null;
+    }
+
+    // Display file preview in modal
+    function showFilePreview(file) {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+            var filePreviewContainer = $("#file-preview-container");
+
+            if (file.type.startsWith("image/")) {
+                filePreviewContainer.html(`<img src="${e.target.result}" style="max-width: 100%; height: auto;" />`);
+            } else if (file.type === "application/pdf") {
+                filePreviewContainer.html(`<embed src="${e.target.result}" width="100%" height="400px" />`);
+            } else {
+                filePreviewContainer.html(`<pre>${e.target.result}</pre>`);
+            }
+        };
+
+        reader.readAsDataURL(file);
+    }
+});
+
+$(document).ready(function() {
+    // Track the number of merges
+    var mergeCount = 0;
+
+    // Handle file selection and display clickable file names with checkboxes
+    $("#attachment").on("change", function() {
+        var fileList = $(this)[0].files;
+        var output = '';
+
+        // Display file names with checkboxes when two or more files are selected
+        if (fileList.length >= 2) {
+            for (var i = 0; i < fileList.length; i++) {
+                var fileName = fileList[i].name;
+                output += `<div>
+                    <input type="checkbox" class="file-checkbox" data-filename="${fileName}" /> 
+                    <span class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</span>
+                </div>`;
+            }
+            $("#file-list").html(output);
+            $("#merge-button").show();  // Show the merge button when two or more files are uploaded
+        } else {
+            // Only show the file names if less than two files are uploaded
+            for (var i = 0; i < fileList.length; i++) {
+                var fileName = fileList[i].name;
+                output += `<div><span class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</span></div>`;
+            }
+            $("#file-list").html(output);
+            $("#merge-button").hide();  // Hide the merge button if less than 2 files are uploaded
+        }
+
+        toggleMergeButton(); // Check if the merge button should be displayed based on selected checkboxes
+    });
+
+    // Show or hide the Merge button based on selected checkboxes
+    $(document).on("change", ".file-checkbox", function() {
+        toggleMergeButton();
+    });
+
+    // Function to show or hide the Merge button
+    function toggleMergeButton() {
+        var selectedCount = $(".file-checkbox:checked").length;
+        if (selectedCount >= 2) {
+            $("#merge-button").show(); // Show the button if two or more files are selected
+        } else {
+            $("#merge-button").hide(); // Hide the button if less than 2 files are selected
+        }
+    }
+
+    // Merge button action - prevent form submission and merge files
+    $("#merge-button").on("click", function(event) {
+        event.preventDefault(); // Prevent form submission
+
+        var selectedFiles = [];
+        $(".file-checkbox:checked").each(function() {
+            var fileName = $(this).data("filename");
+            var file = getFileByName(fileName);
+            if (file) {
+                selectedFiles.push(file);
+            }
+        });
+
+        if (selectedFiles.length >= 2) {
+            // Send the files to the server for merging
+            var formData = new FormData();
+            selectedFiles.forEach(function(file) {
+                formData.append('files[]', file);
+            });
+
+            // Perform the AJAX request to merge the files
+            $.ajax({ 
+                url: "{{ url('mergeFiles') }}",  // Laravel route to handle file merge
+                type: 'POST',
+                data: formData,
+                processData: false,  // Prevent jQuery from processing the data
+                contentType: false,  // Prevent jQuery from setting content type
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // CSRF token
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Increment merge count
+                        mergeCount++;
+
+                        // Generate a dynamic name for the merged file
+                        var mergedFileName = "merged_file_" + mergeCount;
+                        
+                        // Display the merged file content in the preview
+                        showFilePreview(response.mergedFileUrl, mergedFileName);
+                    } else {
+                        alert('Error merging files!');
+                    }
+                },
+                error: function() {
+                    alert('Something went wrong!');
+                }
+            });
+        } else {
+            alert("Please select at least 2 files to merge.");
+        }
+    });
+
+    // Helper function to get file by name
+    function getFileByName(fileName) {
+        var fileList = $("#attachment")[0].files;
+        for (var i = 0; i < fileList.length; i++) {
+            if (fileList[i].name === fileName) {
+                return fileList[i];
+            }
+        }
+        return null;
+    }
+
+    // Function to preview the merged file
+    function showFilePreview(fileUrl, fileName) {
+        var previewContainer = $("#file-list");
+        
+        // Clear any previous preview
+        previewContainer.html('');
+
+        // Add the merged file preview
+        previewContainer.append(`
+            <a href="${fileUrl}" target="_blank">Download ${fileName}</a>
+        `);
+    }
+});
+
 
 $(document).ready(function() {
     $("#phone_num").on("input", function() {
@@ -1752,8 +2380,11 @@ $(function() {
                     Swal.fire({
                         icon: 'success',
                         title: 'Success!',
-                        text: 'Tax Form Moved To Accounts Team',
+                        text: 'Tax Form Moved To Tax Status',
                         confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Reload the page after closing the success alert
+                        window.location.reload();
                     });
                 },
                 error: function(xhr, status, error) {
