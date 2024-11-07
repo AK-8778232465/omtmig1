@@ -1120,6 +1120,10 @@ $(document).ready(function() {
             datatable.column(16).visible(false);
         }
 
+        if(status == 15){
+            $('.status-dropdown').prop('disabled', true);
+        }
+
     });
 
 function updateStatusCounts() {

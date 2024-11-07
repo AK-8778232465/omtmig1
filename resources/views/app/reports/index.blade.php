@@ -205,7 +205,7 @@
                 <div class="form-group">
                     <label for="lob_id">Lob</label>
                     <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id">
-                        <option selected value="">Select Lob</option>
+                        <option selected value="All">All</option>
                     </select>
                 </div>
             </div>
@@ -622,8 +622,8 @@ $(document).ready(function() {
             if (isLobChanging) return;
             isLobChanging = true;
             var selectedLobOption = $(this).val();
-                if (selectedLobOption === 'Select Lob') {
-                    $("#lob_id").val('Select Lob');
+                if (selectedLobOption === 'All') {
+                    $("#lob_id").val('All');
             }
             isLobChanging = false;
         });
@@ -831,7 +831,7 @@ $('#newreports_datatable').on('draw.dt', function () {
             },
             dataType: 'json',
             success: function (response) {
-                $('#lob_id').html('<option selected value="Select Lob">Select Lob</option>');
+                $('#lob_id').html('<option selected value="All">All</option>');
                 $('#product_id').html('<option selected value="All">All</option>');
 
 
@@ -1021,7 +1021,7 @@ $('#client_id_dcf').on('change', function () {
     let client_id = $("#client_id_dcf").val();
     let product_id = $("#product_id").val();
 
-    $("#lob_id").html('<option selected value="Select Lob">Select Lob</option>');
+    $("#lob_id").html('<option selected value="All">All</option>');
     $("#product_id").html('<option selected value="All">All</option>');
     $("#process_type_id").html('<option selected value="All">All</option>');
 

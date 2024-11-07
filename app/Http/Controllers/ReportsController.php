@@ -203,7 +203,9 @@ class ReportsController extends Controller
             $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
 
-        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+
+
+        if (!empty($lob_id) && $lob_id !== 'All') {
             $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
         }
         
@@ -342,8 +344,8 @@ private function getProcessIdsBasedOnUserRole($user)
             $query->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
 
-        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
-            $query->where('oms_order_creations.lob_id', $lob_id);
+        if (!empty($lob_id) && $lob_id !== 'All') {
+            $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
         }
         $results = $query->orderBy('oms_order_creations.id', 'desc')->get();
         $results = $results->map(function($item) {
@@ -460,8 +462,8 @@ private function getProcessIdsBasedOnUserRole($user)
 if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
             $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
-    
-        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+
+        if (!empty($lob_id) && $lob_id !== 'All') {
             $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
         }
         $statusCounts = $statusCountsQuery->get();
@@ -632,8 +634,8 @@ public function orderTimeTaken(Request $request) {
         if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
             $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
-    
-        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+
+       if (!empty($lob_id) && $lob_id !== 'All') {
             $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
         }
     
@@ -963,7 +965,7 @@ private function applyFilters($query, $processIds, $clientId, $lobId, $processTy
         $query->whereIn('order_creation_main.process_type_id', $processTypeId);
     }
 
-    if (!empty($lobId) && $lobId[0] !== 'Select Lob') {
+    if (!empty($lobId) && $lobId[0] !== 'All') {
         $query->where('order_creation_main.lob_id', $lobId);
     }
 

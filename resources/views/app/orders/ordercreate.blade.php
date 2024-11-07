@@ -218,13 +218,13 @@
                             </div>
                         </div>
                         <div class="form-group col-lg-3 mb-3 pb-0">
-                            <label class="font-weight-bold">Lob</label>
+                            <label class="font-weight-bold">Lob<span style="color:red;">*</span></label>
                             <select id="lob_id" name="lob_id" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Lob">
                                 <option selected="" disabled="" value="">Select lob</option>
                             </select>
                         </div>
                         <div class="form-group col-lg-3 mb-3 pb-0">
-                            <label class="font-weight-bold">Process</label>
+                            <label class="font-weight-bold">Process<span style="color:red;">*</span></label>
                             <select id="process_type_id" name="process_type_id" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Process">
                                 <option selected="" disabled="" value="">Select Process</option>
                             </select>
@@ -946,25 +946,25 @@ $(document).ready(function() {
         var clientId = selectedOption.data('client-id');
 console.log(clientId);
         // Check if the client_id is 16
-        if (clientId == 16) {
+        if (clientId == 16 || clientId == 88 || clientId == 90 || clientId == 92 || clientId == 2 || clientId == 13) {
             $('#typist-container').hide();
             $('#typist-qc-container').hide();
-        } else {
-            $('#typist-container').show();
-            $('#typist-qc-container').show();
+            $('#municipality-container').show();
+            $('#tier-container').show();
         }
 
         if(clientId == 82){
             $('#municipality-container').hide();
             $('#tier-container').hide();
-        }else{
-            $('#municipality-container').show();
-            $('#tier-container').show();
+            $('#typist-container').show();
+            $('#typist-qc-container').show();
         }
 
         if(clientId == 86 || clientId == 84 || clientId == 85 || clientId == 87 || clientId == 89 || clientId == 91){
             $('#municipality-container').hide();
             $('#tier-container').hide();
+            $('#typist-container').show();
+            $('#typist-qc-container').show();
         }
 
 
