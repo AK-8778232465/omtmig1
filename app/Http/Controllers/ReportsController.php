@@ -339,7 +339,7 @@ private function getProcessIdsBasedOnUserRole($user)
             $query->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
 
-        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+        if (!empty($lob_id) && $lob_id !== 'All') {
             $query->where('oms_order_creations.lob_id', $lob_id);
         }
         $results = $query->orderBy('oms_order_creations.id', 'desc')->get();
