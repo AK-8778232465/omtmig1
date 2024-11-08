@@ -463,9 +463,9 @@
                         <input type="text" id="search-input" placeholder="Search..." style="padding: 5px 30px 5px 10px;">
                         <i class="fas fa-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
                     </div>
-                    <div style="margin-left: auto;">                    
-                        <i class="fas fa-calendar-minus" data-toggle="modal" data-target="#yesterday_dataModal"></i>
-                        <i class="fas fa-calendar-plus" data-toggle="modal" data-target="#dataModal"></i>
+                    <div class="d-flex" style="margin-left: auto;">
+                        <i class="fas fa-calendar-minus img-fluid" data-toggle="modal" data-target="#yesterday_dataModal"></i>
+                        <i class="fas fa-calendar-plus img-fluid" data-toggle="modal" data-target="#dataModal"></i>
                     </div>
                 </div>
 
