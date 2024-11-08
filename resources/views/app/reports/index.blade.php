@@ -1439,7 +1439,7 @@ function production_report() {
             { data: 'short_code', title: 'State' },
             { data: 'county_name', title: 'County' },
             { data: 'portal_fee_cost', title: 'Portal Fee Cost' },
-            { data: 'source', title: 'Source' },
+            { data: 'source_name', title: 'Source' },
             { data: 'completion_date', title: 'Production Date' },
             { data: 'assignee_empid', title: 'User EMP ID' },
             { data: 'qa_empid', title: 'QA EMP ID' },
