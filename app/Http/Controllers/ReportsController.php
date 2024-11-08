@@ -345,7 +345,7 @@ private function getProcessIdsBasedOnUserRole($user)
         }
 
         if (!empty($lob_id) && $lob_id !== 'All') {
-            $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
+            $query->where('oms_order_creations.lob_id', $lob_id);
         }
         $results = $query->orderBy('oms_order_creations.id', 'desc')->get();
         $results = $results->map(function($item) {
