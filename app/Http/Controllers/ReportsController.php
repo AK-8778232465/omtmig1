@@ -960,7 +960,7 @@ private function applyFilters($query, $processIds, $clientId, $lobId, $processTy
         $query->whereIn('order_creation_main.process_type_id', $processTypeId);
     }
 
-    if (!empty($lobId) && $lobId[0] !== 'Select Lob') {
+    if (!empty($lobId) && $lobId !== 'All') {
         $query->where('order_creation_main.lob_id', $lobId);
     }
 
