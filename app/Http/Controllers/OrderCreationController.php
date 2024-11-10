@@ -436,7 +436,9 @@ public function unassign_user(Request $request)
 
     $order = OrderCreation::find($orderId);
     if ($order) {
-        $order->assignee_user_id = null; // Unassign the user
+        $order->assignee_user_id = null;// Unassign the user
+        $order->status_id = 1;
+
         $order->save();
         return response()->json(['success' => true]);
     }
