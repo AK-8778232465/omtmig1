@@ -317,18 +317,18 @@
                     </div>
                     @endif
 
-                            <div class="col-md-3" id="hide_lob"
+                            {{-- <div class="col-md-3" id="hide_lob"
                                 @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('SPOC'))
                                 @else
                                     style="display: none;"
-                                @endif>
-                                <div class="form-group">
+                                @endif> --}}
+                                <div class="col-md-3 form-group">
                                     <label for="lob_id">Lob</label>
                                     <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id" multiple="multiple">
                                         <option selected value="All">All</option>
                                     </select>
                                 </div>
-                            </div>
+                            {{-- </div> --}}
 
                             <!-- <div class="col-md-2"  id="hide_process_type" style="display: none;">
                                 <div class="form-group">
@@ -339,18 +339,18 @@
                                 </div>
                             </div> -->
 
-                            <div class="col-md-2" id="hide_process_type"
+                            {{-- <div class="col-md-2" id="hide_process_type"
                                 @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('SPOC'))
                                 @else
                                     style="display: none;"
-                                @endif>
-                                <div class="form-group">
+                                @endif> --}}
+                                <div class="col-md-2 form-group">
                                     <label for="process_type_id">Process</label>
                                     <select class="form-control select2-basic-multiple" style="width:100%" name="process_type_id" id="process_type_id" multiple="multiple">
                                         <option selected value="All">All</option>
                                     </select>
                                 </div>
-                            </div>
+                            {{-- </div> --}}
                             <div class="col-md-3" id="hidefilter_2">
                                 <div class="form-group">
                                     <label for="product_id">Product</label>
