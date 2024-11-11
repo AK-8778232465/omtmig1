@@ -251,7 +251,7 @@
 
 <div class="container-fluid mt-2 mb-1 p-1" style="width: 90%; height: 90%;">
     <section id="minimal-statistics">
-            @if(Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
+        <!--@if(Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
         <div class="switch-container d-flex justify-content-end">
                 <span class="label-left">Revenue</span>
                 <input type="checkbox" id="toggleSwitch" class="toggle-switch">
@@ -261,6 +261,7 @@
                 <span class="label-right">Production</span>
             </div>
         @endif
+        !-->
                 <div class="container-fluid d-flex reports">
                     <div class="col-md-12">
                         <div class="row" id="hidefilter">
