@@ -149,6 +149,10 @@ Route::middleware('auth:web')->controller(OrderFormController::class)->group(fun
 
     // accurate client
     Route::any('getaccurateClientId', 'getaccurateClientId')->name('getaccurateClientId');
+    Route::any('storeFile', 'storeFile')->name('storeFile');
+    Route::any('getFiles', 'getFiles')->name('getFiles');
+    Route::delete('deleteFile', 'deleteFile')->name('deleteFile');
+    Route::get('attachmentHistoryData', 'attachmentHistoryData')->name('attachmentHistoryData');
 
 });
 

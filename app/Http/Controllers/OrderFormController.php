@@ -9,9 +9,11 @@ use App\Models\User;
 use App\Models\Process;
 use App\Models\Tier;
 use App\Models\City;
+use App\Models\OmsAttachmentHistory;
 use App\Models\Product;
 use App\Models\PrimarySource;
 use App\Models\OrderCreation;
+use App\Models\TaxAttachmentFile;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -1140,5 +1142,116 @@ class OrderFormController extends Controller
     }
 
 
+    public function storeFile(Request $request)
+        {
+            // Validate the file
+            // $request->validate([
+            //     'file' => 'required|file|mimes:jpeg,png,pdf,eml,xlsx,xlsm|max:2048'
+            // ]);
 
+            // Store the file in the 'uploads' directory in the storage path
+            $filePath = $request->file('file')->store('uploads', 'public');
+
+            // Get the file name
+            $fileName = $request->file('file')->getClientOriginalName();
+
+            $file = $request->file('file');
+            $fileName = $file->getClientOriginalName();
+            $pathfileName = uniqid() . '-' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('texAttachments', $pathfileName, 'public');
+            // dd($request);
+            TaxAttachmentFile::create([
+                            'order_id' => $request->input('order_id'),
+                            'file_path' => $filePath,
+                            'file_name' => $file->getClientOriginalName(),
+                        ]);
+            OmsAttachmentHistory::create([
+                            'order_id' => $request->input('order_id'),
+                            'updated_by' => Auth::id(),
+                            'action' => 'Uploaded',
+                            'file_name' => $fileName,
+                            'updated_at' => now(),
+                        ]);
+
+            // Optional: Save file information to the database, if needed
+            // File::create(['path' => $filePath, 'name' => $fileName]);
+
+            return response()->json(['filePath' => $filePath, 'fileName' => $fileName]);
+        }
+
+      
+            public function getFiles(Request $request)
+            {
+                $orderId = $request->input('order_id');
+        
+                // Retrieve files associated with the request_management_id
+                $attachments = TaxAttachmentFile::where('order_id', $orderId)->get();
+        
+                $files = $attachments->map(function ($attachment) {
+                    return [
+                        'id' => $attachment->id,
+                        'name' => $attachment->file_name,
+                        'path' => Storage::url($attachment->file_path),
+                    ];
+                });
+        
+                return response()->json($files);
+            }
+            public function deleteFile(Request $request)
+            {
+                $fileId = $request->input('file_id');
+            
+                try {
+                    // Find the file by ID, or fail if not found
+                    $file = TaxAttachmentFile::findOrFail($fileId);
+            
+                    // Check if the physical file exists in storage, and delete it if so
+                    $filePath = str_replace('storage/', '', $file->file_path);
+                    if (\Storage::disk('public')->exists($filePath)) {
+                        \Storage::disk('public')->delete($filePath);
+                    }
+                    
+                    // Delete the file entry from the database
+                    $file->delete();
+                OmsAttachmentHistory::create([
+                        'order_id' => $file->order_id,
+                        'updated_by' => Auth::id(),
+                        'action' => 'Deleted',
+                        'file_name' => $file->file_name,
+                        'updated_at' => now(),
+                    ]);
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'File deleted successfully.'
+                    ]);
+                } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                    // Handle case where the file ID does not exist
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'File not found.'
+                    ], 404);
+                } catch (\Exception $e) {
+                    // Handle general errors
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Failed to delete the file. Please try again.',
+                        'error' => $e->getMessage() // Optional: include the error message for debugging
+                    ], 500);
+                }
+            }
+            public function attachmentHistoryData(Request $request)
+            {
+                $query = OmsAttachmentHistory::select('id', 'order_id', 'file_name', 'updated_by', 'action', 'updated_at')
+                    ->with('user:id,username'); // Include only `id` and `username` from `stl_user`
+
+                if ($request->has('order_id') && !empty($request->order_id)) {
+                    $query->where('order_id', $request->order_id);
+                }
+
+                $data = $query->get();
+
+                return response()->json(['data' => $data]);
+            }
+
+            
 }

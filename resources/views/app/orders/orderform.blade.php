@@ -1163,7 +1163,7 @@
                             </div>
                             <!-- <label for="files" style="font-size: 24px;"><i class="fas fa-paperclip" style="font-size: 24px;"></i> Attach Files:</label> -->
                             <label for="files"><i class="fas fa-paperclip" style="font-size: 24px;"></i></label>
-                            <input type="file" id="attachment" name="attachment[]" multiple>
+                            <input type="file" id="attachment" name="attachment[]" accept=".pdf, image/*" multiple>
 
                             <!-- The actual file input field (hidden for user interaction) -->
                                 <input type="file" id="attachment" name="attachment[]" multiple style="display: none;">
@@ -1172,7 +1172,12 @@
                                 <div class="ml-2 mt-2" id="file-list">
                                     <!-- File names will be shown here -->
                                 </div>
-
+                                <div class=" mt-4 col-12">
+                                    <div id="attachmentsHeader" class="header" style="display: none;"></div>
+                                    <div id="fileList" class="col-lg-6 col-md-6">
+                                        <!-- Files will be dynamically inserted here -->
+                                    </div>
+                                </div>
                                 <!-- Modal to display uploaded file content (hidden by default) -->
                                 <div id="file-modal" style="display: none; background-color: rgba(0, 0, 0, 0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center;">
                                     <div style="background-color: white; padding: 20px; max-width: 800px; margin: auto;">
@@ -1205,6 +1210,22 @@
                             </div>
                             @endif
                             <!-- /s history -->
+                            <div class="card-body mt-3">
+                                <table id="attachmentHistoryTable" class="table table-bordered nowrap"
+                                    style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>File Name</th>
+                                            <th>User Name</th>
+                                            <th>Action</th>
+                                            <th>Updated At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data populated by DataTables via AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
                             <div class="card-body">
                                 <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
                                     style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -1780,325 +1801,108 @@ $(document).ready(function() {
   });
 });
 
-// $(document).ready(function() {
-//   // Display file names and show merge option only if more than one file is selected
-//   $("#attachment").on("change", function() {
-//     var fileList = $(this)[0].files;
+$(document).ready(function () {
+    // Trigger file upload on file selection change
+    $("#attachment").on("change", function () {
+        uploadFiles();
+    });
 
-//     if (fileList.length > 1) {
-//       var output = "<ul>";
-//       for (var i = 0; i < fileList.length; i++) {
-//         output += "<li>" + fileList[i].name + "</li>";
-//       }
-//       output += "</ul>";
-//       $("#file-list").html(output);
-      
-//       // Show the merge option if more than one file is selected
-//       $("#merge-option").show();
-//     } else {
-//       // Clear the file list and hide the merge option if only one file is selected
-//       $("#file-list").empty();
-//       $("#merge-option").hide();
-//     }
-//   });
-
-//   // Submit form with AJAX
-//   $("#taxFormValues").on("submit", function(event) {
-//     event.preventDefault(); 
-
-//     var formData = new FormData(this);
-
-//     // Append additional data from the specified input fields
-//     formData.append('tax_status', $("#tax_status").val());
-//     formData.append('get_data', $("#get_data").val());
-//     formData.append('search_input', $("#search_input").val());
-
-//     $.ajax({
-//       url: "{{ url('taxform_submit') }}",
-//       type: "POST",
-//       data: formData,
-//       processData: false,
-//       contentType: false,
-//       headers: {
-//         'X-CSRF-TOKEN': $('input[name="_token"]').val()
-//       },
-//       success: function(response) {
-//         Swal.fire({
-//           title: 'Success!',
-//           text: response.message,
-//           icon: 'success',
-//           confirmButtonText: 'OK'
-//         });
-//       },
-//       error: function(error) {        
-//         Swal.fire({
-//           title: 'Error!',
-//           text: 'Failed to send data. Please try again.',
-//           icon: 'error',
-//           confirmButtonText: 'OK'
-//         });
-//       }
-//     });
-//   });
-// });
-
-// $(document).ready(function() {
-//     // Display file names and show merge option only if more than one file is selected
-//     $("#attachment").on("change", function() {
-//         var fileList = $(this)[0].files;
-
-//         if (fileList.length > 1) {
-//             var output = "<ul>";
-//             for (var i = 0; i < fileList.length; i++) {
-//                 output += `<li><a href="#" class="file-download" data-file-index="${i}">${fileList[i].name}</a></li>`;
-//             }
-//             output += "</ul>";
-//             $("#file-list").html(output);
-
-//             // Show the merge option if more than one file is selected
-//             $("#merge-option").show();
-//             $("#merged-file").hide();
-//         } else {
-//             // Clear the file list and hide the merge option if only one file is selected
-//             $("#file-list").empty();
-//             $("#merge-option").hide();
-//             $("#merged-file").hide();
-//         }
-//     });
-
-//     // Handle file download (directly from file input)
-//     $(document).on('click', '.file-download', function(e) {
-//         e.preventDefault();
-//         var index = $(this).data('file-index');
-//         var file = $("#attachment")[0].files[index];
-//         var url = URL.createObjectURL(file);
-//         var a = document.createElement('a');
-//         a.href = url;
-//         a.download = file.name;
-//         a.click();
-//     });
-
-//     // Handle merge option (trigger file merge)
-//     $("#mergeFiles").on("change", function() {
-//         if (this.checked) {
-//             var files = $("#attachment")[0].files;
-//             var formData = new FormData();
-//             for (var i = 0; i < files.length; i++) {
-//                 formData.append('files[]', files[i]);
-//             }
-
-//             // Send files to the server for merging
-//             $.ajax({
-//                 url: "{{ url('mergeFiles') }}", // Adjust this URL to your backend endpoint for merging
-//                 type: "POST",
-//                 data: formData,
-//                 processData: false,
-//                 contentType: false,
-//                 success: function(response) {
-//                     if (response.status === 'success') {
-//                         $("#merged-file-link").attr('href', response.merged_file_url);
-//                         $("#merged-file").show();
-//                     } else {
-//                         alert('Failed to merge files');
-//                     }
-//                 },
-//                 error: function() {
-//                     alert('Error merging files');
-//                 }
-//             });
-//         } else {
-//             $("#merged-file").hide();
-//         }
-//     });
-// });
-
-// $(document).ready(function() {
-//     // Trigger the file input dialog when clicking on the file names
-//     $(document).on("click", ".file-name", function() {
-//         // Get the corresponding file from the list
-//         var fileName = $(this).data('filename');
-//         var file = getFileByName(fileName);
+    function uploadFiles() {
+        let orderId = $("#order_id").val();
+        let fileList = $("#attachment")[0].files;
         
-//         // Hide the sticky-container
-//         $(".sticky-container").hide();
-        
+        if (fileList.length > 0) {
+            for (let i = 0; i < fileList.length; i++) {
+                let formData = new FormData();
+                formData.append('file', fileList[i]);
+                formData.append('order_id', orderId);
 
-//         // Show the modal with the file preview
-//         if (file) {
-//             showFilePreview(file);
-//         }
-//     });
+                $.ajax({
+                    url: "{{ url('storeFile') }}",
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        console.log("File stored successfully:", response);
+                        // Refresh the file list after each successful upload
+                        displayFiles();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("File upload failed:", error);
+                    }
+                });
+            }
+        }
+    }
 
-//     // Handle file selection and display file names
-//     $("#attachment").on("change", function() {
-//         var fileList = $(this)[0].files;
-//         var output = '';
-        
-//         if (fileList.length > 0) {
-//             // Loop through selected files
-//             for (var i = 0; i < fileList.length; i++) {
-//                 var file = fileList[i];
-//                 var fileName = file.name;
-                
-//                 // Display the file name and make it clickable
-//                 output += `<div class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</div>`;
-//             }
-            
-//             // Show the uploaded files
-//             $("#file-list").html(output);
-//         }
-//     });
+    function displayFiles() {
+        let orderId = $("#order_id").val();
 
-//     // Close the modal when clicking on the close button
-//     $("#close-modal").on("click", function() {
-//         $("#file-modal").hide();  // Hide the modal
-//         $(".sticky-container").show();  // Show the sticky-container again
-//     });
+        $.ajax({
+            url: "{{ url('getFiles') }}",
+            type: 'GET',
+            data: { order_id: orderId },
+            success: function (data) {
+                let fileList = $('#fileList');
+                let attachmentsHeader = $('#attachmentsHeader');
+                fileList.empty(); // Clear previous file list
 
-//     // Function to get file by name (assuming the files are stored in an array)
-//     function getFileByName(fileName) {
-//         var fileList = $("#attachment")[0].files;
-//         for (var i = 0; i < fileList.length; i++) {
-//             if (fileList[i].name === fileName) {
-//                 return fileList[i];
-//             }
-//         }
-//         return null;
-//     }
+                if (data.length > 0) {
+                    attachmentsHeader.show();
+                    data.forEach(file => {
+                        let fileType = file.name.split('.').pop().toLowerCase();
+                        let filePreview = '';
 
-//     // Function to show the file preview in the modal
-//     function showFilePreview(file) {
-//         var reader = new FileReader();
-        
-//         reader.onload = function(e) {
-//             var filePreviewContainer = $("#file-preview-container");
-            
-//             if (file.type.startsWith('image/')) {
-//                 // Show image preview
-//                 filePreviewContainer.html(`<img src="${e.target.result}" style="max-width: 100%; height: auto;" />`);
-//             } else if (file.type === 'application/pdf') {
-//                 // Show PDF preview
-//                 filePreviewContainer.html(`<embed src="${e.target.result}" width="100%" height="400px" />`);
-//             } else {
-//                 // Show text content (for text-based files)
-//                 filePreviewContainer.html(`<pre>${e.target.result}</pre>`);
-//             }
-            
-//             // Show the modal
-//             $("#file-modal").show();
-//             $(".modelopenhide").hide();
-//         };
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                        } else if (fileType === 'pdf') {
+                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                            filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
+                        } else {
+                            filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
+                        }
 
-//         // Read the file as a data URL
-//         reader.readAsDataURL(file);
-//     }
-// });
+                        fileList.append(`<div class="m-2">${filePreview}</div>`);
+                    });
 
+                    $('.file-link').on('click', function (e) {
+                        e.preventDefault();
+                        let fileUrl = $(this).data('file-url');
+                        let fileType = fileUrl.split('.').pop().toLowerCase();
 
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                            Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                        } else if (fileType === 'pdf') {
+                            Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                            window.open(fileUrl, '_blank');
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
+                        }
+                    });
+                } else {
+                    attachmentsHeader.hide(); // Hide header if no files are available
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
+            }
+        });
+    }
 
-
-// $(document).ready(function() {
-//     // Trigger the file input dialog when clicking on the file names
-//     $(document).on("click", ".file-name", function() {
-//         // Get the corresponding file from the list
-//         var fileName = $(this).data('filename');
-//         var file = getFileByName(fileName);
-        
-//         $(".sticky-container").hide();
-//         $(".topbar").hide();
-//         // Show the modal with the file preview
-//         if (file) {
-//             showFilePreview(file);
-//         }
-//     });
-
-//     // Handle file selection and display file names
-//     $("#attachment").on("change", function() {
-//         var fileList = $(this)[0].files;
-//         var output = '';
-        
-//         if (fileList.length > 0) {
-//             // Loop through selected files
-//             for (var i = 0; i < fileList.length; i++) {
-//                 var file = fileList[i];
-//                 var fileName = file.name;
-                
-//                 // Display the file name and make it clickable
-//                 output += `<div class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</div>`;
-//             }
-            
-//             // Show the uploaded files
-//             $("#file-list").html(output);
-//         }
-//     });
-
-//   // Close the modal without submitting the form
-// $("#close-modal").on("click", function(event) {
-//     event.preventDefault();  // Prevent any default action
-//     $("#file-modal").hide();  // Hide the modal
-//     $(".sticky-container").show();
-//     $(".topbar").show();
-//     $(".modelopenhide").show();
-// });
-
-//     // Function to get file by name (assuming the files are stored in an array)
-//     function getFileByName(fileName) {
-//         var fileList = $("#attachment")[0].files;
-//         for (var i = 0; i < fileList.length; i++) {
-//             if (fileList[i].name === fileName) {
-//                 return fileList[i];
-//             }
-//         }
-//         return null;
-//     }
-
-//     // Function to show the file preview in the modal
-//     function showFilePreview(file) {
-//         var reader = new FileReader();
-        
-//         reader.onload = function(e) {
-//             var filePreviewContainer = $("#file-preview-container");
-            
-//             if (file.type.startsWith('image/')) {
-//                 // Show image preview
-//                 filePreviewContainer.html(`<img src="${e.target.result}" style="max-width: 100%; height: auto;" />`);
-//             } else if (file.type === 'application/pdf') {
-//                 // Show PDF preview
-//                 filePreviewContainer.html(`<embed src="${e.target.result}" width="100%" height="400px" />`);
-//             } else {
-//                 // Show text content (for text-based files)
-//                 filePreviewContainer.html(`<pre>${e.target.result}</pre>`);
-//             }
-            
-//             // Show the modal
-//             $("#file-modal").show();
-//             $(".modelopenhide").hide();
-//         };
-
-//         // Read the file as a data URL
-//         reader.readAsDataURL(file);
-//     }
-// });
+    // Initial call to load files if `order_id` is already set
+    displayFiles();
+});
 
 
 $(document).ready(function() {
     // Handle file selection and display clickable file names
-    $("#attachment").on("change", function() {
-        var fileList = $(this)[0].files;
-        var output = '';
 
-        if (fileList.length > 0) {
-            // Loop through selected files and display each file name
-            for (var i = 0; i < fileList.length; i++) {
-                var fileName = fileList[i].name;
-
-                // Display each file name as clickable text with a hand cursor
-                output += `<div><span class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</span></div>`;
-            }
-            // Show the clickable file names in #file-list
-            $("#file-list").html(output);
-        }
-    });
 
     // Bind click event to file name text for preview
     $("#file-list").on("click", ".file-name", function() {
@@ -2150,131 +1954,131 @@ $(document).ready(function() {
     }
 });
 
-$(document).ready(function() {
-    // Track the number of merges
-    var mergeCount = 0;
+// $(document).ready(function() {
+//     // Track the number of merges
+//     var mergeCount = 0;
 
-    // Handle file selection and display clickable file names with checkboxes
-    $("#attachment").on("change", function() {
-        var fileList = $(this)[0].files;
-        var output = '';
+//     // Handle file selection and display clickable file names with checkboxes
+//     $("#attachment").on("change", function() {
+//         var fileList = $(this)[0].files;
+//         var output = '';
 
-        // Display file names with checkboxes when two or more files are selected
-        if (fileList.length >= 2) {
-            for (var i = 0; i < fileList.length; i++) {
-                var fileName = fileList[i].name;
-                output += `<div>
-                    <input type="checkbox" class="file-checkbox" data-filename="${fileName}" /> 
-                    <span class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</span>
-                </div>`;
-            }
-            $("#file-list").html(output);
-            $("#merge-button").show();  // Show the merge button when two or more files are uploaded
-        } else {
-            // Only show the file names if less than two files are uploaded
-            for (var i = 0; i < fileList.length; i++) {
-                var fileName = fileList[i].name;
-                output += `<div><span class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</span></div>`;
-            }
-            $("#file-list").html(output);
-            $("#merge-button").hide();  // Hide the merge button if less than 2 files are uploaded
-        }
+//         // Display file names with checkboxes when two or more files are selected
+//         if (fileList.length >= 2) {
+//             for (var i = 0; i < fileList.length; i++) {
+//                 var fileName = fileList[i].name;
+//                 output += `<div>
+//                     <input type="checkbox" class="file-checkbox" data-filename="${fileName}" /> 
+//                     <span class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</span>
+//                 </div>`;
+//             }
+//             $("#file-list").html(output);
+//             $("#merge-button").show();  // Show the merge button when two or more files are uploaded
+//         } else {
+//             // Only show the file names if less than two files are uploaded
+//             for (var i = 0; i < fileList.length; i++) {
+//                 var fileName = fileList[i].name;
+//                 output += `<div><span class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</span></div>`;
+//             }
+//             $("#file-list").html(output);
+//             $("#merge-button").hide();  // Hide the merge button if less than 2 files are uploaded
+//         }
 
-        toggleMergeButton(); // Check if the merge button should be displayed based on selected checkboxes
-    });
+//         toggleMergeButton(); // Check if the merge button should be displayed based on selected checkboxes
+//     });
 
-    // Show or hide the Merge button based on selected checkboxes
-    $(document).on("change", ".file-checkbox", function() {
-        toggleMergeButton();
-    });
+//     // Show or hide the Merge button based on selected checkboxes
+//     $(document).on("change", ".file-checkbox", function() {
+//         toggleMergeButton();
+//     });
 
-    // Function to show or hide the Merge button
-    function toggleMergeButton() {
-        var selectedCount = $(".file-checkbox:checked").length;
-        if (selectedCount >= 2) {
-            $("#merge-button").show(); // Show the button if two or more files are selected
-        } else {
-            $("#merge-button").hide(); // Hide the button if less than 2 files are selected
-        }
-    }
+//     // Function to show or hide the Merge button
+//     function toggleMergeButton() {
+//         var selectedCount = $(".file-checkbox:checked").length;
+//         if (selectedCount >= 2) {
+//             $("#merge-button").show(); // Show the button if two or more files are selected
+//         } else {
+//             $("#merge-button").hide(); // Hide the button if less than 2 files are selected
+//         }
+//     }
 
-    // Merge button action - prevent form submission and merge files
-    $("#merge-button").on("click", function(event) {
-        event.preventDefault(); // Prevent form submission
+//     // Merge button action - prevent form submission and merge files
+//     $("#merge-button").on("click", function(event) {
+//         event.preventDefault(); // Prevent form submission
 
-        var selectedFiles = [];
-        $(".file-checkbox:checked").each(function() {
-            var fileName = $(this).data("filename");
-            var file = getFileByName(fileName);
-            if (file) {
-                selectedFiles.push(file);
-            }
-        });
+//         var selectedFiles = [];
+//         $(".file-checkbox:checked").each(function() {
+//             var fileName = $(this).data("filename");
+//             var file = getFileByName(fileName);
+//             if (file) {
+//                 selectedFiles.push(file);
+//             }
+//         });
 
-        if (selectedFiles.length >= 2) {
-            // Send the files to the server for merging
-            var formData = new FormData();
-            selectedFiles.forEach(function(file) {
-                formData.append('files[]', file);
-            });
+//         if (selectedFiles.length >= 2) {
+//             // Send the files to the server for merging
+//             var formData = new FormData();
+//             selectedFiles.forEach(function(file) {
+//                 formData.append('files[]', file);
+//             });
 
-            // Perform the AJAX request to merge the files
-            $.ajax({ 
-                url: "{{ url('mergeFiles') }}",  // Laravel route to handle file merge
-                type: 'POST',
-                data: formData,
-                processData: false,  // Prevent jQuery from processing the data
-                contentType: false,  // Prevent jQuery from setting content type
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // CSRF token
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        // Increment merge count
-                        mergeCount++;
+//             // Perform the AJAX request to merge the files
+//             $.ajax({ 
+//                 url: "{{ url('mergeFiles') }}",  // Laravel route to handle file merge
+//                 type: 'POST',
+//                 data: formData,
+//                 processData: false,  // Prevent jQuery from processing the data
+//                 contentType: false,  // Prevent jQuery from setting content type
+//                 headers: {
+//                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // CSRF token
+//                 },
+//                 success: function(response) {
+//                     if (response.status === 'success') {
+//                         // Increment merge count
+//                         mergeCount++;
 
-                        // Generate a dynamic name for the merged file
-                        var mergedFileName = "merged_file_" + mergeCount;
+//                         // Generate a dynamic name for the merged file
+//                         var mergedFileName = "merged_file_" + mergeCount;
                         
-                        // Display the merged file content in the preview
-                        showFilePreview(response.mergedFileUrl, mergedFileName);
-                    } else {
-                        alert('Error merging files!');
-                    }
-                },
-                error: function() {
-                    alert('Something went wrong!');
-                }
-            });
-        } else {
-            alert("Please select at least 2 files to merge.");
-        }
-    });
+//                         // Display the merged file content in the preview
+//                         showFilePreview(response.mergedFileUrl, mergedFileName);
+//                     } else {
+//                         alert('Error merging files!');
+//                     }
+//                 },
+//                 error: function() {
+//                     alert('Something went wrong!');
+//                 }
+//             });
+//         } else {
+//             alert("Please select at least 2 files to merge.");
+//         }
+//     });
 
-    // Helper function to get file by name
-    function getFileByName(fileName) {
-        var fileList = $("#attachment")[0].files;
-        for (var i = 0; i < fileList.length; i++) {
-            if (fileList[i].name === fileName) {
-                return fileList[i];
-            }
-        }
-        return null;
-    }
+//     // // Helper function to get file by name
+//     // function getFileByName(fileName) {
+//     //     var fileList = $("#attachment")[0].files;
+//     //     for (var i = 0; i < fileList.length; i++) {
+//     //         if (fileList[i].name === fileName) {
+//     //             return fileList[i];
+//     //         }
+//     //     }
+//     //     return null;
+//     // }
 
-    // Function to preview the merged file
-    function showFilePreview(fileUrl, fileName) {
-        var previewContainer = $("#file-list");
+//     // // Function to preview the merged file
+//     // function showFilePreview(fileUrl, fileName) {
+//     //     var previewContainer = $("#file-list");
         
-        // Clear any previous preview
-        previewContainer.html('');
+//     //     // Clear any previous preview
+//     //     previewContainer.html('');
 
-        // Add the merged file preview
-        previewContainer.append(`
-            <a href="${fileUrl}" target="_blank">Download ${fileName}</a>
-        `);
-    }
-});
+//     //     // Add the merged file preview
+//     //     previewContainer.append(`
+//     //         <a href="${fileUrl}" target="_blank">Download ${fileName}</a>
+//     //     `);
+//     // }
+// });
 
 
 $(document).ready(function() {
@@ -2907,5 +2711,175 @@ function updateESTTime() {
             });
         }
     });
+
+    $(document).ready(function () {
+    // Automatically trigger displayFiles when order_id changes
+    function displayFiles() {
+        let orderId = $("#order_id").val();
+        $.ajax({
+            url: "{{ url('getFiles') }}",
+            type: 'GET',
+            data: {
+                order_id: orderId // Use the dynamic ID
+            },
+            success: function (data) {
+                let fileList = $('#fileList');
+                let attachmentsHeader = $('#attachmentsHeader');
+                fileList.empty(); // Clear previous file list
+
+                if (data.length > 0) {
+                    attachmentsHeader.show();
+                    data.forEach(file => {
+                        let fileType = file.name.split('.').pop().toLowerCase();
+                        let filePreview = '';
+
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                            filePreview = `<div class="d-flex "><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></div>`;
+                        } else if (fileType === 'pdf') {
+                            filePreview = `<div class="d-flex "><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></div>`;
+                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                            filePreview = `<div class="d-flex "><a href="${file.path}" download="${file.name}">${file.name}</a></div>`;
+                        } else {
+                            filePreview = `<div class="d-flex ">${file.name} <span class="badge bg-secondary">Unknown file type</span></div>`;
+                        }
+
+                        fileList.append(`
+                            <div class="d-flex align-items-center row" data-file-id="${file.id}">
+                                <div class="align-item-center">
+                                    <button class="btn btn-link text-danger delete-file" data-file-id="${file.id}" title="Delete">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div style="flex: 1;">
+                                    ${filePreview}
+                                </div>
+                            </div>
+                        `);
+                    });
+
+                    // Event listener for viewing files
+                    $('.file-link').on('click', function (e) {
+                        e.preventDefault();
+                        let fileUrl = $(this).data('file-url');
+                        let fileType = fileUrl.split('.').pop().toLowerCase();
+
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                            Swal.fire({
+                                title: 'View Image',
+                                html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`,
+                                showCloseButton: true,
+                                confirmButtonText: 'Close',
+                                width: '80%'
+                            });
+                        } else if (fileType === 'pdf') {
+                            Swal.fire({
+                                title: 'View File',
+                                html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`,
+                                showCloseButton: true,
+                                confirmButtonText: 'Close',
+                                width: '80%'
+                            });
+                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                            window.open(fileUrl, '_blank');
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Unsupported File Type',
+                                text: 'This file type is not supported for viewing.',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    });
+
+                } else {
+                    attachmentsHeader.hide(); // Hide header if no files are available
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'An error occurred while retrieving the files.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    }
+
+    // Initially load the files
+    displayFiles();
+
+    // Delete file functionality
+    $(document).on('click', '.delete-file', function (e) {
+        e.preventDefault();
+        let fileId = $(this).data('file-id');
+        let fileRow = $(this).closest('.row'); // Find the closest row that contains the file
+
+        // Show confirmation dialog using Swal
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will delete the file permanently.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            console.log(result); // Check the full result object for debugging
+            if (result.value) {
+               
+                $.ajax({
+                    url: "{{ url('deleteFile') }}",
+                    type: 'DELETE',
+                    data: {
+                        file_id: fileId
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
+                        fileRow.remove(); // Remove the file row from the UI
+                        displayFiles(); // Refresh file list after deletion
+                    },
+                    error: function () {
+                        Swal.fire('Error!', 'There was a problem deleting the file.', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+});
+
+$(document).ready(function() {
+            // Initialize DataTable with AJAX data
+            var table = $('#attachmentHistoryTable').DataTable({
+
+                ajax: {
+                    url: "{{ url('attachmentHistoryData') }}",
+                    data: function(d) {
+                        d.order_id = $("#order_id").val(); // Send `order_id` as a parameter
+                    },
+                    type: 'GET'
+                },
+                order: [[3, 'desc']],
+                columns: [
+                    { data: 'file_name' },
+                    { data: 'user.username', defaultContent: '' }, 
+                    { data: 'action' },
+                    {
+                        data: 'updated_at',
+                        render: function(data) {
+                            // Format the date (e.g., "YYYY-MM-DD HH:mm:ss" to "MM/DD/YYYY HH:mm")
+                            let date = new Date(data);
+                            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                    }
+                ]
+            });
+
+        
+        });
+
 </script>
 @endsection
