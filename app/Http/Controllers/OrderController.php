@@ -1250,7 +1250,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
         ->addColumn('status', function ($order) use ($request) {
-            if (in_array($order->client_id, [82, 84, 85, 86])) 
+            if (in_array($order->client_id, [82, 84, 85, 86, 87, 89, 91, 88, 2, 13, 90, 92]))
                 {
                                 $statusMapping = [];
                     if (Auth::user()->hasRole('Typist') && in_array($order->process_type_id, [12, 7])) {
@@ -1287,7 +1287,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         16 => 'Typing',
                         17 => 'Typing QC'
                     ];
-                        if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86])) {
+                        if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86, 13, 2, 87, 88, 89, 90, 91, 92])) {
                         unset($statusMapping[15]);
                     }
                         if (!in_array($order->process_type_id, [12, 7])) {
@@ -1396,6 +1396,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 3 => 'Cancelled',
 
                             ];
+                            if (in_array($order->client_id, [2,13])) {
+                                unset($statusMapping[13]);
+                            }
                         }
                         }
                     }
@@ -1455,7 +1458,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 $className = 'goto-order2'; 
             } elseif ($elapsedHours < ($tatValueInHours*3)) {
                 $className = 'goto-order3'; 
-            } elseif ($elapsedHours < ($tatValueInHours*3)) {
+            } elseif ($elapsedHours < ($tatValueInHours*4)) {
                 $className = 'goto-order4'; 
             } else {
                 $className = 'goto-order6'; 
@@ -1552,7 +1555,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     ->update(['assignee_qa_id' => $input['user_id']]);
             }
  
-            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3])) {
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3, 16, 17])) {
                 if ($input['user_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update(['assignee_user_id' => $input['user_id']]);
@@ -1572,7 +1575,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
 
             }
  
-            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3]) && $input['user_id'] != null && $input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_id'] != null && $input['typist_qc_id'] != null) {
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3, 16, 17]) && $input['user_id'] != null && $input['qcer_id'] != null && $input['cover_prep_id'] != null && $input['typist_id'] != null && $input['typist_qc_id'] != null) {
                 OrderCreation::whereIn('id', $orderIds)
                     ->update([
                         'assignee_user_id' => $input['user_id'],
@@ -1583,7 +1586,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     ]);
             }
  
-            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3])) {
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3,16, 17])) {
                 if ($input['user_id'] != null && $input['qcer_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([

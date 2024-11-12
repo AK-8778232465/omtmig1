@@ -202,7 +202,9 @@ class ReportsController extends Controller
             $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
 
-        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+
+
+        if (!empty($lob_id) && $lob_id !== 'All') {
             $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
         }
 
@@ -458,7 +460,7 @@ if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
             $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
 
-        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+        if (!empty($lob_id) && $lob_id !== 'All') {
             $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
         }
         $statusCounts = $statusCountsQuery->get();
@@ -630,7 +632,7 @@ public function orderTimeTaken(Request $request) {
             $statusCountsQuery->whereIn('oms_order_creations.process_type_id', $process_type_id);
         }
     
-        if (!empty($lob_id) && $lob_id[0] !== 'Select Lob') {
+       if (!empty($lob_id) && $lob_id !== 'All') {
             $statusCountsQuery->where('oms_order_creations.lob_id', $lob_id);
         }
     

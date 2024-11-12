@@ -993,7 +993,7 @@ $(document).ready(function() {
             datatable.column(15).visible(false);
         }
         // //
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') ||Auth::user()->hasRole('SPOC') )
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') ||Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
             if(status == 13){
                 $('.status-dropdown').prop('disabled', false);
                 datatable.column(15).visible(true);
@@ -1050,7 +1050,7 @@ $(document).ready(function() {
         @endif
 
         if(status == 5) {
-            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC'))
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
             $('.status-dropdown').prop('disabled', false);
             @endif
         }
@@ -1363,7 +1363,7 @@ $(document).on('change', 'input.check-one', function() {
 
     if (anyCheckboxChecked) {   
 
-        if ($(this).data('id') == 82) {
+        if ($(this).data('id') == 82 || $(this).data('id') == 86 || $(this).data('id') == 84 || $(this).data('id') == 85 || $(this).data('id') == 87 || $(this).data('id') == 89 || $(this).data('id') == 91) {
                 $('#assign_tab').removeClass('d-none');
                 $('#typist_div').removeClass('d-none');
                 var task_status = $('#statusButtons').find('.btn-primary').attr('id');
@@ -1396,7 +1396,7 @@ $(document).on('change', 'input.check-one', function() {
 $(document).on('change', 'input.check-one', function() {
     var anyCheckboxChecked = $('input.check-one:checked').length > 0;
     if (anyCheckboxChecked) {
-        if ($(this).data('id') == 82) {
+        if ($(this).data('id') == 82 || $(this).data('id') == 86 || $(this).data('id') == 84 || $(this).data('id') == 85 || $(this).data('id') == 87 || $(this).data('id') == 89 || $(this).data('id') == 91) {
         $('#assign_tab').removeClass('d-none');
         $('#typist_qc_div').removeClass('d-none');
 
