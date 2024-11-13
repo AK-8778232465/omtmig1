@@ -249,6 +249,8 @@ class HomeController extends Controller
         $yetToAssignUser = 0;
         $yetToAssignQa = 0;
 
+        $StatusCompletedCount = [];
+
         if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             // Handle additional query based on project_id and client_id
             if (in_array('All', $project_id) && !in_array('All', $client_id)) {
@@ -670,6 +672,8 @@ class HomeController extends Controller
             ->selectRaw('status_id, count(*) as total_orders')
             ->groupBy('status_id')
             ->get();
+
+         $getorderId = [];
 
         $statusCounts['carriedCount'] = $carriedCount;
         if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {

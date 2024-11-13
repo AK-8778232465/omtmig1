@@ -286,6 +286,7 @@ private function getProcessIdsBasedOnUserRole($user)
             ->leftJoin('oms_city', 'oms_order_creations.city_id', '=', 'oms_city.id')
             ->leftJoin('oms_users as assignee_user', 'oms_order_creations.assignee_user_id', '=', 'assignee_user.id')
             ->leftJoin('oms_users as status_update_qc', 'oms_order_creations.updated_qc', '=', 'status_update_qc.id')
+            ->leftJoin('oms_users as assignee_qcer', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qcer.id')
 
 
             ->leftJoin('county_instructions', function($join) {
