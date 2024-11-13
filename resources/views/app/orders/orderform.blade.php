@@ -1713,7 +1713,7 @@ $(document).ready(function() {
 @if(!in_array($orderData->stl_process_id, [2, 4, 6]))
 <script>
 
-
+let lastSegment = "{{ $lastSegment }}";
 let isTaxFormVisible = false;
 let isOrderFormVisible = false;
 
