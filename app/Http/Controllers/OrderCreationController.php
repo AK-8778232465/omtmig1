@@ -220,16 +220,24 @@ public function getlobid(Request $request){
             'status_updated_time' => Carbon::now()
         ];
 
-        
-            $duplicateOrderCount = OrderCreation::where('order_id', $input['order_id'])
-            ->where(DB::raw('DATE(order_date)'), '=', \Carbon\Carbon::parse($input['order_date'])->format('Y-m-d'))     
-                ->where('client_id', $input['select_client_id'])        
-                ->where('lob_id', $input['lob_id'])
-                ->where('process_type_id', $input['process_type_id'])
-                ->where('process_id', $input['process_code'])            
-                ->where('is_active', 1)
-                ->where('status_id', '!=', 3)
-                ->count();
+
+
+
+                if (in_array($input['process_type_id'], [2, 4, 6])) {
+                    $duplicateOrderCount = OrderCreation::where('order_id', $input['order_id'])
+                                            ->where('status_id', '!=', 3);
+                }else{
+                    $duplicateOrderCount = OrderCreation::where('order_id', $input['order_id'])
+                    ->where(DB::raw('DATE(order_date)'), '=', \Carbon\Carbon::parse($input['order_date'])->format('Y-m-d'))
+                        ->where('client_id', $input['select_client_id'])
+                        ->where('lob_id', $input['lob_id'])
+                        ->where('process_type_id', $input['process_type_id'])
+                        ->where('process_id', $input['process_code'])
+                        ->where('is_active', 1)
+                        ->where('status_id', '!=', 3);
+                }
+
+                $duplicateOrderCount = $duplicateOrderCount->count();
 
         if ($duplicateOrderCount > 0) {
             return response()->json(['data' => 'error', 'msg' => 'Order already exists.']);
