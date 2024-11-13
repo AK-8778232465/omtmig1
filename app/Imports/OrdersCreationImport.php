@@ -369,18 +369,28 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         $orderDate_condition = \Carbon\Carbon::parse($data['order_date'])->format('Y-m-d');
 
-        $existingOrder = OrderCreation::where('order_id', $data['order_id'])
-                    ->whereDate('order_date', '=', $orderDate_condition)
-                    ->where('process_id', $processOrg->id)
-                    ->where('lob_id',  $lob->id)
-                    ->where('process_type_id', $process_typeid->process_id)
-                    ->where('status_id', '!=', 3)
-                    ->exists();
-        
 
+        if (isset($data['process_type_id']) && $data['process_type_id'] == 'Typing') {
+            $existingOrder= OrderCreation::where('order_id', $data['order_id'])
+                          ->where('status_id', '!=', 3);
+
+                $data['comments'] = 'For Typing Process OrderId Should be Unique';
+
+        } else {
+            $existingOrder = OrderCreation::where('order_id', $data['order_id'])
+                                           ->whereDate('order_date', '=', $orderDate_condition)
+                                           ->where('process_id', $processOrg->id)
+                                           ->where('lob_id',  $lob->id)
+                                           ->where('process_type_id', $process_typeid->process_id)
+                                           ->where('status_id', '!=', 3);
+
+                $data['comments'] = 'Duplicate Order ID and Order Date or Process found';
+        }
+
+
+        $existingOrder = $existingOrder->exists();
 
         if ($existingOrder) {
-            $data['comments'] = 'Duplicate Order ID and Order Date found';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
@@ -487,23 +497,31 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         $orderDate_condition = \Carbon\Carbon::parse($data['order_date'])->format('Y-m-d');
 
-        $existingOrder = OrderCreation::where('order_id', $data['order_id'])
-                    ->whereDate('order_date', '=', $orderDate_condition)
-                    ->where('process_id', $processOrg->id)
-                    ->where('lob_id',  $lob->id)
-                    ->where('process_type_id', $process_typeid->process_id)
-                    ->exists();
+        if (isset($data['process_type_id']) && $data['process_type_id'] == 'Typing') {
+            $existingOrder= OrderCreation::where('order_id', $data['order_id'])
+                          ->where('status_id', '!=', 3);
+                $data['comments'] = 'Typing Unique OrderId';
 
- 
+        } else {
+            $existingOrder = OrderCreation::where('order_id', $data['order_id'])
+                                           ->whereDate('order_date', '=', $orderDate_condition)
+                                           ->where('process_id', $processOrg->id)
+                                           ->where('lob_id',  $lob->id)
+                                           ->where('process_type_id', $process_typeid->process_id)
+                                           ->where('status_id', '!=', 3);
 
- 
-         if ($existingOrder) {
-             $data['comments'] = 'Duplicate Order ID and Order Date or Process found';
-             OrderTemp::insert($data);
-             ++$this->unsuccess_rows;
-             return null;
-         }
- 
+                $data['comments'] = 'Duplicate Order ID and Order Date or Process found';
+        }
+
+
+        $existingOrder = $existingOrder->exists();
+
+        if ($existingOrder) {
+            OrderTemp::insert($data);
+            ++$this->unsuccess_rows;
+            return null;
+        }
+
          $order_date = isset($order_date) ? date('Y-m-d H:i:s', strtotime($order_date)) : null;
  
          $currentTimeIST = Carbon::now();
