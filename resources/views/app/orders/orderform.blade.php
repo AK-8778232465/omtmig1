@@ -133,6 +133,23 @@
     transform: translateY(-50%);
 }
 
+/* Prevent columns from expanding when text overflows */
+.table thead th, .table tbody td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.table-wrapper {
+    max-width: 100%;
+}
+
+/* Force data to wrap within fixed width cells */
+#attachmentHistoryTable td,
+#orderstatusdetail_datatable td {
+    word-wrap: break-word;
+    white-space: normal;
+}
 
 </style>
 <div class="col-lg-12">
@@ -1217,51 +1234,56 @@
                             </div>
                             @endif
                             <!-- /s history -->
-                            <div class="card-body mt-3">
-                                <table id="attachmentHistoryTable" class="table table-bordered nowrap"
-                                    style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                    <thead>
-                                        <tr>
-                                            <th>File Name</th>
-                                            <th>User Name</th>
-                                            <th>Action</th>
-                                            <th>Updated At</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Data populated by DataTables via AJAX -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="card-body">
-                                <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
-                                    style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                <thead>
-                                    <tr>
-                                        <th>Comments</th>
-                                        <th>User</th>
-                                        <th>Date and Time (EST)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if($orderTaxInfo && count($orderTaxInfo) > 0)
-                                        @foreach($orderTaxInfo as $status)
+                            <div class="card-body mt-3 d-flex justify-content-between">
+                                    <!-- Attachment History Table -->
+                                <div class="table-wrapper m-1" style="width: 50%;">
+                                    <table id="attachmentHistoryTable" class="table table-bordered nowrap"
+                                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                        <thead>
                                             <tr>
-                                                <td>{{ $status->comment ?? 'N/A' }}</td>
-                                                <td>{{ $status->username ?? 'N/A' }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($status->updated_at)->format('m-d-Y H:i:s') }}
-                                            </td>
+                                                <th style="width: 3%;">S No</th>
+                                                <th style="width: 37%;">File Name</th>
+                                                <th style="width: 20%;">User Name</th>
+                                                <th style="width: 20%;">Action</th>
+                                                <th style="width: 20%;">Updated At</th>
                                             </tr>
-                                        @endforeach
-                                    @else
-                                        <tr>
-                                            <td class="text-center" colspan="4">No history available for this
-                                                order.</td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data populated by DataTables via AJAX -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Order Status Details Table -->
+                                <div class="table-wrapper m-1" style="width: 50%;">
+                                    <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
+                                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50%;">Comments</th>
+                                                <th style="width: 25%;">User</th>
+                                                <th style="width: 25%;">Date and Time (EST)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if($orderTaxInfo && count($orderTaxInfo) > 0)
+                                                @foreach($orderTaxInfo as $status)
+                                                    <tr>
+                                                        <td style="word-wrap: break-word; white-space: normal;">{{ $status->comment ?? 'N/A' }}</td>
+                                                        <td style="word-wrap: break-word; white-space: normal;">{{ $status->username ?? 'N/A' }}</td>
+                                                        <td style="word-wrap: break-word; white-space: normal;">{{ \Carbon\Carbon::parse($status->updated_at)->format('m-d-Y H:i:s') }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <tr>
+                                                    <td class="text-center" colspan="3">No history available for this order.</td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
                              <!-- /e history -->
                         </form>
                     </div>
@@ -1776,54 +1798,60 @@ updateHideCardVisibility();
     }
 
 $(document).ready(function() {
-  $("#taxFormValues").on("submit", function(event) {
-    event.preventDefault(); 
-    var formData = $(this).serialize();
+    $("#taxFormValues").on("submit", function(event) {
+        event.preventDefault(); 
+        var formData = $(this).serialize();
 
-    // Append additional data from the specified input fields
-    var taxStatus = $("#tax_status").val();
-    var getData = $("#get_data").val();
-    var searchInput = $("#search_input").val();
+        // Append additional data from the specified input fields
+        var taxStatus = $("#tax_status").val();
+        var getData = $("#get_data").val();
+        var searchInput = $("#search_input").val();
 
-    // Create an object to hold the serialized data and additional fields
-    var additionalData = {
-      tax_status: taxStatus,
-      get_data: getData,
-      search_input: searchInput
-    };
+        // Create an object to hold the serialized data and additional fields
+        var additionalData = {
+            tax_status: taxStatus,
+            get_data: getData,
+            search_input: searchInput
+        };
 
-    // Convert the additionalData object to a query string
-    var additionalDataString = $.param(additionalData);
-    
-    // Combine the original form data with the additional data
-    var combinedData = formData + '&' + additionalDataString;
+        // Convert the additionalData object to a query string
+        var additionalDataString = $.param(additionalData);
+        
+        // Combine the original form data with the additional data
+        var combinedData = formData + '&' + additionalDataString;
 
-    $.ajax({
-      url: "{{ url('taxform_submit') }}",
-      type: "POST",
-      data: combinedData,
-      headers: {
-        'X-CSRF-TOKEN': $('input[name="_token"]').val()
-      },
-      success: function(response) {
-        Swal.fire({
-          title: 'Success!',
-          text: response.message,
-          icon: 'success',
-          confirmButtonText: 'OK'
+        $.ajax({
+            url: "{{ url('taxform_submit') }}",
+            type: "POST",
+            data: combinedData,
+            headers: {
+                'X-CSRF-TOKEN': $('input[name="_token"]').val()
+            },
+            success: function(response) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.value) {
+                        window.location.href = "{{ url('/orders_status') }}/tax";
+
+                    }
+                });
+            },
+            error: function(error) {        
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to send data. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
         });
-      },
-      error: function(error) {        
-        Swal.fire({
-          title: 'Error!',
-          text: 'Failed to send data. Please try again.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-      }
     });
-  });
 });
+
 
 $(document).ready(function () {
     // Trigger file upload on file selection change
@@ -2876,34 +2904,38 @@ function updateESTTime() {
 });
 
 $(document).ready(function() {
-            // Initialize DataTable with AJAX data
-            var table = $('#attachmentHistoryTable').DataTable({
-
-                ajax: {
-                    url: "{{ url('attachmentHistoryData') }}",
-                    data: function(d) {
-                        d.order_id = $("#order_id").val(); // Send `order_id` as a parameter
-                    },
-                    type: 'GET'
+    // Initialize DataTable with AJAX data
+    var table = $('#attachmentHistoryTable').DataTable({
+        ajax: {
+            url: "{{ url('attachmentHistoryData') }}",
+            data: function(d) {
+                d.order_id = $("#order_id").val(); // Send `order_id` as a parameter
+            },
+            type: 'GET'
+        },
+        // Adjusted order column to account for the new serial number column
+        columns: [
+            {
+                data: null, // Serial number column
+                render: function(data, type, row, meta) {
+                    return meta.row + 1; // Display row number (1-based index)
                 },
-                order: [[3, 'desc']],
-                columns: [
-                    { data: 'file_name' },
-                    { data: 'user.username', defaultContent: '' }, 
-                    { data: 'action' },
-                    {
-                        data: 'updated_at',
-                        render: function(data) {
-                            // Format the date (e.g., "YYYY-MM-DD HH:mm:ss" to "MM/DD/YYYY HH:mm")
-                            let date = new Date(data);
-                            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        }
-                    }
-                ]
-            });
+                orderable: false // Disable sorting on this column
+            },
+            { data: 'file_name' },
+            { data: 'user.username', defaultContent: '' },
+            { data: 'action' },
+            {
+            data: 'updated_at',
+              
+            }
+        ],
+       
+        dom: 't', // Only display the table body, no search box or entries dropdown
+        paging: false // Disable pagination if desired
+    });
+});
 
-        
-        });
 
 </script>
 @endsection
