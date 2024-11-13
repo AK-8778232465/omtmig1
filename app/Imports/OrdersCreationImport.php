@@ -373,6 +373,7 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                     ->where('process_id', $processOrg->id)
                     ->where('lob_id',  $lob->id)
                     ->where('process_type_id', $process_typeid->process_id)
+                    ->where('status_id', '!=', 3)
                     ->exists();
         
 

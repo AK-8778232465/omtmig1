@@ -228,6 +228,7 @@ public function getlobid(Request $request){
                 ->where('process_type_id', $input['process_type_id'])
                 ->where('process_id', $input['process_code'])            
                 ->where('is_active', 1)
+                ->where('status_id', '!=', 3)
                 ->count();
 
         if ($duplicateOrderCount > 0) {
