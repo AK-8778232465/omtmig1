@@ -317,6 +317,8 @@ private function getProcessIdsBasedOnUserRole($user)
                 'stl_process.name as process_name',
                 'assignee_user.emp_id as EmpId',
                 'assignee_user.username as EmpName',
+                'assignee_qcer.emp_id as qcer_EmpId',
+                'assignee_qcer.username as qcer_EmpName',
                 'status_update_qc.emp_id as qc_EmpId',
                 'status_update_qc.username as qa_user',
                 'oms_order_creations.qc_comment as qc_comment',
@@ -364,8 +366,8 @@ private function getProcessIdsBasedOnUserRole($user)
                 'process_name' => $item->process_name,
                 'emp_id' => $item->EmpId,
                 'emp_name' => $item->EmpName,
-                'qa_user' => $item->qa_user,
-                'qc_EmpId' => $item->qc_EmpId,
+                'qa_user' => $item->qcer_EmpName,
+                'qc_EmpId' => $item->qcer_EmpId,
                 'qc_comment' => $item->qc_comment,
                 'status_updated_time' => $item->status_updated_time
                 
