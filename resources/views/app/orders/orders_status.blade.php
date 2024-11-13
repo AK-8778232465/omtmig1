@@ -2063,7 +2063,11 @@ $('#deleteBtn').click(function (event) {
 
     if (status == 13) {
             window.location.href = "{{ url('coversheet-prep/') }}/" + order_id;
-        } else {
+        }else if(status == "tax"){
+            console.log('test');
+            window.location.href = "{{ url('orderform') }}/" +  order_id  + "/tax";
+        }
+         else {
             window.location.href = "{{ url('orderform/') }}/" + order_id;
         }
 });

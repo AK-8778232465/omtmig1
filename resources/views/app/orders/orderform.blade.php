@@ -463,6 +463,12 @@
                 @endif
                     @if($orderData->client_id == 16)
                         @if(!in_array($orderData->stl_process_id, [2, 4, 6]))
+				@php
+                    $segments = explode('/', Request::path());
+                    $lastSegment = end($segments);
+                @endphp
+
+            @if($lastSegment != "tax")
                 @if(!@empty($countyInfo))
                 <input type="hidden" name="instructionId" id="instructionId" value="{{$instructionId}}">
                 <h6 class="font-weight-bold">Source Information :</h6>
@@ -530,6 +536,7 @@
                         </table>
                     </div>
                 </div>
+                @endif
                 @endif
                     @endif
                     @if(in_array($orderData->stl_process_id, [2, 4, 6]))
@@ -624,7 +631,7 @@
                                     <option value="address" {{ isset($getTaxJson['get_data']) && $getTaxJson['get_data'] == 'address' ? 'selected' : '' }}>Address</option>
                                 </select>
                             </div>
-                            <div class="col-2 d-flex align-items-center">
+                            <div class="col-4 d-flex align-items-center">
                                 <input class="form-control" id="search_input" name="search_input" type="text" placeholder="Enter APN/Address" value="{{ isset($getTaxJson['search_input']) ? $getTaxJson['search_input'] : '' }}">
                             </div>
                             <div class="col-md-2 align-items-center">
@@ -1705,12 +1712,25 @@ $(document).ready(function() {
 
 @if(!in_array($orderData->stl_process_id, [2, 4, 6]))
 <script>
+
+let lastSegment = "{{ $lastSegment }}";
 let isTaxFormVisible = false;
 let isOrderFormVisible = false;
 
 function updateHideCardVisibility() {
     document.getElementById('hide_card').style.display = (isTaxFormVisible || isOrderFormVisible) ? 'block' : 'none';
 }
+
+if (lastSegment === 'tax') {
+        document.getElementById('showOrderForm').disabled = true;
+        document.getElementById('showOrderForm').classList.add('btn-inactive');
+
+    } else {
+        document.getElementById('showOrderForm').disabled = false;
+        document.getElementById('showOrderForm').classList.remove('btn-inactive');
+    }
+
+
 
 document.getElementById('showTaxForm').addEventListener('click', function() {
     isTaxFormVisible = !isTaxFormVisible;
@@ -1748,8 +1768,12 @@ document.getElementById('showOrderForm').addEventListener('click', function() {
 
 updateHideCardVisibility();
 
-document.getElementById('showOrderForm').click();
 
+    if (lastSegment === 'tax') {
+        document.getElementById('showTaxForm').click();
+    }else{
+        document.getElementById('showOrderForm').click();
+    }
 
 $(document).ready(function() {
   $("#taxFormValues").on("submit", function(event) {
