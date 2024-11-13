@@ -1241,15 +1241,16 @@ class OrderFormController extends Controller
             }
             public function attachmentHistoryData(Request $request)
             {
-                $query = OmsAttachmentHistory::select('id', 'order_id', 'file_name', 'updated_by', 'action', 'updated_at')
-                    ->with('user:id,username'); // Include only `id` and `username` from `stl_user`
+                
+                        $query = OmsAttachmentHistory::select('id', 'order_id', 'file_name', 'updated_by', 'action', DB::raw("DATE_FORMAT(updated_at, '%m/%d/%Y') as updated_at"))
+                        ->with('user:id,username') // Include only `id` and `username` from `stl_user`
+                        ->orderByDesc('updated_at'); // Order by `updated_at` in descending order
 
-                if ($request->has('order_id') && !empty($request->order_id)) {
-                    $query->where('order_id', $request->order_id);
-                }
+                        if ($request->has('order_id') && !empty($request->order_id)) {
+                        $query->where('order_id', $request->order_id);
+                        }
 
-                $data = $query->get();
-
+                        $data = $query->get();
                 return response()->json(['data' => $data]);
             }
 
