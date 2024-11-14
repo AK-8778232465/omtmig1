@@ -223,8 +223,9 @@ public function getlobid(Request $request){
 
 
 
-                if (in_array($input['process_type_id'], [2, 4, 6])) {
+                if (in_array($input['process_type_id'], [2, 4, 6, 8, 9, 16])) {
                     $duplicateOrderCount = OrderCreation::where('order_id', $input['order_id'])
+                                            ->whereIn('process_type_id', [2, 4, 6, 8, 9, 16])
                                             ->where('status_id', '!=', 3);
                 }else{
                     $duplicateOrderCount = OrderCreation::where('order_id', $input['order_id'])

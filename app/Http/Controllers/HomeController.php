@@ -674,7 +674,8 @@ class HomeController extends Controller
             ->get();
 
          $getorderId = [];
-
+         $carriedOverCompletedCount2 = [];
+         
         $statusCounts['carriedCount'] = $carriedCount;
         if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
             if(in_array('All', $project_id) && !in_array('All', $client_id)){

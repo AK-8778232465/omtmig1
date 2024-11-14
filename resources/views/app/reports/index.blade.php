@@ -294,6 +294,7 @@
                                     <th width="11%">Status Comments</th>
                                     <th width="5%">Primary Source</th>
                                     <th width="5%">Process type</th>
+                                    <th width="5%">Tier</th>
                                     <th width="11%">User Emp Id</th>
                                     <th width="11%">User Emp Name</th>
                                     <th width="5%">QA Emp Id</th>
@@ -730,6 +731,7 @@ function orderWise() {
             { data: 'status_comment', name: 'status_comment' },
             { data: 'primary_source', name: 'primary_source' },
             { data: 'process_name', name: 'process_name' },
+            { data: 'tier', name: 'tier' },
             { data: 'emp_id', name: 'emp_id' },
             { data: 'emp_name', name: 'emp_name' },
             {data: 'qc_EmpId', name: 'qc_EmpId'},

@@ -372,9 +372,10 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         if (isset($data['process_type_id']) && $data['process_type_id'] == 'Typing') {
             $existingOrder= OrderCreation::where('order_id', $data['order_id'])
+                          ->whereIn('process_type_id', [2, 4, 6, 8, 9, 16])
                           ->where('status_id', '!=', 3);
 
-                $data['comments'] = 'For Typing Process OrderId Should be Unique';
+                $data['comments'] = 'For Typing Process, OrderId Should be Unique';
 
         } else {
             $existingOrder = OrderCreation::where('order_id', $data['order_id'])
@@ -499,8 +500,9 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
 
         if (isset($data['process_type_id']) && $data['process_type_id'] == 'Typing') {
             $existingOrder= OrderCreation::where('order_id', $data['order_id'])
+                          ->whereIn('process_type_id', [2, 4, 6, 8, 9, 16])
                           ->where('status_id', '!=', 3);
-                $data['comments'] = 'Typing Unique OrderId';
+                $data['comments'] = 'For Typing Process, OrderId Should be Unique';
 
         } else {
             $existingOrder = OrderCreation::where('order_id', $data['order_id'])

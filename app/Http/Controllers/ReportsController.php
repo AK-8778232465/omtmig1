@@ -287,7 +287,7 @@ private function getProcessIdsBasedOnUserRole($user)
             ->leftJoin('oms_users as assignee_user', 'oms_order_creations.assignee_user_id', '=', 'assignee_user.id')
             ->leftJoin('oms_users as status_update_qc', 'oms_order_creations.updated_qc', '=', 'status_update_qc.id')
             ->leftJoin('oms_users as assignee_qcer', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qcer.id')
-
+            ->leftJoin('oms_tier', 'oms_order_creations.tier_id', '=', 'oms_tier.id')
 
             ->leftJoin('county_instructions', function($join) {
                 $join->on('oms_order_creations.state_id', '=', 'county_instructions.state_id')
@@ -324,7 +324,7 @@ private function getProcessIdsBasedOnUserRole($user)
                 'status_update_qc.username as qa_user',
                 'oms_order_creations.qc_comment as qc_comment',
                 'oms_order_creations.status_updated_time as status_updated_time',
-
+                'oms_tier.Tier_id as tier_name'
             )
             ->whereNotNull('oms_order_creations.assignee_user_id')
             ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
@@ -365,6 +365,7 @@ private function getProcessIdsBasedOnUserRole($user)
                 'status_comment' => $item->status_comment,
                 'primary_source' => $primarySource,
                 'process_name' => $item->process_name,
+                'tier' => $item->tier_name,
                 'emp_id' => $item->EmpId,
                 'emp_name' => $item->EmpName,
                 'qa_user' => $item->qcer_EmpName,
