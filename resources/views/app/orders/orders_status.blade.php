@@ -1517,11 +1517,15 @@ $(document).on('focus', '.status-dropdown', function() {
                         updateStatusCounts();
                     } else {
                         Swal.fire({
-                            text: "Can't able to Update Status",
+                            text: response.error,
                             icon: "error",
                             timer: 1500
                         });
-                        page_reload();
+                        
+                        var table = $('#order_datatable').DataTable();
+                        var currentPage = table.page();
+                        table.page(currentPage).draw(false);
+
                     }
                 },
                 error: function(error) {

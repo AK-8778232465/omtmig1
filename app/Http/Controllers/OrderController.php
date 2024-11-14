@@ -1799,6 +1799,18 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $updateData['completion_date'] = null;
         }
 
+        $update_data = OrderCreation::select('state_id', 'county_id', 'tier_id', 'city_id')
+        ->where('id', $orderId)
+        ->first();
+
+        if (is_null($update_data->state_id) || is_null($update_data->county_id)) {
+            return response()->json([
+                'error' => 'State and County are required to Fill'
+            ]);
+        }
+
+
+
         $update_status = OrderCreation::where('id', $orderId)->update($updateData);
 
         if ($update_status) {

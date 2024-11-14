@@ -993,6 +993,19 @@ function order_submition(orderId, type) {
         }
     }
 
+
+    var propertystate = $("#property_state").val();
+    var propertycounty = $("#property_county").val();
+
+    if (!propertystate && !propertycounty) {
+        Swal.fire({
+            title: "Error",
+            text: "State and County need to be filled",
+            icon: "error"
+        });
+        return false; 
+    }
+
         var checklistItems = [];
         $("input[name='checks[]']:checked").each(function() {
             checklistItems.push($(this).val());
