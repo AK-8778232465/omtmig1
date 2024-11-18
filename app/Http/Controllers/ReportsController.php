@@ -79,10 +79,16 @@ class ReportsController extends Controller
                             ->select('id', 'name')
                             ->get();
         } else {
-            $getprocess = DB::table('stl_process')
-                            ->select('id', 'name', 'lob_id')
-                            ->where('lob_id', $lob_id)
-                            ->get();
+
+            $getprocess = DB::table('stl_item_description')
+            ->leftjoin('stl_process', 'stl_process.id', '=', 'stl_item_description.process_id')
+            ->leftjoin('stl_client', 'stl_client.id', '=', 'stl_item_description.client_id')
+                ->select('stl_process.id', 'stl_process.name')
+                ->where('stl_process.lob_id', $lob_id)
+                ->where('stl_item_description.lob_id', $lob_id)
+                ->where('stl_item_description.client_id', $client_id)
+                ->groupBy('stl_process.id')
+                ->get();
 
         }
 
