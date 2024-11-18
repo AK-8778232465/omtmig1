@@ -181,6 +181,8 @@ class ReportsController extends Controller
                 SUM(CASE WHEN status_id = 5 THEN 1 ELSE 0 END) as `status_5`,
                 SUM(CASE WHEN status_id = 13 THEN 1 ELSE 0 END) as `status_13`,
                 SUM(CASE WHEN status_id = 14 THEN 1 ELSE 0 END) as `status_14`,
+                SUM(CASE WHEN status_id = 16 THEN 1 ELSE 0 END) as `status_16`,
+                SUM(CASE WHEN status_id = 17 THEN 1 ELSE 0 END) as `status_17`,
                 COUNT(*) as `All`')
             ->whereNotNull('assignee_user_id')
             ->where('oms_order_creations.is_active', 1)
@@ -219,6 +221,8 @@ class ReportsController extends Controller
                 'status_1' => $count->status_1,
                 'status_2' => $count->status_2,
                 'status_3' => $count->status_3,
+                'status_16' => $count->status_16,
+                'status_17' => $count->status_17,
                 'status_4' => $count->status_4,
                 'status_5' => $count->status_5,
                 'status_13' => $count->status_13,
@@ -331,7 +335,7 @@ private function getProcessIdsBasedOnUserRole($user)
             ->whereDate('oms_order_creations.order_date', '<=', $toDate)
             ->whereIn('oms_order_creations.process_id', $processIds)
             ->where('oms_order_creations.is_active', 1)
-            ->whereIn('oms_order_creations.status_id', [1, 2, 3, 4, 5, 13, 14])
+            ->whereIn('oms_order_creations.status_id', [1, 2, 3, 4, 5, 13, 14, 16, 17])
             ->where('stl_item_description.is_approved', 1)
             ->where('stl_client.is_approved', 1);
 

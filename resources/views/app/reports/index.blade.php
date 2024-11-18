@@ -259,6 +259,8 @@
                                     <th width="11%">WIP</th>
                                     <th width="11%">Coversheet Prep</th>
                                     <th width="11%">Clarification</th>
+                                    <th width="11%">Typing</th>
+                                    <th width="11%">Typing QC</th>
                                     <th width="11%">Send For QC</th>
                                     <th width="11%">Hold</th>
                                     <th width="11%">Cancelled</th>
@@ -962,6 +964,8 @@ $('#newreports_datatable').on('draw.dt', function () {
             { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
             { data: 'status_13', name: 'status_13' },
             { data: 'status_14', name: 'status_14' },
+            { data: 'status_16', name: 'status_16' },
+            { data: 'status_17', name: 'status_17' },
             { data: 'status_4', name: 'status_4' },
             { data: 'status_2', name: 'status_2' },
             { data: 'status_3', name: 'status_3' },
