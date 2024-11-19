@@ -1489,10 +1489,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             }
         
             if ($user->user_type_id == 8) {
-                if (($order->status_id == 1 && $order->assignee_qa_id != Auth::id()) ||
-                    ($order->status_id == 1 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == Auth::id()) ||
-                    ($order->status_id == 14 && $order->assignee_user_id == Auth::id() ||
-                    ($order->status_id == 14 && $order->assignee_qa_id == Auth::id()))){
+                if (($order->status_id == 1 && $order->assignee_qa_id != Auth::id()) || 
+                    ($order->status_id == 1 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == Auth::id())) {
                     $orderId = $order->id ?? '';
                 } elseif (($order->status_id == 4 && $order->assignee_user_id != Auth::id() && $order->assignee_qa_id == Auth::id()) ||
                             ($order->status_id == 4 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == Auth::id()) || 
