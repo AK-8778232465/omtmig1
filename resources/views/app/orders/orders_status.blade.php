@@ -1124,6 +1124,14 @@ $(document).ready(function() {
             $('.status-dropdown').prop('disabled', true);
         }
 
+        @if(Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer'))
+            if(status == 14){
+            $('.status-dropdown').prop('disabled', false);
+        }
+        @endif
+
+
+
     });
 
 function updateStatusCounts() {

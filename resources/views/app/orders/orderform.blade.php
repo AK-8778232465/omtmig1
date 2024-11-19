@@ -2273,7 +2273,7 @@ $(document).ready(function() {
     $('#order_status').change(function() {
         let status = $(this).val();
         @if(Auth::user()->hasRole('Process'))
-        if (status == 14 || status == 4 || status == 2 || status == 5) {
+        if (status == 4 || status == 2 || status == 5) {
             $('#order_status').prop('disabled', true);
         } else {
             $('#order_status').prop('disabled', false);

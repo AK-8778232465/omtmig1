@@ -1436,7 +1436,11 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                           ($order->status_id == 4 && $user->user_type_id == 8 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id ==  Auth::id()) || ($order->status_id == 4 && $user->user_type_id == 8 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == null)) {
                 $disabled = '';
                 $makedisable = '';
-            } else {
+            }elseif (($order->status_id == 14  )){
+                $disabled = '';
+                $makedisable = '';
+            }
+            else {
                 $disabled = 'readonly';
                 $makedisable = 'select-disabled';
             }
