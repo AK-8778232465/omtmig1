@@ -1297,8 +1297,43 @@ function userTimeTaken_datatable() {
         dom: 'lBfrtip',
         buttons: [
             {
-                extend: 'excelHtml5',
-                title: 'ordercompletion details'  // Set the filename here
+                extend: 'excel',
+                action: function (e, dt, button, config) {
+                    $.ajax({
+                        url: "{{ route('get_timetaken') }}",
+                        type: 'POST',
+                        data: {
+                            toDate_range: toDate,
+                            fromDate_range: fromDate,
+                            client_id: client_id,
+                            lob_id: lob_id,
+                            process_type_id: process_type_id,
+                            product_id: product_id,
+                            selectedDateFilter: selectedDateFilter,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            var data = response.data;
+
+                            var headers = ["Emp Id", "Users", "Product Type", "No of Assigned Orders", "No of Completed Orders", "Total Time taken for Completed Orders", "Avg Time taken for Completed Orders"];
+                            var exportData = data.map(row => [
+                                row.emp_id,
+                                row.Users,
+                                row.Product_Type,
+                                row.NO_OF_ASSIGNED_ORDERS,
+                                row.NO_OF_COMPLETED_ORDERS,
+                                row.TOTAL_TIME_TAKEN_FOR_COMPLETED_ORDERS,
+                                row.AVG_TIME_TAKEN_FOR_COMPLETED_ORDERS,
+
+                            ]);
+
+                            var wb = XLSX.utils.book_new();
+                            var ws = XLSX.utils.aoa_to_sheet([headers].concat(exportData));
+                            XLSX.utils.book_append_sheet(wb, ws, "Time Taken Data");
+                            XLSX.writeFile(wb, "order_completion_data.xlsx");
+                        }
+                    });
+                }
             }
         ],
         lengthMenu: [ 10, 25, 50, 75, 100 ]
