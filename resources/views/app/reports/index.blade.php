@@ -483,8 +483,34 @@ function selectDateFilter(value) {
         value = 'current_month';
 }
 
-    dateDisplay.textContent = selectedDateFilter;
+     // Display the selected date filter
+     dateDisplay.textContent = selectedDateFilter;
+
+     if (selectedDateFilter && value !== 'custom') {
+        // Remove the "Selected:" prefix if it exists
+        let cleanedFilter = selectedDateFilter.replace("Selected: ", "").trim();
+
+        // Split the cleaned filter into dates
+        let dates = cleanedFilter.split(' to ');
+        if (dates.length === 2) {
+            // Convert the dates into YYYY-MM-DD format
+            let fromDate = formatDate1(dates[0].trim());
+            let toDate = formatDate1(dates[1].trim());
+
+            // Set the input values
+            fromDateInput.value = fromDate; // Set the start date
+            toDateInput.value = toDate; // Set the end date
+        }
+    }
+   
 }
+
+// Function to convert date to YYYY-MM-DD format
+function formatDate1(dateString) {
+    let [month, day, year] = dateString.split('-'); // Assuming the input is MM-DD-YYYY
+    return `${year}-${month}-${day}`; // Convert to YYYY-MM-DD
+}
+
 function getTodayDate() {
     let StartDate = new Date();
     return `Selected: ${formatDate(StartDate)}`;
@@ -1396,7 +1422,7 @@ function production_report() {
     let process_type_id = $('#process_type_id').val();
     let product_id = $('#product_id').val();
     let selectedDateFilter = $('#selectedDateFilter').val(); 
-
+// console.log(selectedDateFilter);
     if ($.fn.DataTable.isDataTable('#production_datatable')) {
         $('#production_datatable').DataTable().clear().destroy();
     }
