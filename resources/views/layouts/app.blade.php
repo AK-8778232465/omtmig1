@@ -59,10 +59,56 @@
             .menu.notification {
                 position: relative;
             }
+            .loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensure it appears on top of everything */
+    flex-direction: column; /* Stack loader and text */
+    font-family: Arial, sans-serif;
+}
+
+.loader {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-radius: 50%;
+    border-top: 8px solid #3498db; /* Blue */
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite; /* Spinning animation */
+    margin-bottom: 15px; /* Space between loader and text */
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader-text {
+    font-size: 18px;
+    color: #3498db; /* Matches loader color */
+    font-weight: bold;
+}
+
         </style>
 
     </head>
     <body data-layout="horizontal" style="background-image: url('{{ asset('assets/images/mainbg.png') }}">
+    <div id="mobileToggle" style="display: none;">
+        <div class="loader-overlay">
+            <div class="loader"></div>
+            <div class="loader-text">Fetching...</div>
+        </div>
+    </div>
         <div id="overlay"></div>
         <div class="topbar">
             <div id="snow"></div>

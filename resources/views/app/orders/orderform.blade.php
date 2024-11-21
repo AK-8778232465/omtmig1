@@ -611,16 +611,16 @@
                                     <label for="tax_status" class="mr-2 font-weight-bold">Tax:</label>
                                     <select class="form-control" name="tax_status" id="tax_status" disabled>
                                         <option value="">Select Tax</option>
-                                        <option value="online" {{ isset($getTaxJson['tax_status']) && $getTaxJson['tax_status'] == 'online' ? 'selected' : '' }}>Online</option>
-                                        <option value="offline" {{ isset($getTaxJson['tax_status']) && $getTaxJson['tax_status'] == 'offline' ? 'selected' : '' }}>Offline</option>
+                                        <option value="online" {{ isset($getTaxJson['Status']) && $getTaxJson['Status'] == 'Automated' ? 'selected' : '' }}>Online</option>
+                                        <option value="offline" {{ isset($getTaxJson['Status']) && $getTaxJson['Status'] == 'Manual' ? 'selected' : '' }}>Offline</option>
                                     </select>
                                 </div>
                                 <div class="col-2 d-flex align-items-center">
                                     <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
                                     <select class="form-control" name="get_data" id="get_data" disabled>
                                         <option value="">Select Source</option>
-                                        <option value="apn" {{ isset($getTaxJson['get_data']) && $getTaxJson['get_data'] == 'apn' ? 'selected' : '' }}>APN</option>
-                                        <option value="address" {{ isset($getTaxJson['get_data']) && $getTaxJson['get_data'] == 'address' ? 'selected' : '' }}>Address</option>
+                                        <option value="apn" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' ? 'selected' : '' }}>APN</option>
+                                        <option value="address" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'No' ? 'selected' : '' }}>Address</option>
                                     </select>
                                 </div>
                                 <div class="col-2 d-flex align-items-center">
@@ -636,16 +636,16 @@
                                 <label for="tax_status" class="mr-2 font-weight-bold">Tax:</label>
                                 <select class="form-control" name="tax_status" id="tax_status">
                                     <option value="">Select Tax</option>
-                                    <option value="online" {{ isset($getTaxJson['tax_status']) && $getTaxJson['tax_status'] == 'online' ? 'selected' : '' }}>Online</option>
-                                    <option value="offline" {{ isset($getTaxJson['tax_status']) && $getTaxJson['tax_status'] == 'offline' ? 'selected' : '' }}>Offline</option>
+                                    <option value="online" {{ isset($getTaxJson['Status']) && $getTaxJson['Status'] == 'Automated' ? 'selected' : '' }}>Online</option>
+                                    <option value="offline" {{ isset($getTaxJson['Status']) && $getTaxJson['Status'] == 'Manual' ? 'selected' : '' }}>Offline</option>
                                 </select>
                             </div>
                             <div class="col-2 d-flex align-items-center">
                                 <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
                                 <select class="form-control" name="get_data" id="get_data">
                                     <option value="">Select Source</option>
-                                    <option value="apn" {{ isset($getTaxJson['get_data']) && $getTaxJson['get_data'] == 'apn' ? 'selected' : '' }}>APN</option>
-                                    <option value="address" {{ isset($getTaxJson['get_data']) && $getTaxJson['get_data'] == 'address' ? 'selected' : '' }}>Address</option>
+                                        <option value="1" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'No' ? 'selected' : '' }}>APN</option>
+                                        <option value="0" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' ? 'selected' : '' }}>Address</option>
                                 </select>
                             </div>
                             <div class="col-4 d-flex align-items-center">
@@ -684,7 +684,7 @@
                                             Calendar/Fiscal Year: <span style="color:red;">*</span>
                                         </label>
                                         <input class="form-control" type="number" placeholder="Enter Calendar/Fiscal Year" 
-                                            style="flex: 1;" id="fiscal_yr_id" name="fiscal_yr_id" required min="0" step="1" value="{{ $getjsonDetails[0]['fiscal_year'] ?? '' }}">
+                                            style="flex: 1;" id="fiscal_yr_id" name="fiscal_yr_id" required min="0" step="1" value="{{ $getjsonDetails[0]['taxYear'] ?? '' }}">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
@@ -694,14 +694,14 @@
                                         <input class="form-control" type="text" placeholder="Enter Tax ID Number" 
                                             style="flex: 1;" id="tax_id" name="tax_id" required 
                                             pattern="^[a-zA-Z0-9]+$" 
-                                            title="Tax ID must contain only letters and numbers without special characters" value="{{ $getjsonDetails[0]['tax_id_number'] ?? '' }}">
+                                            title="Tax ID must contain only letters and numbers without special characters" value="{{ $getjsonDetails[0]['taxId'] ?? '' }}">
                                     </div>
 
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Tax ID Number Described :</label>
                                         <input class="form-control" type="text"
-                                            placeholder="Enter Tax ID Number Described" style="flex: 1;" id="tax_described_id" name="tax_described_id" value="{{ $getjsonDetails[0]['tax_described_number'] ?? '' }}">
+                                            placeholder="Enter Tax ID Number Described" style="flex: 1;" id="tax_described_id" name="tax_described_id" value="{{ $getjsonDetails[0]['taxNotes'] ?? '' }}">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
@@ -740,7 +740,7 @@
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Street Address 1 :</label>
                                         <input class="form-control" type="text" placeholder="Enter Street Address 1"
-                                            style="flex: 1;" id="street_address1" name="street_address1" value="{{ $getjsonDetails[0]['street_address1'] ?? '' }}">
+                                            style="flex: 1;" id="street_address1" name="street_address1" value="{{ $getjsonDetails[0]['propertyAddress'] ?? '' }}">
                                     </div>
 
                                     <div class="form-group ml-3"
@@ -755,7 +755,7 @@
                                         <input class="form-control" type="text" placeholder="Enter Zip"
                                             style="flex: 1;" id="zip_id" name="zip_id"
                                             maxlength="5"
-                                            value="{{ $getjsonDetails[0]['zip_number'] ?? '' }}">
+                                            value="{{ $getjsonDetails[0]['countyOfficeZip'] ?? '' }}">
                                         <div class="p-4">
                                             <label class="checkbox-label">
                                             <!-- Hidden input to submit "0" if checkbox is unchecked -->
@@ -769,7 +769,7 @@
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">City :</label>
                                         <input class="form-control" type="text" placeholder="Enter City"
-                                            style="flex: 1;" id="city_id" name="city_id" value="{{ $getjsonDetails[0]['city_number'] ?? '' }}">
+                                            style="flex: 1;" id="city_id" name="city_id" value="{{ $getjsonDetails[0]['countyOfficeCity'] ?? '' }}">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
@@ -794,7 +794,7 @@
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Total Annual Tax :<span style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Total Annual Tax" style="flex: 1;" id="total_annual_tax" 
-                                            name="total_annual_tax" value="{{ $getjsonDetails[0]['total_annual_tax'] ?? '' }}" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
+                                            name="total_annual_tax" value="{{ $getjsonDetails[0]['totalTax'] ?? '' }}" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
                                     </div>
 
 
@@ -818,14 +818,14 @@
                                         <label class="required" style="margin-right: 10px; width: 150px;">Land :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Land"
-                                            style="flex: 1;" id="land" name="land" value="{{ $getjsonDetails[0]['land_data'] ?? '' }}" required>
+                                            style="flex: 1;" id="land" name="land" value="{{ $getjsonDetails[0]['landValue'] ?? '' }}" required>
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Improvements
                                             :<span style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Improvements"
-                                            style="flex: 1;" id="improvement" name="improvement" value="{{ $getjsonDetails[0]['improvements'] ?? '' }}" required> 
+                                            style="flex: 1;" id="improvement" name="improvement" value="{{ $getjsonDetails[0]['improvementValue'] ?? '' }}" required> 
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
@@ -838,7 +838,7 @@
                                         <label style="margin-right: 10px; width: 150px;">Exemption (Home Owners)
                                             :</label>
                                         <input class="form-control" type="text"
-                                            placeholder="Enter Exemption (Home Owners)" style="flex: 1;" id="exemption_homeowner" name="exemption_homeowner" value="{{ $getjsonDetails[0]['exemption_homeowner'] ?? '' }}">
+                                            placeholder="Enter Exemption (Home Owners)" style="flex: 1;" id="exemption_homeowner" name="exemption_homeowner" value="{{ $getjsonDetails[0]['homeownerExemption'] ?? '' }}">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
@@ -852,13 +852,13 @@
                                         <label style="margin-right: 10px; width: 150px;">Exemption (Additional)
                                             :</label>
                                         <input class="form-control" type="text"
-                                            placeholder="Enter Exemption (Additional)" style="flex: 1;" id="exemption_additional" name="exemption_additional" value="{{ $getjsonDetails[0]['exemption_additional'] ?? '' }}">
+                                            placeholder="Enter Exemption (Additional)" style="flex: 1;" id="exemption_additional" name="exemption_additional" value="{{ $getjsonDetails[0]['veteranExemption_Eflag'] ?? '' }}">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Other :</label>
                                         <input class="form-control" type="text" placeholder="Enter Other"
-                                            style="flex: 1;" id="others" name="others" value="{{ $getjsonDetails[0]['others'] ?? '' }}">
+                                            style="flex: 1;" id="others" name="others" value="{{ $getjsonDetails[0]['otherExemption'] ?? '' }}">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
@@ -889,7 +889,7 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="first_amount_id" name="first_amount_id" value="{{ $getjsonDetails[0]['first_installment_amount'] ?? '' }}" required>
+                                            style="flex: 1;" id="first_amount_id" name="first_amount_id" value="{{ $getjsonDetails[0]['firstInstBilledAmt'] ?? '' }}" required>
                                         </div>
 
                                     <div class="checkbox-group">
@@ -897,12 +897,13 @@
                                             <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
                                                 <input type="checkbox" id="first_partially_paid_id" name="first_partially_paid_id" value="1" onclick="toggleReadonly(this, 'first_partially_paid_amount')"> Partially Paid
                                             </label>
-                                            <input id="first_partially_paid_amount" name="first_partially_paid_amount" value="{{ $getjsonDetails[0]['first_partially_paid_amount'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input id="first_partially_paid_amount" name="first_partially_paid_amount" value="{{ $getjsonDetails[0]['firstInstPaidAmt'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="first_paid_id" name="first_paid_id" value="1" onclick="onlyOne(this)"
-                                                    {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['first_paid_id']) && $getjsonDetails[0]['first_paid_id'] == 1 ? 'checked' : '' }} > Paid
+                                            <input type="checkbox" id="first_paid_id" name="first_paid_id" value="1" onclick="onlyOne(this)"
+                                             {{ isset($getjsonDetails[0]['firstInstStatus']) && trim($getjsonDetails[0]['firstInstStatus']) == 'PAID' ? 'checked' : '' }}>
+                                                Paid
                                             </label>
                                         </div>
                                         <div>
@@ -931,7 +932,7 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Due :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_due_id" name="first_tax_due_id" value="{{ $getjsonDetails[0]['first_installment_tax_due'] ?? '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_due_id" name="first_tax_due_id" value="{{ isset($getjsonDetails[0]['firstInstDueDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['firstInstDueDate'])->format('Y-m-d') : '' }}">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
@@ -946,7 +947,8 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Paid :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_paid_id" name="first_tax_paid_id" value="{{ $getjsonDetails[0]['first_installment_tax_paid'] ?? '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_paid_id" name="first_tax_paid_id" value="{{ isset($getjsonDetails[0]['firstInstPaidDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['firstInstPaidDate'])->format('Y-m-d') : '' }}">
+
                                     </div>
                                 </div>
 
@@ -967,7 +969,7 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" value="{{ $getjsonDetails[0]['second_installment_amount'] ?? '' }}" required>
+                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" value="{{ $getjsonDetails[0]['secondInstBilledAmt'] ?? '' }}" required>
                                     </div>
 
                                     <div class="checkbox-group">
@@ -975,18 +977,18 @@
                                             <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
                                                 <input type="checkbox" id="second_partially_paid_id" name="second_partially_paid_id" value="1" onclick="toggleReadonly(this, 'second_partially_paid_amount')"> Partially Paid
                                             </label>
-                                            <input id="second_partially_paid_amount" name="second_partially_paid_amount" value="{{ $getjsonDetails[0]['second_partially_paid_amount'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input id="second_partially_paid_amount" name="second_partially_paid_amount" value="{{ $getjsonDetails[0]['secondInstPaidAmt'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"
-                                                    {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['second_paid_id']) && $getjsonDetails[0]['second_paid_id'] == 1 ? 'checked' : '' }}> Paid
+                                                    {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['secondInstStatus']) && $getjsonDetails[0]['secondInstStatus'] == 'PAID' ? 'checked' : '' }}> Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="second_due_id" name="second_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['second_due_id']) && $getjsonDetails[0]['second_due_id'] == 1 ? 'checked' : '' }}> Due
+                                            <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"
+                                            {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['secondInstStatus']) && $getjsonDetails[0]['secondInstStatus'] == 'Due' ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
@@ -1010,7 +1012,7 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Due :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_due_id" name="second_tax_due_id" value="{{ $getjsonDetails[0]['second_installment_tax_due'] ?? '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_due_id" name="second_tax_due_id" value="{{ isset($getjsonDetails[0]['secondInstDueDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['secondInstDueDate'])->format('Y-m-d') : '' }}">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
@@ -1025,7 +1027,7 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Paid :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_paid_id" name="second_tax_paid_id" value="{{ $getjsonDetails[0]['second_installment_tax_paid'] ?? '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="second_tax_paid_id" name="second_tax_paid_id" value="{{ isset($getjsonDetails[0]['secondInstPaidDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['secondInstPaidDate'])->format('Y-m-d') : '' }}">
                                     </div>
                                 </div>
 
@@ -1046,7 +1048,7 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="third_amount_id" name="third_amount_id" value="{{ $getjsonDetails[0]['third_installment_amount'] ?? '' }}" required>
+                                            style="flex: 1;" id="third_amount_id" name="third_amount_id" value="{{ $getjsonDetails[0]['thirdInstBilledAmt'] ?? '' }}" required>
                                     </div>
 
                                     <div class="checkbox-group">
@@ -1054,18 +1056,20 @@
                                             <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
                                                 <input type="checkbox" id="third_partially_paid_id" name="third_partially_paid_id" value="1" onclick="toggleReadonly(this, 'third_partially_paid_amount')"> Partially Paid
                                             </label>
-                                            <input id="third_partially_paid_amount" name="third_partially_paid_amount" value="{{ $getjsonDetails[0]['third_partially_paid_amount'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input id="third_partially_paid_amount" name="third_partially_paid_amount" value="{{ $getjsonDetails[0]['thirdInstPaidAmt'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="third_paid_id" name="third_paid_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['third_paid_id']) && $getjsonDetails[0]['third_paid_id'] == 1 ? 'checked' : '' }}> Paid
+                                            <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"
+                                            {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['thirdInstStatus']) && $getjsonDetails[0]['thirdInstStatus'] == 'PAID' ? 'checked' : '' }}> Paid
+                                            </label>
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
-                                                <input type="checkbox" id="third_due_id" name="third_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['third_due_id']) && $getjsonDetails[0]['third_due_id'] == 1 ? 'checked' : '' }}> Due
+                                            <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"
+                                            {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['thirdInstStatus']) && $getjsonDetails[0]['thirdInstStatus'] == 'Due' ? 'checked' : '' }}> Due
+                                            </label>
                                             </label>
                                         </div>
                                         <div>
@@ -1088,7 +1092,7 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Due :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_due_id" name="third_tax_due_id" value="{{ $getjsonDetails[0]['third_installment_tax_due'] ?? '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_due_id" name="third_tax_due_id" value="{{ isset($getjsonDetails[0]['thirdInstDueDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['thirdInstDueDate'])->format('Y-m-d') : '' }}">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
@@ -1103,7 +1107,7 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Paid :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_paid_id" name="third_tax_paid_id" value="{{ $getjsonDetails[0]['third_installment_tax_paid'] ?? '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="third_tax_paid_id" name="third_tax_paid_id" value="{{ isset($getjsonDetails[0]['thirdInstPaidDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['thirdInstPaidDate'])->format('Y-m-d') : '' }}">
                                     </div>
                                 </div>
 
@@ -1115,7 +1119,7 @@
                                         <label class="checkbox-label">
                                             <!-- Hidden input to ensure 0 is submitted if checkbox is unchecked -->
                                             <input type="hidden" name="fourth_estimate_id" value="0">
-                                            <input type="checkbox" id="fourth_estimate_id" name="fourth_estimate_id" value="1" {{ isset($getjsonDetails[0]['fourth_estimate_id']) && $getjsonDetails[0]['fourth_estimate_id'] == 1 ? 'checked' : '' }}> Estimated
+                                            <input type="checkbox" id="fourth_estimate_id" name="fourth_estimate_id" value="1" {{ isset($getjsonDetails[0]['fourthInstBilledAmt']) && $getjsonDetails[0]['fourthInstBilledAmt'] == 1 ? 'checked' : '' }}> Estimated
                                         </label>
                                     </div>
 
@@ -1124,7 +1128,7 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="fourth_amount_id" name="fourth_amount_id" value="{{ $getjsonDetails[0]['fourth_installment_amount'] ?? '' }}" required>
+                                            style="flex: 1;" id="fourth_amount_id" name="fourth_amount_id" value="{{ $getjsonDetails[0]['fourthInstBilledAmt'] ?? '' }}" required>
                                     </div>
 
                                     <div class="checkbox-group">
@@ -1132,18 +1136,18 @@
                                             <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
                                                 <input type="checkbox" id="fourth_partially_paid_id" name="fourth_partially_paid_id" value="1" onclick="toggleReadonly(this, 'fourth_partially_paid_amount')"> Partially Paid
                                             </label>
-                                            <input id="fourth_partially_paid_amount" name="fourth_partially_paid_amount" value="{{ $getjsonDetails[0]['fourth_partially_paid_amount'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input id="fourth_partially_paid_amount" name="fourth_partially_paid_amount" value="{{ $getjsonDetails[0]['fourthInstPaidAmt'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="fourth_paid_id" name="fourth_paid_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourth_paid_id']) && $getjsonDetails[0]['fourth_paid_id'] == 1 ? 'checked' : '' }}> Paid
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'Paid' ? 'checked' : '' }}> Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="fourth_due_id" name="fourth_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourth_due_id']) && $getjsonDetails[0]['fourth_due_id'] == 1 ? 'checked' : '' }}> Due
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'Due' ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
@@ -1166,7 +1170,7 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Due :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_due_id"  name="fourth_tax_due_id" value="{{ $getjsonDetails[0]['fourth_installment_tax_due'] ?? '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_due_id"  name="fourth_tax_due_id" value="{{ isset($getjsonDetails[0]['fourthInstDueDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['fourthInstDueDate'])->format('Y-m-d') : '' }}">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
@@ -1181,7 +1185,7 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Paid :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_paid_id" name="fourth_tax_paid_id" value="{{ $getjsonDetails[0]['fourth_installment_tax_paid'] ?? '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_paid_id" name="fourth_tax_paid_id" value="{{ isset($getjsonDetails[0]['fourthInstPaidDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['fourthInstPaidDate'])->format('Y-m-d') : '' }}">
                                     </div>
                                 </div>
                             </div>
@@ -2263,6 +2267,73 @@ $(function() {
             });
         }
     });
+
+    $('#fetchButton').on('click', function (e) {
+    e.preventDefault();
+
+    // Collect data from form
+    const taxStatus = $('#tax_status').val();
+    const getData = $('#get_data').val();
+    const searchInput = $('#search_input').val();
+    const orderId = $('#order_id').val();
+    const loader = $('#mobileToggle'); // Ensure this ID matches the loader element
+
+    // Check if all fields are filled
+    if (taxStatus && getData && searchInput) {
+        loader.show(); // Show the loader before making the AJAX call
+
+        $.ajax({
+            url: '{{ url("submitFtcOrder") }}',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                orderId: orderId,
+                type: getData,
+                search_value: searchInput,
+                _token: '{{ csrf_token() }}',
+            },
+            success: function (response) {
+                // Hide the loader on success
+                loader.hide();
+
+                // Display success message with Swal
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Order successfully fetched.',
+                    confirmButtonText: 'OK',
+                }).then(() => {
+                    // Reload the page after closing the success alert
+                    window.location.reload();
+                });
+            },
+            error: function (xhr, status, error) {
+                // Hide the loader on error
+                loader.hide();
+
+                // Display error message with Swal
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    confirmButtonText: 'OK',
+                });
+            },
+        });
+    } else {
+        // Display warning if fields are missing
+        Swal.fire({
+            icon: 'warning',
+            title: 'Incomplete Data',
+            text: 'Please fill in all fields before saving.',
+            confirmButtonText: 'OK',
+        });
+    }
+});
+
+
+
+
 });
 </script>
 @endif
@@ -2780,96 +2851,95 @@ function updateESTTime() {
     $(document).ready(function () {
     // Automatically trigger displayFiles when order_id changes
     function displayFiles() {
-        let orderId = $("#order_id").val();
-        $.ajax({
-            url: "{{ url('getFiles') }}",
-            type: 'GET',
-            data: {
-                order_id: orderId // Use the dynamic ID
-            },
-            success: function (data) {
-                let fileList = $('#fileList');
-                let attachmentsHeader = $('#attachmentsHeader');
-                fileList.empty(); // Clear previous file list
+    let orderId = $("#order_id").val();
+    $.ajax({
+        url: "{{ url('getFiles') }}",
+        type: 'GET',
+        data: {
+            order_id: orderId // Use the dynamic ID
+        },
+        success: function (data) {
+            let fileList = $('#fileList');
+            let attachmentsHeader = $('#attachmentsHeader');
+            fileList.empty(); // Clear previous file list
 
-                if (data.length > 0) {
-                    attachmentsHeader.show();
-                    data.forEach(file => {
-                        let fileType = file.name.split('.').pop().toLowerCase();
-                        let filePreview = '';
+            if (data.length > 0) {
+                attachmentsHeader.show();
+                data.forEach(file => {
+                    let fileType = file.name.split('.').pop().toLowerCase();
+                    let filePreview = '';
 
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                            filePreview = `<div class="d-flex "><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></div>`;
-                        } else if (fileType === 'pdf') {
-                            filePreview = `<div class="d-flex "><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></div>`;
-                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                            filePreview = `<div class="d-flex "><a href="${file.path}" download="${file.name}">${file.name}</a></div>`;
-                        } else {
-                            filePreview = `<div class="d-flex ">${file.name} <span class="badge bg-secondary">Unknown file type</span></div>`;
-                        }
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                        filePreview = `<div class="d-flex"><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></div>`;
+                    } else if (fileType === 'pdf') {
+                        filePreview = `<div class="d-flex"><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></div>`;
+                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                        filePreview = `<div class="d-flex"><a href="${file.path}" download="${file.name}">${file.name}</a></div>`;
+                    } else {
+                        filePreview = `<div class="d-flex">${file.name} <span class="badge bg-secondary">Unknown file type</span></div>`;
+                    }
 
-                        fileList.append(`
-                            <div class="d-flex align-items-center row" data-file-id="${file.id}">
-                                <div class="align-item-center">
-                                    <button class="btn btn-link text-danger delete-file" data-file-id="${file.id}" title="Delete">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                                <div style="flex: 1;">
-                                    ${filePreview}
-                                </div>
+                    fileList.append(`
+                        <div class="d-flex align-items-center row" data-file-id="${file.id}">
+                            <div class="align-item-center">
+                                <button class="btn btn-link text-danger delete-file" data-file-id="${file.id}" title="Delete">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                        `);
-                    });
-
-                    // Event listener for viewing files
-                    $('.file-link').on('click', function (e) {
-                        e.preventDefault();
-                        let fileUrl = $(this).data('file-url');
-                        let fileType = fileUrl.split('.').pop().toLowerCase();
-
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                            Swal.fire({
-                                title: 'View Image',
-                                html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`,
-                                showCloseButton: true,
-                                confirmButtonText: 'Close',
-                                width: '80%'
-                            });
-                        } else if (fileType === 'pdf') {
-                            Swal.fire({
-                                title: 'View File',
-                                html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`,
-                                showCloseButton: true,
-                                confirmButtonText: 'Close',
-                                width: '80%'
-                            });
-                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                            window.open(fileUrl, '_blank');
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Unsupported File Type',
-                                text: 'This file type is not supported for viewing.',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    });
-
-                } else {
-                    attachmentsHeader.hide(); // Hide header if no files are available
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'An error occurred while retrieving the files.',
-                    confirmButtonText: 'OK'
+                            <div style="flex: 1;">
+                                ${filePreview}
+                            </div>
+                        </div>
+                    `);
                 });
-            }
+
+                $('.file-link').on('click', function (e) {
+    e.preventDefault();
+    let fileUrl = $(this).data('file-url');
+    let fileType = fileUrl.split('.').pop().toLowerCase();
+    
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+        Swal.fire({
+            title: 'View Image',
+            html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`,
+            showCloseButton: true,
+            confirmButtonText: 'Close',
+            width: '80%'
+        });
+    } else if (fileType === 'pdf') {
+        Swal.fire({
+            title: 'View File',
+            html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`,
+            showCloseButton: true,
+            confirmButtonText: 'Close',
+            width: '100%'
+        });
+    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+        window.open(fileUrl, '_blank');
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Unsupported File Type',
+            text: 'This file type is not supported for viewing.',
+            confirmButtonText: 'OK'
         });
     }
+});
+
+            } else {
+                attachmentsHeader.hide(); // Hide header if no files are available
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'An error occurred while retrieving the files.',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+}
 
     // Initially load the files
     displayFiles();

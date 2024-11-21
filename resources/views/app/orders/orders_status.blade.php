@@ -821,7 +821,7 @@ $(document).ready(function() {
             processing: true,
             serverSide: true,
             scrollX: true,
-            lengthMenu: [10, 25, 50, 100, 200, 500],
+            lengthMenu:  [10, 25, 50, 100, 500, 750, 1000],
             dom: 'lrtip',
             ajax: {
                 url: '{{ route("getOrderData") }}',

@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Jobs\RetryFtcOrder;
 use App\Models\Lob;
 use App\Models\State;
 use App\Models\Status;
@@ -29,11 +31,13 @@ use Intervention\Image\Facades\Image;
 use PhpOffice\PhpWord\IOFactory;
 use setasign\Fpdi\Fpdi;
 use App\Models\SupportingDocs;
-
+use App\Http\Traits\FastTaxAPI;
 
 
 class OrderFormController extends Controller
 {
+    use FastTaxAPI;
+
     public function index(Request $request, $orderId = null)
     {
         $user = Auth::user();
@@ -322,11 +326,11 @@ class OrderFormController extends Controller
 
             $primarySource = PrimarySource::select('id','source_name')->get();
 
+            
             $clientIdList = DB::table('oms_vendor_information')
-                            ->select('id', 'accurate_client_id')
-                            ->whereRaw('JSON_CONTAINS(product_id, ?)', [json_encode((string)$orderData->process_id)])
-                            ->orderBy('accurate_client_id')
-                            ->get();
+                ->select('id', 'accurate_client_id')->where('product_id', $orderData->process_id)->orderBy('accurate_client_id')  
+                ->get();
+
 
             $userinput = DB::table('production_tracker')
                 ->where('order_id', $orderData->id)->first();
@@ -441,6 +445,45 @@ class OrderFormController extends Controller
                     }
                 }
                 
+
+                try {
+                    $State = $orderData->short_code; // Access the 'state_name' column from the result
+                    $County = $orderData->county_name; // Access the 'county_name' column
+                    $CountyId = $orderData->client_id; // Access the 'county_id' column
+              
+                    // Check if the values are not null and proceed
+                    if ($State !== null && $County !== null && $CountyId !== null) {
+                        $data = [
+                            "state" => $State,
+                            "countyname" => $County,
+                            "countyId" => $CountyId
+                        ];
+                
+                        $ftcResponse = $this->getFtcData('CountyStatus.php', $data);
+             
+                        // Check the FTC response
+                        if (isset($ftcResponse['Status']) && in_array(strtolower($ftcResponse['Status']),['automated','manual'])) {
+                       
+                            // dd($ftcResponse);
+                            DB::table('oms_order_creations')
+                                ->where('id', $orderId)
+                                ->update([
+                                    'tax_json' => $ftcResponse, // Ensure the JSON data is saved as a string
+                                    'status_updated_time' => Carbon::now(),
+                                ]);
+                        } 
+                    } 
+                } catch (\Exception $e) {
+                    // Log the error and return a generic error message
+                    \Log::error('Error processing FTC data: ' . $e->getMessage(), [
+                        'exception' => $e,
+                        'orderData' => $orderData
+                    ]);
+                
+                }
+                
+
+
                 $getjsonDetails = DB::table('taxes')
                 ->where('order_id', $orderData->id)
                 ->pluck('json')
@@ -914,13 +957,13 @@ class OrderFormController extends Controller
         $fieldMapping = [
             'order_id' => 'order_id',
             'type_id' => 'type_dd',
-            'fiscal_yr_id' => 'fiscal_year',
-            'tax_id' => 'tax_id_number',
+            'taxYear' => 'fiscal_year',
+            'taxId' => 'tax_id_number',
             'tax_described_id' => 'tax_described_number',
             'tax_state_id' => 'tax_state_number',
             'taxing_id' => 'taxing_entity_dd',
             'phone_num' => 'phone_number',
-            'street_address1' => 'street_address1',
+            'streetAddress1' => 'street_address1',
             'street_address2' => 'street_address2',
             'zip_id' => 'zip_number',
             'override_id' => 'override_id',
@@ -932,14 +975,14 @@ class OrderFormController extends Controller
             'second_partially_paid_amount' => 'second_partially_paid_amount',
             'third_partially_paid_amount' => 'third_partially_paid_amount',
             'fourth_partially_paid_amount' => 'fourth_partially_paid_amount',
-            'first_paid_id' => 'first_paid_id',
-            'second_paid_id' => 'second_paid_id',
-            'third_paid_id' => 'third_paid_id',
-            'fourth_paid_id' => 'fourth_paid_id',
-            'first_due_id' => 'first_due_id',
-            'second_due_id' => 'second_due_id',
-            'third_due_id' => 'third_due_id',
-            'fourth_due_id' => 'fourth_due_id',
+            'firstInstStatus' => 'first_paid_id',
+            'secondInstStatus' => 'second_paid_id',
+            'thirdInstStatus' => 'third_paid_id',
+            'fourthInstStatus' => 'fourth_paid_id',
+            'firstInstStatus' => 'first_due_id',
+            'secondInstStatus' => 'second_due_id',
+            'thirdInstStatus' => 'third_due_id',
+            'fourthInstStatus' => 'fourth_due_id',
             'first_delinquent_id' => 'first_delinquent_id',
             'second_delinquent_id' => 'second_delinquent_id',
             'third_delinquent_id' => 'third_delinquent_id',
@@ -948,13 +991,13 @@ class OrderFormController extends Controller
             'state' => 'state_dd',
             'total_annual_tax' => 'total_annual_tax',
             'payment_frequency' => 'payment_frequency_dd',
-            'land' => 'land_data',
-            'improvement' => 'improvements',
+            'landValue' => 'land_data',
+            'mprovementValue' => 'improvements',
             'exemption_mortgage' => 'exemption_mortgage',
-            'exemption_homeowner' => 'exemption_homeowner',
+            'homeownerExemption' => 'exemption_homeowner',
             'exemption_homestead' => 'exemption_homestead',
-            'exemption_additional' => 'exemption_additional',
-            'others' => 'others',
+            'veteranExemption' => 'exemption_additional',
+            'otherExemption' => 'others',
             'net_value' => 'net_value',
             'first_amount_id' => 'first_installment_amount',
             'first_texes_out_id' => 'first_installment_texes_out',
@@ -1181,24 +1224,37 @@ class OrderFormController extends Controller
             return response()->json(['filePath' => $filePath, 'fileName' => $fileName]);
         }
 
-      
-            public function getFiles(Request $request)
-            {
-                $orderId = $request->input('order_id');
+        public function getFiles(Request $request)
+        {
+            $orderId = $request->input('order_id');
         
-                // Retrieve files associated with the request_management_id
-                $attachments = TaxAttachmentFile::where('order_id', $orderId)->get();
+            // Retrieve files from TaxAttachmentFile
+            $attachments = TaxAttachmentFile::where('order_id', $orderId)->get()->map(function ($attachment) {
+                return [
+                    'id' => $attachment->id,
+                    'name' => $attachment->file_name, // Assuming file_name exists in TaxAttachmentFile
+                    'path' => Storage::url($attachment->file_path), // Generate the file's public URL
+                    'source' => 'TaxAttachmentFile',
+                ];
+            });
         
-                $files = $attachments->map(function ($attachment) {
-                    return [
-                        'id' => $attachment->id,
-                        'name' => $attachment->file_name,
-                        'path' => Storage::url($attachment->file_path),
-                    ];
-                });
+            // Retrieve files from SupportingDocs
+            $supportingDocs = SupportingDocs::where('order_id', $orderId)->get()->map(function ($doc) {
+                return [
+                    'id' => $doc->id,
+                    'name' => $doc->file_name, // Assuming file_name exists in SupportingDocs
+                    'path' => Storage::url($doc->file_path), // Generate the file's public URL
+                    'source' => 'SupportingDocs',
+                ];
+            });
         
-                return response()->json($files);
-            }
+            // Merge both collections into a single collection
+            $files = $attachments->merge($supportingDocs);
+        
+            return response()->json($files);
+        }
+        
+        
             public function deleteFile(Request $request)
             {
                 $fileId = $request->input('file_id');
@@ -1255,6 +1311,175 @@ class OrderFormController extends Controller
                         $data = $query->get();
                 return response()->json(['data' => $data]);
             }
+
+            public function submitFtcOrder(Request $request)
+            {
+                $type = $request->type;
+                $orderId = $request->orderId;
+                $search_value = $request->search_value;
+            
+                // Retrieve order data from the database
+                $orderData = DB::table('oms_order_creations')
+                    ->leftJoin('oms_state', 'oms_order_creations.state_id', '=', 'oms_state.id')
+                    ->leftJoin('county', 'oms_order_creations.county_id', '=', 'county.id')
+                    ->select('oms_order_creations.*', 'oms_state.short_code as short_code', 'county.county_name as county_name')
+                    ->where('oms_order_creations.id', $orderId)
+                    ->first();
+            
+                if (isset($orderData->id)) {
+                    // Prepare the data to be sent to FTC
+                    $data = [
+                        "state" => $orderData->short_code,
+                        "zip" => "",
+                        "countyname" => $orderData->county_name,
+                        "county" => $orderData->county_id,
+                        "order_no" => $orderData->order_id,
+                        "APN" => ($type == 1) ? $search_value : '',
+                        "property_address" => ($type == 1) ? '' : $search_value,
+                        "city" => "",
+                        "owner_name" => "",
+                    ];
+            
+                    // Insert request data into the database
+                    $ftc_log_id = DB::table('ftc_order_data')->insertGetId([
+                        'order_id' => $orderData->id,
+                        'request_data' => json_encode($data),
+                        'created_by' => Auth::id(),
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    ]);
+            
+                    // Call the FTC API
+                    $ftcResponse = $this->getFtcData('ftc/CreateOrderFTC.php', $data);
+            
+                    // Check if FTC response is successful and contains OrderId
+                    if (isset($ftcResponse['Status']) && $ftcResponse['Status'] == "Success" && isset($ftcResponse['OrderId']) && !empty($ftcResponse['OrderId'])) {
+                        // Update the FTC log with the response OrderId
+                        DB::table('ftc_order_data')
+                            ->where('id', $ftc_log_id)
+                            ->update([
+                                'ftc_order_id' => $ftcResponse['OrderId'],
+                                'updated_at' => Carbon::now(),
+                            ]);
+            
+                        // Redirect to the fetchFtcOrder route
+                        return redirect()->route('fetchFtcOrder', ['id' => $orderData->id]);
+                            // ->with('message', 'FTC order created successfully.');
+                    } else {
+                        // In case of failure, log the error or provide a failure message
+                        DB::table('ftc_order_data')
+                            ->where('id', $ftc_log_id)
+                            ->update([
+                                'status' => 'Failed',
+                                'updated_at' => Carbon::now(),
+                            ]);
+            
+                        // Return a failure response
+                        return response()->json(['message' => 'FTC order creation failed.'], 400);
+                    }
+                } else {
+                    return response()->json(['message' => 'Order not found.'], 404);
+                }
+            }
+            
+
+            public function fetchFtcOrder(Request $request,$id)
+            { 
+               $ftc_order = DB::table('ftc_order_data')->where('order_id',$id)->orderBy('id','desc')->first();
+            
+     
+                $data = [ "OrderId" => $ftc_order->ftc_order_id ];
+
+                $ftcResponse = $this->getFtcData('ftc/GetOrderStatusFTC.php', $data);
+                // dd($ftcResponse);
+               
+                // Check if 'result' is null and 'Status' is "In Progress"
+                if ($ftcResponse['result'] === null ||(isset($ftcResponse['Status']) && $ftcResponse['Status'] == "In Progress" )) {
+
+                    return redirect()->route('fetchFtcOrder', ['id' => $id])
+                    ->with('message', 'FTC order created successfully.');
+
+                }
+     
+                // Process the response further if needed
+                if (!is_null($ftcResponse['result']) && $ftcResponse['Status'] != "In Progress" ) {
+
+                    DB::table('ftc_order_data')
+                            ->where('id',$ftc_order->id)
+                            ->update([
+                                'ftc_response' =>$ftcResponse['result'],
+                                'ftc_status' => $ftcResponse['Status'],
+                                'updated_at'=> Carbon::now(),
+                            ]); 
+                            
+                    DB::table('taxes')->insert([
+                                'order_id' => $ftc_order->order_id, 
+                                'json' => $ftcResponse['result'],   
+                                'updated_by' => Auth::id(),               
+                                'updated_at' => now(),            
+                            ]);        
+                            // dd($ftcResponse['supportfiles']);
+
+                            try {
+                                $support_files = json_decode($ftcResponse['supportfiles'], true);
+                                
+                                $fileCount = count($support_files['fileslist']);
+                                foreach($support_files['fileslist'] as $filelist)
+                                {
+                                    $decodedData = base64_decode($filelist['file']);
+                                    $filename = uniqid().' '.$filelist['file_name'];
+                                    $fileName = $filelist['file_name'];
+
+                                    // $filePath = $file->storeAs('taxcert', $pathfileName, 'public');
+                                    \Storage::disk('public')->put("taxcert/$filename", $decodedData);
+                                    $filePath = "taxcert/$filename";
+                                    //  SupportingDocs::insertGetId(['order_id' => $ftc_order->order_id,'pdf_file' => $filename,'created_at' => now()]);
+                                    try {
+                                        SupportingDocs::insertGetId([
+                                            'order_id' => $ftc_order->order_id,
+                                            'file_path' => $filePath,  // Store the full path here
+                                            'file_name' => $fileName,   // Store the filename
+                                            'created_at' => now()
+                                        ]);
+                                    
+                                        // dd($id);  // If it works, this will print the inserted ID
+                                    } catch (\Exception $e) {
+                                        dd($e->getMessage());  // If it fails, this will print the error message
+                                    }
+                                    if(substr(PHP_OS, 0, 3) != 'WIN') {
+                                        $this->changeFolderPermissions("taxcert/$filename", 0777);
+                                    }
+                                }
+                            } catch (\Exception $e) {
+                                \Log::error("Error while processing documents: {$e->getMessage()}");
+                            }
+                            return response()->json(['message' => 'Order successfully fetch.'], 200);
+                } else {
+                    // Log or handle the case where result is still null after retrying
+                    // ...
+                }
+                            
+            }
+
+            // public function fetchFtcOrder(Request $request, $id)
+            //     {
+            //         // Fetch the FTC order data from the database
+            //         $ftc_order = DB::table('ftc_order_data')->where('order_id', $id)->orderBy('id', 'desc')->first();
+
+            //         if (!$ftc_order) {
+            //             return response()->json(['message' => 'Order not found.'], 404);
+            //         }
+
+            //         // Dispatch the job to check the FTC order status
+            //         RetryFtcOrder::dispatch($ftc_order->order_id, $ftc_order->ftc_order_id);
+
+            //         // Return a JSON response indicating that the order status is being processed in the background
+            //         return response()->json([
+            //             'message' => 'FTC order created successfully. The order status is being checked asynchronously.'
+            //         ], 202); // HTTP 202 Accepted to indicate that the request has been accepted for processing
+            //     }
+            
+
 
             
 }
