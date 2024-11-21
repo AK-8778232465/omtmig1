@@ -1262,6 +1262,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     5 => 'Completed',
                                     3 => 'Cancelled',
                                     17 => 'Typing QC',
+                                    4 => 'Send for QC',
                                 ];
 
                     } elseif (Auth::user()->hasRole('Typist/Qcer')  && in_array($order->process_type_id, [12, 7])) {
@@ -1273,6 +1274,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 2 => 'Hold',
                                 5 => 'Completed',
                                 3 => 'Cancelled',
+                                4 => 'Send for QC',
                             ];
                 } elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                     $statusMapping = [
