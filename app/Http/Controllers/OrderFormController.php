@@ -311,8 +311,10 @@ class OrderFormController extends Controller
             $primarySource = PrimarySource::select('id','source_name')->get();
 
             $clientIdList = DB::table('oms_vendor_information')
-                ->select('id', 'accurate_client_id')->where('product_id', $orderData->process_id)->orderBy('accurate_client_id')  
-                ->get();
+                            ->select('id', 'accurate_client_id')
+                            ->whereRaw('JSON_CONTAINS(product_id, ?)', [json_encode((string)$orderData->process_id)])
+                            ->orderBy('accurate_client_id')
+                            ->get();
 
             $userinput = DB::table('production_tracker')
                 ->where('order_id', $orderData->id)->first();
@@ -758,7 +760,7 @@ class OrderFormController extends Controller
         if(!empty($getclientid) && !empty($getproductid)){
             $vendorDetail = DB::table('oms_vendor_information')
                 ->where('id', $getclientid)
-                ->where('product_id', $getproductid)
+                ->whereRaw('JSON_CONTAINS(product_id, ?)', [json_encode((string)$getproductid)])
                 ->first();
         } else {
             return response()->json(['message' => 'Product Is Not Available']);
