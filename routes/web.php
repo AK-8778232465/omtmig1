@@ -154,7 +154,7 @@ Route::middleware('auth:web')->controller(OrderFormController::class)->group(fun
     Route::any('getFiles', 'getFiles')->name('getFiles');
     Route::delete('deleteFile', 'deleteFile')->name('deleteFile');
     Route::get('attachmentHistoryData', 'attachmentHistoryData')->name('attachmentHistoryData');
-    Route::post('submitFtcOrder', 'submitFtcOrder')->name('submitFtcOrder');
+    Route::any('submitFtcOrder', 'submitFtcOrder')->name('submitFtcOrder');
     Route::get('fetchFtcOrder/{id?}', 'fetchFtcOrder')->name('fetchFtcOrder');
 
 });

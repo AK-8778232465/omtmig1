@@ -1265,8 +1265,16 @@ class OrderFormController extends Controller
                 ];
             });
         
-            // Merge both collections into a single collection
-            $files = $attachments->merge($supportingDocs);
+            // Merge the collections if both are non-empty, otherwise return whichever is non-empty
+            if ($attachments->isNotEmpty() && $supportingDocs->isNotEmpty()) {
+                $files = $attachments->merge($supportingDocs);
+            } elseif ($attachments->isNotEmpty()) {
+                $files = $attachments;
+            } elseif ($supportingDocs->isNotEmpty()) {
+                $files = $supportingDocs;
+            } else {
+                $files = collect(); // Return an empty collection if both are empty
+            }
         
             return response()->json($files);
         }
@@ -1413,6 +1421,7 @@ class OrderFormController extends Controller
                 // Check if 'result' is null and 'Status' is "In Progress"
                 if ($ftcResponse['result'] === null ||(isset($ftcResponse['Status']) && $ftcResponse['Status'] == "In Progress" )) {
 
+                    sleep(5); // Delay the response by 5 seconds
                     return redirect()->route('fetchFtcOrder', ['id' => $id])
                     ->with('message', 'FTC order created successfully.');
 

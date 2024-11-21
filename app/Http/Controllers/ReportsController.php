@@ -1130,7 +1130,7 @@ public function exportProductionReport(Request $request) {
         
 
         if ($fromDateRange && $toDateRange) {
-            $statusCountsQuery->whereBetween('order_creation_main.order_date', [$fromDateRange, $toDateRange]);
+            $statusCountsQuery->whereBetween('order_creation_main.order_date', [$fromDate, $toDate]);
         }
         
         if (!empty($product_id) && is_array($product_id) && $product_id[0] !== 'All') {
