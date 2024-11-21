@@ -791,7 +791,7 @@ function orderWise() {
                         success: function(response) {
                             var data = response.data;
 
-                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source","Process Type", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments"];
+                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source","Process Type","Tier", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments"];
                             var exportData = data.map((row, index) => [
                                 index + 1,
                                 row.process,
@@ -805,6 +805,7 @@ function orderWise() {
                                 row.status_comment,
                                 row.primary_source,
                                 row.process_name.replace(/&amp;/g, '&'),
+                                row.tier,
                                 row.emp_id,
                                 row.emp_name,
                                 row.qc_EmpId,
