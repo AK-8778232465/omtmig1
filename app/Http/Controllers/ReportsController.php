@@ -1049,14 +1049,15 @@ public function exportProductionReport(Request $request) {
     $user = Auth::user();
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
 
-    $client_id = $request->input('client_id');
-    $lob_id = $request->input('lob_id');
-    $process_type_id = $request->input('process_type_id');
-    $product_id = $request->input('product_id');
-    $selectedDateFilter = $request->input('selectedDateFilter');
-    $fromDateRange = $request->input('fromDate_range');
-    $toDateRange = $request->input('toDate_range');
-    $searchValue = $request->input('search.value');
+    $client_id = $request->input('client_id') ?? null;
+    $lob_id = $request->input('lob_id') ?? null;
+    $process_type_id = $request->input('process_type_id') ?? null;
+    $product_id = $request->input('product_id') ?? null;
+    $selectedDateFilter = $request->input('selectedDateFilter') ?? null;
+    $fromDateRange = $request->input('fromDate_range') ?? null;
+    $toDateRange = $request->input('toDate_range') ?? null;
+    $searchValue = $request->input('search.value') ?? null;
+    
 
     $fromDate = null;
     $toDate = null;
@@ -1123,7 +1124,11 @@ public function exportProductionReport(Request $request) {
             'order_creation_main.comment as comment'
         )
         ->where('order_creation_main.is_active', 1)
-        ->where('stl_item_description.is_approved', 1);
+        ->where(function ($statusCountsQuery) {
+            $statusCountsQuery->where('stl_item_description.is_approved', 1)
+                  ->orWhereNull('stl_item_description.is_approved');
+        });
+        
 
     if ($fromDate && $toDate) {
         $statusCountsQuery->whereBetween('order_creation_main.order_date', [$fromDate, $toDate]);
@@ -1137,17 +1142,18 @@ public function exportProductionReport(Request $request) {
         $statusCountsQuery->whereIn('order_creation_main.process_id', $product_id);
     }
 
-    if (!empty($client_id) && $client_id[0] !== 'All') {
-        $statusCountsQuery->where('stl_item_description.client_id', $client_id);
+    if (!empty($client_id) && is_array($client_id) && $client_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
     }
-
-    if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
+    
+    if (!empty($process_type_id) && is_array($process_type_id) && $process_type_id[0] !== 'All') {
         $statusCountsQuery->whereIn('order_creation_main.process_type_id', $process_type_id);
     }
-
-    if (!empty($lob_id) && $lob_id[0] !== 'All') {
-        $statusCountsQuery->where('order_creation_main.lob_id', $lob_id);
+    
+    if (!empty($lob_id) && is_array($lob_id) && $lob_id[0] !== 'All') {
+        $statusCountsQuery->whereIn('order_creation_main.lob_id', $lob_id);
     }
+    
 
     if (!empty($searchValue)) {
         $query->where(function($q) use ($searchValue) {
