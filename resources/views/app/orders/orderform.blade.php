@@ -1736,7 +1736,7 @@ $(document).ready(function() {
 </script>
 @endif
 
-@if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 7, 12]))
+@if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 7, 12, 15]))
 <script>
 
 let lastSegment = "{{ $lastSegment }}";
