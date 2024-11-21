@@ -130,6 +130,12 @@ class OrderFormController extends Controller
                                     ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
                             });
 
+                        }elseif(in_array($user->user_type_id, [22])) {
+                            $query->where(function ($optionalquery) use($user) {
+                                $optionalquery->where('oms_order_creations.typist_id', $user->id)
+                                    ->orWhere('oms_order_creations.typist_qc_id', $user->id);
+                            });
+
                         }
                     }
                 } else {
@@ -157,6 +163,12 @@ class OrderFormController extends Controller
                         $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
                             ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
                     });
+                }elseif(in_array($user->user_type_id, [22])) {
+                    $query->where(function ($optionalquery) use($user) {
+                        $optionalquery->where('oms_order_creations.typist_id', $user->id)
+                            ->orWhere('oms_order_creations.typist_qc_id', $user->id);
+                    });
+
                 } else {
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
@@ -328,9 +340,10 @@ class OrderFormController extends Controller
 
             
             $clientIdList = DB::table('oms_vendor_information')
-                ->select('id', 'accurate_client_id')->where('product_id', $orderData->process_id)->orderBy('accurate_client_id')  
-                ->get();
-
+                            ->select('id', 'accurate_client_id')
+                            ->whereRaw('JSON_CONTAINS(product_id, ?)', [json_encode((string)$orderData->process_id)])
+                            ->orderBy('accurate_client_id')
+                            ->get();
 
             $userinput = DB::table('production_tracker')
                 ->where('order_id', $orderData->id)->first();
@@ -609,6 +622,10 @@ class OrderFormController extends Controller
                                                         'stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo',
                                                         'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo'));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
+            return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
+                                                        'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo'));
+        }else if(in_array($user->user_type_id, [22]) && (Auth::id() == $orderData->typist_id || Auth::id() == $orderData->typist_qc_id) && $orderData->status_id !=4) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
                                                         'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo'));
