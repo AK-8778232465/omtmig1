@@ -1058,7 +1058,6 @@ public function exportProductionReport(Request $request) {
     $toDateRange = $request->input('toDate_range') ?? null;
     $searchValue = $request->input('search.value') ?? null;
     
-
     $fromDate = null;
     $toDate = null;
 
@@ -1130,33 +1129,31 @@ public function exportProductionReport(Request $request) {
         });
         
 
-    if ($fromDate && $toDate) {
-        $statusCountsQuery->whereBetween('order_creation_main.order_date', [$fromDate, $toDate]);
-    }
-
-    if (!empty($processIds)) {
-        $statusCountsQuery->whereIn('order_creation_main.process_id', $processIds);
-    }
-
-    if (!empty($product_id) && $product_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('order_creation_main.process_id', $product_id);
-    }
-
-    if (!empty($client_id) && is_array($client_id) && $client_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('stl_item_description.client_id', $client_id);
-    }
-    
-    if (!empty($process_type_id) && is_array($process_type_id) && $process_type_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('order_creation_main.process_type_id', $process_type_id);
-    }
-    
-    if (!empty($lob_id) && is_array($lob_id) && $lob_id[0] !== 'All') {
-        $statusCountsQuery->whereIn('order_creation_main.lob_id', $lob_id);
-    }
-    
+        if ($fromDateRange && $toDateRange) {
+            $statusCountsQuery->whereBetween('order_creation_main.order_date', [$fromDateRange, $toDateRange]);
+        }
+        
+        if (!empty($product_id) && is_array($product_id) && $product_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('order_creation_main.process_id', $product_id);
+        }
+        
+        if (!empty($client_id) && $client_id !== 'All') {
+            // `client_id` is not an array, so handle it as a single value
+            $statusCountsQuery->where('stl_item_description.client_id', $client_id);
+        }
+        
+        if (!empty($process_type_id) && is_array($process_type_id) && $process_type_id[0] !== 'All') {
+            $statusCountsQuery->whereIn('order_creation_main.process_type_id', $process_type_id);
+        }
+        
+        if (!empty($lob_id) && $lob_id !== 'All') {
+            // `lob_id` is not an array, so handle it as a single value
+            $statusCountsQuery->where('order_creation_main.lob_id', $lob_id);
+        }
+        
 
     if (!empty($searchValue)) {
-        $query->where(function($q) use ($searchValue) {
+        $statusCountsQuery->where(function($q) use ($searchValue) {
             $q->where('assignee_user.emp_id', 'like', "%{$searchValue}%")
               ->orWhere('assignee_user.username', 'like', "%{$searchValue}%")
                 ->orWhere('qa_user.emp_id', 'like', "%{$searchValue}%")
