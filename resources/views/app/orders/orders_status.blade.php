@@ -867,7 +867,7 @@ $(document).ready(function() {
                 {
                     "data": "action",
                     "name": "action",
-                    "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) false @else true @endif,
+                    "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) false @else true @endif,
                     "orderable": false,
                 },
                 { "data": "associate_name", "name": "associate_name", "visible": true},
