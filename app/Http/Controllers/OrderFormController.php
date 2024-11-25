@@ -1386,10 +1386,10 @@ class OrderFormController extends Controller
                                 'ftc_order_id' => $ftcResponse['OrderId'],
                                 'updated_at' => Carbon::now(),
                             ]);
-            
-                        // Redirect to the fetchFtcOrder route
-                        return redirect()->route('fetchFtcOrder', ['id' => $orderData->id]);
-                            // ->with('message', 'FTC order created successfully.');
+                            $orderId = $orderData->id;
+                            
+                            RetryFtcOrder::dispatch($orderId);
+                            return response()->json(['message' => 'FTC order created successfully.'], 200);
                     } else {
                         // In case of failure, log the error or provide a failure message
                         DB::table('ftc_order_data')
@@ -1408,102 +1408,6 @@ class OrderFormController extends Controller
             }
             
 
-            public function fetchFtcOrder(Request $request,$id)
-            { 
-               $ftc_order = DB::table('ftc_order_data')->where('order_id',$id)->orderBy('id','desc')->first();
-            
-     
-                $data = [ "OrderId" => $ftc_order->ftc_order_id ];
-
-                $ftcResponse = $this->getFtcData('ftc/GetOrderStatusFTC.php', $data);
-                // dd($ftcResponse);
-               
-                // Check if 'result' is null and 'Status' is "In Progress"
-                if ($ftcResponse['result'] === null ||(isset($ftcResponse['Status']) && $ftcResponse['Status'] == "In Progress" )) {
-
-                    sleep(5); // Delay the response by 5 seconds
-                    return redirect()->route('fetchFtcOrder', ['id' => $id])
-                    ->with('message', 'FTC order created successfully.');
-
-                }
-     
-                // Process the response further if needed
-                if (!is_null($ftcResponse['result']) && $ftcResponse['Status'] != "In Progress" ) {
-
-                    DB::table('ftc_order_data')
-                            ->where('id',$ftc_order->id)
-                            ->update([
-                                'ftc_response' =>$ftcResponse['result'],
-                                'ftc_status' => $ftcResponse['Status'],
-                                'updated_at'=> Carbon::now(),
-                            ]); 
-                            
-                    DB::table('taxes')->insert([
-                                'order_id' => $ftc_order->order_id, 
-                                'json' => $ftcResponse['result'],   
-                                'updated_by' => Auth::id(),               
-                                'updated_at' => now(),            
-                            ]);        
-                            // dd($ftcResponse['supportfiles']);
-
-                            try {
-                                $support_files = json_decode($ftcResponse['supportfiles'], true);
-                                
-                                $fileCount = count($support_files['fileslist']);
-                                foreach($support_files['fileslist'] as $filelist)
-                                {
-                                    $decodedData = base64_decode($filelist['file']);
-                                    $filename = uniqid().' '.$filelist['file_name'];
-                                    $fileName = $filelist['file_name'];
-
-                                    // $filePath = $file->storeAs('taxcert', $pathfileName, 'public');
-                                    \Storage::disk('public')->put("taxcert/$filename", $decodedData);
-                                    $filePath = "taxcert/$filename";
-                                    //  SupportingDocs::insertGetId(['order_id' => $ftc_order->order_id,'pdf_file' => $filename,'created_at' => now()]);
-                                    try {
-                                        SupportingDocs::insertGetId([
-                                            'order_id' => $ftc_order->order_id,
-                                            'file_path' => $filePath,  // Store the full path here
-                                            'file_name' => $fileName,   // Store the filename
-                                            'created_at' => now()
-                                        ]);
-                                    
-                                        // dd($id);  // If it works, this will print the inserted ID
-                                    } catch (\Exception $e) {
-                                        dd($e->getMessage());  // If it fails, this will print the error message
-                                    }
-                                    if(substr(PHP_OS, 0, 3) != 'WIN') {
-                                        $this->changeFolderPermissions("taxcert/$filename", 0777);
-                                    }
-                                }
-                            } catch (\Exception $e) {
-                                \Log::error("Error while processing documents: {$e->getMessage()}");
-                            }
-                            return response()->json(['message' => 'Order successfully fetch.'], 200);
-                } else {
-                    // Log or handle the case where result is still null after retrying
-                    // ...
-                }
-                            
-            }
-
-            // public function fetchFtcOrder(Request $request, $id)
-            //     {
-            //         // Fetch the FTC order data from the database
-            //         $ftc_order = DB::table('ftc_order_data')->where('order_id', $id)->orderBy('id', 'desc')->first();
-
-            //         if (!$ftc_order) {
-            //             return response()->json(['message' => 'Order not found.'], 404);
-            //         }
-
-            //         // Dispatch the job to check the FTC order status
-            //         RetryFtcOrder::dispatch($ftc_order->order_id, $ftc_order->ftc_order_id);
-
-            //         // Return a JSON response indicating that the order status is being processed in the background
-            //         return response()->json([
-            //             'message' => 'FTC order created successfully. The order status is being checked asynchronously.'
-            //         ], 202); // HTTP 202 Accepted to indicate that the request has been accepted for processing
-            //     }
             
 
 
