@@ -1607,6 +1607,8 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
 
             // Calculate total orders
             let totalValue = 0;
+
+  @if(!Auth::user()->hasRole('Typist/Typist_Qcer'))
             for (const key in statusCounts) {
                 if (statusCounts.hasOwnProperty(key)) {
                     if (Array.isArray(statusCounts[key])) {
@@ -1620,6 +1622,35 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
                     }
                 }
             }
+            @endif
+
+
+            @if(Auth::user()->hasRole('Typist/Typist_Qcer'))
+
+                // For Typist/Typist_Qcer users, exclude status_id = 1
+                if (statusCounts.carriedOverCompletedCount) {
+                    for (const statusId in statusCounts.carriedOverCompletedCount) {
+                        if (statusCounts.carriedOverCompletedCount.hasOwnProperty(statusId)) {
+                            totalValue += statusCounts.carriedOverCompletedCount[statusId];
+                        }
+                    }
+                }
+
+                // For Typist/Typist_Qcer users, exclude status_id = 1
+                for (const key in statusCounts) {
+                    if (statusCounts.hasOwnProperty(key)) {
+                        if (Array.isArray(statusCounts[key])) {
+                            statusCounts[key].forEach(count => {
+                                // Exclude status_id = 1
+                                if (![1, 6, 13, 15, 19].includes(count.status_id)) {
+                                    totalValue += count.total_orders;
+                                }
+                            });
+                        }
+                    }
+                }
+            @endif
+
             $('#pre_all_cnt').text(totalValue);
 
             // Update individual counts
@@ -1665,8 +1696,15 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
             $('#pre_ground_abstractor_cnt').text(pregroundAbstractorCnt);
 
             // Calculate and update the total of the specified values
+            @if(!Auth::user()->hasRole('Typist/Typist_Qcer'))
+    // Include all values for users who are not Typists/Typist_Qcers
             let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt + predocPurchaserCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt;
             $('#carried_over_cnt').text(totalSpecificValues);
+        @else
+            // Exclude preWipCnt for Typists/Typist_Qcers
+            let totalSpecificValues = preHoldCnt + preQuCnt + preClarificationCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt;
+            $('#carried_over_cnt').text(totalSpecificValues);
+        @endif
         },
         error: function (error) {
             console.error('Error:', error);

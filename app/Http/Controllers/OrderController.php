@@ -1285,6 +1285,14 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         if ($request->status != 'All') {
             $query->where('oms_order_creations.status_id', $request->status);
         }
+
+        if(Auth::user()->hasRole('Typist/Typist_Qcer')){
+            if ($request->status == 'All') {
+                $query->where('oms_order_creations.status_id', '!=', 1);
+            }
+         }
+
+
         if($request->status == 6){
             if(in_array('All', $project_id) && !in_array('All', $client_id)){
             $query = $currentYet_to_assign->whereNull('assignee_user_id')
