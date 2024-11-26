@@ -147,6 +147,9 @@
             <li id="attendance-details" class="report-item">Attendance Details</li>
            <li id="production-report" class="report-item">Accurate - Production Report</li>
             <li id="orderInflow-report" class="report-item">Order Inflow Details</li>
+            <li id="acm-report" class="report-item">ACM Report</li>
+
+
         </ul>
     </div>
 
