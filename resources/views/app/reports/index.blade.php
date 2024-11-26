@@ -158,6 +158,35 @@
                 </div>
             </div>
         </div>
+
+<div class="d-flex">
+        <div class="col-md-2" id="role_filter">
+            <div class="form-group">
+                <label for="role">Roles</label>
+                <select class="form-control select2-basic-multiple" name="role_id" id="role_id">
+                    <option selected value="">Select Role</option>
+                    @forelse($roles as $role)
+                    <option value="{{ $role->id }}">{{ $role->name }}</option>
+                    @empty
+                    @endforelse
+                </select>
+            </div>
+        </div>
+
+
+        <div class="col-md-2" id="user_filter">
+            <div class="form-group">
+                <label for="user">Users</label>
+                <select class="form-control select2-basic-multiple" name="user_id" id="user_id">
+                    <option selected value="">Select Users</option>
+                </select>
+            </div>
+        </div>
+
+</div>
+
+
+        <div class="row" id="hidefilter">
             <div class="col-md-4" style="width: 350px!important;" id="selected_date_range">
                 <div class="form-group">
                     <label for="dateFilter" required>Selected received date range:</label>
@@ -449,6 +478,28 @@
             </div>
         </div>
     </div>
+
+    {{-- ACM Report --}}
+
+    <div class="card col-md-10 mt-2 tabledetails" id="acm_report" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
+        <h4 class="text-center mt-3">ACM Report</h4>
+        <div class="card-body">
+            <div class="p-0">
+                <table id="acm_report_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <thead class="text-center" style="font-size: 12px;">
+                        <tr>
+                            <th width="10%">Emp Id</th>
+                            <th width="12%">Emp Name</th>
+                            <th width="12%">Role</th>
+                            <th width="8%">Reporting_to</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center" style="font-size: 12px;"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script src="{{asset('./assets/js/jquery.min.js')}}"></script>
@@ -1152,6 +1203,7 @@ $(document).ready(function() {
         $('#datepicker').hide();
         $('#production_report').hide();
         $('#orderInflow_report').hide();
+        $('#acm_report').hide();
 
 
 
@@ -1164,6 +1216,8 @@ $(document).ready(function() {
             $('#hidefilter').show();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
 
         } else if (reportId === 'orderwise-details') {
             $('#newreports_table').show();
@@ -1171,6 +1225,8 @@ $(document).ready(function() {
             $('#hidefilter').show();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
 
         } else if (reportId === 'ordercompletion-details') {
             $('#timetaken_table').show();
@@ -1178,6 +1234,8 @@ $(document).ready(function() {
             $('#hidefilter').show();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
 
         } else if (reportId === 'orderprogress-details') {
             $('#orderwise_timetaken_table').show();
@@ -1185,6 +1243,8 @@ $(document).ready(function() {
             $('#hidefilter').show();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
 
 
         } else if (reportId === 'attendance-details') {
@@ -1194,12 +1254,18 @@ $(document).ready(function() {
             $('#hidefilter_3').hide();
             $('#datepicker').show();
             $('#filterButton2').click();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+
         }else if (reportId === 'production-report') {
             $('#production_report').show();
             $('#hidefilter').show();
             $('#datepicker').hide();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+
 		}else if (reportId === 'orderInflow-report') {
             $('#orderInflow_report').show();
             $('#selected_date_range').show();
@@ -1208,6 +1274,23 @@ $(document).ready(function() {
             $('#lob_filter').hide();
             $('#process_filter').hide();
             $('#hidefilter_2').hide();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+
+        }else if (reportId === 'acm-report') {
+            $('#acm_report').show();
+            $('#selected_date_range').hide();
+            $('#hidefilter_3').hide();
+            $('#client_filter').hide();
+            $('#lob_filter').hide();
+            $('#process_filter').hide();
+            $('#hidefilter_2').hide();
+            $('#role_filter').show();
+            $('#user_filter').show();
+
+
+
+
 
         }
         }
@@ -1742,10 +1825,92 @@ function calculateTatTime(orderDate, completionDate) {
 
 
 
+$(document).ready(function() {
+    // When the role dropdown changes
+    $('#role_id').on('change', function() {
+        var roleId = $(this).val();
+        console.log(roleId); // Get the selected role ID
+
+        // Check if a role is selected
+        if (roleId) {
+            // Make an AJAX call to fetch users
+            $.ajax({
+                url: "{{ url('getUsersByRole') }}",
+                type: 'POST',
+                data: {
+                    role_id: roleId,
+                     _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    // Clear the current user dropdown
+                    $('#user_id').empty();
+                    $('#user_id').append('<option selected value="">Select Users</option>');
+
+                    // Check if there are users returned
+                    if (response.users.length > 0) {
+                        // Loop through the users and append them to the user dropdown
+                        $.each(response.users, function(index, user) {
+                            $('#user_id').append('<option value="' + user.id + '">' + user.username + '</option>');
+                        });
+                    } else {
+                        $('#user_id').append('<option value="">No users found</option>');
+                    }
+                },
+                error: function() {
+                    alert('Error fetching users');
+                }
+            });
+        } else {
+            // If no role is selected, clear the user dropdown
+            $('#user_id').empty();
+            $('#user_id').append('<option selected value="">Select Users</option>');
+        }
+    });
+});
 
 
+$('#user_id').on('change', function() {
+    var userId = $(this).val();
+    console.log(userId);  // Get the selected user_id
 
+    // Check if a user is selected
+    if (userId) {
+        // Make an AJAX request to fetch user data
+        $.ajax({
+            url: "{{ route('getUserData') }}",  // Route to the Laravel controller
+            type: 'POST',
+            data: {
+                user_id: userId,  // Send the selected user_id
+                _token: '{{ csrf_token() }}'  // CSRF token for security
+            },
+            success: function(response) {
+                if (response.users && response.users.length > 0) {
+                    // Initialize DataTable with the response data
+                    $('#acm_report_table').DataTable({
+                        destroy: true, // To reset the table on every new selection
+                        data: response.users,
+                        columns: [
+                            { data: 'emp_id', title: 'Emp Id' },
+                            { data: 'username', title: 'Emp Name' },
+                            { data: 'role', title: 'Role' },
+                            { data: 'reporting_to_username', title: 'Reporting_to', defaultContent: 'N/A' }
+                        ],
+                        dom: 'lBfrtip',  // Add the Excel button functionality
+                        buttons: ['excel'],  // Excel export button
+                        lengthMenu: [10, 25, 50, 75, 100],
+                        order: [[0, 'asc']],  // Sort by Emp Id (or adjust as needed)
+                    });
+                }else {
+                    // If no users, clear the table
+                    var table = $('#acm_report_table').DataTable();
+                    table.clear(); // Remove all data
+                    table.draw();  // Redraw the table to reflect the empty state
+                }
+            },
 
+        });
+    }
+});
 
 </script>
 

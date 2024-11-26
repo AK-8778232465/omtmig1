@@ -200,6 +200,8 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
     Route::any('production_report', 'production_report')->name('production_report');
     Route::any('exportProductionReport', 'exportProductionReport')->name('exportProductionReport');
     Route::any('orderInflow_data', 'orderInflow_data')->name('orderInflow_data');
+    Route::any('getUsersByRole', 'getUsersByRole')->name('getUsersByRole');
+    Route::any('getUserData', 'getUserData')->name('getUserData');
 
 
 });
