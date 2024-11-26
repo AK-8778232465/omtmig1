@@ -67,10 +67,38 @@ class SettingController extends Controller
     public function setting(Request $request)
     {
         if($request->is('settings/users') ||$request->is('settings') ){
-            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP') || Auth::user()->hasRole('SPOC')) {
-                $usersData = User::with('usertypes:id,usertype')->whereNotIn('user_type_id', [1,4])->get();
-                $userTypes = UserType::whereNotIn('id', [1,4])->get();
-                $exportCount = ServiceUserMapping::count();
+            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('Admin')) {
+                $currentUserId = Auth::id();
+                $user = User::find($currentUserId);
+
+                $user_lower_ids = User::getAllLowerLevelUserIds_all($currentUserId);
+
+                $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
+                    return $id != $currentUserId;
+                });
+
+                $usersData = User::select(
+                    'oms_users.id', 
+                    'oms_users.emp_id', 
+                    'oms_users.username', 
+                    'oms_users.email', 
+                    'reporting_user.username as reporting_username', 
+                    'roles.name as roles', 
+                    'oms_users.is_active'
+                )
+                ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+                ->leftJoin('roles as roles', 'oms_users.user_type_id', '=', 'roles.id')
+                ->when($user->id != 1, function ($query) use ($user_lower_ids) {
+                    $query->whereIn('oms_users.id', $user_lower_ids);
+                })
+                ->get();
+                
+               
+                // $usersData = User::with('usertypes:id,usertype')->whereNotIn('user_type_id', [1,4])->get();
+                $userTypes = UserType::whereNotIn('id', [1,10])->get();
+                $exportCount = ServiceUserMapping::count(); 
+
+
                 return view('app.settings.users', compact('usersData', 'userTypes','exportCount'));
             } else {
                 abort(403);
@@ -460,8 +488,9 @@ class SettingController extends Controller
             $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [5])->where('is_active', 1)->get();
         }elseif($request->reviewer_type == 'getSOPC') {
             $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [9])->where('is_active', 1)->get();
+        }elseif($request->reviewer_type == 'getAdmin') {
+            $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [12])->where('is_active', 1)->get();
         }
-
         $html = '<option disabled selected value="">Select Reporting to</option>';
         if (!empty($ReportingList)) {
             foreach ($ReportingList as $Reporting) {

@@ -501,7 +501,6 @@ class OrderFormController extends Controller
                 ->where('order_id', $orderData->id)
                 ->pluck('json')
                 ->toArray();
-            
             // Check if $getjsonDetails is empty, and if so, set each entry as null
             if (empty($getjsonDetails)) {
                 $getjsonDetails = [
@@ -521,11 +520,12 @@ class OrderFormController extends Controller
                     'second_estimate_id' => null,
                     'third_estimate_id' => null,
                     'fourth_estimate_id' => null,
+                    'totalValue' => null,
                     'first_partially_paid_amount' => null,
                     'second_partially_paid_amount' => null,
                     'third_partially_paid_amount' => null,
                     'fourth_partially_paid_amount' => null,
-                    'first_paid_id'=>null,
+                    'firstInstStatus'=>null,
                     'second_paid_id' => null,
                     'third_paid_id' => null,
                     'fourth_paid_id' => null,
@@ -533,7 +533,7 @@ class OrderFormController extends Controller
                     'second_due_id' => null,
                     'third_due_id' => null,
                     'fourth_due_id' => null,
-                    'first_delinquent_id' => null,
+                    'firstDeliqDate_flag' => null,
                     'second_delinquent_id' => null,
                     'third_delinquent_id' => null,
                     'fourth_delinquent_id' => null,
@@ -594,7 +594,10 @@ class OrderFormController extends Controller
                 ->where('id', $orderData->id)
                 ->pluck('tax_json')
                 ->first();
-                 // Use first() to get a single item instead of an array
+            $getApi = DB::table('oms_order_creations')
+                ->where('id', $orderData->id)
+                ->select('api_data')
+                ->first();    
 
             $getTaxJson = json_decode($getTaxJson, true);
 
@@ -615,20 +618,21 @@ class OrderFormController extends Controller
                 ->orderBy('oms_tax_comments_histroy.id', 'desc')
                 ->get();
 
+// dd($orderTaxInfo);
                 // return response()->json($getTaxBucket);
 
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions',
                                                         'stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo',
-                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo'));
+                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi'));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
-                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo'));
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi'));
         }else if(in_array($user->user_type_id, [22]) && (Auth::id() == $orderData->typist_id || Auth::id() == $orderData->typist_qc_id) && $orderData->status_id !=4 && $orderData->status_id != 5) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
-                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo'));
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi'));
         } else {
             return redirect('/orders_status');
         }
@@ -970,172 +974,170 @@ class OrderFormController extends Controller
 
     public function taxform_submit(Request $request)
     {
-        // Define an array to map old field names to new field names
+ 
         $fieldMapping = [
-            'order_id' => 'order_id',
-            'type_id' => 'type_dd',
-            'taxYear' => 'fiscal_year',
-            'taxId' => 'tax_id_number',
-            'tax_described_id' => 'tax_described_number',
-            'tax_state_id' => 'tax_state_number',
-            'taxing_id' => 'taxing_entity_dd',
-            'phone_num' => 'phone_number',
-            'streetAddress1' => 'street_address1',
-            'street_address2' => 'street_address2',
-            'zip_id' => 'zip_number',
-            'override_id' => 'override_id',
-            'first_estimate_id' => 'first_estimate_id',
-            'second_estimate_id' => 'second_estimate_id',
-            'third_estimate_id' => 'third_estimate_id',
-            'fourth_estimate_id' => 'fourth_estimate_id',
-            'first_partially_paid_amount' => 'first_partially_paid_amount',
-            'second_partially_paid_amount' => 'second_partially_paid_amount',
-            'third_partially_paid_amount' => 'third_partially_paid_amount',
-            'fourth_partially_paid_amount' => 'fourth_partially_paid_amount',
-            'firstInstStatus' => 'first_paid_id',
-            'secondInstStatus' => 'second_paid_id',
-            'thirdInstStatus' => 'third_paid_id',
-            'fourthInstStatus' => 'fourth_paid_id',
-            'firstInstStatus' => 'first_due_id',
-            'secondInstStatus' => 'second_due_id',
-            'thirdInstStatus' => 'third_due_id',
-            'fourthInstStatus' => 'fourth_due_id',
-            'first_delinquent_id' => 'first_delinquent_id',
-            'second_delinquent_id' => 'second_delinquent_id',
-            'third_delinquent_id' => 'third_delinquent_id',
-            'fourth_delinquent_id' => 'fourth_delinquent_id',
-            'city_id' => 'city_number',
-            'state' => 'state_dd',
-            'total_annual_tax' => 'total_annual_tax',
-            'payment_frequency' => 'payment_frequency_dd',
-            'landValue' => 'land_data',
-            'mprovementValue' => 'improvements',
-            'exemption_mortgage' => 'exemption_mortgage',
-            'homeownerExemption' => 'exemption_homeowner',
-            'exemption_homestead' => 'exemption_homestead',
-            'veteranExemption' => 'exemption_additional',
-            'otherExemption' => 'others',
-            'net_value' => 'net_value',
-            'first_amount_id' => 'first_installment_amount',
-            'first_texes_out_id' => 'first_installment_texes_out',
-            'first_discount_expires_id' => 'first_installment_discount_expires',
-            'first_tax_due_id' => 'first_installment_tax_due',
-            'first_tax_delinquent_id' => 'first_installment_tax_delinquent',
-            'first_good_through_id' => 'first_installment_good_through',
-            'first_tax_paid_id' => 'first_installment_tax_paid',
-            'second_amount_id' => 'second_installment_amount',
-            'second_texes_out_id' => 'second_installment_texes_out',
-            'second_discount_expires_id' => 'second_installment_discount_expires',
-            'second_tax_due_id' => 'second_installment_tax_due',
-            'second_tax_delinquent_id' => 'second_installment_tax_delinquent',
-            'second_good_through_id' => 'second_installment_good_through',
-            'second_tax_paid_id' => 'second_installment_tax_paid',
-            'third_amount_id' => 'third_installment_amount',
-            'third_texes_out_id' => 'third_installment_texes_out',
-            'third_discount_expires_id' => 'third_installment_discount_expires',
-            'third_tax_due_id' => 'third_installment_tax_due',
-            'third_tax_delinquent_id' => 'third_installment_tax_delinquent',
-            'third_good_through_id' => 'third_installment_good_through',
-            'third_tax_paid_id' => 'third_installment_tax_paid',
-            'fourth_amount_id' => 'fourth_installment_amount',
-            'fourth_texes_out_id' => 'fourth_installment_texes_out',
-            'fourth_discount_expires_id' => 'fourth_installment_discount_expires',
-            'fourth_tax_due_id' => 'fourth_installment_tax_due',
-            'fourth_tax_delinquent_id' => 'fourth_installment_tax_delinquent',
-            'fourth_good_through_id' => 'fourth_installment_good_through',
-            'fourth_tax_paid_id' => 'fourth_installment_tax_paid',
-            'exampleFormControlTextarea1' => 'notes'
+            'order_id' => $request['order_id'],
+            'type_id' => $request['type_id'],
+            'taxYear' => $request['fiscal_yr_id'],
+            'taxId' => $request['tax_id'],
+            'taxing_entity_dd'=> $request['taxing_entity_dd'],
+            'tax_described_id' => $request['tax_described_id'],
+            'tax_state_id' => $request['tax_state_id'],
+            'taxing_id' => $request['taxing_id'],
+            'phone_number' => $request['phone_num'],
+            'streetAddress1' => $request['street_address1'],
+            'street_address2' => $request['street_address2'],
+            'zip_id' => $request['zip_id'],
+            'override_id' => $request['override_id'],
+            'first_estimate_id' => $request['first_estimate_id'],
+            'second_estimate_id' => $request['second_estimate_id'],
+            'third_estimate_id' => $request['third_estimate_id'],
+            'fourth_estimate_id' => $request['fourth_estimate_id'],
+            'first_partially_paid_amount' => $request['first_partially_paid_amount'],
+            'second_partially_paid_amount' => $request['second_partially_paid_amount'],
+            'third_partially_paid_amount' => $request['third_partially_paid_amount'],
+            'fourth_partially_paid_amount' => $request['fourth_partially_paid_amount'],
+            'firstInstStatus' => $request['first_paid_id'],
+            'secondInstStatus' => $request['second_paid_id'],
+            'thirdInstStatus' => $request['third_paid_id'],
+            'fourthInstStatus' => $request['fourth_paid_id'],
+            // 'firstInstStatus' => 'first_due_id',
+            // 'secondInstStatus' => 'second_due_id',
+            // 'thirdInstStatus' => 'third_due_id',
+            // 'fourthInstStatus' => 'fourth_due_id',
+            'firstDeliqDate_flag' => $request['first_delinquent_id'],
+            'secondDeliqDate_Eflag' => $request['second_delinquent_id'],
+            'thirdDeliqDate_Eflag' => $request['third_delinquent_id'],
+            'fourthDeliqDate_Eflag' => $request['fourth_delinquent_id'],
+            'city_id' => $request['city_id'],
+            'state' => $request['state'],
+            'totalValue' => $request['total_annual_tax'],
+            'numberOfInst' => $request['payment_frequency'],
+            'landValue' => $request['land'],
+            'improvementValue' => $request['improvement'],
+            'exemption_mortgage' => $request['exemption_mortgage'],
+            'homeownerExemption' => $request['exemption_homeowner'],
+            'exemption_homestead' => $request['exemption_homestead'],
+            'veteranExemption' => $request['exemption_additional'],
+            'otherExemption' => $request['others'],
+            'netTaxable' => $request['net_value'],
+            'firstInstPaidAmt' => $request['first_amount_id'],
+            'first_texes_out_id' => $request['first_texes_out_id'],
+            'first_discount_expires_id' => $request['first_discount_expires_id'],
+            'firstInstDueDate' => $request['first_tax_due_id'],
+            'firstDeliqDate' => $request['first_tax_delinquent_id'],
+            // 'first_good_through_id' => 'first_installment_good_through',
+            'firstInstPaidDate' => $request['first_tax_paid_id'],
+            'secondInstPaidAmt' => $request['second_amount_id'],
+            'second_texes_out_id' => $request['second_texes_out_id'],
+            'second_discount_expires_id' => $request['second_discount_expires_id'],
+            'secondInstDueDate' => $request['second_tax_due_id'],
+            'secondDeliqDate' => $request['second_tax_delinquent_id'],
+            // 'second_good_through_id' => 'second_installment_good_through',
+            'secondInstPaidDate' => $request['second_tax_paid_id'],
+            'thirdInstPaidAmt' => $request['third_amount_id'],
+            'third_texes_out_id' => $request['third_texes_out_id'],
+            'third_discount_expires_id' => $request['third_discount_expires_id'],
+            'thirdInstDueDate' => $request['third_tax_due_id'],
+            'thirdDeliqDate' => $request['third_tax_delinquent_id'],
+            // 'third_good_through_id' => 'third_installment_good_through',
+            'thirdInstPaidDate' => $request['third_tax_paid_id'],
+            'fourthInstPaidAmt' => $request['fourth_amount_id'],
+            'fourth_texes_out_id' => $request['fourth_texes_out_id'],
+            'fourth_discount_expires_id' => $request['fourth_discount_expires_id'],
+            'fourthInstDueDate' => $request['fourth_tax_due_id'],
+            'fourthDeliqDate' => $request['fourth_tax_delinquent_id'],
+            // 'fourth_good_through_id' => 'fourth_installment_good_through',
+            'fourthInstPaidDate' => $request['fourth_tax_paid_id'],
+            'exampleFormControlTextarea1' => $request['exampleFormControlTextarea1'],
+            'taxing_entity_dd' => $request['taxing_id']
+            
         ];
-    
+
         // Initialize an array for the renamed fields
-        $renamedData = [];
-    
-        // Loop through the field mapping to rename the fields
-        foreach ($fieldMapping as $oldField => $newField) {
-            $renamedData[$newField] = $request->input($oldField);
-        }
+      
 
-        if (isset($renamedData['first_paid_id']) && $renamedData['first_paid_id'] == '1') {
-            $renamedData['first_due_id'] = 'null';
-            $renamedData['first_delinquent_id'] = 'null';
-        }
+        // if (isset($renamedData['first_paid_id']) && $renamedData['first_paid_id'] == '1') {
+        //     $renamedData['first_due_id'] = 'null';
+        //     $renamedData['firstDeliqDate'] = 'null';
+        // }
 
-        if (isset($renamedData['first_due_id']) && $renamedData['first_due_id'] == '1') {
-            $renamedData['first_paid_id'] = 'null';
-            $renamedData['first_delinquent_id'] = 'null';
-        }
+        // if (isset($renamedData['first_due_id']) && $renamedData['first_due_id'] == '1') {
+        //     $renamedData['first_paid_id'] = 'null';
+        //     $renamedData['firstDeliqDate'] = 'null';
+        // }
 
-        if (isset($renamedData['first_delinquent_id']) && $renamedData['first_delinquent_id'] == '1') {
-            $renamedData['first_due_id'] = 'null';
-            $renamedData['first_paid_id'] = 'null';
-        }
+        // if (isset($renamedData['first_delinquent_id']) && $renamedData['first_delinquent_id'] == '1') {
+        //     $renamedData['first_due_id'] = 'null';
+        //     $renamedData['first_paid_id'] = 'null';
+        // }
 
 
-        if (isset($renamedData['second_paid_id']) && $renamedData['second_paid_id'] == '1') {
-            $renamedData['second_due_id'] = 'null';
-            $renamedData['second_delinquent_id'] = 'null';
-        }
+        // if (isset($renamedData['second_paid_id']) && $renamedData['second_paid_id'] == '1') {
+        //     $renamedData['second_due_id'] = 'null';
+        //     $renamedData['second_delinquent_id'] = 'null';
+        // }
 
-        if (isset($renamedData['second_due_id']) && $renamedData['second_due_id'] == '1') {
-            $renamedData['second_paid_id'] = 'null';
-            $renamedData['second_delinquent_id'] = 'null';
-        }
+        // if (isset($renamedData['second_due_id']) && $renamedData['second_due_id'] == '1') {
+        //     $renamedData['second_paid_id'] = 'null';
+        //     $renamedData['second_delinquent_id'] = 'null';
+        // }
 
-        if (isset($renamedData['second_delinquent_id']) && $renamedData['second_delinquent_id'] == '1') {
-            $renamedData['second_due_id'] = 'null';
-            $renamedData['second_paid_id'] = 'null';
-        }
+        // if (isset($renamedData['second_delinquent_id']) && $renamedData['second_delinquent_id'] == '1') {
+        //     $renamedData['second_due_id'] = 'null';
+        //     $renamedData['second_paid_id'] = 'null';
+        // }
 
 
 
 
-        if (isset($renamedData['third_paid_id']) && $renamedData['third_paid_id'] == '1') {
-            $renamedData['third_due_id'] = 'null';
-            $renamedData['third_delinquent_id'] = 'null';
-        }
+        // if (isset($renamedData['third_paid_id']) && $renamedData['third_paid_id'] == '1') {
+        //     $renamedData['third_due_id'] = 'null';
+        //     $renamedData['third_delinquent_id'] = 'null';
+        // }
 
-        if (isset($renamedData['third_due_id']) && $renamedData['third_due_id'] == '1') {
-            $renamedData['third_paid_id'] = 'null';
-            $renamedData['third_delinquent_id'] = 'null';
-        }
+        // if (isset($renamedData['third_due_id']) && $renamedData['third_due_id'] == '1') {
+        //     $renamedData['third_paid_id'] = 'null';
+        //     $renamedData['third_delinquent_id'] = 'null';
+        // }
 
-        if (isset($renamedData['third_delinquent_id']) && $renamedData['third_delinquent_id'] == '1') {
-            $renamedData['third_due_id'] = 'null';
-            $renamedData['third_paid_id'] = 'null';
-        }
+        // if (isset($renamedData['third_delinquent_id']) && $renamedData['third_delinquent_id'] == '1') {
+        //     $renamedData['third_due_id'] = 'null';
+        //     $renamedData['third_paid_id'] = 'null';
+        // }
 
 
-        if (isset($renamedData['fourth_paid_id']) && $renamedData['fourth_paid_id'] == '1') {
-            $renamedData['fourth_due_id'] = 'null';
-            $renamedData['fourth_delinquent_id'] = 'null';
-        }
+        // if (isset($renamedData['fourth_paid_id']) && $renamedData['fourth_paid_id'] == '1') {
+        //     $renamedData['fourth_due_id'] = 'null';
+        //     $renamedData['fourth_delinquent_id'] = 'null';
+        // }
 
-        if (isset($renamedData['fourth_due_id']) && $renamedData['fourth_due_id'] == '1') {
-            $renamedData['fourth_paid_id'] = 'null';
-            $renamedData['fourth_delinquent_id'] = 'null';
-        }
+        // if (isset($renamedData['fourth_due_id']) && $renamedData['fourth_due_id'] == '1') {
+        //     $renamedData['fourth_paid_id'] = 'null';
+        //     $renamedData['fourth_delinquent_id'] = 'null';
+        // }
 
-        if (isset($renamedData['fourth_delinquent_id']) && $renamedData['fourth_delinquent_id'] == '1') {
-            $renamedData['fourth_due_id'] = 'null';
-            $renamedData['fourth_paid_id'] = 'null';
-        }
+        // if (isset($renamedData['fourth_delinquent_id']) && $renamedData['fourth_delinquent_id'] == '1') {
+        //     $renamedData['fourth_due_id'] = 'null';
+        //     $renamedData['fourth_paid_id'] = 'null';
+        // }
 
         // Encode the renamed data as JSON
-        $jsonData = json_encode($renamedData);
-    
+        $jsonData = json_encode($fieldMapping);
+    // dd($jsonData);
         // Check if the order_id already exists
-        $existingRecord = DB::table('taxes')->where('order_id', $renamedData['order_id'])->first();
+        $existingRecord = DB::table('taxes')->where('order_id', $fieldMapping['order_id'])->first();
     
         if ($existingRecord) {
             // Update existing record
             $updated = DB::table('taxes')
-                ->where('order_id', $renamedData['order_id'])
+                ->where('order_id', $fieldMapping['order_id'])
                 ->update([
                     'json' => $jsonData,
                     'updated_by' => Auth::id(),
                     'updated_at' => Carbon::now(),
                 ]);
-            $tax_bucket_update = DB::table('oms_order_creations')->where('id', $renamedData['order_id'])->update([
+            $tax_bucket_update = DB::table('oms_order_creations')->where('id', $fieldMapping['order_id'])->update([
                 'tax_bucket' => null,
                 ]);
 
@@ -1144,13 +1146,13 @@ class OrderFormController extends Controller
         } else {
             // Insert new record
             $inserted = DB::table('taxes')->insert([
-                'order_id' => $renamedData['order_id'],
+                'order_id' => $fieldMapping['order_id'],
                 'json' => $jsonData,
                 'updated_by' => Auth::id(),
                 'updated_at' => Carbon::now(),
             ]);
 
-            $tax_bucket_update = DB::table('oms_order_creations')->where('id', $renamedData['order_id'])->update([
+            $tax_bucket_update = DB::table('oms_order_creations')->where('id', $fieldMapping['order_id'])->update([
                 'tax_bucket' => null,
             ]);
 
@@ -1162,8 +1164,8 @@ class OrderFormController extends Controller
     
             DB::table('oms_tax_comments_histroy')
                     ->insert([
-                        'order_id'=> $renamedData['order_id'],
-                        'comment' => $renamedData['notes'],
+                        'order_id'=> $request['order_id'],
+                        'comment' => $request['exampleFormControlTextarea1'],
                         'updated_by' => Auth::id(),
                         'updated_at' => Carbon::now('America/New_York'),
                     ]);
@@ -1172,7 +1174,7 @@ class OrderFormController extends Controller
         // Prepare the response with the renamed fields
         $responseData = [
             'status' => $status,
-            'data' => $renamedData,
+            'data' => $jsonData,
             'message' => $message,
         ];
     
@@ -1195,6 +1197,7 @@ class OrderFormController extends Controller
                 ->update([
                     'tax_json' => $jsondata,
                     'tax_bucket' => 1,
+                    'api_data' => $request->search_input
                 ]);
 
             return response()->json(['message' => 'Order status updated successfully'], 200);
@@ -1339,6 +1342,8 @@ class OrderFormController extends Controller
 
             public function submitFtcOrder(Request $request)
             {
+
+              
                 $type = $request->type;
                 $orderId = $request->orderId;
                 $search_value = $request->search_value;
@@ -1354,7 +1359,7 @@ class OrderFormController extends Controller
                 if (isset($orderData->id)) {
                     // Prepare the data to be sent to FTC
                     $data = [
-                        "state" => $orderData->short_code,
+                        "state" => $orderData->short_code,  
                         "zip" => "",
                         "countyname" => $orderData->county_name,
                         "county" => $orderData->county_id,
@@ -1364,7 +1369,7 @@ class OrderFormController extends Controller
                         "city" => "",
                         "owner_name" => "",
                     ];
-            
+            //  dd($data);
                     // Insert request data into the database
                     $ftc_log_id = DB::table('ftc_order_data')->insertGetId([
                         'order_id' => $orderData->id,
@@ -1373,13 +1378,17 @@ class OrderFormController extends Controller
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now(),
                     ]);
-            
+
+                    DB::table('oms_order_creations')
+                        ->where('id', $request->orderId)
+                        ->update([
+                            'api_data' => $request->search_value,
+                        ]);
                     // Call the FTC API
                     $ftcResponse = $this->getFtcData('ftc/CreateOrderFTC.php', $data);
-            
                     // Check if FTC response is successful and contains OrderId
                     if (isset($ftcResponse['Status']) && $ftcResponse['Status'] == "Success" && isset($ftcResponse['OrderId']) && !empty($ftcResponse['OrderId'])) {
-                        // Update the FTC log with the response OrderId
+                        // Update the FTC log with the response 
                         DB::table('ftc_order_data')
                             ->where('id', $ftc_log_id)
                             ->update([

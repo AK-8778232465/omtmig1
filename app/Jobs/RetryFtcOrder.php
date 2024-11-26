@@ -12,6 +12,11 @@ use App\Http\Traits\FastTaxAPI;
 use Illuminate\Support\Facades\Http;
 use DB;
 use App\Models\SupportingDocs;
+use Session;
+use Illuminate\Support\Facades\Auth; 
+use Illuminate\Http\Request;
+use App\Models\OmsAttachmentHistory;
+
 
 class RetryFtcOrder implements ShouldQueue
 {
@@ -42,15 +47,15 @@ class RetryFtcOrder implements ShouldQueue
     public function handle()
     {
         $ftcOrder = DB::table('ftc_order_data')->where('order_id', $this->orderId)->first();
-    
+   
         if (!$ftcOrder) {
             \Log::error("FTC order not found", ['order_id' => $this->orderId]);
             return;
         }
     
         $data = ["OrderId" => $ftcOrder->ftc_order_id];
-        $ftcResponse = $this->getFtcData('ftc/GetOrderStatusFTC.php', $data);
-    
+        $ftcResponse = $this->getFtcData('ftc/GetOrderStatusFTC.php', $data );
+    // dd($ftcOrder);
         if (empty($ftcResponse)) {
             \Log::error("Empty response from FTC API", ['order_id' => $this->orderId]);
             return;
@@ -61,7 +66,7 @@ class RetryFtcOrder implements ShouldQueue
             RetryFtcOrder::dispatch($this->orderId);
             return;
         }
-    
+
         DB::beginTransaction();
         try {
             DB::table('ftc_order_data')
@@ -80,6 +85,7 @@ class RetryFtcOrder implements ShouldQueue
                 'updated_by' => auth()->id(),
                 'updated_at' => now(),
             ]);
+          
     
             \Log::info("Tax record inserted", ['order_id' => $this->orderId]);
     
@@ -104,6 +110,13 @@ class RetryFtcOrder implements ShouldQueue
                     'file_path' => $filePath,
                     'file_name' => $file['file_name'],
                     'created_at' => now(),
+                ]);
+                OmsAttachmentHistory::create([
+                    'order_id' => $ftcOrder->order_id,
+                    'updated_by' => Auth::id(),
+                    'action' => 'Uploaded',
+                    'file_name' => $file['file_name'],
+                    'updated_at' => now(),
                 ]);
     
                 \Log::info("Supporting document saved", ['file' => $filename]);

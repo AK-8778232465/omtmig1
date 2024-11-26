@@ -123,7 +123,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $users->emp_id }}</td>
                                 <td>{{ $users->username }}</td>
-                                <td>{{ isset($users->usertypes->usertype) ? $users->usertypes->usertype : ""}}</td>
+                                <td>{{ isset($users->roles) ? $users->roles : ""}}</td>
                                 <td>{{ $users->email}}</td>
                                 <td class="text-center">
                                     <div class="custom-control custom-switch">
@@ -389,6 +389,9 @@
                 $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
                 @endrole
                 @role('AVP/VP')
+                $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
+                @endrole
+                @role('Admin')
                 $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
                 @endrole
             }
@@ -745,9 +748,9 @@ function assignService(userID) {
     $(document).on('change', '#user_type_id', function() {
         let role = $(this).val();
         let reporting_users;
-        if(role == 1 || role == 2) {
+        if(role == 1 ) {
             $('#add_reporting_to').hide();
-        } else if (role == 3) {
+        } else if (role == 3 ) {
             $('#add_reporting_to').show();
             reporting_users = 'getVps';
         } else if (role == 5) {
@@ -760,6 +763,9 @@ function assignService(userID) {
         else if (role ==  6 || role == 7 || role == 8 ) {
             $('#add_reporting_to').show();
             reporting_users = 'getSOPC';
+        }else if (role == 2 ) {
+            $('#add_reporting_to').show();
+            reporting_users = 'getAdmin';
         }
 
             $.ajax({
