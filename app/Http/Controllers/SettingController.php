@@ -95,7 +95,7 @@ class SettingController extends Controller
                 
                
                 // $usersData = User::with('usertypes:id,usertype')->whereNotIn('user_type_id', [1,4])->get();
-                $userTypes = UserType::whereNotIn('id', [1,10])->get();
+                $userTypes = UserType::whereNotIn('id', [1,4])->get();
                 $exportCount = ServiceUserMapping::count(); 
 
 

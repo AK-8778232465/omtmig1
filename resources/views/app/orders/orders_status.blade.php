@@ -397,6 +397,8 @@
                             @endif
                             <th style="width:7%">Action</th>
                             <th style="width:10%">Coversheet Preparer</th>
+                            <th style="width:7%">Created Date</th>
+
                         </tr>
                         </thead>
                         <tbody>
@@ -871,6 +873,8 @@ $(document).ready(function() {
                     "orderable": false,
                 },
                 { "data": "associate_name", "name": "associate_name", "visible": true},
+                { "data": "created_at", "name": "created_at", "visible": true},
+
             ],
             "order": [[1, 'asc']],
             createdRow: function (row, data, dataIndex) {

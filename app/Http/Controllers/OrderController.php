@@ -353,6 +353,7 @@ class OrderController extends Controller
                 'stl_client.id as client_id',
                 'stl_item_description.process_name as process', 
                 'oms_tier.Tier_id as tier_name',
+                DB::raw('DATE_FORMAT(oms_order_creations.created_at, "%m/%d/%Y %H:%i:%s") as created_at'),
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
                 DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")") as typist_user'),
@@ -1267,7 +1268,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 'stl_item_description.client_id',
                 'stl_item_description.process_name as process', 
                 'oms_tier.Tier_id as tier_name',
-                
+                DB::raw('DATE_FORMAT(oms_order_creations.created_at, "%m/%d/%Y %H:%i:%s") as created_at'),
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
                 DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")") as typist_user'),
