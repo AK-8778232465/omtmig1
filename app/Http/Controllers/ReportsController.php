@@ -6,6 +6,7 @@ use App\Models\user;
 use App\Models\State;
 use App\Models\County;
 use App\Models\City;
+use App\Models\Role;
 use App\Models\OrderCreation;
 use Illuminate\Http\Request;
 use DB;
@@ -22,7 +23,10 @@ class ReportsController extends Controller
     public function Reports(Request $request)
     {
         $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
-        return view('app.reports.index',compact('clients'));
+        $roles = Role::select('id', "name")->get();
+
+
+        return view('app.reports.index',compact('clients', 'roles'));
     }
 
 
@@ -1303,4 +1307,97 @@ public function orderInflow_data(Request $request){
     ]);
 }
 
+
+
+public function getUsersByRole(Request $request)
+{
+    // Get the role_id from the request
+    $roleId = $request->input('role_id');
+
+    // Fetch users with matching user_type_id (assuming the relationship is on `oms_users`)
+    $users = User::where('user_type_id', $roleId)->get(['id', 'username']); // Or any other fields you need
+
+    // Return a response in JSON format
+    return response()->json([
+        'users' => $users
+    ]);
+}
+
+public function getUserData(Request $request)
+{
+    // Validate incoming request to ensure user_id is provided
+    $request->validate([
+        'user_id' => 'required|exists:oms_users,id',
+    ]);
+
+    // Get the selected user_id
+    $userId = $request->input('user_id');
+
+    // Initialize the userLowerIds array with the given user_id
+    $userLowerIds = [$userId];
+
+    // This will hold the final list of all the user IDs in the hierarchy
+    $allUserIds = [];
+
+    // Flag to indicate if we need to continue fetching lower level users
+    $continueFetching = true;
+
+    while ($continueFetching) {
+        // Get all users whose reporting_to is in the current list of userLowerIds
+        $users = DB::table('oms_users')
+            ->leftJoin('roles', 'oms_users.user_type_id', '=', 'roles.id')
+            ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+            ->select(
+                'oms_users.id',
+                'oms_users.emp_id',
+                'oms_users.username',
+                'roles.name as role',
+                'reporting_user.username as reporting_to_username'
+            )
+            ->whereIn('oms_users.reporting_to', $userLowerIds)
+            ->get();
+
+        // If there are users found in this batch, add their IDs to the list
+        if ($users->isNotEmpty()) {
+            // Add these users' IDs to the allUserIds list
+            foreach ($users as $user) {
+                $allUserIds[] = $user->id;
+            }
+
+            // Update userLowerIds to the new list of IDs to continue fetching
+            $userLowerIds = $users->pluck('id')->toArray();
+        } else {
+            // No more users to fetch, break the loop
+            $continueFetching = false;
+        }
+    }
+
+    // Get the final set of users by their collected IDs
+    $userData = DB::table('oms_users')
+        ->leftJoin('roles', 'oms_users.user_type_id', '=', 'roles.id')
+        ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+        ->select(
+            'oms_users.id',
+            'oms_users.emp_id',
+            'oms_users.username',
+            'roles.name as role',
+            'reporting_user.username as reporting_to_username'
+        )
+        ->whereIn('oms_users.id', $allUserIds)
+        ->get();
+
+    // Check if user data exists
+
+        return response()->json([
+            'users' => $userData->map(function($user) {
+                return [
+                    'emp_id' => $user->emp_id ?? "",
+                    'username' => $user->username ?? "",
+                    'role' => $user->role ?? "",
+                    'reporting_to_username' => $user->reporting_to_username ?? ""
+                ];
+            }),
+        ]);
+
+}
 }
