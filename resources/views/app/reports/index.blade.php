@@ -1211,6 +1211,7 @@ $(document).ready(function() {
 
         }
         }
+    }
 
     showReport('userwise-details');
 
