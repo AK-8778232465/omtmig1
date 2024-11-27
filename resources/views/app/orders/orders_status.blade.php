@@ -264,12 +264,17 @@
                             <span id="tat_status_2_fourth_count">0</span>
                         </div></button>
                     <button id="status_5" class="btn btn-info status-btn">Completed<span id="status_5_count"></span><div style="">
-                            <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px;"></div>
-                            <!-- <span id="tat_status_5_third_count">0</span> -->
-                            <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
-                            <!-- <span id="tat_status_5_fourth_count">0</span> -->
-                        </div>
-                    </button>
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_5_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_5_fourth_count">0</span>
+                        </div></button>
+                    <button id="status_20" class="btn btn-info status-btn">Partially Cancelled<span id="status_20_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_20_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_20_fourth_count">0</span>
+                    </div></button>
                     <button id="status_3" class="btn btn-info status-btn">Cancelled<span id="status_3_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_3_third_count">0</span>
@@ -791,6 +796,11 @@ $(document).ready(function() {
             case 'status_3':
                 defaultStatus = 3;
                 break;
+
+            case 'status_20':
+                defaultStatus = 20;
+                break;
+
             case 'status_All':
                 defaultStatus = 'All'; // Adjust if 'All' should be treated differently
                 break;

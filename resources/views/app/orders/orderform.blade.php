@@ -1374,30 +1374,21 @@
                                         </div>
                                             <div class="col-12 mb-2">
                                     <div class="font-weight-bold mb-1 mt-1">Status :</div>
-                                                <input type="hidden" id="current_status_id" name="current_status_id"
-                                                    value="{{ $orderData->status_id }}">
-                                                <select style="width: 83%;" class="form-control" name="order_status"
-                                                    id="order_status" @if(!isset($orderData->assignee_user)) disabled
-                                                    @endif>
-                                                    <option value="1" id="status_1" @if($orderData->status_id == 1)
-                                                        selected @endif>WIP</option>
-                                                    <option value="2" id="status_2" @if($orderData->status_id == 2)
-                                                        selected @endif>Hold</option>
-                                                    <option value="3" id="status_3" @if($orderData->status_id == 3)
-                                                        selected @endif>Cancelled</option>
-                                                    <option value="4" id="status_4" @if($orderData->status_id == 4)
-                                                        selected @endif>Send for QC</option>
-                                                    <option value="5" id="status_5" @if($orderData->status_id == 5)
-                                                        selected @endif>Completed</option>
-                                                    <option value="13" id="status_13" @if($orderData->status_id == 13)
-                                                        selected @endif>Coversheet Prep</option>
-                                                    <option value="14" id="status_14" @if($orderData->status_id == 14)
-                                                        selected @endif>Clarification</option>
-                                                    <option value="18" id="status_18" @if($orderData->status_id == 18)
-                                                        selected @endif>Ground Abstractor</option>
-                                                </select>
-                                            </div>
-                                        </div>
+                                        <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
+                                        <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                            <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                            <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>-
+                                            <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                            <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                            <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
+                                            <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
+                                            <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                            <option value="20" id="status_20"  @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
+                                            <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+
+                                        </select>
+                                    </div>
+                                </div>
                                     </div>
                                 </div>
                                 @if(is_null($getTaxBucket[0]->tax_bucket))
@@ -1463,26 +1454,17 @@
                                         <div class="row">
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
-                                        <input type="hidden" id="current_status_id" name="current_status_id"
-                                            value="{{ $orderData->status_id }}">
-                                        <select style="width:300px" class="form-control" name="order_status"
-                                            id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
-                                            <option value="1" id="status_1" @if($orderData->status_id == 1) selected
-                                                @endif>WIP</option>
-                                            <option value="2" id="status_2" @if($orderData->status_id == 2) selected
-                                                @endif>Hold</option>
-                                            <option value="3" id="status_3" @if($orderData->status_id == 3) selected
-                                                @endif>Cancelled</option>
-                                            <option value="4" id="status_4" @if($orderData->status_id == 4) selected
-                                                @endif>Send for QC</option>
-                                            <option value="5" id="status_5" @if($orderData->status_id == 5) selected
-                                                @endif>Completed</option>
-                                            <option value="13" id="status_13" @if($orderData->status_id == 13) selected
-                                                @endif>Coversheet Prep</option>
-                                            <option value="14" id="status_14" @if($orderData->status_id == 14) selected
-                                                @endif>Clarification</option>
-                                            <option value="18" id="status_18" @if($orderData->status_id == 18) selected
-                                                @endif>Ground Abstractor</option>
+                                                <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
+                                                <select style="width:300px"  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                    <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                    <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
+                                                    <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                                    <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>   
+                                                    <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
+                                                    <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
+                                                    <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                                    <option value="20" id="status_20" @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
+                                                    <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -1566,8 +1548,10 @@
                                                         @endif
                                                         <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                         <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                                        <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                                                         <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                                        <option value="20" id="status_20" @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
+                                                        <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+                                                        
                                                     </select>
                                                 </div>
                                             </div>
@@ -1644,8 +1628,10 @@
                                                         @endif
                                                         <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                         <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                                        <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                                                         <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                                        <option value="20" id="status_20" @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
+                                                        <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+                                                        
                                                     </select>
                                                 </div>
                                             </div>

@@ -374,7 +374,7 @@ class OrderController extends Controller
             
             if (
                 isset($request->status) &&
-                in_array($request->status, [1, 2, 3, 4, 5, 13, 14, 15, 16, 17, 18]) &&
+                in_array($request->status, [1, 2, 3, 4, 5, 13, 14, 15, 16, 17, 18,20]) &&
                 $request->status != 'All' &&
                 $request->status != 6 &&
                 $request->status != 7
@@ -1469,50 +1469,56 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     if (Auth::user()->hasRole('Typist') && in_array($order->process_type_id, [12, 7])) {
                                 $statusMapping = [
                                     14 => 'Clarification',
+                                    4 => 'Send for QC',
                                     16 => 'Typing',
+                                    17 => 'Typing QC',
                                     18 => 'Ground Abstractor',
                                     2 => 'Hold',
                                     5 => 'Completed',
+                                    20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
-                                    17 => 'Typing QC',
-                                    4 => 'Send for QC',
                                 ];
 
                     } elseif (Auth::user()->hasRole('Typist/Qcer')  && in_array($order->process_type_id, [12, 7])) {
                             $statusMapping = [
+                                
+                                14 => 'Clarification',
+                                4 => 'Send for QC', 
+                                16 => 'Typing',
                                 17 => 'Typing QC',
                                 18 => 'Ground Abstractor',
-                                16 => 'Typing',
-                                14 => 'Clarification',
                                 2 => 'Hold',
                                 5 => 'Completed',
+                                20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
-                                4 => 'Send for QC',
                             ];
                 }elseif (Auth::user()->hasRole('Typist/Typist_Qcer')) {
                     $statusMapping = [
-                        17 => 'Typing QC',
-                        18 => 'Ground Abstractor',
-                        16 => 'Typing',
+                        
                         14 => 'Clarification',
+                        4 => 'Send for QC',
+                        16 => 'Typing',
+                        17 => 'Typing QC',                        
+                        18 => 'Ground Abstractor',
                         2 => 'Hold',
                         5 => 'Completed',
+                        20 => 'Partially Cancelled',
                         3 => 'Cancelled',
-                        4 => 'Send for QC',
                     ];
                  }
                  elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                     $statusMapping = [
                         1 => 'WIP',
                         15 => 'Doc Purchase',
-                        18 => 'Ground Abstractor',
                         14 => 'Clarification',
-                        2 => 'Hold',
-                        5 => 'Completed',
-                        3 => 'Cancelled',
                         4 => 'Send for QC',
                         16 => 'Typing',
-                        17 => 'Typing QC'
+                        17 => 'Typing QC',
+                        18 => 'Ground Abstractor',
+                        2 => 'Hold',
+                        5 => 'Completed',
+                        20 => 'Partially Cancelled',
+                        3 => 'Cancelled',
                     ];
                         if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86, 13, 2, 87, 88, 89, 90, 91, 92])) {
                         unset($statusMapping[15]);
@@ -1526,13 +1532,14 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $statusMapping = [
                                     1 => 'WIP',
                                     15 => 'Doc Purchase',
-                        18 => 'Ground Abstractor',
                                     14 => 'Clarification',
                                     4 => 'Send for QC',
                                     16 => 'Typing',
                                     17 => 'Typing QC',
+                                    18 => 'Ground Abstractor',
                                     2 => 'Hold',
                                     5 => 'Completed',
+                                    20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
                                 ];
                             if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86])) {
@@ -1551,11 +1558,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $statusMapping = [
                                     1 => 'WIP',
                                     13 => 'Coversheet Prep',
-                                    18 => 'Ground Abstractor',
                                     14 => 'Clarification',
+                                    18 => 'Ground Abstractor',
                                     4 => 'Send for QC',
                                     2 => 'Hold',
                                     5 => 'Completed',
+                                    20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
                                 ];
                         }elseif($order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 ){
@@ -1563,11 +1571,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             $statusMapping = [
                                 1 => 'WIP',
                                 13 => 'Coversheet Prep',
-                                18 => 'Ground Abstractor',
                                 14 => 'Clarification',
+                                18 => 'Ground Abstractor',
                                 4 => 'Send for QC',
                                 2 => 'Hold',
                                 5 => 'Completed',
+                                20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
                             ];
                         }else{
@@ -1575,11 +1584,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $statusMapping = [
                                     1 => 'WIP',
                                     13 =>'Coversheet Prep',
-                                    18 => 'Ground Abstractor',
                                     14 => 'Clarification',
+                                    18 => 'Ground Abstractor',
                                     4 => 'Send for QC',
                                     2 => 'Hold',
                                     5 => 'Completed',
+                                    20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
                                 ];
                         }
@@ -1591,11 +1601,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             $statusMapping = [
                                 1 => 'WIP',
                                 13 => 'Coversheet Prep',
-                                18 => 'Ground Abstractor',
                                 14 => 'Clarification',
+                                18 => 'Ground Abstractor',
                                 4 => 'Send for QC',
                                 2 => 'Hold',
                                 5 => 'Completed',
+                                20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
                             ];
                         }elseif((!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 )||(!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 3 )){
@@ -1603,11 +1614,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             $statusMapping = [
                                 1 => 'WIP',
                                 13 => 'Coversheet Prep',
-                                18 => 'Ground Abstractor',
                                 14 => 'Clarification',
                                 4 => 'Send for QC',
+                                18 => 'Ground Abstractor',
                                 2 => 'Hold',
                                 5 => 'Completed',
+                                20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
                             ];
                         }else{
@@ -1615,11 +1627,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             $statusMapping = [
                                 1 => 'WIP',
                                 13 => 'Coversheet Prep',
-                                18 => 'Ground Abstractor',
                                 14 => 'Clarification',
                                 4 => 'Send for QC',
+                                18 => 'Ground Abstractor',
                                 2 => 'Hold',
                                 5 => 'Completed',
+                                20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
 
                             ];
