@@ -188,7 +188,7 @@
         <div class="card-body">
             <div class="row justify-content-start m-3 mt-2 mb-4" id="statusButtons">
                 <div class="bg-info shadow-lg p-0 rounded text-white" style="text-decoration: none; font-size:0.7rem">
-                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif" style="cursor: pointer;">Yet to Assign User<span id="status_6_count"></span>
+                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif" style="cursor: pointer;">Yet to Assign User<span id="status_6_count"></span>
                      <!-- <div style=""> -->
                             <!-- <div style="display: inline-block;"></div>
                             <span id="tat_status_6_third_count"></span>
@@ -203,19 +203,19 @@
                             <span id="tat_status_7_fourth_count">0</span>
                         </div>
                     </button>
-                    <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">WIP<span id="status_1_count"></span> <div style="">
+                    <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif">WIP<span id="status_1_count"></span> <div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_1_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_1_fourth_count">0</span>
                         </div></button>
-                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span><div style="">
+                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_13_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_13_fourth_count">0</span>
                         </div></button>
-                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif" >Doc Purchase<span id="status_15_count"></span> <div style="">
+                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif" >Doc Purchase<span id="status_15_count"></span> <div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_15_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
@@ -842,7 +842,7 @@ $(document).ready(function() {
                 {
                     "data": "action",
                     "name": "action",
-                    "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) false @else true @endif,
+                    "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) false @else true @endif,
                     "orderable": false,
                 },
                 { "data": "associate_name", "name": "associate_name", "visible": true},
@@ -1089,6 +1089,11 @@ $(document).ready(function() {
             @endif
         }
 
+		 @if(Auth::user()->hasRole('Typist/Typist_Qcer'))
+		            if(status == 4){
+		            $('.status-dropdown').prop('disabled', true);
+		        }
+		        @endif
         @if(Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer'))
             if(status == 14){
             $('.status-dropdown').prop('disabled', false);
@@ -1109,13 +1114,27 @@ function updateStatusCounts() {
         let statusCounts = response.StatusCounts;
         let assign = response.AssignCoverSheet;
         let total = 0;
-        for (let status = 1; status <= 17; status++) {
+        @if(!Auth::user()->hasRole('Typist/Typist_Qcer'))
+        for (let status = 1; status <= 20; status++) {
           if (status !== 6) { // Exclude status 6
             let count = statusCounts[status] || 0;
             total += count;
             $('#status_' + status + '_count').text(' (' + count + ')');
           }
         }
+        @endif
+
+        @if(Auth::user()->hasRole('Typist/Typist_Qcer'))
+        for (let status = 1; status <= 20; status++) {
+            if (status == 18 || status == 14 || status == 16 || status == 17 || status == 2 || status == 5 || status == 3 || status == 4) { // Include statuses 1, 4, and 6
+                let count = statusCounts[status] || 0;
+                total += count;
+                $('#status_' + status + '_count').text(' (' + count + ')');
+            }
+            }
+        @endif
+
+
         @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
         $('#status_13_count').text("(" + statusCounts[13] + "+" + assign + ")");
         @endif

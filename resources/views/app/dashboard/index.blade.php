@@ -440,7 +440,8 @@
             </div>
         
 
-@if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')))
+
+@if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')))
     <div class="card mb-4">
     <div class="col-md-12 d-flex">
     <div class="card col-md-5 mt-3 mb-3 ml-3" id="available_resource_table" style="font-size: 12px;">
@@ -510,7 +511,7 @@
 
 
 {{-- carry over count --}}
-@if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')))
+@if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')))
 <div class="d-flex justify-content-center">
    <div class="card col-md-8 mt-3 mb-3 ml-3 carry_over_monthly_table" id="carry_over_monthly_table" style="font-size: 12px;">
     <h4 class="text-center mt-3">Order Inflow Data</h4>
@@ -559,7 +560,7 @@
                     </div>
                 </div>
             @endif
-            @if(!Auth::user()->hasRole('Qcer'))
+            @if(!(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')))
                 <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(1)" style="cursor: pointer;">
                     <div class="card">
                         <div class="card-content">
@@ -608,6 +609,7 @@
                 </div>
             </div>
             @endif
+            @if(!Auth::user()->hasRole('Typist/Typist_Qcer'))
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(15)"  style="cursor: pointer;">
                 <div class="card">
                     <div class="card-content">
@@ -629,6 +631,7 @@
                     </div>
                 </div>
             </div>
+            @endif
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(18)"  style="cursor: pointer;">
                 <div class="card">
                     <div class="card-content">
@@ -1552,11 +1555,23 @@ function fetchOrderData(projectId, clientId, fromDate, toDate, selectedDateFilte
         success: function (response) {
             let statusCounts = response.StatusCounts;
             let totalValue = 0;
+            
+            @if(!Auth::user()->hasRole('Typist/Typist_Qcer'))
             for (const key in statusCounts) {
                 if (statusCounts.hasOwnProperty(key) && key !== '6') {
                     totalValue += statusCounts[key];
                 }
             }
+            @endif
+
+            @if(Auth::user()->hasRole('Typist/Typist_Qcer'))
+            for (const key in statusCounts) {
+                if (statusCounts.hasOwnProperty(key) && key !== '6' && key !== '1') {
+                    totalValue += statusCounts[key];
+                }
+            }
+            @endif
+
             $('#all_count').text(totalValue);
             $('#yet_to_assign_cnt').text(statusCounts[6] || 0);
             $('#wip_cnt').text(statusCounts[1] || 0);
@@ -1592,6 +1607,8 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
 
             // Calculate total orders
             let totalValue = 0;
+
+  @if(!Auth::user()->hasRole('Typist/Typist_Qcer'))
             for (const key in statusCounts) {
                 if (statusCounts.hasOwnProperty(key)) {
                     if (Array.isArray(statusCounts[key])) {
@@ -1605,6 +1622,35 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
                     }
                 }
             }
+            @endif
+
+
+            @if(Auth::user()->hasRole('Typist/Typist_Qcer'))
+
+                // For Typist/Typist_Qcer users, exclude status_id = 1
+                if (statusCounts.carriedOverCompletedCount) {
+                    for (const statusId in statusCounts.carriedOverCompletedCount) {
+                        if (statusCounts.carriedOverCompletedCount.hasOwnProperty(statusId)) {
+                            totalValue += statusCounts.carriedOverCompletedCount[statusId];
+                        }
+                    }
+                }
+
+                // For Typist/Typist_Qcer users, exclude status_id = 1
+                for (const key in statusCounts) {
+                    if (statusCounts.hasOwnProperty(key)) {
+                        if (Array.isArray(statusCounts[key])) {
+                            statusCounts[key].forEach(count => {
+                                // Exclude status_id = 1
+                                if (![1, 6, 13, 15, 19].includes(count.status_id)) {
+                                    totalValue += count.total_orders;
+                                }
+                            });
+                        }
+                    }
+                }
+            @endif
+
             $('#pre_all_cnt').text(totalValue);
 
             // Update individual counts
@@ -1650,8 +1696,15 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
             $('#pre_ground_abstractor_cnt').text(pregroundAbstractorCnt);
 
             // Calculate and update the total of the specified values
+            @if(!Auth::user()->hasRole('Typist/Typist_Qcer'))
+    // Include all values for users who are not Typists/Typist_Qcers
             let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt + predocPurchaserCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt;
             $('#carried_over_cnt').text(totalSpecificValues);
+        @else
+            // Exclude preWipCnt for Typists/Typist_Qcers
+            let totalSpecificValues = preHoldCnt + preQuCnt + preClarificationCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt;
+            $('#carried_over_cnt').text(totalSpecificValues);
+        @endif
         },
         error: function (error) {
             console.error('Error:', error);

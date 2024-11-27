@@ -62,6 +62,14 @@ class OrderController extends Controller
                 $statusCountsQuery->where('typist_qc_id', $user->id)
                 ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18]);
 
+            }elseif ($user->user_type_id == 22) {
+                $statusCountsQuery->where(function($query) use ($user) {
+                    $query->where('oms_order_creations.typist_id', $user->id)
+                          ->orWhere('oms_order_creations.typist_qc_id', $user->id);
+
+                })
+                          ->whereIn('status_id', [2, 3, 4, 5, 14, 16, 17, 18]);
+
             }
         }
 
@@ -187,6 +195,14 @@ class OrderController extends Controller
             } elseif($user->user_type_id == 11){
                 $tatstatusCountsQuery->where('oms_order_creations.typist_qc_id', $user->id)
                 ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 16, 18]);
+            } elseif ($user->user_type_id == 22) {
+                $statusCountsQuery->where(function($query) use ($user) {
+                    $query->where('oms_order_creations.typist_id', $user->id)
+                          ->orWhere('oms_order_creations.typist_qc_id', $user->id);
+
+                })
+                ->whereIn('status_id', [2, 3, 5, 14, 16, 17, 18]);
+
             }
         }
 
@@ -379,6 +395,14 @@ class OrderController extends Controller
                                     ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
                             });
 
+                        } elseif(in_array($user->user_type_id, [22])) {
+                            $query->where('oms_order_creations.status_id', $request->status)
+                            ->where(function ($optionalquery) use ($user) {
+                                $optionalquery->where('oms_order_creations.typist_id', $user->id)
+                                    ->orWhere('oms_order_creations.typist_qc_id', $user->id)
+                                    ->whereIn('status_id', [2, 3, 5, 14, 16, 17, 18]);
+                            });
+
                         }
                     }
                     }
@@ -404,6 +428,14 @@ class OrderController extends Controller
                         $query->where('oms_order_creations.status_id', $request->status)->Where('oms_order_creations.typist_id', $user->id);
                     }elseif(in_array($user->user_type_id, [11]) && $request->status != 13) {
                     $query->where('oms_order_creations.status_id', $request->status)->Where('oms_order_creations.typist_qc_id', $user->id);
+                    }elseif(in_array($user->user_type_id, [22])) {
+                        $query->where('oms_order_creations.status_id', $request->status)
+                        ->where(function ($optionalquery) use ($user) {
+                            $optionalquery->where('oms_order_creations.typist_id', $user->id)
+                                ->orWhere('oms_order_creations.typist_qc_id', $user->id);
+                        })
+                                ->whereIn('status_id', [2, 3, 4, 5, 14, 16, 17, 18]);
+
                     }
                     else{
                         if($request->status != 13){
@@ -440,7 +472,17 @@ class OrderController extends Controller
                 }elseif(in_array($user->user_type_id, [11])){
                     $query->where('oms_order_creations.typist_qc_id', $user->id)
                     ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18]);
-                }else {
+                }elseif(in_array($user->user_type_id, [22])) {
+                    $query->where(function ($optionalquery) use ($user) {
+                        $optionalquery->where('oms_order_creations.typist_id', $user->id)
+                            ->orWhere('oms_order_creations.typist_qc_id', $user->id);
+
+                    })
+                    ->whereIn('status_id', [2, 3, 4, 5, 14, 16, 17, 18]);
+
+
+                }
+                else {
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
             } elseif ($request->status == 6) {
@@ -1003,6 +1045,151 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     }
                 }
 
+            }else if($user->user_type_id == 22){
+                if (in_array('All', $project_id) && !in_array('All', $client_id)) {
+                    $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
+                        ->where('status_id', '!=', 5)
+                        ->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                        ->where('is_active', 1)
+                        ->whereDate('order_date', '>=', $fromDate)
+                        ->whereDate('order_date', '<=', $toDate)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+
+                    $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
+                        ->where('is_active', 1)
+                        ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                        ->whereNotIn('status_id', [3,5])
+                        ->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                        ->whereNull('completion_date')
+                        ->whereDate('order_date', '<', $fromDate)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+
+                    $getcurrentCompletedorderId = OrderCreation::with('process', 'client')->select('id')
+                        ->whereDate('completion_date', '>=', $fromDate)
+                        ->whereDate('completion_date', '<=', $toDate)
+                        ->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                        ->where('status_id', 5)
+                        ->where('is_active', 1)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+
+                    $getPreCompletedorderId = OrderCreation::with('process', 'client')
+                        ->select('id')
+                        ->whereDate('order_date', '<', $fromDate)
+                        ->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                        ->where('status_id', 5)
+                        ->where('is_active', 1)
+                        ->whereHas('process', function ($query) use ($client_id) {
+                            $query->whereIn('client_id', $client_id);
+                        });
+
+                } else {
+                    if (!in_array('All', $project_id)) {
+                        // Case: project_id is specified (not 'All')
+                        $currentOverAllStatusCounts = OrderCreation::select('id')
+                            ->whereIn('process_id', $project_id)
+                            ->where('status_id', '!=', 5)
+                            ->where(function ($query) use($user){
+                                $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                            ->where('is_active', 1)
+                            ->whereDate('order_date', '>=', $fromDate)
+                            ->whereDate('order_date', '<=', $toDate);
+
+                        $carryOverAllStatusCounts = OrderCreation::select('id')
+                            ->where('is_active', 1)
+                            ->whereIn('process_id', $project_id)
+                            ->where(function ($query) use($user){
+                                $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                            ->whereNotIn('status_id', [3, 5])
+                            ->whereNull('completion_date')
+                            ->whereDate('order_date', '<', $fromDate);
+
+                        $getcurrentCompletedorderId = OrderCreation::select('id')
+                            ->whereIn('process_id', $project_id)
+                            ->where(function ($query) use($user){
+                                $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                            ->whereDate('completion_date', '>=', $fromDate)
+                            ->whereDate('completion_date', '<=', $toDate)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+
+                        $getPreCompletedorderId = OrderCreation::select('id')
+                            ->whereIn('process_id', $project_id)
+                            ->where(function ($query) use($user){
+                                $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                            ->whereDate('order_date', '<', $fromDate)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+
+                    } else {
+                        $currentOverAllStatusCounts = OrderCreation::select('id')
+                            ->whereDate('order_date', '>=', $fromDate)
+                            ->whereDate('order_date', '<=', $toDate)
+                            ->where(function ($query) use($user){
+                                $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                            ->where('status_id', '!=', 5)
+                            ->where('is_active', 1);
+
+                        $carryOverAllStatusCounts = OrderCreation::select('id')
+                            ->where('is_active', 1)
+                            ->where(function ($query) use($user){
+                                $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                            ->whereNotIn('status_id', [3, 5])
+                            ->whereNull('completion_date')
+                            ->whereDate('order_date', '<', $fromDate);
+
+                        $getcurrentCompletedorderId = OrderCreation::select('id')
+                            ->whereDate('completion_date', '>=', $fromDate)
+                            ->whereDate('completion_date', '<=', $toDate)
+                            ->where(function ($query) use($user){
+                                $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+
+                        $getPreCompletedorderId = OrderCreation::select('id')
+                            ->whereDate('order_date', '<', $fromDate)
+                            ->where(function ($query) use($user){
+                                $query->where('typist_id', $user->id)
+                                ->orWhere('typist_qc_id', $user->id);
+                        })
+                            ->where('status_id', 5)
+                            ->where('is_active', 1);
+                    }
+                }
+
             }
     }
         
@@ -1084,6 +1271,14 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         if ($request->status != 'All') {
             $query->where('oms_order_creations.status_id', $request->status);
         }
+
+        if(Auth::user()->hasRole('Typist/Typist_Qcer')){
+            if ($request->status == 'All') {
+                $query->where('oms_order_creations.status_id', '!=', 1);
+            }
+         }
+
+
         if($request->status == 6){
             if(in_array('All', $project_id) && !in_array('All', $client_id)){
             $query = $currentYet_to_assign->whereNull('assignee_user_id')
@@ -1529,8 +1724,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $stateList = State::select('id', 'short_code')->get();
         $processors = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [6, 8, 9])->orderBy('emp_id')->get();
         $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7, 8])->orderBy('emp_id')->get();
-        $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [10])->orderBy('emp_id')->get();
-        $typists_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [11])->orderBy('emp_id')->get();
+        $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [10, 22])->orderBy('emp_id')->get();
+        $typists_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [11, 22])->orderBy('emp_id')->get();
 
         $statusList = Status::select('id', 'status')->get();
         $countyList = County::select('id', 'county_name')->get();

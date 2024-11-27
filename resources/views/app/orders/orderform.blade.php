@@ -260,7 +260,7 @@
                         </div>
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">Portal Fee Cost<span style="color:red;">*</span></div>
-                                <input type="text" id="portal_fee_cost_id" name="portal_fee_cost_id" class="form-control" 
+                                <input type="number" id="portal_fee_cost_id" name="portal_fee_cost_id" class="form-control"
                                     placeholder="Enter Portal Fee Cost" 
                                     value="{{ $userinput ? $userinput->portal_fee_cost : '' }}" required>
                             </div>
@@ -284,19 +284,19 @@
                             <div class="row mt-3 mb-2"> -->
                                 <div class="col-md-3 mb-2">
                                     <div class="font-weight-bold">Copy Cost<span style="color:red;">*</span></div>
-                                    <input type="text" id="copy_cost_id" name="copy_cost_id" class="form-control" 
+                                    <input type="number" id="copy_cost_id" name="copy_cost_id" class="form-control"
                                         placeholder="Enter Copy Cost" 
                                         value="{{ $userinput ? $userinput->copy_cost : '' }}" required>
                                 </div>
                                 <div class="col-md-3 mb-2">
                                     <div class="font-weight-bold">No of Search Done<span style="color:red;">*</span></div>
-                                    <input type="text" id="no_of_search_id" name="no_of_search_id" class="form-control" 
+                                    <input type="number" id="no_of_search_id" name="no_of_search_id" class="form-control"
                                         placeholder="Enter No of Search" 
                                         value="{{ $userinput ? $userinput->no_of_search_done : '' }}" required>
                                 </div>
                                 <div class="col-md-3 mb-2">
                                     <div class="font-weight-bold">No of Documents Retrieved in TP/Other Applications<span style="color:red;">*</span></div>
-                                    <input type="text" id="document_retrive_id" name="document_retrive_id" class="form-control" 
+                                    <input type="number" id="document_retrive_id" name="document_retrive_id" class="form-control"
                                         placeholder="Enter No of Documents Retrieved" 
                                         value="{{ $userinput ? $userinput->no_of_documents_retrieved : '' }}" required>
                                 </div>
@@ -692,7 +692,7 @@
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                 <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
                                                     <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
-                                                        @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
+                                                        @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer') && !Auth::user()->hasRole('Typist/Typist_Qcer'))
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                             <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
                                                         <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
