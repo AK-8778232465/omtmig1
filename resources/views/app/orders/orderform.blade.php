@@ -332,8 +332,7 @@
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">Portal Fee Cost<span style="color:red;">*</span></div>
                                 <input type="number" id="portal_fee_cost_id" name="portal_fee_cost_id" class="form-control"
-                                    placeholder="Enter Portal Fee Cost"
-                                    value="{{ $userinput ? $userinput->portal_fee_cost : '' }}" required>
+                                    placeholder="Enter Portal Fee Cost" value="{{ $userinput ? $userinput->portal_fee_cost : '' }}" required>
                             </div>
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">Source<span style="color:red;">*</span></div>
@@ -644,8 +643,8 @@
                                 <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
                                 <select class="form-control" name="get_data" id="get_data" >
                                     <option value="">Select Source</option>
-                                    <option value="1" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' ? 'hidden' : '' }} {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'NO' ? '' : 'selected' }}>APN</option>
-                                    <option value="0" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' ? 'selected' : '' }}>Address</option>
+                                    <option value="1" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'No' ? 'selected' : '' }}>APN</option>
+                                    <option value="0" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'No' ? 'hidden' : '' }} {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' ? 'selected' : '' }}>Address</option>
                                 </select>
 
                             </div>
@@ -660,7 +659,6 @@
                             </div>
                             @endif`
                         </div>
-
                         <form id="taxFormValues">
                         <input type="hidden" name="order_id" value="{{$orderData->id}}">
                             <!-- Top Section -->
@@ -711,7 +709,6 @@
                                             style="flex: 1;" id="tax_state_id" name="tax_state_id" value="{{ $getjsonDetails[0]['tax_state_number'] ?? '' }}">
                                     </div>
                                 </div>
-
                                 <!-- Right Column -->
                                 <div class="col-6">
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
@@ -801,7 +798,7 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Payment Frequency :<span style="color:red;">*</span></label>
-                                        <select class="form-control" style="flex: 1;" id="payment_frequency" name="payment_frequency" value="{{ $getjsonDetails[0]['payment_frequency_dd'] ?? '' }}" required>
+                                        <select class="form-control" style="flex: 1;" id="payment_frequency" name="payment_frequency" required>
                                             <option>Select Payment Frequency</option>
                                             @foreach ($taxPaymentFrequency as $frequency)
                                                 <option value="{{ $frequency->id }}" 
@@ -870,9 +867,9 @@
 
                             <hr style="border: 1px solid #ccc; margin: 20px 0;">
                             <!-- Installments Section -->
-                            <div class="row installments-section">
+                            <div class="row installments-section  " >
                                 <!-- First Installment -->
-                                <div class="col-3 installment">
+                                <div class="col-3 installment container d-none" id ="container1">
                                     <h6 class="installment-title">First Installment</h6>
 
                                     <div class="checkbox-group">
@@ -888,7 +885,7 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="first_amount_id" name="first_amount_id" value="{{ $getjsonDetails[0]['firstInstPaidAmt'] ?? '' }}" required>
+                                            style="flex: 1;" id="first_amount_id" name="first_amount_id" value="{{ $getjsonDetails[0]['firstInstBilledAmt'] ?? '' }}" required>
                                         </div>
 
                                     <div class="checkbox-group">
@@ -908,7 +905,7 @@
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="first_due_id" name="first_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['first_due_id']) && $getjsonDetails[0]['firstInstStatus'] == 'Due' ? 'checked' : '' }}> Due
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['firstInstStatus']) && $getjsonDetails[0]['firstInstStatus'] == 'DUE' ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
@@ -942,7 +939,7 @@
                                             style="flex: 1;" 
                                             id="first_tax_delinquent_id" 
                                             name="first_tax_delinquent_id" 
-                                            value="{{ isset($getjsonDetails[0]['firstDeliqDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['firstDeliqDate'])->format('Y-m-d') : '' }}">
+                                            value="{{ isset($getjsonDetails[0]['firstDeliqDate']) && $getjsonDetails[0]['firstDeliqDate'] ? \Carbon\Carbon::parse($getjsonDetails[0]['firstDeliqDate'])->format('Y-m-d') : '' }}">
 
                                     </div>
 
@@ -957,13 +954,13 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Paid :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_paid_id" name="first_tax_paid_id" value="{{ isset($getjsonDetails[0]['firstInstPaidDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['firstInstPaidDate'])->format('Y-m-d') : '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_paid_id" name="first_tax_paid_id" value="{{ isset($getjsonDetails[0]['firstInstPaidDate']) && $getjsonDetails[0]['firstDeliqDate'] ? \Carbon\Carbon::parse($getjsonDetails[0]['firstInstPaidDate'])->format('Y-m-d') : '' }}">
 
                                     </div>
                                 </div>
 
                                 <!-- Second Installment -->
-                                <div class="col-3 installment">
+                                <div class="col-3 installment container d-none" id ="container2">
                                     <h6 class="installment-title">Second Installment</h6>
 
                                     <div class="checkbox-group">
@@ -979,7 +976,7 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :  
                                         </label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" value="{{ $getjsonDetails[0]['secondInstPaidAmt'] ?? '' }}" >
+                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" value="{{ $getjsonDetails[0]['secondInstInstBilledAmt'] ?? '' }}" >
                                     </div>
 
                                     <div class="checkbox-group">
@@ -998,7 +995,7 @@
                                         <div>
                                             <label class="checkbox-label">
                                             <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"
-                                            {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['secondInstStatus']) && $getjsonDetails[0]['secondInstStatus'] == 'Due' ? 'checked' : '' }}> Due
+                                            {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['secondInstStatus']) && $getjsonDetails[0]['secondInstStatus'] == 'DUE' ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
@@ -1044,7 +1041,7 @@
                                 </div>
 
                                 <!-- Third Installment -->
-                                <div class="col-3 installment">
+                                <div class="col-3 installment container d-none" id ="container3">
                                     <h6 class="installment-title">Third Installment</h6>
 
                                     <div class="checkbox-group">
@@ -1079,7 +1076,7 @@
                                         <div>
                                             <label class="checkbox-label">
                                             <input type="checkbox" id="third_paid_id" name="third_paid_id" value="Due" onclick="onlyOne(this)"
-                                            {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['thirdInstStatus']) && $getjsonDetails[0]['thirdInstStatus'] == 'Due' ? 'checked' : '' }}> Due
+                                            {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['thirdInstStatus']) && $getjsonDetails[0]['thirdInstStatus'] == 'DUE' ? 'checked' : '' }}> Due
                                             </label>
                                             </label>
                                         </div>
@@ -1126,7 +1123,7 @@
                                 </div>
 
                                 <!-- Fourth Installment -->
-                                <div class="col-3 installment">
+                                <div class="col-3 installment container d-none" id ="container4">
                                     <h6 class="installment-title">Fourth Installment</h6>
 
                                     <div class="checkbox-group">
@@ -1153,13 +1150,13 @@
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="fourth_paid_id" name="fourth_paid_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'Paid' ? 'checked' : '' }}> Paid
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'PAID' ? 'checked' : '' }}> Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
                                                 <input type="checkbox" id="fourth_due_id" name="fourth_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'Due' ? 'checked' : '' }}> Due
+                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'DUE' ? 'checked' : '' }}> Due
                                             </label>
                                         </div>
                                         <div>
@@ -2267,7 +2264,7 @@ $(function() {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'An error occurred. Please try again.',
+                        text: ' Please try again.',
                         confirmButtonText: 'OK'
                     });
                 }
@@ -2313,14 +2310,15 @@ $(function() {
 
                 // Display success message with Swal
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Order successfully fetched.',
-                    confirmButtonText: 'OK',
-                }).then(() => {
-                    // Reload the page after closing the success alert
-                    window.location.reload();
-                });
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Order successfully fetched.',
+                            confirmButtonText: 'OK',
+                        }).then(() => {
+                            // Reload the page after closing the success alert
+                            // window.location.reload(); 
+                           window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}/tax';
+                        });
             },
             error: function (xhr, status, error) {
                 // Hide the loader on error
@@ -3074,6 +3072,34 @@ $(document).ready(function() {
         }
     });
 
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const dropdown = document.getElementById('payment_frequency');
+    const containers = document.querySelectorAll('.container');
+
+    // Function to show containers based on selected value
+    const updateContainers = () => {
+        const selectedValue = parseInt(dropdown.value) || 0;
+
+        // Log the selected value for debugging
+        console.log("Selected Value:", selectedValue);
+
+        // Hide all containers initially
+        containers.forEach((container, index) => {
+            if (index < selectedValue) {
+                container.classList.remove('d-none'); // Show the container
+            } else {
+                container.classList.add('d-none'); // Hide the container
+            }
+        });
+    };
+
+    // Initial update based on preselected value
+    updateContainers();
+
+    // Event listener for dropdown change
+    dropdown.addEventListener('change', updateContainers);
+});
 
 </script>
 @endsection

@@ -16,7 +16,8 @@ use Session;
 use Illuminate\Support\Facades\Auth; 
 use Illuminate\Http\Request;
 use App\Models\OmsAttachmentHistory;
-
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Storage;
 
 class RetryFtcOrder implements ShouldQueue
 {
@@ -63,12 +64,15 @@ class RetryFtcOrder implements ShouldQueue
     
         if ($ftcResponse['result'] === null || (isset($ftcResponse['Status']) && $ftcResponse['Status'] == "In Progress")) {
             \Log::info("FTC response in progress", ['response' => $ftcResponse]);
-            RetryFtcOrder::dispatch($this->orderId);
+
+            RetryFtcOrder::dispatch($this->orderId)->delay(now()->addSeconds(6));
+
             return;
         }
 
         DB::beginTransaction();
         try {
+            
             DB::table('ftc_order_data')
                 ->where('id', $ftcOrder->id)
                 ->update([
@@ -78,6 +82,14 @@ class RetryFtcOrder implements ShouldQueue
                 ]);
     
             \Log::info("FTC order data updated", ['order_id' => $this->orderId]);
+
+
+            $existingTaxRecord = DB::table('taxes')->where('order_id', $ftcOrder->order_id)->first();
+
+                if ($existingTaxRecord) {
+                    // Step 2: Delete the existing record
+                    DB::table('taxes')->where('order_id', $ftcOrder->order_id)->delete();
+                }
     
             DB::table('taxes')->insert([
                 'order_id' => $ftcOrder->order_id,
@@ -105,19 +117,39 @@ class RetryFtcOrder implements ShouldQueue
     
                 \Storage::disk('public')->put($filePath, $decodedData);
     
-                SupportingDocs::insertGetId([
-                    'order_id' => $ftcOrder->order_id,
-                    'file_path' => $filePath,
-                    'file_name' => $file['file_name'],
-                    'created_at' => now(),
-                ]);
-                OmsAttachmentHistory::create([
-                    'order_id' => $ftcOrder->order_id,
-                    'updated_by' => Auth::id(),
-                    'action' => 'Uploaded',
-                    'file_name' => $file['file_name'],
-                    'updated_at' => now(),
-                ]);
+                if (!empty($ftcOrder->order_id)) {
+                    // Step 1: Check if record exists
+                    $existingRecord = SupportingDocs::where('order_id', $ftcOrder->order_id)->first();
+                
+                    if ($existingRecord) {
+                        // Step 2a: Delete the file from storage
+                        if (Storage::exists($existingRecord->file_path)) {
+                            Storage::delete($existingRecord->file_path);
+                        }
+                
+                        // Step 2b: Delete the record from the database
+                        $existingRecord->delete();
+                    }
+                
+                    // Step 3: Insert the new record
+                    SupportingDocs::insertGetId([
+                        'order_id' => $ftcOrder->order_id,
+                        'file_path' => $filePath,
+                        'file_name' => $file['file_name'],
+                        'created_at' => now(),
+                    ]);
+
+                    OmsAttachmentHistory::where('order_id', $ftcOrder->order_id)->delete();
+                    
+                    OmsAttachmentHistory::create([
+                        'order_id' => $ftcOrder->order_id,
+                        'updated_by' => Auth::id(),
+                        'action' => 'Uploaded',
+                        'file_name' => $file['file_name'],
+                        'updated_at' => now(),
+                    ]);
+                }
+               
     
                 \Log::info("Supporting document saved", ['file' => $filename]);
             }
