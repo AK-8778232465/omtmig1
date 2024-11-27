@@ -145,8 +145,7 @@
             <li id="ordercompletion-details" class="report-item">Order Completion Details</li>
             <li id="orderprogress-details" class="report-item">Order Progress Details</li>
             <li id="attendance-details" class="report-item">Attendance Details</li>
-           <li id="production-report" class="report-item">Accurate - Production Report</li>
-            <li id="orderInflow-report" class="report-item">Order Inflow Details</li>
+            <li id="production-report" class="report-item">Production Report</li>
         </ul>
     </div>
 
@@ -158,8 +157,9 @@
                 </div>
             </div>
         </div>
-            <div class="col-md-4" style="width: 350px!important;" id="selected_date_range">
-                <div class="form-group">
+        <div class="row" id="hidefilter">
+            <div class="col-md-4" style="width: 350px!important;">
+                <div class="form-group" >
                     <label for="dateFilter" required>Selected received date range:</label>
                     <select class="form-control" style=" width: 250px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
                         <option value="" >Select Date Range</option>
@@ -188,7 +188,7 @@
                     <b class="mt-0" id="selectedDate"></b>
                 </div>
             </div>
-            <div class="col-md-2" id="client_filter">
+            <div class="col-md-2">
                 <div class="form-group">
                     <label for="client">Client</label>
                     <select class="form-control select2-basic-multiple" name="dcf_client_id" id="client_id_dcf">
@@ -201,7 +201,7 @@
                 </div>
             </div>
 
-            <div class="col-md-2" id="lob_filter">
+            <div class="col-md-2">
                 <div class="form-group">
                     <label for="lob_id">Lob</label>
                     <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id">
@@ -210,7 +210,7 @@
                 </div>
             </div>
 
-            <div class="col-md-2" id="process_filter">
+            <div class="col-md-2">
                 <div class="form-group">
                     <label for="process_type_id">Process</label>
                     <select class="form-control select2-basic-multiple" style="width:100%" name="process_type_id" id="process_type_id" multiple="multiple">
@@ -424,28 +424,6 @@
             </div>
         </div>
     </div>
-
-
-            </div>
-        </div>
-    </div>
-    <div class="card col-md-10 mt-2 tabledetails" id="orderInflow_report" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
-        <h4 class="text-center mt-3">Order Inflow Report</h4>
-        <div class="card-body">
-            <div class="p-0">
-                <table id="orderInflow_report_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                    <thead class="text-center" style="font-size: 12px;">
-                        <tr>
-                            <th width="10%">Client Name</th>
-                            <th width="12%">Carry Forward</th>
-                            <th width="12%">Received</th>
-                            <th width="12%">Completed</th>
-                            <th width="12%">Pending</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-center" style="font-size: 12px;"></tbody>
-                </table>
-                <h5><span style="color:red;">*</span><strong>Note:</strong> Cancelled Count is not Considered in Carry forward Count</h5>
             </div>
         </div>
     </div>
@@ -1121,9 +1099,6 @@ $(document).on('click', '#filterButton,#filterButton2', function () {
             case 'production-report':
                  production_report();
                 break;
-            case 'orderInflow-report':
-                 orderInflow_report();
-                break;
             default:
                 console.log('No valid report item is active.');
         }
@@ -1151,9 +1126,6 @@ $(document).ready(function() {
         $('#attendance_report').hide();
         $('#datepicker').hide();
         $('#production_report').hide();
-        $('#orderInflow_report').hide();
-
-
 
 
 
@@ -1200,16 +1172,6 @@ $(document).ready(function() {
             $('#datepicker').hide();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
-		}else if (reportId === 'orderInflow-report') {
-            $('#orderInflow_report').show();
-            $('#selected_date_range').show();
-            $('#hidefilter_3').show();
-            $('#client_filter').hide();
-            $('#lob_filter').hide();
-            $('#process_filter').hide();
-            $('#hidefilter_2').hide();
-
-        }
         }
     }
 
@@ -1629,55 +1591,6 @@ function production_report() {
         fixedFooter: true  
     });
 }
-
-
-
-function orderInflow_report() {
-    var fromDate = $('#fromDate_range').val();
-    var toDate = $('#toDate_range').val();
-    $('#orderInflow_report_table').DataTable({
-        destroy: true,
-        processing: true,
-        serverSide: true,
-        searching: true,
-        ajax: {
-            url: "{{ route('orderInflow_data') }}",
-            type: 'POST',
-            data: {
-                toDate_range: toDate,
-                fromDate_range: fromDate,
-                selectedDateFilter: selectedDateFilter, // Send the selected date
-                _token: '{{ csrf_token() }}'
-            },
-            dataSrc: function(json) {
-                console.log("Backend Response:", json);
-
-                if (json.data && typeof json.data === 'object') {
-                    return Object.values(json.data);
-                } else {
-                    console.error('Data is not in expected format');
-                    return [];
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Error loading data: ', error);
-                alert('Failed to load data. Please try again.');
-            }
-        },
-        columns: [
-            { data: 'client_name', name: 'client_name' },
-            { data: 'carry_forward', name: 'carry_forward' },
-            { data: 'received', name: 'received' },
-            { data: 'completed', name: 'completed' },
-            { data: 'pending', name: 'pending' }
-        ],
-        dom: 'lBfrtip',
-        buttons: ['excel'],
-        lengthMenu: [10, 25, 50, 75, 100],
-        order: [[0, 'asc']] // Order by client name
-    });
-}
-
 
 function exportToExcel(data) {
     var exportData = data.map(function (row, index) {
