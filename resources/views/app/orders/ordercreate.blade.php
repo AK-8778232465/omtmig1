@@ -277,6 +277,32 @@
                                 <div id="process_code_error" class="parsley-error"></div>
                             </div>
 
+                        <h6 style="margin-right: 370px;"><strong>Sample:</strong></h6>
+                            <select class="form-control select2dropdown" style="width:200px;" id="selectclient">
+                            <option selected disabled value="">Select Client</option>
+                            <option value="1">Fams</option>
+                            <option value="2">Accurate</option>
+                            <option value="3">Cypress Ascendant Services</option>
+                            <option value="4">BC Law Firm</option>
+                            <option value="5">Title 365</option>
+                            <option value="6">ATA National Title</option>
+                            <option value="7">Reliable Property Reports</option>
+                            <option value="8">Radian Settlement Services</option>
+                            <option value="9">Reltco_sample_template</option>
+                            <option value="10">Qualia</option>
+                            <option value="11">WFG Title</option>
+                            <option value="12">FINN TITLE</option>
+                            <option value="13">Beeline</option>
+                            <option value="14">Flowers Title Companies</option>
+                            <option value="15">Ice</option>
+                            <option value="16">Old Republic Diversified</option>
+                            <option value="17">Silk Title</option>
+                            <option value="18">Baseline Title</option>
+                            <option value="19">California Best Title company</option>
+                            <option value="20">Common Bond Title</option>
+                            <option value="21">Ferr & Mullin, P.C</option>
+
+
 
                             <div class="form-group col-lg-3 mb-3 pb-0">
                                 <label class="font-weight-bold">State Code</label><br>
@@ -1051,49 +1077,65 @@
 
             });
 
-            $('#select_client_id').trigger('change');
-        });
+    $('#select_client_id').trigger('change');
+});
 
-        $(document).ready(function() {
-            $('#selectclient').on('change', function() {
-                var selectedValue = $(this).val();
-                var downloadLink = $('#download');
+$(document).ready(function () {
+        $('#selectclient').on('change', function () {
+            var selectedValue = $(this).val();
+            var downloadLink = $('#download');
 
-                if (selectedValue == "1") {
-                    downloadLink.attr('href', "{{ asset('/template/Fams_sample_template.xlsx') }}");
-                } else if (selectedValue == "2") {
-                    downloadLink.attr('href', "{{ asset('/template/Accurate_sample_template.xlsx') }}");
-                } else if (selectedValue == "3") {
-                    downloadLink.attr('href',
-                        "{{ asset('/template/Cypress Ascendant Services LLC_sample_template.xlsx') }}");
-                } else if (selectedValue == "4") {
-                    downloadLink.attr('href', "{{ asset('/template/BC Law Firm_sample_template.xlsx') }}");
-                } else if (selectedValue == "5") {
-                    downloadLink.attr('href', "{{ asset('/template/Title 365_sample_template.xlsx') }}");
-                } else if (selectedValue == "6") {
-                    downloadLink.attr('href',
-                        "{{ asset('/template/ATA National Title_sample_template.xlsx') }}");
-                } else if (selectedValue == "7") {
-                    downloadLink.attr('href',
-                        "{{ asset('/template/Reliable Property Reports, Inc_sample_template.xlsx') }}");
-                } else if (selectedValue == "8") {
-                    downloadLink.attr('href',
-                        "{{ asset('/template/Radian Settlement Services Inc_sample_template.xlsx') }}");
-                } else if (selectedValue == "9") {
-                    downloadLink.attr('href', "{{ asset('/template/Reltco_sample_template.xlsx') }}");
-                } else if (selectedValue == "10") {
-                    downloadLink.attr('href', "{{ asset('/template/Qualia_sample_template.xlsx') }}");
-                } else if (selectedValue == "11") {
-                    downloadLink.attr('href', "{{ asset('/template/WFG Title_sample_template.xlsx') }}");
-                } else if (selectedValue == "12") {
-                    downloadLink.attr('href', "{{ asset('/template/FINN TITLE_sample_template.xlsx') }}");
-                } else if (selectedValue == "13") {
-                    downloadLink.attr('href', "{{ asset('/template/Beeline_sample_template.xlsx') }}");
-                } else {
-                    downloadLink.attr('href', "#");
-                }
-            });
+            if (selectedValue == "1") {
+                downloadLink.attr('href', "{{ asset('/template/Fams_sample_template.xlsx') }}");
+            } else if (selectedValue == "2") {
+                downloadLink.attr('href', "{{ asset('/template/Accurate_sample_template.xlsx') }}");
+            } else if (selectedValue == "3") {
+                downloadLink.attr('href', "{{ asset('/template/Cypress Ascendant Services LLC_sample_template.xlsx') }}");
+            }else if (selectedValue == "4") {
+                downloadLink.attr('href', "{{ asset('/template/BC Law Firm_sample_template.xlsx') }}");
+            }else if (selectedValue == "5") {
+                downloadLink.attr('href', "{{ asset('/template/Title 365_sample_template.xlsx') }}");
+            }else if (selectedValue == "6") {
+                downloadLink.attr('href', "{{ asset('/template/ATA National Title_sample_template.xlsx') }}");
+            }else if (selectedValue == "7") {
+                downloadLink.attr('href', "{{ asset('/template/Reliable Property Reports, Inc_sample_template.xlsx') }}");
+            }else if (selectedValue == "8") {
+                downloadLink.attr('href', "{{ asset('/template/Radian Settlement Services Inc_sample_template.xlsx') }}");
+            }else if (selectedValue == "9") {
+                downloadLink.attr('href', "{{ asset('/template/Reltco_sample_template.xlsx') }}");
+            }else if (selectedValue == "10") {
+                downloadLink.attr('href', "{{ asset('/template/Qualia_sample_template.xlsx') }}");
+            }else if (selectedValue == "11") {
+                downloadLink.attr('href', "{{ asset('/template/WFG Title_sample_template.xlsx') }}");
+            }else if (selectedValue == "12") {
+                downloadLink.attr('href', "{{ asset('/template/FINN TITLE_sample_template.xlsx') }}");
+            }else if (selectedValue == "13") {
+                downloadLink.attr('href', "{{ asset('/template/Beeline_sample_template.xlsx') }}");
+            }else if (selectedValue == "14") {
+                downloadLink.attr('href', "{{ asset('/template/Flower_sample_template.xlsx') }}");
+            }else if (selectedValue == "15") {
+                downloadLink.attr('href', "{{ asset('/template/Ice_sample_template.xlsx') }}");
+            }else if (selectedValue == "16") {
+                downloadLink.attr('href', "{{ asset('/template/ORT_sample_template.xlsx') }}");
+            }else if (selectedValue == "17") {
+                downloadLink.attr('href', "{{ asset('/template/Silk Title_sample_template.xlsx') }}");
+            }else if (selectedValue == "18") {
+                downloadLink.attr('href', "{{ asset('/template/Baseline_sample_template.xlsx') }}");
+            }else if (selectedValue == "19") {
+                downloadLink.attr('href', "{{ asset('/template/California Best_sample_template.xlsx') }}");
+            }else if (selectedValue == "20") {
+                downloadLink.attr('href', "{{ asset('/template/Common Bond_sample_template.xlsx') }}");
+            }else if (selectedValue == "21") {
+                downloadLink.attr('href', "{{ asset('/template/Ferr.xlsx') }}");
+            }
+            else {
+                downloadLink.attr('href', "#");
+            }
         });
+    });
+
+    
+
     </script>
 
 @endsection

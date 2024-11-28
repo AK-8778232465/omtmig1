@@ -6,6 +6,7 @@ use App\Models\user;
 use App\Models\State;
 use App\Models\County;
 use App\Models\City;
+use App\Models\Role;
 use App\Models\OrderCreation;
 use Illuminate\Http\Request;
 use DB;
@@ -22,7 +23,10 @@ class ReportsController extends Controller
     public function Reports(Request $request)
     {
         $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
-        return view('app.reports.index',compact('clients'));
+        $roles = Role::select('id', "name")->get();
+
+
+        return view('app.reports.index',compact('clients', 'roles'));
     }
 
 
@@ -1178,5 +1182,222 @@ public function exportProductionReport(Request $request) {
         'data' => $result
     ]);
 }
-     
+
+
+
+public function orderInflow_data(Request $request){
+
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+    $currentDate = Carbon::now();
+    $firstDateOfCurrentMonth = Carbon::now()->startOfMonth();
+
+    $selectedDateFilter = $request->input('selectedDateFilter');
+
+    $fromDateRange = $request->input('fromDate_range');
+    $toDateRange = $request->input('toDate_range');
+
+    $from_date = null;
+    $to_date = null;
+
+    if ($fromDateRange && $toDateRange) {
+        $from_date = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $to_date = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $from_date = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $to_date = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $from_date = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $to_date = $from_date;
+        }
+    }
+
+
+    $statusCountsQuery = OrderCreation::query()->with('process', 'client')
+        ->whereHas('process', function ($query) {
+            $query->where('stl_item_description.is_approved', 1);
+        })
+        ->whereHas('client', function ($query) {
+            $query->where('stl_client.is_approved', 1);
+
+        });
+
+        $statusCountsQuery2 = clone $statusCountsQuery;
+        $statusCountsQuery3 = clone $statusCountsQuery;
+
+
+    // Carry forward count for all clients
+    $carry_forward = $statusCountsQuery->whereIn('process_id', $processIds)
+        ->where('is_active', 1)
+        ->where('status_id', '!=', 3)
+        ->whereDate('order_date', '<', $from_date)
+        ->groupBy('client_id')
+        ->selectRaw('client_id, count(*) as carry_forward')
+        ->get();
+
+
+
+
+
+    // Received count for all clients
+    $received = $statusCountsQuery2->whereIn('process_id', $processIds)
+        ->where('is_active', 1)
+        ->whereBetween('order_date', [$from_date, $to_date])
+        ->groupBy('client_id')
+        ->selectRaw('client_id, count(*) as received')
+        ->get();
+
+
+
+    // Completed count for all clients
+    $completed = $statusCountsQuery3->whereIn('process_id', $processIds)
+        ->where('status_id', 5)
+        ->where('is_active', 1)
+        ->whereDate('completion_date', '>=', $from_date)
+        ->whereDate('completion_date', '<=', $to_date)
+        ->groupBy('client_id')
+        ->selectRaw('client_id, count(*) as completed')
+        ->get();
+
+    // Pending count for all clients
+    $pendingData = $carry_forward->keyBy('client_id')->map(function ($item) use ($received, $completed) {
+        $receivedCount = $received->firstWhere('client_id', $item->client_id);
+        $completedCount = $completed->firstWhere('client_id', $item->client_id);
+
+        $receivedCount = $receivedCount ? $receivedCount->received : 0;
+        $completedCount = $completedCount ? $completedCount->completed : 0;
+
+        $pending = $item->carry_forward + $receivedCount - $completedCount;
+
+        return [
+            'carry_forward' => $item->carry_forward,
+            'received' => $receivedCount,
+            'completed' => $completedCount,
+            'pending' => max($pending, 0)
+        ];
+    });
+
+    // Retrieve client names
+    $clientNames = Client::whereIn('id', $carry_forward->pluck('client_id'))->pluck('client_name', 'id');
+
+    // Prepare the final response data
+    $data = $pendingData->map(function ($counts, $clientId) use ($clientNames) {
+        return [
+            'client_name' => $clientNames[$clientId],
+            'carry_forward' => $counts['carry_forward'],
+            'received' => $counts['received'],
+            'completed' => $counts['completed'],
+            'pending' => $counts['pending'],
+        ];
+    });
+    $totalRecords = $pendingData->count();
+    return response()->json([
+        'recordsTotal' => $totalRecords,
+        'recordsFiltered' => $totalRecords,
+        'data' => $data
+    ]);
+}
+
+
+
+public function getUsersByRole(Request $request)
+{
+    // Get the role_id from the request
+    $roleId = $request->input('role_id');
+
+    // Fetch users with matching user_type_id (assuming the relationship is on `oms_users`)
+    $users = User::where('user_type_id', $roleId)->get(['id', 'username']); // Or any other fields you need
+
+    // Return a response in JSON format
+    return response()->json([
+        'users' => $users
+    ]);
+}
+
+public function getUserData(Request $request)
+{
+    // Validate incoming request to ensure user_id is provided
+    $request->validate([
+        'user_id' => 'required|exists:oms_users,id',
+    ]);
+
+    // Get the selected user_id
+    $userId = $request->input('user_id');
+
+    // Initialize the userLowerIds array with the given user_id
+    $userLowerIds = [$userId];
+
+    // This will hold the final list of all the user IDs in the hierarchy
+    $allUserIds = [];
+
+    // Flag to indicate if we need to continue fetching lower level users
+    $continueFetching = true;
+
+    while ($continueFetching) {
+        // Get all users whose reporting_to is in the current list of userLowerIds
+        $users = DB::table('oms_users')
+            ->leftJoin('roles', 'oms_users.user_type_id', '=', 'roles.id')
+            ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+            ->select(
+                'oms_users.id',
+                'oms_users.emp_id',
+                'oms_users.username',
+                'roles.name as role',
+                'reporting_user.username as reporting_to_username'
+            )
+            ->whereIn('oms_users.reporting_to', $userLowerIds)
+            ->get();
+
+        // If there are users found in this batch, add their IDs to the list
+        if ($users->isNotEmpty()) {
+            // Add these users' IDs to the allUserIds list
+            foreach ($users as $user) {
+                $allUserIds[] = $user->id;
+            }
+
+            // Update userLowerIds to the new list of IDs to continue fetching
+            $userLowerIds = $users->pluck('id')->toArray();
+        } else {
+            // No more users to fetch, break the loop
+            $continueFetching = false;
+        }
+    }
+
+    // Get the final set of users by their collected IDs
+    $userData = DB::table('oms_users')
+        ->leftJoin('roles', 'oms_users.user_type_id', '=', 'roles.id')
+        ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+        ->select(
+            'oms_users.id',
+            'oms_users.emp_id',
+            'oms_users.username',
+            'roles.name as role',
+            'reporting_user.username as reporting_to_username'
+        )
+        ->whereIn('oms_users.id', $allUserIds)
+        ->get();
+
+    // Check if user data exists
+
+        return response()->json([
+            'users' => $userData->map(function($user) {
+                return [
+                    'emp_id' => $user->emp_id ?? "",
+                    'username' => $user->username ?? "",
+                    'role' => $user->role ?? "",
+                    'reporting_to_username' => $user->reporting_to_username ?? ""
+                ];
+            }),
+        ]);
+
+}
 }

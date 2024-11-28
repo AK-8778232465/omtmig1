@@ -145,7 +145,8 @@
             <li id="ordercompletion-details" class="report-item">Order Completion Details</li>
             <li id="orderprogress-details" class="report-item">Order Progress Details</li>
             <li id="attendance-details" class="report-item">Attendance Details</li>
-            <li id="production-report" class="report-item">Production Report</li>
+           <li id="production-report" class="report-item">Accurate - Production Report</li>
+            <li id="orderInflow-report" class="report-item">Order Inflow Details</li>
         </ul>
     </div>
 
@@ -157,9 +158,37 @@
                 </div>
             </div>
         </div>
+
+<div class="d-flex">
+        <div class="col-md-2" id="role_filter">
+            <div class="form-group">
+                <label for="role">Roles</label>
+                <select class="form-control select2-basic-multiple" name="role_id" id="role_id">
+                    <option selected value="">Select Role</option>
+                    @forelse($roles as $role)
+                    <option value="{{ $role->id }}">{{ $role->name }}</option>
+                    @empty
+                    @endforelse
+                </select>
+            </div>
+        </div>
+
+
+        <div class="col-md-2" id="user_filter">
+            <div class="form-group">
+                <label for="user">Users</label>
+                <select class="form-control select2-basic-multiple" name="user_id" id="user_id">
+                    <option selected value="">Select Users</option>
+                </select>
+            </div>
+        </div>
+
+</div>
+
+
         <div class="row" id="hidefilter">
-            <div class="col-md-4" style="width: 350px!important;">
-                <div class="form-group" >
+            <div class="col-md-4" style="width: 350px!important;" id="selected_date_range">
+                <div class="form-group">
                     <label for="dateFilter" required>Selected received date range:</label>
                     <select class="form-control" style=" width: 250px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
                         <option value="" >Select Date Range</option>
@@ -188,7 +217,7 @@
                     <b class="mt-0" id="selectedDate"></b>
                 </div>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2" id="client_filter">
                 <div class="form-group">
                     <label for="client">Client</label>
                     <select class="form-control select2-basic-multiple" name="dcf_client_id" id="client_id_dcf">
@@ -201,7 +230,7 @@
                 </div>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-2" id="lob_filter">
                 <div class="form-group">
                     <label for="lob_id">Lob</label>
                     <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id">
@@ -210,7 +239,7 @@
                 </div>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-2" id="process_filter">
                 <div class="form-group">
                     <label for="process_type_id">Process</label>
                     <select class="form-control select2-basic-multiple" style="width:100%" name="process_type_id" id="process_type_id" multiple="multiple">
@@ -424,9 +453,53 @@
             </div>
         </div>
     </div>
+
+
             </div>
         </div>
     </div>
+    <div class="card col-md-10 mt-2 tabledetails" id="orderInflow_report" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
+        <h4 class="text-center mt-3">Order Inflow Report</h4>
+        <div class="card-body">
+            <div class="p-0">
+                <table id="orderInflow_report_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <thead class="text-center" style="font-size: 12px;">
+                        <tr>
+                            <th width="10%">Client Name</th>
+                            <th width="12%">Carry Forward</th>
+                            <th width="12%">Received</th>
+                            <th width="12%">Completed</th>
+                            <th width="12%">Pending</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center" style="font-size: 12px;"></tbody>
+                </table>
+                <h5><span style="color:red;">*</span><strong>Note:</strong> Cancelled Count is not Considered in Carry forward Count</h5>
+            </div>
+        </div>
+    </div>
+
+    {{-- ACM Report --}}
+
+    <div class="card col-md-10 mt-2 tabledetails" id="acm_report" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
+        <h4 class="text-center mt-3">ACM Report</h4>
+        <div class="card-body">
+            <div class="p-0">
+                <table id="acm_report_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <thead class="text-center" style="font-size: 12px;">
+                        <tr>
+                            <th width="10%">Emp Id</th>
+                            <th width="12%">Emp Name</th>
+                            <th width="12%">Role</th>
+                            <th width="8%">Reporting_to</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center" style="font-size: 12px;"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script src="{{asset('./assets/js/jquery.min.js')}}"></script>
@@ -1099,6 +1172,9 @@ $(document).on('click', '#filterButton,#filterButton2', function () {
             case 'production-report':
                  production_report();
                 break;
+            case 'orderInflow-report':
+                 orderInflow_report();
+                break;
             default:
                 console.log('No valid report item is active.');
         }
@@ -1126,6 +1202,10 @@ $(document).ready(function() {
         $('#attendance_report').hide();
         $('#datepicker').hide();
         $('#production_report').hide();
+        $('#orderInflow_report').hide();
+        $('#acm_report').hide();
+
+
 
 
 
@@ -1136,6 +1216,13 @@ $(document).ready(function() {
             $('#hidefilter').show();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+            $('#selected_date_range').show();
+            $('#client_filter').show();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+
 
         } else if (reportId === 'orderwise-details') {
             $('#newreports_table').show();
@@ -1143,6 +1230,13 @@ $(document).ready(function() {
             $('#hidefilter').show();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+            $('#selected_date_range').show();
+            $('#client_filter').show();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+
 
         } else if (reportId === 'ordercompletion-details') {
             $('#timetaken_table').show();
@@ -1150,6 +1244,13 @@ $(document).ready(function() {
             $('#hidefilter').show();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+            $('#selected_date_range').show();
+            $('#client_filter').show();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+
 
         } else if (reportId === 'orderprogress-details') {
             $('#orderwise_timetaken_table').show();
@@ -1157,6 +1258,13 @@ $(document).ready(function() {
             $('#hidefilter').show();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+            $('#selected_date_range').show();
+            $('#client_filter').show();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+
 
 
         } else if (reportId === 'attendance-details') {
@@ -1166,14 +1274,59 @@ $(document).ready(function() {
             $('#hidefilter_3').hide();
             $('#datepicker').show();
             $('#filterButton2').click();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+            $('#selected_date_range').hide();
+            $('#client_filter').hide();
+            $('#lob_filter').hide();
+            $('#process_filter').hide();
+
+
+
+
         }else if (reportId === 'production-report') {
             $('#production_report').show();
             $('#hidefilter').show();
             $('#datepicker').hide();
             $('#hidefilter_2').show();
             $('#hidefilter_3').show();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+            $('#selected_date_range').show();
+            $('#client_filter').show();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+
+
+
+		}else if (reportId === 'orderInflow-report') {
+            $('#orderInflow_report').show();
+            $('#selected_date_range').show();
+            $('#hidefilter_3').show();
+            $('#client_filter').hide();
+            $('#lob_filter').hide();
+            $('#process_filter').hide();
+            $('#hidefilter_2').hide();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+
+        }else if (reportId === 'acm-report') {
+            $('#acm_report').show();
+            $('#selected_date_range').hide();
+            $('#hidefilter_3').hide();
+            $('#client_filter').hide();
+            $('#lob_filter').hide();
+            $('#process_filter').hide();
+            $('#hidefilter_2').hide();
+            $('#role_filter').show();
+            $('#user_filter').show();
+
+
+
+
+
         }
-    }
+        }
 
     showReport('userwise-details');
 
@@ -1592,6 +1745,55 @@ function production_report() {
     });
 }
 
+
+
+function orderInflow_report() {
+    var fromDate = $('#fromDate_range').val();
+    var toDate = $('#toDate_range').val();
+    $('#orderInflow_report_table').DataTable({
+        destroy: true,
+        processing: true,
+        serverSide: true,
+        searching: true,
+        ajax: {
+            url: "{{ route('orderInflow_data') }}",
+            type: 'POST',
+            data: {
+                toDate_range: toDate,
+                fromDate_range: fromDate,
+                selectedDateFilter: selectedDateFilter, // Send the selected date
+                _token: '{{ csrf_token() }}'
+            },
+            dataSrc: function(json) {
+                console.log("Backend Response:", json);
+
+                if (json.data && typeof json.data === 'object') {
+                    return Object.values(json.data);
+                } else {
+                    console.error('Data is not in expected format');
+                    return [];
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error loading data: ', error);
+                alert('Failed to load data. Please try again.');
+            }
+        },
+        columns: [
+            { data: 'client_name', name: 'client_name' },
+            { data: 'carry_forward', name: 'carry_forward' },
+            { data: 'received', name: 'received' },
+            { data: 'completed', name: 'completed' },
+            { data: 'pending', name: 'pending' }
+        ],
+        dom: 'lBfrtip',
+        buttons: ['excel'],
+        lengthMenu: [10, 25, 50, 75, 100],
+        order: [[0, 'asc']] // Order by client name
+    });
+}
+
+
 function exportToExcel(data) {
     var exportData = data.map(function (row, index) {
         return {
@@ -1655,10 +1857,92 @@ function calculateTatTime(orderDate, completionDate) {
 
 
 
+$(document).ready(function() {
+    // When the role dropdown changes
+    $('#role_id').on('change', function() {
+        var roleId = $(this).val();
+        console.log(roleId); // Get the selected role ID
+
+        // Check if a role is selected
+        if (roleId) {
+            // Make an AJAX call to fetch users
+            $.ajax({
+                url: "{{ url('getUsersByRole') }}",
+                type: 'POST',
+                data: {
+                    role_id: roleId,
+                     _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    // Clear the current user dropdown
+                    $('#user_id').empty();
+                    $('#user_id').append('<option selected value="">Select Users</option>');
+
+                    // Check if there are users returned
+                    if (response.users.length > 0) {
+                        // Loop through the users and append them to the user dropdown
+                        $.each(response.users, function(index, user) {
+                            $('#user_id').append('<option value="' + user.id + '">' + user.username + '</option>');
+                        });
+                    } else {
+                        $('#user_id').append('<option value="">No users found</option>');
+                    }
+                },
+                error: function() {
+                    alert('Error fetching users');
+                }
+            });
+        } else {
+            // If no role is selected, clear the user dropdown
+            $('#user_id').empty();
+            $('#user_id').append('<option selected value="">Select Users</option>');
+        }
+    });
+});
 
 
+$('#user_id').on('change', function() {
+    var userId = $(this).val();
+    console.log(userId);  // Get the selected user_id
 
+    // Check if a user is selected
+    if (userId) {
+        // Make an AJAX request to fetch user data
+        $.ajax({
+            url: "{{ route('getUserData') }}",  // Route to the Laravel controller
+            type: 'POST',
+            data: {
+                user_id: userId,  // Send the selected user_id
+                _token: '{{ csrf_token() }}'  // CSRF token for security
+            },
+            success: function(response) {
+                if (response.users && response.users.length > 0) {
+                    // Initialize DataTable with the response data
+                    $('#acm_report_table').DataTable({
+                        destroy: true, // To reset the table on every new selection
+                        data: response.users,
+                        columns: [
+                            { data: 'emp_id', title: 'Emp Id' },
+                            { data: 'username', title: 'Emp Name' },
+                            { data: 'role', title: 'Role' },
+                            { data: 'reporting_to_username', title: 'Reporting_to', defaultContent: 'N/A' }
+                        ],
+                        dom: 'lBfrtip',  // Add the Excel button functionality
+                        buttons: ['excel'],  // Excel export button
+                        lengthMenu: [10, 25, 50, 75, 100],
+                        order: [[0, 'asc']],  // Sort by Emp Id (or adjust as needed)
+                    });
+                }else {
+                    // If no users, clear the table
+                    var table = $('#acm_report_table').DataTable();
+                    table.clear(); // Remove all data
+                    table.draw();  // Redraw the table to reflect the empty state
+                }
+            },
 
+        });
+    }
+});
 
 </script>
 
