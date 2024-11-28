@@ -1218,6 +1218,11 @@ $(document).ready(function() {
             $('#hidefilter_3').show();
             $('#role_filter').hide();
             $('#user_filter').hide();
+            $('#selected_date_range').show();
+            $('#client_filter').show();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+
 
         } else if (reportId === 'orderwise-details') {
             $('#newreports_table').show();
@@ -1227,6 +1232,11 @@ $(document).ready(function() {
             $('#hidefilter_3').show();
             $('#role_filter').hide();
             $('#user_filter').hide();
+            $('#selected_date_range').show();
+            $('#client_filter').show();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+
 
         } else if (reportId === 'ordercompletion-details') {
             $('#timetaken_table').show();
@@ -1236,6 +1246,11 @@ $(document).ready(function() {
             $('#hidefilter_3').show();
             $('#role_filter').hide();
             $('#user_filter').hide();
+            $('#selected_date_range').show();
+            $('#client_filter').show();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+
 
         } else if (reportId === 'orderprogress-details') {
             $('#orderwise_timetaken_table').show();
@@ -1245,6 +1260,11 @@ $(document).ready(function() {
             $('#hidefilter_3').show();
             $('#role_filter').hide();
             $('#user_filter').hide();
+            $('#selected_date_range').show();
+            $('#client_filter').show();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+
 
 
         } else if (reportId === 'attendance-details') {
@@ -1256,6 +1276,13 @@ $(document).ready(function() {
             $('#filterButton2').click();
             $('#role_filter').hide();
             $('#user_filter').hide();
+            $('#selected_date_range').hide();
+            $('#client_filter').hide();
+            $('#lob_filter').hide();
+            $('#process_filter').hide();
+
+
+
 
         }else if (reportId === 'production-report') {
             $('#production_report').show();
@@ -1265,6 +1292,12 @@ $(document).ready(function() {
             $('#hidefilter_3').show();
             $('#role_filter').hide();
             $('#user_filter').hide();
+            $('#selected_date_range').show();
+            $('#client_filter').show();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+
+
 
 		}else if (reportId === 'orderInflow-report') {
             $('#orderInflow_report').show();
