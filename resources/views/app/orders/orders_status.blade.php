@@ -1032,7 +1032,7 @@ $(document).ready(function() {
             datatable.column(15).visible(false);
         }
         // //
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') ||Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') ||Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP') || Auth::user()->hasRole('Admin'))
             if(status == 13){
                 $('.status-dropdown').prop('disabled', false);
                 datatable.column(15).visible(true);
@@ -1089,7 +1089,7 @@ $(document).ready(function() {
         @endif
 
         if(status == 5) {
-            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP') || Auth::user()->hasRole('Admin'))
             $('.status-dropdown').prop('disabled', false);
             @endif
         }
