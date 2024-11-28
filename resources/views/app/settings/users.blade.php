@@ -132,7 +132,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    @role('Super Admin|Business Head|SPOC|PM/TL|AVP/VP|Admin')
+                                    @role('Super Admin|Business Head|SPOC|PM/TL|AVP/VP')
                                     <a href="#"><span class="edit_user ml-2"  data-id="{{ $users->id }}">
                                         <img class="menuicon tbl_editbtn" src="{{asset('assets/images/edit.svg')}}" >&nbsp;
                                     </span></a>
@@ -526,7 +526,7 @@
 
                 let role = res['user_type_id'];
                 let reporting_users;
-                if(role == 1) {
+                if(role == 1 || role == 2) {
                     $('#edit_reporting_to').hide();
                 } else if (role == 3) {
                     $('#edit_reporting_to').show();
@@ -537,12 +537,9 @@
                 } else if (role == 9) {
                     $('#edit_reporting_to').show();
                     reporting_users = 'getPM_TL';
-                }else if (role == 6 || role == 7 || role == 8  || role == 10 || role == 11 || role == 22 ) {
+                }else if (role == 6 || role == 7 || role == 8) {
                     $('#edit_reporting_to').show();
                     reporting_users = 'getSOPC';
-                }else if (role == 2 ) {
-                    $('#edit_reporting_to').show();
-                    reporting_users = 'getAdmin';
                 }
                 $.ajax({
                     url: "{{ route('getUserList') }}",
@@ -763,7 +760,7 @@ function assignService(userID) {
             $('#add_reporting_to').show();
             reporting_users = 'getPM_TL';
         }
-        else if (role ==  6 || role == 7 || role == 8 || role == 10 ||role == 11 || role == 22  ) {
+        else if (role ==  6 || role == 7 || role == 8 ) {
             $('#add_reporting_to').show();
             reporting_users = 'getSOPC';
         }else if (role == 2 ) {
@@ -791,7 +788,7 @@ function assignService(userID) {
     $(document).on('change', '#user_type_id_ed', function() {
         let role = $(this).val();
         let reporting_users;
-        if(role == 1 ) {
+        if(role == 1 || role == 2) {
             $('#edit_reporting_to').hide();
         } else if (role == 3) {
             $('#edit_reporting_to').show();
@@ -800,14 +797,8 @@ function assignService(userID) {
             $('#edit_reporting_to').show();
             reporting_users = 'getBussinessHeads';
         } else if (role == 9) {
-            $('#edit_reporting_to').show(); 
+            $('#edit_reporting_to').show();
             reporting_users = 'getPM_TL';
-        }else if (role == 2 ) {
-            $('#edit_reporting_to').show();
-            reporting_users = 'getAdmin';
-        }else if (role ==  6 || role == 7 || role == 8 || role == 10 ||role == 11 || role == 22  ) {
-            $('#edit_reporting_to').show();
-            reporting_users = 'getSOPC';
         }
 
             $.ajax({

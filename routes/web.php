@@ -67,7 +67,7 @@ Route::middleware('auth:web')->controller(HomeController::class)->group(function
 
 });
 
-Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPOC,Admin'])->controller(SettingController::class)->group(function () {
+Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPOC'])->controller(SettingController::class)->group(function () {
     Route::get('settings', 'setting')->name('settings');
     Route::get('settings/users', 'setting')->name('users');
     Route::get('settings/products', 'setting')->name('products');
@@ -160,7 +160,7 @@ Route::middleware('auth:web')->controller(OrderFormController::class)->group(fun
 });
 
 
-Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPOC,Admin')->controller(OrderCreationController::class)->group(function () {
+Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPOC')->controller(OrderCreationController::class)->group(function () {
     Route::any('single_order', 'single_order')->name('single_order');
     Route::any('OrderCreationsImport', 'OrderCreationsImport')->name('OrderCreationsImport');
     Route::any('InsertOrder', 'InsertOrder')->name('InsertOrder');
@@ -191,7 +191,7 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPO
 //reports
 
 
-Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPOC,Admin')->controller(ReportsController::class)->group(function () {
+Route::middleware('auth:web','role_or:Super Admin,PM/TL,AVP/VP,Business Head,SPOC')->controller(ReportsController::class)->group(function () {
     Route::get('Reports', 'Reports')->name('Reports');
     Route::post('get_lob', 'get_lob')->name('get_lob');
     Route::post('get_process', 'get_process')->name('get_process');

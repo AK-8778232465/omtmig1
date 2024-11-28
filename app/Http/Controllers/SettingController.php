@@ -95,7 +95,7 @@ class SettingController extends Controller
                 
                
                 // $usersData = User::with('usertypes:id,usertype')->whereNotIn('user_type_id', [1,4])->get();
-                $userTypes = UserType::whereNotIn('id', [1,4,10])->get();
+                $userTypes = UserType::whereNotIn('id', [1,4])->get();
                 $exportCount = ServiceUserMapping::count(); 
 
 
@@ -105,7 +105,7 @@ class SettingController extends Controller
             }
         }else if ($request->is('settings/products')) {
 
-            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')|| Auth::user()->hasRole('Admin')) {
+            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                 $lobData = DB::table('stl_lob')->get();
                 $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
                 $products = Product::all();
@@ -489,7 +489,7 @@ class SettingController extends Controller
         }elseif($request->reviewer_type == 'getSOPC') {
             $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [9])->where('is_active', 1)->get();
         }elseif($request->reviewer_type == 'getAdmin') {
-            $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [23])->where('is_active', 1)->get();
+            $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [12])->where('is_active', 1)->get();
         }
         $html = '<option disabled selected value="">Select Reporting to</option>';
         if (!empty($ReportingList)) {
@@ -637,8 +637,6 @@ class SettingController extends Controller
                 $splitSize = ($totalRowCount/3);
             } elseif (Auth::user()->hasRole('PM/TL') && $totalRowCount > 2000) {
                 $splitSize = ($totalRowCount/2);
-            }elseif (Auth::user()->hasRole('Admin') && $totalRowCount >= 4000) {
-                $splitSize = ($totalRowCount/4);
             } else {
                 $splitSize = ($totalRowCount/1);
             }

@@ -789,16 +789,10 @@
                             <div class="form-row">
                                 <!-- Left Column -->
                                 <div class="col-6">
-                                @php
-                                $totalBilledAmount = (float)$getjsonDetails[0]['firstInstBilledAmt'] 
-                                                    + (float)$getjsonDetails[0]['secondInstBilledAmt'] 
-                                                    + (float)$getjsonDetails[0]['thirdInstBilledAmt'] 
-                                                    + (float)$getjsonDetails[0]['fourthInstBilledAmt'];
-                                @endphp
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Total Annual Tax :<span style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Total Annual Tax" style="flex: 1;" id="total_annual_tax" 
-                                            name="total_annual_tax" value="{{ $getjsonDetails[0]['totalBilledAmount'] ?? '0' }}" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
+                                            name="total_annual_tax" value="{{ $getjsonDetails[0]['totalValue'] ?? '' }}" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
                                     </div>
 
 
@@ -819,7 +813,7 @@
                                 <!-- Right Column -->
                                 <div class="col-6">
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
-                                        <label class="required" style="margin-right: 10px; width: 150px;">Land :<span style="color:red;">*</span></label>
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Land :<span vstyle="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Land"
                                             style="flex: 1;" id="land" name="land" value="{{ $getjsonDetails[0]['landValue'] ?? '' }}" required>
                                     </div>
@@ -934,7 +928,7 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Due :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_due_id" name="first_tax_due_id" value="{{ isset($getjsonDetails[0]['firstInstDueDate']) && $getjsonDetails[0]['firstInstDueDate'] ? \Carbon\Carbon::parse($getjsonDetails[0]['firstInstDueDate'])->format('Y-m-d') : '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_due_id" name="first_tax_due_id" value="{{ isset($getjsonDetails[0]['firstInstDueDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['firstInstDueDate'])->format('Y-m-d') : '' }}">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
