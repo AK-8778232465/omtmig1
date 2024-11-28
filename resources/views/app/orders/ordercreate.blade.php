@@ -276,34 +276,6 @@
                                 </select>
                                 <div id="process_code_error" class="parsley-error"></div>
                             </div>
-
-                        <h6 style="margin-right: 370px;"><strong>Sample:</strong></h6>
-                            <select class="form-control select2dropdown" style="width:200px;" id="selectclient">
-                            <option selected disabled value="">Select Client</option>
-                            <option value="1">Fams</option>
-                            <option value="2">Accurate</option>
-                            <option value="3">Cypress Ascendant Services</option>
-                            <option value="4">BC Law Firm</option>
-                            <option value="5">Title 365</option>
-                            <option value="6">ATA National Title</option>
-                            <option value="7">Reliable Property Reports</option>
-                            <option value="8">Radian Settlement Services</option>
-                            <option value="9">Reltco_sample_template</option>
-                            <option value="10">Qualia</option>
-                            <option value="11">WFG Title</option>
-                            <option value="12">FINN TITLE</option>
-                            <option value="13">Beeline</option>
-                            <option value="14">Flowers Title Companies</option>
-                            <option value="15">Ice</option>
-                            <option value="16">Old Republic Diversified</option>
-                            <option value="17">Silk Title</option>
-                            <option value="18">Baseline Title</option>
-                            <option value="19">California Best Title company</option>
-                            <option value="20">Common Bond Title</option>
-                            <option value="21">Ferr & Mullin, P.C</option>
-
-
-
                             <div class="form-group col-lg-3 mb-3 pb-0">
                                 <label class="font-weight-bold">State Code</label><br>
                                 <select class="form-control select2dropdown" style="width:100%" name="property_state"
@@ -443,7 +415,7 @@
                         <div class="form-group col-lg-6 mb-2 mt-2 pb-0 text-center" style="margin-top: auto;">
 
                             <h6 style="margin-right: 370px;"><strong>Sample:</strong></h6>
-                            <select class="form-control select2dropdown" style="width:200px;" id="selectclient">
+                                <select class="form-control select2dropdown" style="width:200px;" id="selectclient">
                                 <option selected disabled value="">Select Client</option>
                                 <option value="1">Fams</option>
                                 <option value="2">Accurate</option>
@@ -458,6 +430,14 @@
                                 <option value="11">WFG Title</option>
                                 <option value="12">FINN TITLE</option>
                                 <option value="13">Beeline</option>
+                                <option value="14">Flowers Title Companies</option>
+                                <option value="15">Ice</option>
+                                <option value="16">Old Republic Diversified</option>
+                                <option value="17">Silk Title</option>
+                                <option value="18">Baseline Title</option>
+                                <option value="19">California Best Title company</option>
+                                <option value="20">Common Bond Title</option>
+                            <option value="21">Ferr & Mullin, P.C</option>
 
                             </select>
 
