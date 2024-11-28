@@ -786,6 +786,30 @@
                             </div>
                         </div>
 
+                        <!-- Partially Cancelled -->
+                        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(20)"  style="cursor: pointer;">
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body">
+                                                <div class="d-flex align-items-center">
+                                                <h3 class="icon-dual-success mb-0 mr-2" id="partially_cancel_cnt">0</h3>
+                                                <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                                <h3 class="icon-dual-warning mb-0" id="pre_partially_cancel_cnt">0</h3>
+                                                </div>
+                                                <div class="justify-content-between align-items-center mt-2">
+                                                <span>Partially Cancelled</span>
+                                                    <i class="icon-dual-danger font-large-2 float-right" data-feather="alert-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
             <!-- Completed -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(5)"  style="cursor: pointer;">
                             <div class="card">
@@ -1585,6 +1609,7 @@ function fetchOrderData(projectId, clientId, fromDate, toDate, selectedDateFilte
             $('#typing_cnt').text(statusCounts[16] || 0);
             $('#typing_qc_cnt').text(statusCounts[17] || 0);
             $('#ground_abstractor_cnt').text(statusCounts[18] || 0);
+            $('#partially_cancel_cnt').text(statusCounts[20] || 0);
         }
     });
 }
@@ -1682,6 +1707,7 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
             let preTypingCnt = carriedCountMap[16] || 0;
             let preTypingQcCnt = carriedCountMap[17] || 0;
             let pregroundAbstractorCnt = carriedCountMap[18] || 0;
+            let prepartiallyCancelCnt = carriedCountMap[20] || 0;
 
 
 
@@ -1694,15 +1720,16 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
             $('#pre_typing_cnt').text(preTypingCnt);
             $('#pre_typing_qc_cnt').text(preTypingQcCnt);
             $('#pre_ground_abstractor_cnt').text(pregroundAbstractorCnt);
+            $('#pre_partially_cancel_cnt').text(prepartiallyCancelCnt);
 
             // Calculate and update the total of the specified values
             @if(!Auth::user()->hasRole('Typist/Typist_Qcer'))
     // Include all values for users who are not Typists/Typist_Qcers
-            let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt + predocPurchaserCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt;
+            let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt + predocPurchaserCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt + prepartiallyCancelCnt;
             $('#carried_over_cnt').text(totalSpecificValues);
         @else
             // Exclude preWipCnt for Typists/Typist_Qcers
-            let totalSpecificValues = preHoldCnt + preQuCnt + preClarificationCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt;
+            let totalSpecificValues = preHoldCnt + preQuCnt + preClarificationCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt + prepartiallyCancelCnt;
             $('#carried_over_cnt').text(totalSpecificValues);
         @endif
         },

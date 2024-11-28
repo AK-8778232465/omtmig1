@@ -240,7 +240,7 @@ class HomeController extends Controller
                 $statusCountsQuery->where(function ($query) use($user){
                     $query->where('typist_id', $user->id)
                         ->orWhere('typist_qc_id', $user->id);
-                });
+                })->whereNotIn('status_id', [1, 13]);
             }
         }
 
@@ -693,8 +693,7 @@ class HomeController extends Controller
             $statusCountsQuery->with('process', 'client')
                 ->whereIn('process_id', $processIds)
                 ->where('is_active', 1)
-                ->where('status_id', '!=', 5)
-                ->where('status_id', '!=', 3)
+                ->whereNotIn('status_id', [3, 5])
                 ->where('completion_date', null)
                 ->whereDate('order_date', '<', $from_date)
                 ->whereHas('process', function ($query) use ($client_id) {
@@ -704,19 +703,17 @@ class HomeController extends Controller
             if (!in_array('All', $project_id)) {
                 // Case: project_id is specified (not 'All')
                 $statusCountsQuery->whereIn('process_id', $processIds)
-                ->whereIn('process_id', $project_id)
-                ->where('is_active', 1)
-                ->where('status_id', '!=', 5)
-                ->where('status_id', '!=', 3)
-                ->where('completion_date', null)
-                ->whereDate('order_date', '<', $from_date);
+                    ->whereIn('process_id', $project_id)
+                    ->where('is_active', 1)
+                    ->whereNotIn('status_id', [3, 5])
+                    ->where('completion_date', null)
+                    ->whereDate('order_date', '<', $from_date);
             } else {
                 // Case: project_id is 'All'
                 $statusCountsQuery->whereIn('process_id', $processIds)
                     ->where('is_active', 1)
-                    ->where('status_id', '!=', 5)
-                    ->where('status_id', '!=', 3)
-                    ->where('completion_date', null)
+                    ->whereNotIn('status_id', [3, 5])
+                    ->whereNull('completion_date')
                     ->whereDate('order_date', '<', $from_date);
             }
         }
@@ -736,8 +733,8 @@ class HomeController extends Controller
             }elseif ($user->user_type_id == 22) {
                 $statusCountsQuery->where(function ($query) use($user){
                     $query->where('typist_id', $user->id)
-                        ->orWhere('typist_qc_id', $user->id);
-                });
+                        ->orWhere('typist_qc_id', $user->id); 
+                })->whereNotIn('status_id', [1, 13]);
             }
         }
 
