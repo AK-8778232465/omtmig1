@@ -789,10 +789,20 @@
                             <div class="form-row">
                                 <!-- Left Column -->
                                 <div class="col-6">
+                                    @php
+                                        $totalBilledAmount = 0;
+                                        if (!empty($getjsonDetails) && isset($getjsonDetails[0])) {
+                                            $totalBilledAmount = 
+                                                (float)($getjsonDetails[0]['firstInstBilledAmt'] ?? 0) +
+                                                (float)($getjsonDetails[0]['secondInstBilledAmt'] ?? 0) +
+                                                (float)($getjsonDetails[0]['thirdInstBilledAmt'] ?? 0) +
+                                                (float)($getjsonDetails[0]['fourthInstBilledAmt'] ?? 0);
+                                        }
+                                    @endphp
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Total Annual Tax :<span style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Total Annual Tax" style="flex: 1;" id="total_annual_tax" 
-                                            name="total_annual_tax" value="{{ $getjsonDetails[0]['totalValue'] ?? '' }}" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
+                                            name="total_annual_tax" value="{{ $getjsonDetails[0]['totalBilledAmount'] ?? '0' }}" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
                                     </div>
 
 
@@ -813,7 +823,7 @@
                                 <!-- Right Column -->
                                 <div class="col-6">
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
-                                        <label class="required" style="margin-right: 10px; width: 150px;">Land :<span vstyle="color:red;">*</span></label>
+                                        <label class="required" style="margin-right: 10px; width: 150px;">Land :<span style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Land"
                                             style="flex: 1;" id="land" name="land" value="{{ $getjsonDetails[0]['landValue'] ?? '' }}" required>
                                     </div>
@@ -869,7 +879,7 @@
                             <!-- Installments Section -->
                             <div class="row installments-section  " >
                                 <!-- First Installment -->
-                                <div class="col-3 installment container d-none" id ="container1">
+                                <div class="col-3 installment  " id ="container1">
                                     <h6 class="installment-title">First Installment</h6>
 
                                     <div class="checkbox-group">
@@ -928,7 +938,7 @@
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Due :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_due_id" name="first_tax_due_id" value="{{ isset($getjsonDetails[0]['firstInstDueDate']) ? \Carbon\Carbon::parse($getjsonDetails[0]['firstInstDueDate'])->format('Y-m-d') : '' }}">
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_due_id" name="first_tax_due_id" value="{{ isset($getjsonDetails[0]['firstInstDueDate']) && $getjsonDetails[0]['firstInstDueDate'] ? \Carbon\Carbon::parse($getjsonDetails[0]['firstInstDueDate'])->format('Y-m-d') : '' }}">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
@@ -946,21 +956,26 @@
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Good through :</label>
                                         @php
-                                        $firstDeliqDate = $getjsonDetails[0]['firstDeliqDate'] ?? null;
-                                        $firstGoodThrough = $firstDeliqDate ? date('Y-m-d', strtotime($firstDeliqDate . ' +30 days')) : '';
+                                            $firstDeliqDate = '';
+                                            $firstGoodThrough = '';
+
+                                            // Check if $getjsonDetails is not empty and contains the required key
+                                            if (!empty($getjsonDetails) && isset($getjsonDetails[0]['firstDeliqDate'])) {
+                                                $firstDeliqDate = $getjsonDetails[0]['firstDeliqDate'];
+                                                $firstGoodThrough = $firstDeliqDate ? date('Y-m-d', strtotime($firstDeliqDate . ' +30 days')) : '';
+                                            }
                                         @endphp
                                         <input class="form-control" type="date" style="flex: 1;" id="first_good_through_id" name="first_good_through_id" value="{{ $firstGoodThrough }}">
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Paid :</label>
-                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_paid_id" name="first_tax_paid_id" value="{{ isset($getjsonDetails[0]['firstInstPaidDate']) && $getjsonDetails[0]['firstDeliqDate'] ? \Carbon\Carbon::parse($getjsonDetails[0]['firstInstPaidDate'])->format('Y-m-d') : '' }}">
-
+                                        <input class="form-control" type="date" style="flex: 1;" id="first_tax_paid_id" name="first_tax_paid_id" value="{{ isset($getjsonDetails[0]['firstInstPaidDate']) && $getjsonDetails[0]['firstInstPaidDate'] ? \Carbon\Carbon::parse($getjsonDetails[0]['firstInstPaidDate'])->format('Y-m-d') : '' }}">
                                     </div>
                                 </div>
 
                                 <!-- Second Installment -->
-                                <div class="col-3 installment container d-none" id ="container2">
+                                <div class="col-3 installment  " id ="container2">
                                     <h6 class="installment-title">Second Installment</h6>
 
                                     <div class="checkbox-group">
@@ -1026,9 +1041,15 @@
                                         <input class="form-control" type="date" style="flex: 1;" id="second_tax_delinquent_id" name="second_tax_delinquent_id" value="{{ isset($getjsonDetails[0]['secondDeliqDate']) && $getjsonDetails[0]['secondDeliqDate'] ? \Carbon\Carbon::parse($getjsonDetails[0]['secondDeliqDate'])->format('Y-m-d') : '' }}">
                                     </div>
                                     @php
-                                        $secondDeliqDate = $getjsonDetails[0]['secondDeliqDate'] ?? null;
-                                        $secondDeliqDate = $secondDeliqDate ? date('Y-m-d', strtotime($secondDeliqDate . ' +30 days')) : '';
-                                        @endphp
+                                        $secondDeliqDate = '';
+
+                                        // Check if $getjsonDetails is not empty and contains the required key
+                                        if (!empty($getjsonDetails) && isset($getjsonDetails[0]['secondDeliqDate'])) {
+                                            $rawSecondDeliqDate = $getjsonDetails[0]['secondDeliqDate'];
+                                            $secondDeliqDate = $rawSecondDeliqDate ? date('Y-m-d', strtotime($rawSecondDeliqDate . ' +30 days')) : '';
+                                        }
+                                    @endphp
+
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Good through :</label>
                                         <input class="form-control" type="date" style="flex: 1;" id="second_good_through_id" name="second_good_through_id" value="{{ $secondDeliqDate }}">
@@ -1041,7 +1062,7 @@
                                 </div>
 
                                 <!-- Third Installment -->
-                                <div class="col-3 installment container d-none" id ="container3">
+                                <div class="col-3 installment  " id ="container3">
                                     <h6 class="installment-title">Third Installment</h6>
 
                                     <div class="checkbox-group">
@@ -1108,9 +1129,14 @@
                                         <input class="form-control" type="date"style="flex: 1;" id="third_tax_delinquent_id" name="third_tax_delinquent_id" value="{{ isset($getjsonDetails[0]['thirdDeliqDate']) && $getjsonDetails[0]['thirdDeliqDate'] ? \Carbon\Carbon::parse($getjsonDetails[0]['thirdDeliqDate'])->format('Y-m-d') : ' ' }}">
                                     </div>
                                     @php
-                                        $thirdDeliqDate = $getjsonDetails[0]['thirdDeliqDate'] ?? null;
-                                        $thirdDeliqDate = $thirdDeliqDate ? date('Y-m-d', strtotime($thirdDeliqDate . ' +30 days')) : '';
-                                        @endphp
+                                        $thirdDeliqDate = '';
+                                        // Check if $getjsonDetails is not empty and contains the required key
+                                        if (!empty($getjsonDetails) && isset($getjsonDetails[0]['thirdDeliqDate'])) {
+                                            $rawThirdDeliqDate = $getjsonDetails[0]['thirdDeliqDate'];
+                                            $thirdDeliqDate = $rawThirdDeliqDate ? date('Y-m-d', strtotime($rawThirdDeliqDate . ' +30 days')) : '';
+                                        }
+                                    @endphp
+
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Good through :</label>
                                         <input class="form-control" type="date" style="flex: 1;" id="third_good_through_id" name="third_good_through_id" value="{{ $thirdDeliqDate}}">
@@ -1123,7 +1149,7 @@
                                 </div>
 
                                 <!-- Fourth Installment -->
-                                <div class="col-3 installment container d-none" id ="container4">
+                                <div class="col-3 installment  " id ="container4">
                                     <h6 class="installment-title">Fourth Installment</h6>
 
                                     <div class="checkbox-group">
@@ -1187,9 +1213,14 @@
                                         <input class="form-control" type="date" style="flex: 1;" id="fourth_tax_delinquent_id" name="fourth_tax_delinquent_id" value="{{ isset($getjsonDetails[0]['fourthDeliqDate']) && $getjsonDetails[0]['fourthDeliqDate'] ? \Carbon\Carbon::parse($getjsonDetails[0]['fourthDeliqDate'])->format('Y-m-d') : '' }}">
                                     </div>
                                     @php
-                                        $fourthDeliqDate = $getjsonDetails[0]['fourthDeliqDate'] ?? null;
-                                        $fourthDeliqDate = $fourthDeliqDate ? date('Y-m-d', strtotime($fourthDeliqDate . ' +30 days')) : '';
-                                        @endphp
+                                        $fourthDeliqDate = '';
+                                        // Check if $getjsonDetails is not empty and contains the required key
+                                        if (!empty($getjsonDetails) && isset($getjsonDetails[0]['fourthDeliqDate'])) {
+                                            $rawFourthDeliqDate = $getjsonDetails[0]['fourthDeliqDate'];
+                                            $fourthDeliqDate = $rawFourthDeliqDate ? date('Y-m-d', strtotime($rawFourthDeliqDate . ' +30 days')) : '';
+                                        }
+                                    @endphp
+
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Good through :</label>
                                         <input class="form-control" type="date" style="flex: 1;" id="fourth_good_through_id" name="fourth_good_through_id" value="{{ $fourthDeliqDate}}">
@@ -3059,33 +3090,55 @@ $(document).ready(function() {
     });
 
 
-    document.addEventListener('DOMContentLoaded', function () {
-    const dropdown = document.getElementById('payment_frequency');
-    const containers = document.querySelectorAll('.container');
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     if (e.target && e.target.id === 'payment_frequency') {
+    //         const selectedValue = parseInt(e.target.value, 10);
 
-    // Function to show containers based on selected value
-    const updateContainers = () => {
-        const selectedValue = parseInt(dropdown.value) || 0;
+    //         // Get all installment containers
+    //         const containers = [
+    //             document.getElementById('container1'),
+    //             document.getElementById('container2'),
+    //             document.getElementById('container3'),
+    //             document.getElementById('container4')
+    //         ];
 
-        // Log the selected value for debugging
-        console.log("Selected Value:", selectedValue);
+    //         // Enable/disable fields based on selected value
+    //         containers.forEach((container, index) => {
+    //             const enable = index < selectedValue; // Enable containers up to the selected value
+    //             toggleContainerFields(container, enable);
+    //         });
+    //     }
+    //     });
+document.addEventListener('change', function (e) {
+        // Check if the event is triggered by the payment frequency dropdown
+        if (e.target && e.target.id === 'payment_frequency') {
+            const selectedValue = parseInt(e.target.value, 10);
 
-        // Hide all containers initially
-        containers.forEach((container, index) => {
-            if (index < selectedValue) {
-                container.classList.remove('d-none'); // Show the container
-            } else {
-                container.classList.add('d-none'); // Hide the container
-            }
+            // Get all installment containers
+            const containers = [
+                document.getElementById('container1'),
+                document.getElementById('container2'),
+                document.getElementById('container3'),
+                document.getElementById('container4')
+            ];
+
+            // Enable/disable fields based on selected value
+            containers.forEach((container, index) => {
+                const enable = index < selectedValue; // Enable containers up to the selected value
+                toggleContainerFields(container, enable);
+            });
+        }
+    }); 
+function toggleContainerFields(container, enable) {
+        if (!container) return;
+
+        // Get all input elements in the container
+        const inputs = container.querySelectorAll('input, select, textarea');
+
+        inputs.forEach(input => {
+            input.disabled = !enable; // Enable or disable input fields
         });
-    };
-
-    // Initial update based on preselected value
-    updateContainers();
-
-    // Event listener for dropdown change
-    dropdown.addEventListener('change', updateContainers);
-});
+    }
 
 </script>
 @endsection
