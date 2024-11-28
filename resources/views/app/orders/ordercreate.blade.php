@@ -365,6 +365,16 @@
                             <option value="11">WFG Title</option>
                             <option value="12">FINN TITLE</option>
                             <option value="13">Beeline</option>
+                            <option value="14">Flowers Title Companies</option>
+                            <option value="15">Ice</option>
+                            <option value="16">Old Republic Diversified</option>
+                            <option value="17">Silk Title</option>
+                            <option value="18">Baseline Title</option>
+                            <option value="19">California Best Title company</option>
+                            <option value="20">Common Bond Title</option>
+                            <option value="21">Ferr & Mullin, P.C</option>
+
+
 
                         </select>
 
@@ -1016,6 +1026,22 @@ $(document).ready(function () {
                 downloadLink.attr('href', "{{ asset('/template/FINN TITLE_sample_template.xlsx') }}");
             }else if (selectedValue == "13") {
                 downloadLink.attr('href', "{{ asset('/template/Beeline_sample_template.xlsx') }}");
+            }else if (selectedValue == "14") {
+                downloadLink.attr('href', "{{ asset('/template/Flower_sample_template.xlsx') }}");
+            }else if (selectedValue == "15") {
+                downloadLink.attr('href', "{{ asset('/template/Ice_sample_template.xlsx') }}");
+            }else if (selectedValue == "16") {
+                downloadLink.attr('href', "{{ asset('/template/ORT_sample_template.xlsx') }}");
+            }else if (selectedValue == "17") {
+                downloadLink.attr('href', "{{ asset('/template/Silk Title_sample_template.xlsx') }}");
+            }else if (selectedValue == "18") {
+                downloadLink.attr('href', "{{ asset('/template/Baseline_sample_template.xlsx') }}");
+            }else if (selectedValue == "19") {
+                downloadLink.attr('href', "{{ asset('/template/California Best_sample_template.xlsx') }}");
+            }else if (selectedValue == "20") {
+                downloadLink.attr('href', "{{ asset('/template/Common Bond_sample_template.xlsx') }}");
+            }else if (selectedValue == "21") {
+                downloadLink.attr('href', "{{ asset('/template/Ferr & Mullin_sample_template.xlsx') }}");
             }
             else {
                 downloadLink.attr('href', "#");
