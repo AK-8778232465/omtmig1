@@ -106,7 +106,7 @@ class SettingController extends Controller
                     ->whereNotIn('id', [4])
                     ->get();
                  }else{
-                    $userTypes = UserType::where('id', '>=', $loggedInUserTypeId)
+                    $userTypes = UserType::where('id', '>', $loggedInUserTypeId)
                     ->whereNotIn('id', [1, 4,23])
                     ->get();
                  }
