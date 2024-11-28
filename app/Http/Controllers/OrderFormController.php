@@ -189,7 +189,7 @@ class OrderFormController extends Controller
         $orderData = $query->first();
 
         if(!empty($orderData)) {
-            $excludedClients = [16, 82, 84, 85, 86, 87, 88, 89, 90, 91, 92, 13, 2];
+            $excludedClients = [16, 82, 84, 85, 86, 87, 88, 89, 90, 91, 92, 13, 2, 93, 94, 95, 96, 97, 98, 99, 100];
             if (!in_array($orderData->client_id, $excludedClients)) {
                 return view('app.orders.comingsoon');
             }

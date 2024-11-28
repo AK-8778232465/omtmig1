@@ -1041,7 +1041,7 @@ $(document).ready(function () {
             }else if (selectedValue == "20") {
                 downloadLink.attr('href', "{{ asset('/template/Common Bond_sample_template.xlsx') }}");
             }else if (selectedValue == "21") {
-                downloadLink.attr('href', "{{ asset('/template/Ferr & Mullin_sample_template.xlsx') }}");
+                downloadLink.attr('href', "{{ asset('/template/Ferr.xlsx') }}");
             }
             else {
                 downloadLink.attr('href', "#");
