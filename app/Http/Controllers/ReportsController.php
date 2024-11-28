@@ -1291,14 +1291,20 @@ public function orderInflow_data(Request $request){
 
     // Prepare the final response data
     $data = $pendingData->map(function ($counts, $clientId) use ($clientNames) {
+        // Only process if clientId exists in clientNames
+        if (!isset($clientNames[$clientId])) {
+            return null; // Skip the entry if clientId is not found
+        }
+    
         return [
             'client_name' => $clientNames[$clientId],
-            'carry_forward' => $counts['carry_forward'],
-            'received' => $counts['received'],
-            'completed' => $counts['completed'],
-            'pending' => $counts['pending'],
+            'carry_forward' => $counts['carry_forward'] ?? 0,
+            'received' => $counts['received'] ?? 0,
+            'completed' => $counts['completed'] ?? 0,
+            'pending' => $counts['pending'] ?? 0,
         ];
-    });
+    })->filter();
+    
     $totalRecords = $pendingData->count();
     return response()->json([
         'recordsTotal' => $totalRecords,
