@@ -25,7 +25,7 @@ class ReportsController extends Controller
         $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
         $roles = Role::select('id', "name")->get();
 
-
+// return response()->json($clients);
         return view('app.reports.index',compact('clients', 'roles'));
     }
 
@@ -193,6 +193,9 @@ class ReportsController extends Controller
                 SUM(CASE WHEN status_id = 14 THEN 1 ELSE 0 END) as `status_14`,
                 SUM(CASE WHEN status_id = 16 THEN 1 ELSE 0 END) as `status_16`,
                 SUM(CASE WHEN status_id = 17 THEN 1 ELSE 0 END) as `status_17`,
+                SUM(CASE WHEN status_id = 15 THEN 1 ELSE 0 END) as `status_15`,
+                SUM(CASE WHEN status_id = 18 THEN 1 ELSE 0 END) as `status_18`,
+                SUM(CASE WHEN status_id = 20 THEN 1 ELSE 0 END) as `status_20`,
                 COUNT(*) as `All`')
             ->whereNotNull('assignee_user_id')
             ->where('oms_order_creations.is_active', 1)
@@ -237,7 +240,10 @@ class ReportsController extends Controller
                 'status_5' => $count->status_5,
                 'status_13' => $count->status_13,
                 'status_14' => $count->status_14,
-                'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14,
+                'status_15' => $count->status_15,
+                'status_18' => $count->status_18,
+                'status_20' => $count->status_20,
+                'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14 + $count->status_15 + $count->status_18 + $count->status_20,
             ];
         });
 
@@ -345,7 +351,7 @@ private function getProcessIdsBasedOnUserRole($user)
             ->whereDate('oms_order_creations.order_date', '<=', $toDate)
             ->whereIn('oms_order_creations.process_id', $processIds)
             ->where('oms_order_creations.is_active', 1)
-            ->whereIn('oms_order_creations.status_id', [1, 2, 3, 4, 5, 13, 14, 16, 17])
+            ->whereIn('oms_order_creations.status_id', [1, 2, 3, 4, 5, 13, 14, 16, 17, 15, 18, 20])
             ->where('stl_item_description.is_approved', 1)
             ->where('stl_client.is_approved', 1);
 
@@ -870,7 +876,7 @@ public function production_report(Request $request) {
     $draw = $request->input('draw');
     $start = $request->input('start');
     $length = $request->input('length');
-    $searchValue = $request->input('search.value'); 
+    $searchValue = $request->input('search.value');
     
     // Date filtering logic
     list($fromDate, $toDate) = $this->getDateRange($selectedDateFilter, $fromDateRange, $toDateRange);

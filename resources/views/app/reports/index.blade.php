@@ -145,11 +145,9 @@
             <li id="ordercompletion-details" class="report-item">Order Completion Details</li>
             <li id="orderprogress-details" class="report-item">Order Progress Details</li>
             <li id="attendance-details" class="report-item">Attendance Details</li>
-           <li id="production-report" class="report-item">Accurate - Production Report</li>
+            <li id="production-report" class="report-item">Accurate - Production Report</li>
             <li id="orderInflow-report" class="report-item">Order Inflow Details</li>
             <li id="acm-report" class="report-item">ACM Report</li>
-
-
         </ul>
     </div>
 
@@ -162,7 +160,7 @@
             </div>
         </div>
 
-<div class="d-flex">
+    <div class="d-flex">
         <div class="col-md-2" id="role_filter">
             <div class="form-group">
                 <label for="role">Roles</label>
@@ -185,8 +183,7 @@
                 </select>
             </div>
         </div>
-
-</div>
+    </div>
 
 
         <div class="row" id="hidefilter">
@@ -290,11 +287,14 @@
                                     <th width="12%">Users</th>
                                     <th width="11%">WIP</th>
                                     <th width="11%">Coversheet Prep</th>
-                                    <th width="11%">Clarification</th>
-                                    <th width="11%">Typing</th>
-                                    <th width="11%">Typing QC</th>
-                                    <th width="11%">Send For QC</th>
-                                    <th width="11%">Hold</th>
+                                    <th width="8%">Doc Purchase</th>
+                                    <th width="8%">Ground Abstractor</th>
+                                    <th width="8%">Clarification</th>
+                                    <th width="8%">Typing</th>
+                                    <th width="8%">Typing QC</th>
+                                    <th width="8%">Send For QC</th>
+                                    <th width="8%">Hold</th>
+                                    <th width="8%">Partially Cancelled</th>
                                     <th width="11%">Cancelled</th>
                                     <th width="11%">Completed</th>
                                     <th width="11%">All</th>
@@ -509,6 +509,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
 <script>
+
+$(document).ready(function() {
+    $('.report-item').on('click', function() {
+        if ($(this).attr('id') === 'production-report') {
+            $('#client_id_dcf').val(82).trigger('change');
+            $('#client_id_dcf').prop('disabled', true);
+        } else {
+            $('#client_id_dcf').val('').trigger('change');
+            $('#client_id_dcf').prop('disabled', false);
+        }
+    });
+});
 
 $(document).ready(function() {
         $('#orderwise_timetaken_datatable').DataTable();
@@ -1065,11 +1077,14 @@ $('#newreports_datatable').on('draw.dt', function () {
             { data: 'userinfo', name: 'userinfo', class: 'text-left' },
             { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
             { data: 'status_13', name: 'status_13' },
+            { data: 'status_15', name: 'status_15' },
+            { data: 'status_18', name: 'status_18' },
             { data: 'status_14', name: 'status_14' },
             { data: 'status_16', name: 'status_16' },
             { data: 'status_17', name: 'status_17' },
             { data: 'status_4', name: 'status_4' },
             { data: 'status_2', name: 'status_2' },
+            { data: 'status_20', name: 'status_20' },
             { data: 'status_3', name: 'status_3' },
             { data: 'status_5', name: 'status_5' },
             { data: 'All', name: 'All' }
@@ -1095,19 +1110,21 @@ $('#newreports_datatable').on('draw.dt', function () {
                         success: function(response) {
                             var data = response.data;
 
-                            var headers = ["Users", "WIP", "Coversheet Prep", "Clarification", "Send For QC", "Hold", "Cancelled", "Completed", "All"];
+                            var headers = ["Users", "WIP", "Coversheet Prep", "Doc Purchase", "Ground Abstractor", "Clarification", "Send For QC", "Hold", "Partially Cancelled", "Cancelled", "Completed", "All"];
                             var exportData = data.map(row => [
                                 row.userinfo,
                                 row.status_1,
                                 row.status_13,
+                                row.status_15,
+                                row.status_18,
                                 row.status_14,
                                 row.status_4,
                                 row.status_2,
+                                row.status_20,
                                 row.status_3,
                                 row.status_5,
                                 row.All
                             ]);
-
                             var wb = XLSX.utils.book_new();
                             var ws = XLSX.utils.aoa_to_sheet([headers].concat(exportData));
                             XLSX.utils.book_append_sheet(wb, ws, "Userwise Data");
@@ -1497,6 +1514,71 @@ function userTimeTaken_datatable() {
 }
 
 
+// function orderTimeTaken_datatable() {
+//     var fromDate = $('#fromDate_range').val();
+//     var toDate = $('#toDate_range').val();
+//     let client_id = $("#client_id_dcf").val();
+//     let lob_id = $("#lob_id").val();
+//     let process_type_id = $('#process_type_id').val();
+//     let product_id = $('#product_id').val();
+
+//     $('#orderwise_timetaken_datatable').DataTable({
+//         destroy: true,
+//         processing: true,
+//         serverSide: true,
+//         ajax: {
+//             url: "{{ route('orderTimeTaken') }}",
+//             type: 'POST',
+//             data: {
+//                 toDate_range: toDate,
+//                 fromDate_range: fromDate,
+//                 client_id: client_id,
+//                 lob_id: lob_id,
+//                 process_type_id : process_type_id,
+//                 product_id: product_id,
+//                 selectedDateFilter: selectedDateFilter,
+//                 _token: '{{ csrf_token() }}'
+//             },
+//             dataSrc: function (json) {
+//                 if (Array.isArray(product_id) && product_id.includes('All')) {
+//                     json.data.forEach(function (item) {
+//                         item.Product_Type = 'All  Products';
+//                     });
+//                 } else if (product_id === 'All') {
+//                     json.data.forEach(function (item) {
+//                         item.Product_Type = 'All';
+//                     });
+//                 }
+//                 return json.data; 
+//             },
+//         },
+//         columns: [
+//             { data: 'Emp ID', name: 'Emp ID', class: 'text-left' },
+//             { data: 'Users', name: 'Users', class: 'text-left' },
+//             { data: 'Product_Type', name: 'Product_Type' },
+//             { data: 'Assigned Orders', name: 'Assigned Orders' },
+//             { data: 'WIP.count', name: 'WIP.count' },
+//             { data: 'WIP.time', name: 'WIP.time' },
+//             { data: 'COVERSHEET PRP.count', name: 'COVERSHEET PRP.count' },
+//             { data: 'COVERSHEET PRP.time', name: 'COVERSHEET PRP.time' },
+//             { data: 'CLARIFICATION.count', name: 'CLARIFICATION.count' },
+//             { data: 'CLARIFICATION.time', name: 'CLARIFICATION.time' },
+//             { data: 'SEND FOR QC.count', name: 'SEND FOR QC.count' },
+//             { data: 'SEND FOR QC.time', name: 'SEND FOR QC.time' },
+//         ],
+//         dom: 'lBfrtip',
+//         buttons: [
+//             {
+//                 extend: 'excelHtml5',
+//                 title: 'orderprogress details'  // Set the filename here
+//             }
+//         ],
+//         lengthMenu: [10, 25, 50, 75, 100],
+//         order: [[0, 'asc']]
+//     });
+// }
+
+
 function orderTimeTaken_datatable() {
     var fromDate = $('#fromDate_range').val();
     var toDate = $('#toDate_range').val();
@@ -1517,7 +1599,7 @@ function orderTimeTaken_datatable() {
                 fromDate_range: fromDate,
                 client_id: client_id,
                 lob_id: lob_id,
-                process_type_id : process_type_id,
+                process_type_id: process_type_id,
                 product_id: product_id,
                 selectedDateFilter: selectedDateFilter,
                 _token: '{{ csrf_token() }}'
@@ -1525,7 +1607,7 @@ function orderTimeTaken_datatable() {
             dataSrc: function (json) {
                 if (Array.isArray(product_id) && product_id.includes('All')) {
                     json.data.forEach(function (item) {
-                        item.Product_Type = 'All  Products';
+                        item.Product_Type = 'All Products';
                     });
                 } else if (product_id === 'All') {
                     json.data.forEach(function (item) {
@@ -1553,13 +1635,65 @@ function orderTimeTaken_datatable() {
         buttons: [
             {
                 extend: 'excelHtml5',
-                title: 'orderprogress details'  // Set the filename here
-            }
+                title: 'Emp Details',
+                customize: function (xlsx) {
+                    var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                    var sheetData = sheet.getElementsByTagName('sheetData')[0];
+
+                    // Add the grouped header row
+                    var groupedHeaderRow = `
+                        <row r="1">
+                            <c t="inlineStr" s="2" r="A1"><is><t>Emp Details</t></is></c>
+                            <c t="inlineStr" s="2" r="A1"><is><t>Emp Details</t></is></c>
+                            <c t="inlineStr" s="2" r="E1"><is><t>WIP</t></is></c>
+                            <c t="inlineStr" s="2" r="G1"><is><t>Coversheet Prep</t></is></c>
+                            <c t="inlineStr" s="2" r="I1"><is><t>Clarification</t></is></c>
+                            <c t="inlineStr" s="2" r="K1"><is><t>Send for QC</t></is></c>
+                        </row>
+                    `;
+                    sheetData.innerHTML = groupedHeaderRow + sheetData.innerHTML;
+
+                    // Add merge cells
+                    var mergeCells = `
+                        <mergeCell ref="A1:D1"/> <!-- Emp Details -->
+                        <mergeCell ref="E1:F1"/> <!-- WIP -->
+                        <mergeCell ref="G1:H1"/> <!-- Coversheet Prep -->
+                        <mergeCell ref="I1:J1"/> <!-- Clarification -->
+                        <mergeCell ref="K1:L1"/> <!-- Send for QC -->
+                    `;
+
+                    // Add alignment styles to the styles.xml
+                    var styles = xlsx.xl['styles.xml'];
+                    var cellXfs = styles.getElementsByTagName('cellXfs')[0];
+
+                    // Add a new style for bold and center-aligned text
+                    var boldCenteredStyle = `
+                        <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1">
+                            <alignment horizontal="center" vertical="center"/>
+                        </xf>
+                    `;
+                    cellXfs.innerHTML += boldCenteredStyle;
+
+                    // Update the styles attribute in the cells
+                    var mergeCellsContainer = sheet.getElementsByTagName('mergeCells')[0];
+                    if (!mergeCellsContainer) {
+                        mergeCellsContainer = document.createElement('mergeCells');
+                        mergeCellsContainer.setAttribute('count', '0');
+                        sheet.getElementsByTagName('worksheet')[0].appendChild(mergeCellsContainer);
+                    }
+                    mergeCellsContainer.innerHTML = mergeCells + mergeCellsContainer.innerHTML;
+
+                    // Update the count of merge cells
+                    var totalMergeCells = mergeCellsContainer.getElementsByTagName('mergeCell').length;
+                    mergeCellsContainer.setAttribute('count', totalMergeCells.toString());
+                }
+            },
         ],
         lengthMenu: [10, 25, 50, 75, 100],
         order: [[0, 'asc']]
     });
 }
+
 
 $(document).ready(function() {
     // Function to set the default date to today
@@ -1621,7 +1755,7 @@ function production_report() {
     let process_type_id = $('#process_type_id').val();
     let product_id = $('#product_id').val();
     let selectedDateFilter = $('#selectedDateFilter').val(); 
-// console.log(selectedDateFilter);
+
     if ($.fn.DataTable.isDataTable('#production_datatable')) {
         $('#production_datatable').DataTable().clear().destroy();
     }
