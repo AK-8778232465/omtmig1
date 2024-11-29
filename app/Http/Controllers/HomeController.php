@@ -1279,6 +1279,9 @@ if ($fromDate && $toDate) {
         if (isset($data->Typing_QC)) $sum += $data->Typing_QC;
         if (isset($data->Ground_Abstractor)) $sum += $data->Ground_Abstractor;
 
+        if ($sum === 0) {
+            continue;
+        }
 
         $output[] = [
             'client_name' => $data->client_name,
