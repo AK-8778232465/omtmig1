@@ -1058,7 +1058,7 @@
         @endif
 
         @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP','PM/TL','Process','Qcer','Process/Qcer','SPOC','Business Head']))
-        <div class="card mt-5 tabledetails d-none" id="datewise_table" style="display: none;">
+        <div class="card mt-5 tabledetails d-none" id="datewise_table">
             <h4 class="text-center mt-3">ClientWise Details</h4>
             <div class="card-body">
                 <div class="p-0">
