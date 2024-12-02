@@ -38,6 +38,15 @@ class OrderFormController extends Controller
 {
     use FastTaxAPI;
 
+    protected $taxCertPDFController;
+
+
+    public function __construct(TaxCertPDFController $taxCertPDFController)
+    {
+        $this->taxCertPDFController = $taxCertPDFController;
+
+    }
+
     public function index(Request $request, $orderId = null)
     {
         $user = Auth::user();
@@ -976,10 +985,11 @@ class OrderFormController extends Controller
     {
  
         $fieldMapping = [
+            'parcel' => $request['parcel'],
             'order_id' => $request['order_id'],
             'type_id' => $request['type_id'],
             'taxYear' => $request['fiscal_yr_id'],
-            'taxId' => $request['tax_id'],
+            'taxAccountId' => $request['tax_id'],
             'taxing_entity_dd'=> $request['taxing_entity_dd'],
             'tax_described_id' => $request['tax_described_id'],
             'tax_state_id' => $request['tax_state_id'],
@@ -1001,10 +1011,6 @@ class OrderFormController extends Controller
             'secondInstStatus' => $request['second_paid_id'],
             'thirdInstStatus' => $request['third_paid_id'],
             'fourthInstStatus' => $request['fourth_paid_id'],
-            // 'firstInstStatus' => 'first_due_id',
-            // 'secondInstStatus' => 'second_due_id',
-            // 'thirdInstStatus' => 'third_due_id',
-            // 'fourthInstStatus' => 'fourth_due_id',
             'firstDeliqDate_flag' => $request['first_delinquent_id'],
             'secondDeliqDate_Eflag' => $request['second_delinquent_id'],
             'thirdDeliqDate_Eflag' => $request['third_delinquent_id'],
@@ -1125,7 +1131,213 @@ class OrderFormController extends Controller
         // Encode the renamed data as JSON
         $jsonData = json_encode($fieldMapping);
     // dd($jsonData);
-        // Check if the order_id already exists
+     
+    $data =  $jsonData;
+    // foreach ($data as $data) {
+        $taxCert = [];
+        $data = json_decode($jsonData, true);
+       
+
+            $exemptionAmount = (string)(number_format($data['homeownerExemption'], 2, '.', '') + number_format($data['otherExemption'], 2, '.', ''));
+            $improvementValue = !empty($data['improvementValue']) ? number_format($data['improvementValue'], 2, '.', '') : (!empty($data['buildingValue']) ? number_format($data['buildingValue'], 2, '.', '') : "0.00");
+
+            $paymentData = [];
+
+            if ($data['numberOfInst'] == 1) {
+                $paymentData = [];
+                $paymentData[] = [
+                    "tax_year" => $data['taxYear'],
+                    "tax_type" => "COUNTY",
+                    "tax_period" => "ANNUAL",
+                    "status" => (strtolower($data['firstInstStatus']) == "paid") ? "PAID" : "DUE",
+                    "tax_amount" => (string)(!empty((float)$data['firstInstBilledAmt']) ? (float)$data['firstInstBilledAmt'] : "0.00"),
+                    "due_date" => !empty($data['firstInstDueDate']) ? date('Y-m-d', strtotime($data['firstInstDueDate'])) : "",
+                    "delinquent_date" => !empty($data['firstDeliqDate']) ? date('Y-m-d', strtotime($data['firstDeliqDate'])) : "",
+                    "paid_date" => !empty($data['firstInstPaidDate']) ? date('Y-m-d', strtotime($data['firstInstPaidDate'])) : ""
+                ];
+            }
+
+            if ($data['numberOfInst'] == 2) {
+                $paymentData[] = [
+                    "tax_year" => $data['taxYear'],
+                    "tax_type" => "COUNTY",
+                    "tax_period" => "1ST INSTALLMENT",
+                    "status" => (strtolower($data['firstInstStatus']) == "paid") ? "PAID" : "DUE",
+                    "tax_amount" => (string)(!empty((float)$data['firstInstBilledAmt']) ? (float)$data['firstInstBilledAmt'] : "0.00"),
+                    "due_date" => !empty($data['firstInstDueDate']) ? date('Y-m-d', strtotime($data['firstInstDueDate'])) : "",
+                    "delinquent_date" => !empty($data['firstDeliqDate']) ? date('Y-m-d', strtotime($data['firstDeliqDate'])) : "",
+                    "paid_date" => !empty($data['firstInstPaidDate']) ? date('Y-m-d', strtotime($data['firstInstPaidDate'])) : ""
+                ];
+
+                $paymentData[] = [
+                    "tax_year" => $data['taxYear'],
+                    "tax_type" => "COUNTY",
+                    "tax_period" => "2ND INSTALLMENT",
+                    "status" => (strtolower($data['secondInstStatus']) == "paid") ? "PAID" : "DUE",
+                    "tax_amount" => (string)(!empty((float)$data['secondInstBilledAmt']) ? (float)$data['secondInstBilledAmt'] : "0.00"),
+                    "due_date" => !empty($data['secondInstDueDate']) ? date('Y-m-d', strtotime($data['secondInstDueDate'])) : "",
+                    "delinquent_date" => !empty($data['secondDeliqDate']) ? date('Y-m-d', strtotime($data['secondDeliqDate'])) : "",
+                    "paid_date" => !empty($data['secondInstPaidDate']) ? date('Y-m-d', strtotime($data['secondInstPaidDate'])) : ""
+                ];
+            }
+
+            if ($data['numberOfInst'] == 3) {
+                $paymentData[] = [
+                    "tax_year" => $data['taxYear'],
+                    "tax_type" => "COUNTY",
+                    "tax_period" => "1ST INSTALLMENT",
+                    "status" => (strtolower($data['firstInstStatus']) == "paid") ? "PAID" : "DUE",
+                    "tax_amount" => (string)(!empty((float)$data['firstInstBilledAmt']) ? (float)$data['firstInstBilledAmt'] : "0.00"),
+                    "due_date" => !empty($data['firstInstDueDate']) ? date('Y-m-d', strtotime($data['firstInstDueDate'])) : "",
+                    "delinquent_date" => !empty($data['firstDeliqDate']) ? date('Y-m-d', strtotime($data['firstDeliqDate'])) : "",
+                    "paid_date" => !empty($data['firstInstPaidDate']) ? date('Y-m-d', strtotime($data['firstInstPaidDate'])) : ""
+                ];
+
+                $paymentData[] = [
+                    "tax_year" => $data['taxYear'],
+                    "tax_type" => "COUNTY",
+                    "tax_period" => "2ND INSTALLMENT",
+                    "status" => (strtolower($data['secondInstStatus']) == "paid") ? "PAID" : "DUE",
+                    "tax_amount" => (string)(!empty((float)$data['secondInstBilledAmt']) ? (float)$data['secondInstBilledAmt'] : "0.00"),
+                    "due_date" => !empty($data['secondInstDueDate']) ? date('Y-m-d', strtotime($data['secondInstDueDate'])) : "",
+                    "delinquent_date" => !empty($data['secondDeliqDate']) ? date('Y-m-d', strtotime($data['secondDeliqDate'])) : "",
+                    "paid_date" => !empty($data['secondInstPaidDate']) ? date('Y-m-d', strtotime($data['secondInstPaidDate'])) : ""
+                ];
+
+                $paymentData[] = [
+                    "tax_year" => $data['taxYear'],
+                    "tax_type" => "COUNTY",
+                    "tax_period" => "3RD INSTALLMENT",
+                    "status" => (strtolower($data['thirdInstStatus']) == "paid") ? "PAID" : "DUE",
+                    "tax_amount" => (string)(!empty((float)$data['thirdInstBilledAmt']) ? (float)$data['thirdInstBilledAmt'] : "0.00"),
+                    "due_date" => !empty($data['thirdInstDueDate']) ? date('Y-m-d', strtotime($data['thirdInstDueDate'])) : "",
+                    "delinquent_date" => !empty($data['thirdDeliqDate']) ? date('Y-m-d', strtotime($data['thirdDeliqDate'])) : "",
+                    "paid_date" => !empty($data['thirdInstPaidDate']) ? date('Y-m-d', strtotime($data['thirdInstPaidDate'])) : ""
+                ];
+            }
+
+            if ($data['numberOfInst'] == 4) {
+                $paymentData[] = [
+                    "tax_year" => $data['taxYear'],
+                    "tax_type" => "COUNTY",
+                    "tax_period" => "1ST QUARTER",
+                    "status" => (strtolower($data['firstInstStatus']) == "paid") ? "PAID" : "DUE",
+                    "tax_amount" => (string)(!empty((float)$data['firstInstBilledAmt']) ? (float)$data['firstInstBilledAmt'] : "0.00"),
+                    "due_date" => !empty($data['firstInstDueDate']) ? date('Y-m-d', strtotime($data['firstInstDueDate'])) : "",
+                    "delinquent_date" => !empty($data['firstDeliqDate']) ? date('Y-m-d', strtotime($data['firstDeliqDate'])) : "",
+                    "paid_date" => !empty($data['firstInstPaidDate']) ? date('Y-m-d', strtotime($data['firstInstPaidDate'])) : ""
+                ];
+
+                $paymentData[] = [
+                    "tax_year" => $data['taxYear'],
+                    "tax_type" => "COUNTY",
+                    "tax_period" => "2ND QUARTER",
+                    "status" => (strtolower($data['secondInstStatus']) == "paid") ? "PAID" : "DUE",
+                    "tax_amount" => (string)(!empty((float)$data['secondInstBilledAmt']) ? (float)$data['secondInstBilledAmt'] : "0.00"),
+                    "due_date" => !empty($data['secondInstDueDate']) ? date('Y-m-d', strtotime($data['secondInstDueDate'])) : "",
+                    "delinquent_date" => !empty($data['secondDeliqDate']) ? date('Y-m-d', strtotime($data['secondDeliqDate'])) : "",
+                    "paid_date" => !empty($data['secondInstPaidDate']) ? date('Y-m-d', strtotime($data['secondInstPaidDate'])) : ""
+                ];
+
+                $paymentData[] = [
+                    "tax_year" => $data['taxYear'],
+                    "tax_type" => "COUNTY",
+                    "tax_period" => "3RD QUARTER",
+                    "status" => (strtolower($data['thirdInstStatus']) == "paid") ? "PAID" : "DUE",
+                    "tax_amount" => (string)(!empty((float)$data['thirdInstBilledAmt']) ? (float)$data['thirdInstBilledAmt'] : "0.00"),
+                    "due_date" => !empty($data['thirdInstDueDate']) ? date('Y-m-d', strtotime($data['thirdInstDueDate'])) : "",
+                    "delinquent_date" => !empty($data['thirdDeliqDate']) ? date('Y-m-d', strtotime($data['thirdDeliqDate'])) : "",
+                    "paid_date" => !empty($data['thirdInstPaidDate']) ? date('Y-m-d', strtotime($data['thirdInstPaidDate'])) : ""
+                ];
+
+                $paymentData[] = [
+                    "tax_year" => $data['taxYear'],
+                    "tax_type" => "COUNTY",
+                    "tax_period" => "4TH QUARTER",
+                    "status" => (strtolower($data['fourthInstStatus']) == "paid") ? "PAID" : "DUE",
+                    "tax_amount" => (string)(!empty((float)$data['fourthInstBilledAmt']) ? (float)$data['fourthInstBilledAmt'] : "0.00"),
+                    "due_date" => !empty($data['fourthInstDueDate']) ? date('Y-m-d', strtotime($data['fourthInstDueDate'])) : "",
+                    "delinquent_date" => !empty($data['fourthDeliqDate']) ? date('Y-m-d', strtotime($data['fourthDeliqDate'])) : "",
+                    "paid_date" => !empty($data['fourthInstPaidDate']) ? date('Y-m-d', strtotime($data['fourthInstPaidDate'])) : ""
+                ];
+            }
+            // $taxPeriod = '';
+            // usort($data['priorYearTaxes'], function($a, $b) {
+            //     if ($a["accTaxYear"] != $b["accTaxYear"]) {
+            //         return strcmp($a["accTaxYear"], $b["accTaxYear"]);
+            //     } else {
+            //         return $a["accTaxPeriod"] - $b["accTaxPeriod"];
+            //     }
+            // });
+
+            // if(count($data['priorYearTaxes']) > 0) {
+            //     foreach($data['priorYearTaxes'] as $priorYearTaxes) {
+            //         if (!empty($priorYearTaxes['accNumberOfInst']) && !empty($priorYearTaxes['accTaxPeriod'])) {
+            //             switch ($priorYearTaxes['accNumberOfInst']) {
+            //                 case 4:
+            //                     $quarters = ["1ST QUARTER", "2ND QUARTER", "3RD QUARTER", "4TH QUARTER"];
+            //                     $taxPeriod = isset($quarters[$priorYearTaxes['accTaxPeriod'] - 1]) ? $quarters[$priorYearTaxes['accTaxPeriod'] - 1] : "";
+            //                     break;
+
+            //                 case 3:
+            //                     $installments = ["1ST INSTALLMENT", "2ND INSTALLMENT", "3RD INSTALLMENT"];
+            //                     $taxPeriod = isset($installments[$priorYearTaxes['accTaxPeriod'] - 1]) ? $installments[$priorYearTaxes['accTaxPeriod'] - 1] : "";
+            //                     break;
+
+            //                 case 2:
+            //                     $taxPeriod = ($priorYearTaxes['accTaxPeriod'] == 1) ? "1ST INSTALLMENT" : "2ND INSTALLMENT";
+            //                     break;
+
+            //                 case 1:
+            //                     $taxPeriod = ($priorYearTaxes['accTaxPeriod'] == 1) ? "ANNUAL" : "";
+            //                     break;
+
+            //                 default:
+            //                     $taxPeriod = "";
+            //             }
+            //         } else {
+            //             $taxPeriod = "";
+            //         }
+
+                //     $paymentData[] = [
+                //         "tax_year" => $priorYearTaxes['accTaxYear'],
+                //         "tax_type" => !empty($priorYearTaxes['accTaxType']) ? $priorYearTaxes['accTaxType'] : "COUNTY",
+                //         "tax_period" => $taxPeriod,
+                //         "status" => (strtolower($priorYearTaxes['accStatus']) == "paid") ? "PAID" : "DUE",
+                //         "tax_amount" => (string)(!empty((float)$priorYearTaxes['accBilledAmt']) ? (float)$priorYearTaxes['accBilledAmt'] : "0.00"),
+                //         "due_date" => !empty($priorYearTaxes['accDueDate']) ? date('Y-m-d', strtotime($priorYearTaxes['accDueDate'])) : "",
+                //         "paid_date" => !empty($priorYearTaxes['accPaidDate']) ? date('Y-m-d', strtotime($priorYearTaxes['accPaidDate'])) : ""
+                //     ];
+                // }
+            // }
+            
+            
+            $taxCert[] = [
+                'fieldlist' => [
+                    "assessed_land_value" => (string)number_format((float)$data['landValue'], 2, '.', ''),
+                    "assessed_total_value" => (string)number_format((float)$data['totalValue'], 2, '.', ''),
+                    "exemption_amount" => number_format($exemptionAmount, 2, '.', ''),
+                    "township" => !empty($data['township']) ? $data['township'] : '',
+                    "exemption_percentage" => '',
+                    "assessed_improvement_value" => $improvementValue,
+                    "is_tax_sale" => "Off",
+                    "tax_parcel_id" => $data['parcel'],
+                    "account_number" => $data['taxAccountId'],
+                    // "is_prior_tax_paid" => ($data['delinquentTotalTax'] == 0 || $data['delinquentTotalTax'] == "0.00" || $data['delinquentTotalTax'] == "") ? "Yes" : "No",
+                    "is_other_exemption" => ($data['otherExemption'] == 0 || $data['otherExemption'] == "0.00" || $data['otherExemption'] == "") ? "Off" : "On",
+                    "is_homestead_exemption" => ($data['homeownerExemption'] == 0 || $data['homeownerExemption'] == "0.00" || $data['homeownerExemption'] == "") ? "Off" : "On",
+                    // "legal_description" => $data['legalDescription'],
+                    "notes" => $data['exampleFormControlTextarea1'],
+                ],
+                'payment_info' => $paymentData
+            ];
+
+           
+        // }
+        $responseDataJson = [
+            'tax_cert' => $taxCert,
+        ];
+        $DataJson = json_encode($responseDataJson);
         $existingRecord = DB::table('taxes')->where('order_id', $fieldMapping['order_id'])->first();
     
         if ($existingRecord) {
@@ -1134,6 +1346,7 @@ class OrderFormController extends Controller
                 ->where('order_id', $fieldMapping['order_id'])
                 ->update([
                     'json' => $jsonData,
+                    'tax_cert' => $responseDataJson,
                     'updated_by' => Auth::id(),
                     'updated_at' => Carbon::now(),
                 ]);
@@ -1169,16 +1382,19 @@ class OrderFormController extends Controller
                         'updated_by' => Auth::id(),
                         'updated_at' => Carbon::now('America/New_York'),
                     ]);
-
-    
+   
         // Prepare the response with the renamed fields
         $responseData = [
             'status' => $status,
             'data' => $jsonData,
             'message' => $message,
         ];
+
+            if($status === 'success'){
+                $this->taxCertPDFController->fillPDF($request['order_id'],$DataJson);
+                
+            }
     
-        // Return the response as JSON
         return response()->json($responseData, $status === 'success' ? 201 : 500);
     }    
 

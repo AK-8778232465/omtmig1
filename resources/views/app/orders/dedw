@@ -1,0 +1,47 @@
+{
+    "tax_cert": [
+        {
+            "fieldlist": {
+                "township": "",
+                "is_tax_sale": "Off",
+                "exemption_amount": "23756748.00",
+                "assessed_land_value": "32313.00",
+                "assessed_total_value": "6757.00",
+                "exemption_percentage": "",
+                "assessed_improvement_value": "4324324234.00"
+            },
+            "payment_info": [
+                {
+                    "status": "DUE",
+                    "due_date": "",
+                    "tax_type": "COUNTY",
+                    "tax_year": "324234",
+                    "paid_date": "2024-12-11",
+                    "tax_amount": "32424324",
+                    "tax_period": "1ST INSTALLMENT",
+                    "delinquent_date": "2025-01-03"
+                },
+                {
+                    "status": "DUE",
+                    "due_date": "",
+                    "tax_type": "COUNTY",
+                    "tax_year": "324234",
+                    "paid_date": "",
+                    "tax_amount": "0.00",
+                    "tax_period": "2ND INSTALLMENT",
+                    "delinquent_date": ""
+                },
+                {
+                    "status": "DUE",
+                    "due_date": "",
+                    "tax_type": "COUNTY",
+                    "tax_year": "324234",
+                    "paid_date": "",
+                    "tax_amount": "4324324324",
+                    "tax_period": "3RD INSTALLMENT",
+                    "delinquent_date": ""
+                }
+            ]
+        }
+    ]
+}

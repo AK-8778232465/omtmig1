@@ -661,6 +661,7 @@
                         </div>
                         <form id="taxFormValues">
                         <input type="hidden" name="order_id" value="{{$orderData->id}}">
+                        <input type="hidden" id="parcel" value="{{ $getjsonDetails[0]['parcel'] ?? '' }}">
                             <!-- Top Section -->
                             <div class="form-row">
                                 <!-- Left Column -->
@@ -693,7 +694,7 @@
                                         <input class="form-control" type="text" placeholder="Enter Tax ID Number" 
                                             style="flex: 1;" id="tax_id" name="tax_id" required 
                                             pattern="^[a-zA-Z0-9]+$" 
-                                            title="Tax ID must contain only letters and numbers without special characters" value="{{ $getjsonDetails[0]['taxId'] ?? '' }}">
+                                            title="Tax ID must contain only letters and numbers without special characters" value="{{ $getjsonDetails[0]['taxAccountId'] ?? '' }}">
                                     </div>
 
 
