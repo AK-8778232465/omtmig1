@@ -110,68 +110,49 @@ class RetryFtcOrder implements ShouldQueue
     
         try {
             $supportFiles = json_decode($ftcResponse['supportfiles'], true);
-            $filesToInsert = [];  // Initialize an array to hold the files for bulk insert
-            $historyToInsert = [];  // Initialize an array to hold the history for bulk insert
-        
-            // Step 1: Clear existing history records for the order
-            OmsAttachmentHistory::where('order_id', $ftcOrder->order_id)->delete();
-        
-            // Step 2: Fetch all existing SupportingDocs records for the order
-            $existingRecords = SupportingDocs::where('order_id', $ftcOrder->order_id)->get();
-        
-            // Step 3: Delete all existing records and files
-            foreach ($existingRecords as $existingRecord) {
-                // Delete the file from storage
-                if (Storage::exists($existingRecord->file_path)) {
-                    Storage::delete($existingRecord->file_path);
-                }
-        
-                // Delete the record from the database
-                $existingRecord->delete();
-                \Log::info("Existing supporting document and file deleted", ['order_id' => $ftcOrder->order_id, 'file_name' => $existingRecord->file_name]);
-            }
-        
-            // Step 4: Process each new file
             foreach ($supportFiles['fileslist'] as $file) {
                 $decodedData = base64_decode($file['file']);
                 $filename = uniqid() . '_' . $file['file_name'];
                 $filePath = "taxcert/$filename";
-        
-                // Step 5: Save the new file to storage
+    
                 \Storage::disk('public')->put($filePath, $decodedData);
-        
-                // Step 6: Prepare data for bulk insert of supporting documents
-                $filesToInsert[] = [
-                    'order_id' => $ftcOrder->order_id,
-                    'file_path' => $filePath,
-                    'file_name' => $file['file_name'],
-                    'created_at' => now(),
-                ];
-        
-                // Step 7: Prepare history data for bulk insert
-                $historyToInsert[] = [
-                    'order_id' => $ftcOrder->order_id,
-                    'updated_by' => Auth::id(),
-                    'action' => 'Uploaded',
-                    'file_name' => $file['file_name'],
-                    'updated_at' => now(),
-                ];
-        
+    
+                if (!empty($ftcOrder->order_id)) {
+                    // Step 1: Check if record exists
+                    $existingRecord = SupportingDocs::where('order_id', $ftcOrder->order_id)->first();
+                
+                    if ($existingRecord) {
+                        // Step 2a: Delete the file from storage
+                        if (Storage::exists($existingRecord->file_path)) {
+                            Storage::delete($existingRecord->file_path);
+                        }
+                
+                        // Step 2b: Delete the record from the database
+                        $existingRecord->delete();
+                    }
+                
+                    // Step 3: Insert the new record
+                    SupportingDocs::insertGetId([
+                        'order_id' => $ftcOrder->order_id,
+                        'file_path' => $filePath,
+                        'file_name' => $file['file_name'],
+                        'created_at' => now(),
+                    ]);
+
+                    OmsAttachmentHistory::where('order_id', $ftcOrder->order_id)->delete();
+                    
+                    OmsAttachmentHistory::create([
+                        'order_id' => $ftcOrder->order_id,
+                        'updated_by' => Auth::id(),
+                        'action' => 'Uploaded',
+                        'file_name' => $file['file_name'],
+                        'updated_at' => now(),
+                    ]);
+                }
+               
+    
                 \Log::info("Supporting document saved", ['file' => $filename]);
             }
-        
-            // Step 8: Bulk insert supporting documents if there are any
-            if (!empty($filesToInsert)) {
-                SupportingDocs::insert($filesToInsert);  // Bulk insert the files at once
-                \Log::info("Bulk insert completed for supporting documents", ['order_id' => $ftcOrder->order_id]);
-            }
-        
-            // Step 9: Bulk insert history records if there are any
-            if (!empty($historyToInsert)) {
-                OmsAttachmentHistory::insert($historyToInsert);  // Bulk insert history records
-                \Log::info("Bulk insert completed for attachment history", ['order_id' => $ftcOrder->order_id]);
-            }
-        
         } catch (\Exception $e) {
             \Log::error("Error while processing documents", ['error' => $e->getMessage()]);
         }
