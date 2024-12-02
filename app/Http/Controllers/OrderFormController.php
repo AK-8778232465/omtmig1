@@ -1497,6 +1497,30 @@ class OrderFormController extends Controller
         
             return response()->json($files);
         }
+
+        public function getCertFiles(Request $request)
+        {
+            $orderId = $request->input('order_id');
+            $directory = "taxcert/{$orderId}";
+            $files = [];
+        
+            // Check if directory exists
+            if (Storage::exists($directory)) {
+                // Get all files in the directory
+                $storedFiles = Storage::files($directory);
+        
+                foreach ($storedFiles as $filePath) {
+                    $fileName = basename($filePath);
+                    $fileUrl = Storage::url($filePath); // Get public URL if storage is linked
+                    $files[] = [
+                        'name' => $fileName,
+                        'path' => $fileUrl
+                    ];
+                }
+            }
+        
+            return response()->json($files);
+        }
         
         
             public function deleteFile(Request $request)

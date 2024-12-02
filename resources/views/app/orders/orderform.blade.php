@@ -1233,6 +1233,11 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div style="align-items: start;">
+                                        <b class="mt-2" style="font-weight: bold; margin-right: 10px;">Tax Certificate :</b>
+                                        <div id="fileList-cert" class="col-lg-6 col-md-6 mb-1"></div>
+                                    </div>
                             <!-- <label for="files" style="font-size: 24px;"><i class="fas fa-paperclip" style="font-size: 24px;"></i> Attach Files:</label> -->
                             <label for="files"><i class="fas fa-paperclip" style="font-size: 24px;"></i></label>
                             <input type="file" id="attachment" name="attachment[]" accept=".pdf, image/*" multiple>
@@ -1981,8 +1986,66 @@ $(document).ready(function () {
         });
     }
 
+
+    function displaycertFiles() {
+        let orderId = $("#order_id").val();
+
+        $.ajax({
+            url: "{{ url('getCertFiles') }}",
+            type: 'GET',
+            data: { order_id: orderId },
+            success: function (data) {
+                let fileList = $('#fileList-cert');
+                let attachmentsHeader = $('#attachmentsHeader');
+                fileList.empty(); // Clear previous file list
+
+                if (data.length > 0) {
+                    attachmentsHeader.show();
+                    data.forEach(file => {
+                        let fileType = file.name.split('.').pop().toLowerCase();
+                        let filePreview = '';
+
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                        } else if (fileType === 'pdf') {
+                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                            filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
+                        } else {
+                            filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
+                        }
+
+                        fileList.append(`<div class="m-2">${filePreview}</div>`);
+                    });
+
+                    $('.file-link').on('click', function (e) {
+                        e.preventDefault();
+                        let fileUrl = $(this).data('file-url');
+                        let fileType = fileUrl.split('.').pop().toLowerCase();
+
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                            Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                        } else if (fileType === 'pdf') {
+                            Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                            window.open(fileUrl, '_blank');
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
+                        }
+                    });
+                } else {
+                    attachmentsHeader.hide(); // Hide header if no files are available
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
+            }
+        });
+    }
+
     // Initial call to load files if `order_id` is already set
     displayFiles();
+    displaycertFiles();
 });
 
 

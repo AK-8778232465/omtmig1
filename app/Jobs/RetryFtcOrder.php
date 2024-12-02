@@ -56,13 +56,13 @@ class RetryFtcOrder implements ShouldQueue
     
         $data = ["OrderId" => $ftcOrder->ftc_order_id];
         $ftcResponse = $this->getFtcData('ftc/GetOrderStatusFTC.php', $data );
-    // dd($ftcOrder);
+    
         if (empty($ftcResponse)) {
             \Log::error("Empty response from FTC API", ['order_id' => $this->orderId]);
             return;
         }
     
-        if ($ftcResponse['result'] === null || (isset($ftcResponse['Status']) && $ftcResponse['Status'] == "In Progress")) {
+        if ((isset($ftcResponse['Status']) && $ftcResponse['Status'] == "In Progress")) {
             \Log::info("FTC response in progress", ['response' => $ftcResponse]);
 
             RetryFtcOrder::dispatch($this->orderId)->delay(now()->addSeconds(6));
