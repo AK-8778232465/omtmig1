@@ -985,7 +985,7 @@ class OrderFormController extends Controller
     {
  
         $fieldMapping = [
-            'parcel' => $request['parcel'],
+            'extracted_parcel' => $request['extracted_parcel'],
             'order_id' => $request['order_id'],
             'type_id' => $request['type_id'],
             'taxYear' => $request['fiscal_yr_id'],
@@ -1321,7 +1321,7 @@ class OrderFormController extends Controller
                     "exemption_percentage" => '',
                     "assessed_improvement_value" => $improvementValue,
                     "is_tax_sale" => "Off",
-                    "tax_parcel_id" => $data['parcel'],
+                    "tax_parcel_id" => $data['extracted_parcel'],
                     "account_number" => $data['taxAccountId'],
                     // "is_prior_tax_paid" => ($data['delinquentTotalTax'] == 0 || $data['delinquentTotalTax'] == "0.00" || $data['delinquentTotalTax'] == "") ? "Yes" : "No",
                     "is_other_exemption" => ($data['otherExemption'] == 0 || $data['otherExemption'] == "0.00" || $data['otherExemption'] == "") ? "Off" : "On",
