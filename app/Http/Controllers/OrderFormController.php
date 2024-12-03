@@ -1501,7 +1501,7 @@ class OrderFormController extends Controller
         public function getCertFiles(Request $request)
         {
             $orderId = $request->input('order_id');
-            $directory = "taxcert/{$orderId}";
+            $directory = "public/taxcert/{$orderId}";
             $files = [];
         
             // Check if directory exists

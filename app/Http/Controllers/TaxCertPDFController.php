@@ -27,12 +27,12 @@ class TaxCertPDFController extends Controller
             return response()->json(['error' => 'Template PDF file does not exist'], 500);
         }
 
-        $directoryPath = storage_path("app/taxcert/{$orderId}");
+        $directoryPath = storage_path("app/public/taxcert/{$orderId}");
         $outputFilePath = "{$directoryPath}/Certificate.pdf";
 
         if (!is_dir($directoryPath)) {
             try {
-                Storage::makeDirectory("taxcert/{$orderId}");
+                Storage::makeDirectory("public/taxcert/{$orderId}");
                 chmod($directoryPath, 0777);
             } catch (\Exception $e) {
                 Log::error("Error creating directory: {$e->getMessage()}");
