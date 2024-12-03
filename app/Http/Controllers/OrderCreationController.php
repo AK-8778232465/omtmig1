@@ -66,8 +66,8 @@ class OrderCreationController extends Controller
         $exceldetail = OrderCreationAudit::with('users')->orderBy('created_at', 'desc')->get();
 
         $tierList = Tier::select('id','Tier_id')->get();
-        $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 10)->get();
-        $typist_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 11)->get();
+        $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [10,22])->get();
+        $typist_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [11,22])->get();
 
         $mapped_lobs = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
         
