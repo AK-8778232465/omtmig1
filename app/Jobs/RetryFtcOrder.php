@@ -135,7 +135,7 @@ class RetryFtcOrder implements ShouldQueue
             foreach ($supportFiles['fileslist'] as $file) {
                 $decodedData = base64_decode($file['file']);
                 $filename = uniqid() . '_' . $file['file_name'];
-                $filePath = "taxcert/$ftcOrder->order_id/$filename";
+                $filePath = "taxcert/$ftcOrder->order_id/supporting_docs/$filename";
         
                 // Step 5: Save the new file to storage
                 \Storage::disk('public')->put($filePath, $decodedData);
