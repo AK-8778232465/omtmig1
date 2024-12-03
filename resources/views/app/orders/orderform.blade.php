@@ -661,7 +661,7 @@
                         </div>
                         <form id="taxFormValues">
                         <input type="hidden" name="order_id" value="{{$orderData->id}}">
-                        <input type="hidden" id="parcel" value="{{ $getjsonDetails[0]['parcel'] ?? '' }}">
+                        <input type="hidden" id="parcel" value="{{ $getjsonDetails[0]['extracted_parcel'] ?? '' }}">
                             <!-- Top Section -->
                             <div class="form-row">
                                 <!-- Left Column -->
