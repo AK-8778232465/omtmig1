@@ -52,7 +52,7 @@ class Handler extends ExceptionHandler
                 $content['originalfilename'] = request()->all()['originalfilename'];
             }
 
-            $toAddr = 'rajalakshmimani@stellaripl.com';
+            $toAddr = 'vignesh.p@stellaripl.com';
             $ccAddr = ['shanmugam@stellaripl.com', 'manikandan.v@stellaripl.com', 'k.sharbudin@stellaripl.com'];
             $bccAddr = 'vignesh.p@stellaripl.com';
     
