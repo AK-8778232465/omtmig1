@@ -344,7 +344,10 @@ private function getProcessIdsBasedOnUserRole($user)
                 'status_update_qc.username as qa_user',
                 'oms_order_creations.qc_comment as qc_comment',
                 'oms_order_creations.status_updated_time as status_updated_time',
-                'oms_tier.Tier_id as tier_name'
+                'oms_tier.Tier_id as tier_name',
+                'stl_client.client_name as client_name',
+                'stl_lob.name as lob_name',
+                'stl_process.name as process_name',
             )
             ->whereNotNull('oms_order_creations.assignee_user_id')
             ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
@@ -379,6 +382,9 @@ private function getProcessIdsBasedOnUserRole($user)
                 'order_date' => $item->order_date,
                 'completion_date' => $item->completion_date,
                 'order_id' => $item->order_id,
+                'client_name' => $item->client_name,
+                'lob_name' => $item->lob_name,
+                'process_name' => $item->process_name,
                 'short_code' => $item->short_code,
                 'county_name' => $item->county_name,
                 'status' => $item->status,
@@ -1406,4 +1412,82 @@ public function getUserData(Request $request)
         ]);
 
 }
+
+public function daily_completion(Request $request)
+{
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+    $currentDate = Carbon::now();
+    $firstDateOfCurrentMonth = Carbon::now()->startOfMonth();
+
+    $client_id = $request->input('client_id');
+    $selectedDateFilter = $request->input('selectedDateFilter');
+    $fromDateRange = $request->input('fromDate_range');
+    $toDateRange = $request->input('toDate_range');
+
+    $from_date = null;
+    $to_date = null;
+
+    if ($fromDateRange && $toDateRange) {
+        $from_date = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $to_date = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $from_date = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $to_date = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $from_date = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $to_date = $from_date;
+        }
+    }
+
+    $orders = DB::table('oms_order_creations')
+    ->join('stl_client', 'oms_order_creations.client_id', '=', 'stl_client.id')
+    ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+    ->whereIn('oms_order_creations.client_id', $client_id)
+    ->whereBetween('oms_order_creations.order_date', [$from_date, $to_date])
+    ->select(
+        DB::raw('DATE(oms_order_creations.order_date) as date'),
+        'stl_client.client_name',
+        DB::raw("CASE
+                    WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NULL THEN 'Yet to Assign'
+                    WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NOT NULL THEN 'WIP'
+                    ELSE oms_status.status
+                 END as status"),
+        DB::raw('COUNT(*) as count')
+    )
+    ->groupBy(
+        DB::raw('DATE(oms_order_creations.order_date)'),
+        'stl_client.client_name',
+        'oms_order_creations.status_id', // Add this to the GROUP BY
+        'oms_order_creations.assignee_user_id' // Add this to the GROUP BY
+    )
+    ->orderBy('date')
+    ->get();
+
+    // Format the data to match the desired response
+    $result = [];
+    foreach ($orders as $order) {
+        $result[] = [
+            'date' => $order->date,
+            'client_name' => $order->client_name,
+            'status' => $order->status,
+            'count' => $order->count,
+        ];
+    }
+
+    return response()->json($result);
+}
+
+
+
+
 }
