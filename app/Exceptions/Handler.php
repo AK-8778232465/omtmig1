@@ -56,7 +56,7 @@ class Handler extends ExceptionHandler
             $ccAddr = ['shanmugam@stellaripl.com', 'manikandan.v@stellaripl.com', 'k.sharbudin@stellaripl.com'];
             $bccAddr = 'vignesh.p@stellaripl.com';
     
-            Mail::to($toAddr)->cc($ccAddr)->bcc($bccAddr)->send(new Exception($content));
+            // Mail::to($toAddr)->cc($ccAddr)->bcc($bccAddr)->send(new Exception($content));
         }
 		catch (Throwable $exception) {
             Log::error('Error sending email: ' . $exception->getMessage());
