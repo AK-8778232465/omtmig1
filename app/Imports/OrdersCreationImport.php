@@ -372,7 +372,8 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         if (isset($data['process_type_id']) && $data['process_type_id'] == 'Typing') {
             $existingOrder= OrderCreation::where('order_id', $data['order_id'])
                           ->whereIn('process_type_id', [2, 4, 6, 8, 9, 16])
-                          ->where('status_id', '!=', 3);
+                          ->where('status_id', '!=', 3)
+                          ->where('is_active', '!=', 0);
 
                 $data['comments'] = 'For Typing Process, OrderId Should be Unique';
 
@@ -382,7 +383,8 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                                            ->where('process_id', $processOrg->id)
                                            ->where('lob_id',  $lob->id)
                                            ->where('process_type_id', $process_typeid->process_id)
-                                           ->where('status_id', '!=', 3);
+                                           ->where('status_id', '!=', 3)
+                                           ->where('is_active', '!=', 0);
 
                 $data['comments'] = 'Duplicate Order ID and Order Date or Process found';
         }
@@ -500,7 +502,8 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         if (isset($data['process_type_id']) && $data['process_type_id'] == 'Typing') {
             $existingOrder= OrderCreation::where('order_id', $data['order_id'])
                           ->whereIn('process_type_id', [2, 4, 6, 8, 9, 16])
-                          ->where('status_id', '!=', 3);
+                          ->where('status_id', '!=', 3)
+                          ->where('is_active', '!=', 0);
                 $data['comments'] = 'For Typing Process, OrderId Should be Unique';
 
         } else {
@@ -509,7 +512,8 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
                                            ->where('process_id', $processOrg->id)
                                            ->where('lob_id',  $lob->id)
                                            ->where('process_type_id', $process_typeid->process_id)
-                                           ->where('status_id', '!=', 3);
+                                           ->where('status_id', '!=', 3)
+                                           ->where('is_active', '!=', 0);
 
                 $data['comments'] = 'Duplicate Order ID and Order Date or Process found';
         }
