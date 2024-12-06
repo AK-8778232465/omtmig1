@@ -530,8 +530,8 @@
                 <table id="daily_completion_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead class="text-center" style="font-size: 12px;">
                         <tr>
-                            <th width="10%">Date</th>
-                            <th width="10%">Client No</th>
+                            <th width="10%">Order Received Date</th>
+                            <th width="10%">Client Name</th>
                             <th width="12%">Order Received</th>
                             <th width="12%">Yet to Assign</th>
                             <th width="8%">WIP</th>
@@ -2099,7 +2099,12 @@ function daily_completion() {
                 serverSide: false, // Local processing now
                 searching: true,
                 dom: 'lBfrtip',
-                buttons: ['excel'],
+                buttons:[
+                    {
+                        extend: 'excel',
+                        title: 'Daily Completion_Reports',  // Set the title for the exported Excel file
+                    }
+                ],
                 lengthMenu: [10, 25, 50, 75, 100],
                 order: [[0, 'asc']]
             });

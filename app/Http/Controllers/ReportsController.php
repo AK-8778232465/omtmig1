@@ -1453,7 +1453,8 @@ public function daily_completion(Request $request)
     ->join('stl_client', 'oms_order_creations.client_id', '=', 'stl_client.id')
     ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
     ->whereIn('oms_order_creations.client_id', $client_id)
-    ->whereBetween('oms_order_creations.order_date', [$from_date, $to_date])
+    ->whereDate('oms_order_creations.order_date', '>=', $from_date)  // Explicit 'from_date' condition
+    ->whereDate('oms_order_creations.order_date', '<=', $to_date)
     ->select(
         DB::raw('DATE(oms_order_creations.order_date) as date'),
         'stl_client.client_name',
@@ -1476,8 +1477,9 @@ public function daily_completion(Request $request)
     // Format the data to match the desired response
     $result = [];
     foreach ($orders as $order) {
+        $orderDate = Carbon::parse($order->date)->format('m-d-Y');
         $result[] = [
-            'date' => $order->date,
+            'date' => $orderDate,
             'client_name' => $order->client_name,
             'status' => $order->status,
             'count' => $order->count,
