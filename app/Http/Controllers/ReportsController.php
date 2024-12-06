@@ -1450,9 +1450,10 @@ public function daily_completion(Request $request)
     }
 
     $orders = DB::table('oms_order_creations')
-    ->join('stl_client', 'oms_order_creations.client_id', '=', 'stl_client.id')
+    ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+    ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
     ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
-    ->whereIn('oms_order_creations.client_id', $client_id)
+    ->whereIn('stl_item_description.client_id', $client_id)
     ->whereDate('oms_order_creations.order_date', '>=', $from_date)  // Explicit 'from_date' condition
     ->whereDate('oms_order_creations.order_date', '<=', $to_date)
     ->select(

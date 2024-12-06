@@ -544,6 +544,7 @@
                             <th width="8%">Typing QC</th>
                             <th width="8%">Hold</th>
                             <th width="8%">Completed</th>
+                            <th width="8%">Partially Cancelled</th>
                             <th width="8%">Cancelled</th>
 
                         </tr>
@@ -2041,6 +2042,7 @@ function formatResponseData(response) {
                 "Typing QC": 0,
                 "Hold": 0,
                 "Completed": 0,
+                "Partially Cancelled": 0,
                 "Cancelled": 0
             });
             existing = formattedData[formattedData.length - 1]; // Get reference to the new entry
@@ -2081,7 +2083,7 @@ function daily_completion() {
                 columns: [
                     { data: 'date' },
                     { data: 'client_name' },
-                    { data: 'Order Received' },  // This is the new column for total order received count
+                    { data: 'Order Received' },
                     { data: 'Yet to Assign' },
                     { data: 'WIP' },
                     { data: 'Coversheet Prep' },
@@ -2093,6 +2095,7 @@ function daily_completion() {
                     { data: 'Typing QC' },
                     { data: 'Hold' },
                     { data: 'Completed' },
+                    { data: 'Partially Cancelled' },
                     { data: 'Cancelled' }
                 ],
                 processing: true,
