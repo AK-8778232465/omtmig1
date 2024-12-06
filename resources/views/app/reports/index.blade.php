@@ -148,6 +148,8 @@
             <li id="production-report" class="report-item">Accurate - Production Report</li>
             <li id="orderInflow-report" class="report-item">Order Inflow Details</li>
             <li id="acm-report" class="report-item">ACM Report</li>
+            <li id="daily-completion" class="report-item">Daily Completion Status</li>
+
         </ul>
     </div>
 
@@ -229,6 +231,18 @@
                     </select>
                 </div>
             </div>
+            <div class="col-md-2" id="client_filter_2">
+                <div class="form-group">
+                    <label for="client">Client</label>
+                    <select class="form-control select2-basic-multiple" name="dcf_client_id_2" id="client_id_dcf_2" multiple="multiple">
+                        <option selected value="">Select Client</option>
+                        @forelse($clients as $client)
+                        <option value="{{ $client->id }}">{{ $client->client_no }} ({{ $client->client_name }})</option>
+                        @empty
+                        @endforelse
+                    </select>
+                </div>
+            </div>
 
             <div class="col-md-2" id="lob_filter">
                 <div class="form-group">
@@ -287,7 +301,7 @@
                                     <th width="12%">Users</th>
                                     <th width="11%">WIP</th>
                                     <th width="11%">Coversheet Prep</th>
-                                    <th width="8%">Doc Purchase</th>
+                                    <th width="8%">Doc Purchaser</th>
                                     <th width="8%">Ground Abstractor</th>
                                     <th width="8%">Clarification</th>
                                     <th width="8%">Typing</th>
@@ -317,10 +331,13 @@
                             <thead class="text-center" style="font-size: 12px;">
                                 <tr>
                                     <th width="5%">S.No</th>
-                                    <th width="11%">Process</th>
+                                    <th width="11%">Product</th>
                                     <th width="8%">Order Received Date</th>
                                     <th width="8%">Production Date</th>
                                     <th width="11%">Order ID</th>
+                                    <th width="11%">Client Name</th>
+                                    <th width="11%">LOB</th>
+                                    <th width="11%">Process</th>
                                     <th width="5%">State</th>
                                     <th width="5%">County Name</th>
                                     <th width="5%">Status Updated Date</th>
@@ -495,6 +512,40 @@
                             <th width="12%">Emp Name</th>
                             <th width="12%">Role</th>
                             <th width="8%">Reporting_to</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center" style="font-size: 12px;"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    {{-- Daily completion --}}
+
+    <div class="card col-md-10 mt-2 tabledetails" id="daily_completion" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
+        <h4 class="text-center mt-3">Daily Completion Status</h4>
+        <div class="card-body">
+            <div class="p-0">
+                <table id="daily_completion_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <thead class="text-center" style="font-size: 12px;">
+                        <tr>
+                            <th width="10%">Order Received Date</th>
+                            <th width="10%">Client Name</th>
+                            <th width="12%">Order Received</th>
+                            <th width="12%">Yet to Assign</th>
+                            <th width="8%">WIP</th>
+                            <th width="8%">Coversheet Prep</th>
+                            <th width="8%">Doc purchase</th>
+                            <th width="8%">Clarification</th>
+                            <th width="8%">Ground Abstractor</th>
+                            <th width="8%">Send for QC</th>
+                            <th width="8%">Typing</th>
+                            <th width="8%">Typing QC</th>
+                            <th width="8%">Hold</th>
+                            <th width="8%">Completed</th>
+                            <th width="8%">Cancelled</th>
+
                         </tr>
                     </thead>
                     <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -836,6 +887,9 @@ function orderWise() {
                 }
             },
             { data: 'order_id', name: 'order_id' },
+            { data: 'client_name', name: 'client_name' },
+            { data: 'lob_name', name: 'lob_name' },
+            { data: 'process_name', name: 'process_name' },
             { data: 'short_code', name: 'short_code' },
             { data: 'county_name', name: 'county_name' },
             { data: 'status_updated_time',
@@ -881,13 +935,16 @@ function orderWise() {
                         success: function(response) {
                             var data = response.data;
 
-                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source","Process Type","Tier", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments"];
+                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Client Name", "LOB", "Process", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source","Process Type","Tier", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments"];
                             var exportData = data.map((row, index) => [
                                 index + 1,
                                 row.process,
                                 formatExcelDate(row.order_date),
                                 formatExcelDate(row.completion_date),
                                 row.order_id,
+                                row.client_name,
+                                row.lob_name,
+                                row.process_name,
                                 row.short_code,
                                 row.county_name,
                                 formatExcelDate(row.status_updated_time),
@@ -1198,6 +1255,9 @@ $(document).on('click', '#filterButton,#filterButton2', function () {
             case 'orderInflow-report':
                  orderInflow_report();
                 break;
+            case 'daily-completion':
+                 daily_completion();
+                break;
             default:
                 console.log('No valid report item is active.');
         }
@@ -1227,6 +1287,8 @@ $(document).ready(function() {
         $('#production_report').hide();
         $('#orderInflow_report').hide();
         $('#acm_report').hide();
+        $('#daily_completion').hide();
+
 
 
 
@@ -1245,6 +1307,7 @@ $(document).ready(function() {
             $('#client_filter').show();
             $('#lob_filter').show();
             $('#process_filter').show();
+            $('#client_filter_2').hide();
 
 
         } else if (reportId === 'orderwise-details') {
@@ -1259,6 +1322,7 @@ $(document).ready(function() {
             $('#client_filter').show();
             $('#lob_filter').show();
             $('#process_filter').show();
+            $('#client_filter_2').hide();
 
 
         } else if (reportId === 'ordercompletion-details') {
@@ -1273,6 +1337,7 @@ $(document).ready(function() {
             $('#client_filter').show();
             $('#lob_filter').show();
             $('#process_filter').show();
+            $('#client_filter_2').hide();
 
 
         } else if (reportId === 'orderprogress-details') {
@@ -1287,6 +1352,7 @@ $(document).ready(function() {
             $('#client_filter').show();
             $('#lob_filter').show();
             $('#process_filter').show();
+            $('#client_filter_2').hide();
 
 
 
@@ -1303,6 +1369,7 @@ $(document).ready(function() {
             $('#client_filter').hide();
             $('#lob_filter').hide();
             $('#process_filter').hide();
+            $('#client_filter_2').hide();
 
 
 
@@ -1319,6 +1386,8 @@ $(document).ready(function() {
             $('#client_filter').show();
             $('#lob_filter').show();
             $('#process_filter').show();
+            $('#client_filter_2').hide();
+
 
 
 
@@ -1332,6 +1401,8 @@ $(document).ready(function() {
             $('#hidefilter_2').hide();
             $('#role_filter').hide();
             $('#user_filter').hide();
+            $('#client_filter_2').hide();
+
 
         }else if (reportId === 'acm-report') {
             $('#acm_report').show();
@@ -1343,10 +1414,20 @@ $(document).ready(function() {
             $('#hidefilter_2').hide();
             $('#role_filter').show();
             $('#user_filter').show();
+            $('#client_filter_2').hide();
 
 
-
-
+        }else if (reportId === 'daily-completion') {
+            $('#daily_completion').show();
+            $('#selected_date_range').show();
+            $('#hidefilter_3').show();
+            $('#client_filter').hide();
+            $('#lob_filter').hide();
+            $('#process_filter').hide();
+            $('#hidefilter_2').hide();
+            $('#role_filter').hide();
+            $('#user_filter').hide();
+            $('#client_filter_2').show();
 
         }
         }
@@ -1932,6 +2013,106 @@ function orderInflow_report() {
         order: [[0, 'asc']] // Order by client name
     });
 }
+
+
+
+function formatResponseData(response) {
+    let formattedData = [];
+
+    // Group data by date and client_name
+    response.forEach(item => {
+        // Find if an entry for the same date and client_name exists in the formattedData
+        let existing = formattedData.find(entry => entry.date === item.date && entry.client_name === item.client_name);
+
+        if (!existing) {
+            // If no entry exists, create a new one
+            formattedData.push({
+                date: item.date,
+                client_name: item.client_name,
+                "Order Received": 0, // Initialize the "Order Received" count
+                "Yet to Assign": 0,
+                "WIP": 0,
+                "Coversheet Prep": 0,
+                "Doc Purchaser": 0,
+                "Clarification": 0,
+                "Ground Abstractor": 0,
+                "Send for QC": 0,
+                "Typing": 0,
+                "Typing QC": 0,
+                "Hold": 0,
+                "Completed": 0,
+                "Cancelled": 0
+            });
+            existing = formattedData[formattedData.length - 1]; // Get reference to the new entry
+        }
+
+        // Increment the count for the corresponding status
+        existing[item.status] += item.count;
+
+        // Add to the "Order Received" count (sum of all statuses for this date/client)
+        existing["Order Received"] += item.count;
+    });
+
+    return formattedData;
+}
+
+function daily_completion() {
+    var fromDate = $('#fromDate_range').val();
+    var toDate = $('#toDate_range').val();
+    let client_id = $("#client_id_dcf_2").val();
+    console.log(client_id);
+
+    $.ajax({
+        url: "{{ route('daily_completion') }}",
+        type: 'POST',
+        data: {
+            toDate_range: toDate,
+            fromDate_range: fromDate,
+            client_id: client_id,
+            selectedDateFilter: selectedDateFilter,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            let formattedData = formatResponseData(response);
+
+            $('#daily_completion_table').DataTable({
+                destroy: true,
+                data: formattedData,
+                columns: [
+                    { data: 'date' },
+                    { data: 'client_name' },
+                    { data: 'Order Received' },  // This is the new column for total order received count
+                    { data: 'Yet to Assign' },
+                    { data: 'WIP' },
+                    { data: 'Coversheet Prep' },
+                    { data: 'Doc Purchaser' },
+                    { data: 'Clarification' },
+                    { data: 'Ground Abstractor' },
+                    { data: 'Send for QC' },
+                    { data: 'Typing' },
+                    { data: 'Typing QC' },
+                    { data: 'Hold' },
+                    { data: 'Completed' },
+                    { data: 'Cancelled' }
+                ],
+                processing: true,
+                serverSide: false, // Local processing now
+                searching: true,
+                dom: 'lBfrtip',
+                buttons:[
+                    {
+                        extend: 'excel',
+                        title: 'Daily Completion_Reports',  // Set the title for the exported Excel file
+                    }
+                ],
+                lengthMenu: [10, 25, 50, 75, 100],
+                order: [[0, 'asc']]
+            });
+
+        }
+    });
+}
+
 
 
 function exportToExcel(data) {
