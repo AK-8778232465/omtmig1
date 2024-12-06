@@ -226,7 +226,8 @@ public function getlobid(Request $request){
                 if (in_array($input['process_type_id'], [2, 4, 6, 8, 9, 16])) {
                     $duplicateOrderCount = OrderCreation::where('order_id', $input['order_id'])
                                             ->whereIn('process_type_id', [2, 4, 6, 8, 9, 16])
-                                            ->where('status_id', '!=', 3);
+                                            ->where('status_id', '!=', 3)
+                                            ->where('is_active', '!=', 0);
                 }else{
                     $duplicateOrderCount = OrderCreation::where('order_id', $input['order_id'])
                     ->where(DB::raw('DATE(order_date)'), '=', \Carbon\Carbon::parse($input['order_date'])->format('Y-m-d'))
@@ -235,7 +236,8 @@ public function getlobid(Request $request){
                         ->where('process_type_id', $input['process_type_id'])
                         ->where('process_id', $input['process_code'])
                         ->where('is_active', 1)
-                        ->where('status_id', '!=', 3);
+                        ->where('status_id', '!=', 3)
+                        ->where('is_active', '!=', 0);
                 }
 
                 $duplicateOrderCount = $duplicateOrderCount->count();
