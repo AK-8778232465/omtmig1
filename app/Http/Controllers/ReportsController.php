@@ -1473,6 +1473,9 @@ public function daily_completion(Request $request)
         'oms_order_creations.assignee_user_id' // Add this to the GROUP BY
     )
     ->orderBy('date')
+    ->where('oms_order_creations.is_active', 1)
+    ->where('stl_item_description.is_approved', 1)
+    ->where('stl_client.is_approved', 1)
     ->get();
 
     // Format the data to match the desired response
