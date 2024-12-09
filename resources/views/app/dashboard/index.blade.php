@@ -1047,6 +1047,7 @@
                                 <th width="7%">Typing</th>
                                 <th width="7%">Typing QC</th>
                                 <th width="7%">Hold</th>
+                                <th width="7%">Partially Cancelled</th>
                                 <th width="7%">Cancelled</th>
                                 <th width="7%">Completed</th>
                                 <th width="7%">All</th>
@@ -1081,6 +1082,7 @@
                                 <th width="7%">Typing</th>
                                 <th width="7%">Typing QC</th>
                                 <th width="6%">Hold</th>
+                                <th width="6%">Parially Cancelled</th>
                                 <th width="7%">Cancelled</th>
                                 <th width="7%">Completed</th>
                                 <th width="7%">All</th>
@@ -1776,6 +1778,7 @@ function datewise_datatable(fromDate, toDate, client_id, project_id, selectedDat
                 destroy: true,
                 processing: true,
                 serverSide: false,
+                scrollX: true,
                 searching: true,
                 ajax: {
                     url: "{{ route('dashboard_clientwise_count') }}",
@@ -1811,6 +1814,7 @@ function datewise_datatable(fromDate, toDate, client_id, project_id, selectedDat
                     { data: 'Typing', name: 'Typing', className: "text-center" },
                     { data: 'Typing QC', name: 'Typing QC', className: "text-center" },
                     { data: 'Hold', name: 'Hold', className: "text-center" },
+                    { data: 'partially cancelled', name: 'partially cancelled', className: "text-center" },
                     { data: 'Cancelled', name: 'Cancelled', className: "text-center" },
                     { data: 'Completed', name: 'Completed', className: "text-center" },
                     { data: 'All', name: 'All', className: "text-center" }
@@ -1838,6 +1842,7 @@ $('#datewise_datatable').on('draw.dt', function() {
             destroy: true,
             processing: true,
             serverSide: true,
+            scrollX: true,
             ajax: {
                 url: "{{ route('dashboard_userwise_count') }}",
                 type: 'POST',
@@ -1862,6 +1867,7 @@ $('#datewise_datatable').on('draw.dt', function() {
                 { data: 'status_16', name: 'status_16' },
                 { data: 'status_17', name: 'status_17' },
                 { data: 'status_2', name: 'status_2' },
+                { data: 'status_20', name: 'status_20' },
                 { data: 'status_3', name: 'status_3' },
                 { data: 'status_5', name: 'status_5' },
                 { data: 'All', name: 'All' },

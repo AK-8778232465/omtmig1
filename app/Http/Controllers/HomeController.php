@@ -1224,6 +1224,8 @@ class HomeController extends Controller
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 18 THEN 18 END) AS Ground_Abstractor')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 16 THEN 16 END) AS Typing')
         ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 17 THEN 17 END) AS Typing_QC')
+        ->selectRaw('COUNT(CASE WHEN oms_order_creations.status_id = 20 THEN 20 END) AS partially_cancelled')
+
         ->groupBy('stl_client.client_name', 'stl_item_description.process_name', 'oms_order_creations.process_id', 'stl_item_description.project_code');
 
     if ($user->user_type_id == 6) {
@@ -1278,6 +1280,8 @@ if ($fromDate && $toDate) {
         if (isset($data->Typing)) $sum += $data->Typing;
         if (isset($data->Typing_QC)) $sum += $data->Typing_QC;
         if (isset($data->Ground_Abstractor)) $sum += $data->Ground_Abstractor;
+        if (isset($data->partially_cancelled)) $sum += $data->partially_cancelled;
+
 
         if ($sum === 0) {
             continue;
@@ -1298,7 +1302,8 @@ if ($fromDate && $toDate) {
             'Typing' => $data->Typing,
             'Typing QC' => $data->Typing_QC,
             'Ground Abstractor' => $data->Ground_Abstractor,
-            'All' => $data->WIP + $data->Hold + $data->Cancelled +  $data->Send_for_QC + $data->Completed +  $data->Coversheet_Prep + $data->Clarification + $data->Doc_Purchase + $data->Typing + $data->Typing_QC + $data->Ground_Abstractor, // Add the sum as 'All'
+            'partially cancelled' => $data->partially_cancelled,
+            'All' => $data->WIP + $data->Hold + $data->Cancelled +  $data->Send_for_QC + $data->Completed +  $data->Coversheet_Prep + $data->Clarification + $data->Doc_Purchase + $data->Typing + $data->Typing_QC + $data->Ground_Abstractor + $data->partially_cancelled, // Add the sum as 'All'
             // Add other fields as needed
         ];
     }
@@ -1366,6 +1371,7 @@ public function dashboard_userwise_count(Request $request)
             SUM(CASE WHEN status_id = 16 THEN 1 ELSE 0 END) as `status_16`,
             SUM(CASE WHEN status_id = 17 THEN 1 ELSE 0 END) as `status_17`,
             SUM(CASE WHEN status_id = 18 THEN 1 ELSE 0 END) as `status_18`,
+            SUM(CASE WHEN status_id = 20 THEN 1 ELSE 0 END) as `status_20`,
 
             COUNT(*) as `All`', [$fromDate, $toDate])
         ->where('oms_order_creations.is_active', 1)
@@ -1396,7 +1402,9 @@ public function dashboard_userwise_count(Request $request)
             'status_16' => $count->status_16,
             'status_17' => $count->status_17,
             'status_18' => $count->status_18,
-            'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14 + $count->status_15 + $count->status_16 + $count->status_17 + $count->status_18,
+            'status_20' => $count->status_20,
+
+            'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14 + $count->status_15 + $count->status_16 + $count->status_17 + $count->status_18 + $count->status_20,
         ];
     });
 
@@ -2466,7 +2474,21 @@ public function revenue_detail_client_fte(Request $request){
 
     public function total_users() {
         $user = User::where('id', Auth::id())->first();
-        // Assuming getAllLowerLevelUserIds returns an array of user IDs
+
+        // Check if the user has a 'user_type_id' of 23
+        if ($user->user_type_id == 23) {
+            // If the user has a 'user_type_id' of 23, get all users
+            $total_users = User::count();
+
+
+            $active_user = User::where('logged_in', 1)->count();
+
+            return response()->json([
+                'user_lower_count' => $total_users,
+                'active_user' => $active_user,
+            ]);
+        } else {
+            // Assuming getAllLowerLevelUserIds_all returns an array of user IDs
         $user_lower_ids = User::getAllLowerLevelUserIds_all(Auth::id());
 
         // Filter out the current user's ID
@@ -2487,6 +2509,7 @@ public function revenue_detail_client_fte(Request $request){
             'active_user' => $active_user,
         ]);
     }
+    }
 
 
 
@@ -2496,6 +2519,22 @@ public function revenue_detail_client_fte(Request $request){
         $user = User::find($currentUserId);
 
         // Get all lower level user IDs
+        if ($user->user_type_id == 23) {
+            // If user_type_id is 23, get all users (logged in)
+            $active_users = User::where('logged_in', 1)
+                ->get(['id', 'emp_id', 'username', 'logged_in']);
+
+            return response()->json([
+                'data' => $active_users->map(function($user) {
+                    return [
+                        'id' => $user->id,
+                        'emp_id' => $user->emp_id,
+                        'username' => $user->username
+                    ];
+                }),
+            ]);
+        } else {
+            // Get all lower-level user IDs
         $user_lower_ids = User::getAllLowerLevelUserIds_all($currentUserId);
 
         // Filter out the current user's ID
@@ -2517,6 +2556,7 @@ public function revenue_detail_client_fte(Request $request){
                     ];
                 }),
             ]);
+    }
     }
 
 
@@ -2843,6 +2883,27 @@ public function tat_zone_count(Request $request) {
         $currentUserId = Auth::id();
         $user = User::find($currentUserId);
 
+        if ($user->user_type_id == 23) {
+
+            $total_users = User::get();
+
+            $active_users = User::select('oms_users.id', 'oms_users.emp_id', 'oms_users.username', 'oms_users.logged_in', 'reporting_user.username as reporting_username')
+            ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+            ->get();
+
+            return response()->json([
+                'data' => $active_users->map(function($user) {
+                    return [
+                        'id' => $user->id,
+                        'emp_id' => $user->emp_id,
+                        'username' => $user->username,
+                        'status' => $user->logged_in ? 'Available' : 'Unavailable',
+                        'reporting_to' => $user->reporting_username ?? 'N/A'
+                    ];
+                }),
+            ]);
+
+        }else{
         $user_lower_ids = User::getAllLowerLevelUserIds_all($currentUserId);
 
         $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
@@ -2868,11 +2929,44 @@ public function tat_zone_count(Request $request) {
         ]);
     }
 
+    }
+
 
     public function yesterday_resourceTable() {
         $currentUserId = Auth::id();
         $user = User::find($currentUserId);
 
+        if ($user->user_type_id == 23) {
+
+            $yesterday = now()->subDay()->toDateString();
+
+
+            $yesterday_active_users = DB::table('oms_users')
+            ->select(
+                'oms_users.id',
+                'oms_users.username',
+                'oms_users.emp_id',
+                'oms_users.logged_in',
+                'reporting_user.username as reporting_username',
+            )
+            ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+            ->leftJoin('yesterday_active_users', 'yesterday_active_users.user_id', '=', 'oms_users.id')
+            ->whereDate('yesterday_active_users.created_at', $yesterday)
+            ->distinct()
+            ->get();
+
+            return response()->json([
+                'data' => $yesterday_active_users->map(function($user) {
+                    return [
+                        'id' => $user->id,
+                        'emp_id' => $user->emp_id,
+                        'username' => $user->username,
+                        'reporting_to' => $user->reporting_username ?? 'N/A'
+                    ];
+                }),
+            ]);
+
+        }else{
         $user_lower_ids = User::getAllLowerLevelUserIds_all($currentUserId);
         $user_lower_ids = array_filter($user_lower_ids, function($id) use ($currentUserId) {
             return $id != $currentUserId;
@@ -2908,6 +3002,8 @@ public function tat_zone_count(Request $request) {
                 ];
             }),
         ]);
+        }
+
     }
 
 
