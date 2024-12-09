@@ -132,7 +132,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    @role('Super Admin|Business Head|SPOC|PM/TL|AVP/VP|Admin')
+                                    @role('Super Admin|Business Head|SPOC|PM/TL|VP|Admin|AVP')
                                     <a href="#"><span class="edit_user ml-2"  data-id="{{ $users->id }}">
                                         <img class="menuicon tbl_editbtn" src="{{asset('assets/images/edit.svg')}}" >&nbsp;
                                     </span></a>
@@ -388,7 +388,10 @@
                 @role('Business Head')
                 $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
                 @endrole
-                @role('AVP/VP')
+                @role('VP')
+                $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
+                @endrole
+                @role('AVP')
                 $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
                 @endrole
                 @role('Admin')
@@ -530,7 +533,7 @@
                     $('#edit_reporting_to').hide();
                 } else if (role == 3) {
                     $('#edit_reporting_to').show();
-                    reporting_users = 'getVps';
+                    reporting_users = 'getAVps';
                 } else if (role == 5) {
                     $('#edit_reporting_to').show();
                     reporting_users = 'getBussinessHeads';
@@ -541,6 +544,9 @@
                     $('#edit_reporting_to').show();
                     reporting_users = 'getSOPC';
                 }else if (role == 2 ) {
+                    $('#edit_reporting_to').show();
+                    reporting_users = 'getVp';
+                }else if (role == 24 ) {
                     $('#edit_reporting_to').show();
                     reporting_users = 'getAdmin';
                 }
@@ -755,7 +761,7 @@ function assignService(userID) {
             $('#add_reporting_to').hide();
         } else if (role == 3 ) {
             $('#add_reporting_to').show();
-            reporting_users = 'getVps';
+            reporting_users = 'getAVps';
         } else if (role == 5) {
             $('#add_reporting_to').show();
             reporting_users = 'getBussinessHeads';
@@ -768,7 +774,12 @@ function assignService(userID) {
             reporting_users = 'getSOPC';
         }else if (role == 2 ) {
             $('#add_reporting_to').show();
-            reporting_users = 'getAdmin';
+            reporting_users = 'getVps';
+        }else if (role == 24 ) {
+            $('#add_reporting_to').hide();
+           
+        }else if (role == 23) {
+            $('#add_reporting_to').hide();
         }
 
             $.ajax({
@@ -795,7 +806,7 @@ function assignService(userID) {
             $('#edit_reporting_to').hide();
         } else if (role == 3) {
             $('#edit_reporting_to').show();
-            reporting_users = 'getVps';
+            reporting_users = 'getAVps';
         } else if (role == 5) {
             $('#edit_reporting_to').show();
             reporting_users = 'getBussinessHeads';
@@ -804,10 +815,14 @@ function assignService(userID) {
             reporting_users = 'getPM_TL';
         }else if (role == 2 ) {
             $('#edit_reporting_to').show();
-            reporting_users = 'getAdmin';
+            reporting_users = 'getVps';
         }else if (role ==  6 || role == 7 || role == 8 || role == 10 ||role == 11 || role == 22  ) {
             $('#edit_reporting_to').show();
             reporting_users = 'getSOPC';
+        }else if (role == 24 ) {
+            $('#edit_reporting_to').hide();
+        }else if (role == 23 ) {
+            $('#edit_reporting_to').hide();
         }
 
             $.ajax({

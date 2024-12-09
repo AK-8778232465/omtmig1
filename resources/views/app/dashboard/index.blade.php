@@ -367,7 +367,7 @@
             <div id="leftContent" style="display: none;">
                 <div class="col-12">
                     <div class="row my-2">
-                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
+                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('Admin'))
                             <div class="col-xl-4 col-sm-6 col-12">
                             <div class="h-100 card">
                                     <div class="card-content">
@@ -540,7 +540,7 @@
     <b class="mt-0 volume_analysis_date" id="selectedDate"></b>
     <div class="col-12">
         <div class="row my-2">
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('VP'))
                 <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)"  style="cursor: pointer;">
                     <div class="card">
                         <div class="card-content">
@@ -1028,7 +1028,7 @@
 
 
 
-        @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP','PM/TL','Business Head']))
+        @if(Auth::user()->hasRole(['Super Admin', 'VP','PM/TL','Business Head','AVP','Admin']))
         <div class="card mt-5 tabledetails d-none" id="userwise_table">
             <h4 class="text-center mt-3">Userwise Details</h4>
             <div class="card-body">
@@ -1060,7 +1060,7 @@
         </div>
         @endif
 
-        @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP','PM/TL','Process','Qcer','Process/Qcer','SPOC','Business Head']))
+        @if(Auth::user()->hasRole(['Super Admin', 'AVP','PM/TL','Process','Qcer','Process/Qcer','SPOC','Business Head','VP','AVP','Admin']))
         <div class="card mt-5 tabledetails d-none" id="datewise_table">
             <h4 class="text-center mt-3">ClientWise Details</h4>
             <div class="card-body">
@@ -1830,7 +1830,7 @@ $('#datewise_datatable').on('draw.dt', function() {
 
 
 
-    @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP', 'Business Head', 'PM/TL','SPOC']))
+    @if(Auth::user()->hasRole(['Super Admin', 'VP', 'Business Head', 'PM/TL','SPOC','AVP','Admin']))
     function userwise_datatable(fromDate, toDate, client_id, projectId, selectedDateFilter){
         fromDate = $('#fromDate_range').val();
         toDate = $('#toDate_range').val();

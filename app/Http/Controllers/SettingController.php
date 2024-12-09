@@ -67,7 +67,7 @@ class SettingController extends Controller
     public function setting(Request $request)
     {
         if($request->is('settings/users') ||$request->is('settings') ){
-            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('Admin')) {
+            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('VP')) {
                 $currentUserId = Auth::id();
                 $user = User::find($currentUserId);
 
@@ -88,32 +88,42 @@ class SettingController extends Controller
                 )
                 ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
                 ->leftJoin('roles as roles', 'oms_users.user_type_id', '=', 'roles.id')
-                ->when($user->id != 1, function ($query) use ($user_lower_ids) {
+                ->when(!in_array($user->user_type_id, [1, 23]), function ($query) use ($user_lower_ids) {
                     $query->whereIn('oms_users.id', $user_lower_ids);
                 })
-                ->get();
+                ->when($user->user_type_id == 23, function ($query) {
+                    $query->whereNotIn('oms_users.user_type_id', [1]);
+                })
                 
-               
+                
+                ->get();
+                            
                 // $usersData = User::with('usertypes:id,usertype')->whereNotIn('user_type_id', [1,4])->get();
                 $loggedInUserTypeId = $user->user_type_id;
 
                 if($loggedInUserTypeId == 23)  {
-                    $userTypes = UserType::where('id', '<=', $loggedInUserTypeId)
+                    $userTypes = UserType::where(function ($query) use ($loggedInUserTypeId) {
+                        $query->where('id', '<>', $loggedInUserTypeId)
+                              ->orWhere('id', '<=', $loggedInUserTypeId);
+                    })
                     ->whereNotIn('id', [1, 4])
                     ->get();
-                }elseif($loggedInUserTypeId == 1){
+                }elseif($loggedInUserTypeId == 24){
+                    $userTypes = UserType::where('id','>=', $loggedInUserTypeId)
+                    ->whereNotIn('id', [4,23])
+                    ->get();
+                 }elseif($loggedInUserTypeId == 1){
                     $userTypes = UserType::where('id','>=', $loggedInUserTypeId)
                     ->whereNotIn('id', [4])
                     ->get();
+
                  }else{
                     $userTypes = UserType::where('id', '>', $loggedInUserTypeId)
-                    ->whereNotIn('id', [1, 4,23])
+                    ->whereNotIn('id', [1, 4,23,24])
                     ->get();
                  }
                 
-                
-                
-
+            
 
                 $exportCount = ServiceUserMapping::count(); 
 
@@ -124,7 +134,7 @@ class SettingController extends Controller
             }
         }else if ($request->is('settings/products')) {
 
-            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')|| Auth::user()->hasRole('Admin')) {
+            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('VP')|| Auth::user()->hasRole('Admin') || Auth::user()->hasRole('VP')) {
                 $lobData = DB::table('stl_lob')->get();
                 $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
                 $products = Product::all();
@@ -499,7 +509,7 @@ class SettingController extends Controller
     public function getUserList(Request $request)
     {
         $ReportingList = [];
-        if($request->reviewer_type == 'getVps') {
+        if($request->reviewer_type == 'getAVps') {
             $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [2])->where('is_active', 1)->get();
         } elseif($request->reviewer_type == 'getBussinessHeads') {
             $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [3])->where('is_active', 1)->get();
@@ -509,6 +519,8 @@ class SettingController extends Controller
             $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [9])->where('is_active', 1)->get();
         }elseif($request->reviewer_type == 'getAdmin') {
             $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [23])->where('is_active', 1)->get();
+        }elseif($request->reviewer_type == 'getVps') {
+            $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [24])->where('is_active', 1)->get();
         }
         $html = '<option disabled selected value="">Select Reporting to</option>';
         if (!empty($ReportingList)) {
@@ -650,13 +662,15 @@ class SettingController extends Controller
 
             if (Auth::user()->hasRole('Super Admin') && $totalRowCount >= 4000) {
                 $splitSize = ($totalRowCount/8);
-            } elseif (Auth::user()->hasRole('AVP/VP') && $totalRowCount >= 4000) {
+            } elseif (Auth::user()->hasRole('VP') && $totalRowCount >= 4000) {
                 $splitSize = ($totalRowCount/4);
             } elseif (Auth::user()->hasRole('Business Head') && $totalRowCount >= 3000) {
                 $splitSize = ($totalRowCount/3);
             } elseif (Auth::user()->hasRole('PM/TL') && $totalRowCount > 2000) {
                 $splitSize = ($totalRowCount/2);
             }elseif (Auth::user()->hasRole('Admin') && $totalRowCount >= 4000) {
+                $splitSize = ($totalRowCount/4);
+            }elseif (Auth::user()->hasRole('AVP') && $totalRowCount >= 4000) {
                 $splitSize = ($totalRowCount/4);
             } else {
                 $splitSize = ($totalRowCount/1);

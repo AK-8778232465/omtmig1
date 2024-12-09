@@ -311,14 +311,15 @@ public function getlobid(Request $request){
 
             if (Auth::user()->hasRole('Super Admin') && $totalRowCount >= 4000) {
                 $splitSize = ($totalRowCount/8);
-            } elseif (Auth::user()->hasRole('AVP/VP') && $totalRowCount >= 4000) {
+            } elseif (Auth::user()->hasRole('AVP') && $totalRowCount >= 4000) {
                 $splitSize = ($totalRowCount/4);
             } elseif (Auth::user()->hasRole('Business Head') && $totalRowCount >= 3000) {
                 $splitSize = ($totalRowCount/3);
             } elseif (Auth::user()->hasRole('PM/TL') && $totalRowCount > 2000) {
                 $splitSize = ($totalRowCount/2);
-            } else {
-                $splitSize = ($totalRowCount/1);
+            }elseif (Auth::user()->hasRole('VP') && $totalRowCount >= 4000) {
+                $splitSize = ($totalRowCount/4);
+            } else {                $splitSize = ($totalRowCount/1);
             }
 
             $fileCount = 1;
