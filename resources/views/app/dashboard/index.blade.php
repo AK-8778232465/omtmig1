@@ -537,6 +537,7 @@
 
 <div id="rightContent">
     <h4 class="text-start mt-3">Volume Analysis:</h4>
+    <b class="mt-0 volume_analysis_date" id="selectedDate"></b>
     <div class="col-12">
         <div class="row my-2">
         @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
@@ -1031,6 +1032,7 @@
         <div class="card mt-5 tabledetails d-none" id="userwise_table">
             <h4 class="text-center mt-3">Userwise Details</h4>
             <div class="card-body">
+            <b class="mt-0 userwise_details_date" id="selectedDate"></b>
                 <div class="p-0">
                     <table id="userwise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
@@ -1061,6 +1063,7 @@
         <div class="card mt-5 tabledetails d-none" id="datewise_table">
             <h4 class="text-center mt-3">ClientWise Details</h4>
             <div class="card-body">
+            <b class="mt-0 clientwise_details_date" id="selectedDate"></b>
                 <div class="p-0">
                     <table id="datewise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
@@ -1202,7 +1205,29 @@ function selectDateFilter(value) {
         value = 'current_month';
 }
 
-    dateDisplay.textContent = selectedDateFilter;
+    // dateDisplay.textContent = selectedDateFilter;
+    updateSelectedDateDisplay(selectedDateFilter);
+}
+
+
+function updateSelectedDateDisplay(date) {
+    let dateDisplay = document.getElementById('selectedDate');
+    dateDisplay.textContent = date;
+
+    let volumeAnalysisDates = document.querySelectorAll('.volume_analysis_date');
+    volumeAnalysisDates.forEach(function(element) {
+        element.textContent = date;
+    });
+
+    let userwiseDetailsDates = document.querySelectorAll('.userwise_details_date');
+    userwiseDetailsDates.forEach(function(element) {
+        element.textContent = date;
+    });
+
+    let clientwiseDetailsDates = document.querySelectorAll('.clientwise_details_date');
+    clientwiseDetailsDates.forEach(function(element) {
+        element.textContent = date;
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
