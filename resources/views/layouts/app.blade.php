@@ -135,7 +135,7 @@
                                         Orders
                                     </a>
                                 </li>
-                                @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP', 'Business Head', 'PM/TL','SPOC', 'Admin' ]))
+                                @if(Auth::user()->hasRole(['Super Admin', 'VP', 'Business Head', 'PM/TL','SPOC', 'Admin','AVP' ]))
                                 <li class="{{ (Request::is('single_order') || Request::is('single_order/*')) ? 'submenuactive' : '' }}">
                                     <a href="{{ route('single_order') }}">
                                         <i id="single_order-icon" class="dripicons-document {{ (Request::is('single_order') || Request::is('single_order/*')) ? 'submenuactivei' : '' }}"></i>

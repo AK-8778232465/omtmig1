@@ -67,7 +67,7 @@ class SettingController extends Controller
     public function setting(Request $request)
     {
         if($request->is('settings/users') ||$request->is('settings') ){
-            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('VP')) {
+            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('VP')) {
                 $currentUserId = Auth::id();
                 $user = User::find($currentUserId);
 
@@ -134,7 +134,7 @@ class SettingController extends Controller
             }
         }else if ($request->is('settings/products')) {
 
-            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('VP')|| Auth::user()->hasRole('Admin') || Auth::user()->hasRole('VP')) {
+            if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP')|| Auth::user()->hasRole('Admin') || Auth::user()->hasRole('VP')) {
                 $lobData = DB::table('stl_lob')->get();
                 $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
                 $products = Product::all();
