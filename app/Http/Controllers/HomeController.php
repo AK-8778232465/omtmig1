@@ -2776,14 +2776,17 @@ public function tat_zone_count(Request $request) {
         //daily
 
 
-        $daily_carry_forward = $statusCountsQuery4->with('process', 'client')
+
+
+        $completed_today = $statusCountsQuery4->with('process', 'client')
             ->whereIn('process_id', $processIds)
             ->where('is_active', 1)
             ->where('status_id', '!=', 3)
-            ->whereDate('order_date', '<', $currentDate);
+                            ->whereDate('completion_date', '=', $currentDate);
 
+         $completed_today  = $completed_today->count();
 
-        $daily_carry_forward = $daily_carry_forward->count();
+        $daily_carry_forward = $carry_forward + $received - $completed + $completed_today;
 
 
 
