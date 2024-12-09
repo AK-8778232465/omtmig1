@@ -365,6 +365,21 @@
                         </div>
                     </div>
                     
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="tat_zone_filter"><b>TAT ZONE:</b></label>
+                            <select class="form-control " id="tat_zone_filter" name="tat_zone_filter" style="border:1px solid blue;">
+                                <option value="" selected >Select Tat Zone</option>
+                                <option value="1">Out of TAT(Brown)</option>
+                                <option value="2">Super Rush(Red)</option>
+                                <option value="3">Rush(Yellow)</option>
+                                <option value="4">Priority(Blue)</option>
+                                <option value="5">Non Priority(Green)</option>
+                            </select>
+                        </div>
+
+                    </div>
+
                     <div class="col-md-1 mt-4">
                         <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
                     </div>
@@ -847,6 +862,7 @@ $(document).ready(function() {
                d.fromDate_range = $('#fromDate_range').val();
                d.toDate_range = $('#toDate_range').val();
                d.sessionfilter = sessionfilter;
+               d.tat_zone_filter = $('#tat_zone_filter').val();
 
 
               

@@ -14,6 +14,8 @@ use Session;
 use DataTables;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use DateTime;
+use DateTimeZone;
 
 
 
@@ -282,7 +284,7 @@ class OrderController extends Controller
         $selectedDateFilter = $request->input('selectedDateFilter');
         $fromDateRange = $request->input('fromDate_range');
         $toDateRange = $request->input('toDate_range');
-
+        $tat_zone_filter = $request->input('tat_zone_filter');
  
 
     if ($fromDateRange && $toDateRange) {
@@ -1372,6 +1374,39 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $query->where('assignee_qas.username', 'like', '%' . $searchInputs . '%');
     }
 
+
+    if ($tat_zone_filter) {
+        // Get the current time in America/New_York timezone
+        $ny_time_zone = new DateTimeZone("America/New_York");
+        $current_time = new DateTime("now", $ny_time_zone); // Current time in NY timezone
+
+        switch ($tat_zone_filter) {
+            case 1:
+                // Brown color (out of TAT)
+                $query->whereRaw('TIMESTAMPDIFF(HOUR, oms_order_creations.order_date, ?) > (stl_item_description.tat_value / 4) * 4', [$current_time->format('Y-m-d H:i:s')]);
+                break;
+
+            case 2:
+                // Blue color (super rush)
+                $query->whereRaw('TIMESTAMPDIFF(HOUR, oms_order_creations.order_date, ?) BETWEEN (stl_item_description.tat_value / 4) * 3 AND (stl_item_description.tat_value / 4) * 4', [$current_time->format('Y-m-d H:i:s')]);
+                break;
+
+            case 3:
+                // Red color (rush)
+                $query->whereRaw('TIMESTAMPDIFF(HOUR, oms_order_creations.order_date, ?) BETWEEN (stl_item_description.tat_value / 4) * 2 AND (stl_item_description.tat_value / 4) * 3', [$current_time->format('Y-m-d H:i:s')]);
+                break;
+
+            case 4:
+                // Priority
+                $query->whereRaw('TIMESTAMPDIFF(HOUR, oms_order_creations.order_date, ?) BETWEEN (stl_item_description.tat_value / 4) * 1 AND (stl_item_description.tat_value / 4) * 2', [$current_time->format('Y-m-d H:i:s')]);
+                break;
+
+            case 5:
+                // Non-Priority
+                $query->whereRaw('TIMESTAMPDIFF(HOUR, oms_order_creations.order_date, ?) <= (stl_item_description.tat_value / 4) * 1', [$current_time->format('Y-m-d H:i:s')]);
+                break;
+        }
+    }
 
 
         return DataTables::of($query)
