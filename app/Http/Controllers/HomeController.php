@@ -2478,10 +2478,10 @@ public function revenue_detail_client_fte(Request $request){
         // Check if the user has a 'user_type_id' of 23
         if ($user->user_type_id == 23) {
             // If the user has a 'user_type_id' of 23, get all users
-            $total_users = User::where('id', '!=', 1)->count();
+            $total_users = User::where('id', '!=', 1)->where('is_active', 1)->count();
 
 
-            $active_user = User::where('id', '!=', 1)->where('logged_in', 1)->count();
+            $active_user = User::where('id', '!=', 1)->where('logged_in', 1)->where('is_active', 1)->count();
 
             return response()->json([
                 'user_lower_count' => $total_users,
@@ -2499,6 +2499,7 @@ public function revenue_detail_client_fte(Request $request){
         // Get the count of active users
         $active_user = User::whereIn('id', $user_lower_ids)
                            ->where('logged_in', 1)
+                               ->where('is_active', 1)
                            ->count();
 
         // Get the count of lower level users
@@ -2521,7 +2522,7 @@ public function revenue_detail_client_fte(Request $request){
         // Get all lower level user IDs
         if ($user->user_type_id == 23) {
             // If user_type_id is 23, get all users (logged in)
-            $active_users = User::where('id', '!=', 1)->where('logged_in', 1)
+            $active_users = User::where('id', '!=', 1)->where('logged_in', 1)->where('is_active', 1)
                 ->get(['id', 'emp_id', 'username', 'logged_in']);
 
             return response()->json([
@@ -2545,6 +2546,7 @@ public function revenue_detail_client_fte(Request $request){
         // Get active lower-level users
         $active_users = User::whereIn('id', $user_lower_ids)
             ->where('logged_in', 1) // Filter to get only logged-in users
+			->where('is_active', 1)
             ->get(['id', 'emp_id', 'username', 'logged_in']);
 
             return response()->json([
@@ -2889,6 +2891,8 @@ public function tat_zone_count(Request $request) {
 
             $active_users = User::select('oms_users.id', 'oms_users.emp_id', 'oms_users.username', 'oms_users.logged_in', 'reporting_user.username as reporting_username')
             ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
+            ->where('oms_users.id', '!=', 1)
+            ->where('oms_users.is_active', 1)
             ->get();
 
             return response()->json([
@@ -2913,6 +2917,7 @@ public function tat_zone_count(Request $request) {
         $active_users = User::select('oms_users.id', 'oms_users.emp_id', 'oms_users.username', 'oms_users.logged_in', 'reporting_user.username as reporting_username')
         ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
         ->whereIn('oms_users.id', $user_lower_ids)
+            ->where('oms_users.is_active', 1)
         ->get();
 
 
