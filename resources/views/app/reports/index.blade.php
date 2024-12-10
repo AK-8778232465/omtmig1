@@ -530,8 +530,8 @@
                 <table id="daily_completion_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead class="text-center" style="font-size: 12px;">
                         <tr>
-                            <th width="10%">Order Received Date</th>
-                            <th width="10%">Client Name</th>
+                            <th width="10%">Date</th>
+                            <th width="10%">Client Code</th>
                             <th width="12%">Order Received</th>
                             <th width="12%">Yet to Assign</th>
                             <th width="8%">WIP</th>

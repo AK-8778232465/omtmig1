@@ -1458,6 +1458,7 @@ public function daily_completion(Request $request)
     ->whereDate('oms_order_creations.order_date', '<=', $to_date)
     ->select(
         DB::raw('DATE(oms_order_creations.order_date) as date'),
+        'stl_client.client_no',
         'stl_client.client_name',
         DB::raw("CASE
                     WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NULL THEN 'Yet to Assign'
@@ -1468,6 +1469,7 @@ public function daily_completion(Request $request)
     )
     ->groupBy(
         DB::raw('DATE(oms_order_creations.order_date)'),
+        'stl_client.client_no',
         'stl_client.client_name',
         'oms_order_creations.status_id', // Add this to the GROUP BY
         'oms_order_creations.assignee_user_id' // Add this to the GROUP BY
@@ -1484,7 +1486,7 @@ public function daily_completion(Request $request)
         $orderDate = Carbon::parse($order->date)->format('m-d-Y');
         $result[] = [
             'date' => $orderDate,
-            'client_name' => $order->client_name,
+            'client_name' => $order->client_no . ' (' . $order->client_name . ')', 
             'status' => $order->status,
             'count' => $order->count,
         ];
