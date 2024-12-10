@@ -2478,10 +2478,10 @@ public function revenue_detail_client_fte(Request $request){
         // Check if the user has a 'user_type_id' of 23
         if ($user->user_type_id == 23) {
             // If the user has a 'user_type_id' of 23, get all users
-            $total_users = User::count();
+            $total_users = User::where('id', '!=', 1)->count();
 
 
-            $active_user = User::where('logged_in', 1)->count();
+            $active_user = User::where('id', '!=', 1)->where('logged_in', 1)->count();
 
             return response()->json([
                 'user_lower_count' => $total_users,
@@ -2521,7 +2521,7 @@ public function revenue_detail_client_fte(Request $request){
         // Get all lower level user IDs
         if ($user->user_type_id == 23) {
             // If user_type_id is 23, get all users (logged in)
-            $active_users = User::where('logged_in', 1)
+            $active_users = User::where('id', '!=', 1)->where('logged_in', 1)
                 ->get(['id', 'emp_id', 'username', 'logged_in']);
 
             return response()->json([
@@ -2885,7 +2885,7 @@ public function tat_zone_count(Request $request) {
 
         if ($user->user_type_id == 23) {
 
-            $total_users = User::get();
+            $total_users = User::where('id', '!=', 1)->get();
 
             $active_users = User::select('oms_users.id', 'oms_users.emp_id', 'oms_users.username', 'oms_users.logged_in', 'reporting_user.username as reporting_username')
             ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
@@ -2952,6 +2952,7 @@ public function tat_zone_count(Request $request) {
             ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
             ->leftJoin('yesterday_active_users', 'yesterday_active_users.user_id', '=', 'oms_users.id')
             ->whereDate('yesterday_active_users.created_at', $yesterday)
+            ->where('oms_users.id', '!=', 1)
             ->distinct()
             ->get();
 
@@ -2988,6 +2989,7 @@ public function tat_zone_count(Request $request) {
         ->leftJoin('yesterday_active_users', 'yesterday_active_users.user_id', '=', 'oms_users.id')
         ->whereIn('oms_users.id', $user_lower_ids)
         ->whereDate('yesterday_active_users.created_at', $yesterday)
+            ->where('oms_users.id', '!=', 1)
         ->distinct()
         ->get();
 

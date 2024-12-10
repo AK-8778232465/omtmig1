@@ -23,7 +23,7 @@ class ReportsController extends Controller
     public function Reports(Request $request)
     {
         $clients = Client::select('id','client_no', 'client_name')->where('is_active', 1)->where('is_approved', 1)->get();
-        $roles = Role::select('id', "name")->get();
+        $roles = Role::select('id', "name")->where('id', '!=', 1)->get();
 
 // return response()->json($clients);
         return view('app.reports.index',compact('clients', 'roles'));

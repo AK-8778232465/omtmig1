@@ -2009,7 +2009,12 @@ function orderInflow_report() {
             { data: 'pending', name: 'pending' }
         ],
         dom: 'lBfrtip',
-        buttons: ['excel'],
+        buttons:[
+                    {
+                        extend: 'excel',
+                        title: 'Order_Inflow Report',  // Set the title for the exported Excel file
+                    }
+                ],
         lengthMenu: [10, 25, 50, 75, 100],
         order: [[0, 'asc']] // Order by client name
     });
