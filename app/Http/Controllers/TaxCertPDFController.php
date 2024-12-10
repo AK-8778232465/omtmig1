@@ -78,7 +78,8 @@ class TaxCertPDFController extends Controller
             $pdfFields["exemption_amount"] = !empty($tax_cert_fieldlist['exemption_amount']) ? number_format($tax_cert_fieldlist['exemption_amount'], 2) : '0.00';
             $pdfFields["notes"] = !empty($tax_cert_fieldlist['notes']) ? $tax_cert_fieldlist['notes'] : '';
         }
-        $tempPdfPath = "{$directoryPath}/Temp_Cert.pdf";
+
+        $tempPdfPath = "{$directoryPath}/Tax Certificate_{$pdfFields['tax_parcel_id']}.pdf";
 
         $pdf = new pdfTk($templatePdf);
         $result = $pdf->fillForm($pdfFields)->flatten()->saveAs($tempPdfPath);
