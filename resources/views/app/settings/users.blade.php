@@ -545,10 +545,11 @@
                     reporting_users = 'getSOPC';
                 }else if (role == 2 ) {
                     $('#edit_reporting_to').show();
-                    reporting_users = 'getVp';
+                    reporting_users = 'getVps';
+                    console.log(reporting_users);
                 }else if (role == 24 ) {
                     $('#edit_reporting_to').show();
-                    reporting_users = 'getAdmin';
+                    // reporting_users = 'getAdmin';
                 }
                 $.ajax({
                     url: "{{ route('getUserList') }}",

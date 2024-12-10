@@ -106,21 +106,20 @@ class SettingController extends Controller
                         $query->where('id', '<>', $loggedInUserTypeId)
                               ->orWhere('id', '<=', $loggedInUserTypeId);
                     })
-                    ->whereNotIn('id', [1, 4])
-                    ->get();
+                        ->whereNotIn('id', [1, 4])
+                        ->get();
                 }elseif($loggedInUserTypeId == 24){
-                    $userTypes = UserType::where('id','>=', $loggedInUserTypeId)
-                    ->whereNotIn('id', [4,23])
-                    ->get();
+                    $userTypes = UserType::where('id','<', $loggedInUserTypeId)
+                        ->whereNotIn('id', [1,4,23])
+                        ->get();
                  }elseif($loggedInUserTypeId == 1){
                     $userTypes = UserType::where('id','>=', $loggedInUserTypeId)
-                    ->whereNotIn('id', [4])
-                    ->get();
-
+                        ->whereNotIn('id', [4])
+                        ->get();
                  }else{
                     $userTypes = UserType::where('id', '>', $loggedInUserTypeId)
-                    ->whereNotIn('id', [1, 4,23,24])
-                    ->get();
+                        ->whereNotIn('id', [1,4,23,24])
+                        ->get();
                  }
                 
             
