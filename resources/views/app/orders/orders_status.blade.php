@@ -82,6 +82,27 @@
     height: 30px; /* Adjust height based on content */
     display: inline-block; /* Ensure it wraps only the content */
 }
+
+#out_of_tat{
+    color: #964B00;
+}
+
+#super_rush{
+    color:red;
+}
+
+#rush{
+    color:orange;
+}
+
+#non_priority{
+    color:green;
+}
+
+#priority{
+    color:blue;
+}
+
 </style>
 
 {{-- Edit Model Order --}}
@@ -359,26 +380,28 @@
 
                     <div class="col-md-2">
                         <div class="form-group">
+                            <label for="tat_zone_filter"><b>TAT ZONE:</b></label>
+                            <select class="form-control " id="tat_zone_filter" name="tat_zone_filter" style="border:1px solid blue;">
+                                <option value="" selected >Select Tat Zone</option>
+                                <option value="1" id="out_of_tat">Out of TAT</option>
+                                <option value="2" id="super_rush">Super Rush</option>
+                                <option value="3" id="rush">Rush</option>
+                                <option value="4" id="priority">Priority</option>
+                                <option value="5" id="non_priority">Non Priority</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
                             <label for="searchInputs"><b>Search</b>:</label>
                             <input type="text" class="form-control" id="searchInputs" style="border:1px solid blue;">
                             <p id="orderIdTip" class="red-text" style="display:none; color:red;">Use Comma separator for multiple search</p>
                         </div>
                     </div>
                     
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label for="tat_zone_filter"><b>TAT ZONE:</b></label>
-                            <select class="form-control " id="tat_zone_filter" name="tat_zone_filter" style="border:1px solid blue;">
-                                <option value="" selected >Select Tat Zone</option>
-                                <option value="1">Out of TAT(Brown)</option>
-                                <option value="2">Super Rush(Red)</option>
-                                <option value="3">Rush(Yellow)</option>
-                                <option value="4">Priority(Blue)</option>
-                                <option value="5">Non Priority(Green)</option>
-                            </select>
-                        </div>
 
-                    </div>
 
                     <div class="col-md-1 mt-4">
                         <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
