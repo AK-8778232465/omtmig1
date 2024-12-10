@@ -2502,11 +2502,15 @@ public function revenue_detail_client_fte(Request $request){
                                ->where('is_active', 1)
                            ->count();
 
+            $total_users = User::whereIn('id', $user_lower_ids)
+                                ->where('is_active', 1)
+                                ->count();
+
         // Get the count of lower level users
         $user_lower_count = count($user_lower_ids);
 
         return response()->json([
-            'user_lower_count' => $user_lower_count,
+                'user_lower_count' => $total_users,
             'active_user' => $active_user,
         ]);
     }
