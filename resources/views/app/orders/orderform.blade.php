@@ -804,7 +804,7 @@
                                 <!-- Left Column -->
                                 <div class="col-6">
                                     @php
-                                        $totalBilledAmount = 0;
+                                        $totalBilledAmount = '';
                                         if (!empty($getjsonDetails) && isset($getjsonDetails[0])) {
                                             $totalBilledAmount = 
                                                 (float)($getjsonDetails[0]['firstInstBilledAmt'] ?? 0) +
@@ -816,7 +816,7 @@
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Total Annual Tax :<span style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Total Annual Tax" style="flex: 1;" id="total_annual_tax" 
-                                            name="total_annual_tax" value="{{ $getjsonDetails[0]['totalBilledAmount'] ?? '0' }}" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
+                                            name="total_annual_tax" value="{{ $totalBilledAmount }}" pattern="^\d+(\.\d{1,2})?$" title="Please enter a valid decimal value with up to two decimal places." required>
                                     </div>
 
 
@@ -839,52 +839,51 @@
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Land :<span style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Land"
-                                            style="flex: 1;" id="land" name="land" value="{{ $getjsonDetails[0]['landValue'] ?? '' }}" required>
+                                            style="flex: 1;" id="land" name="land" value="{{  isset($getjsonDetails[0]['landValue']) ? $getjsonDetails[0]['landValue'] :'' }}" required>
                                     </div>
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label class="required" style="margin-right: 10px; width: 150px;">Improvements
                                             :<span style="color:red;">*</span></label>
-                                        <input class="form-control" type="text" placeholder="Enter Improvements"
-                                            style="flex: 1;" id="improvement" name="improvement" value="{{ $getjsonDetails[0]['improvementValue'] ?? ' ' }}" required> 
+                                            <input  class="form-control" type="text" placeholder="Enter Improvements" style="flex: 1;" id="improvement" name="improvement" value="{{ !empty($getjsonDetails[0]['improvementValue']) ? $getjsonDetails[0]['improvementValue'] : '' }}" required>
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Exemption (Mortgage) :</label>
                                         <input class="form-control" type="text" placeholder="Enter Exemption (Mortgage)"
-                                            style="flex: 1;" id="exemption_mortgage" name="exemption_mortgage" value="{{ $getjsonDetails[0]['exemption_mortgage'] ?? '' }}">
+                                            style="flex: 1;" id="exemption_mortgage" name="exemption_mortgage"     value="{{ !empty($getjsonDetails[0]['exemption_mortgage']) ? $getjsonDetails[0]['exemption_mortgage'] : '' }}">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Exemption (Home Owners)
                                             :</label>
                                         <input class="form-control" type="text"
-                                            placeholder="Enter Exemption (Home Owners)" style="flex: 1;" id="exemption_homeowner" name="exemption_homeowner" value="{{ $getjsonDetails[0]['homeownerExemption'] ?? '' }}">
+                                            placeholder="Enter Exemption (Home Owners)" style="flex: 1;" id="exemption_homeowner" name="exemption_homeowner"  value="{{  !empty($getjsonDetails[0]['homeownerExemption']) ? $getjsonDetails[0]['homeownerExemption'] : '' }}">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Exemption (Homestead
                                             Supplement) :</label>
                                         <input class="form-control" type="text"
-                                            placeholder="Enter Exemption (Homestead Supplement)" style="flex: 1;" id="exemption_homestead" name="exemption_homestead" value="{{ $getjsonDetails[0]['exemption_homestead'] ?? '' }}">
+                                            placeholder="Enter Exemption (Homestead Supplement)" style="flex: 1;" id="exemption_homestead" name="exemption_homestead" value="{{ !empty($getjsonDetails[0]['exemption_homestead'] ) ? $getjsonDetails[0]['exemption_homestead'] : '' }}">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Exemption (Additional)
                                             :</label>
                                         <input class="form-control" type="text"
-                                            placeholder="Enter Exemption (Additional)" style="flex: 1;" id="exemption_additional" name="exemption_additional" value="{{ $getjsonDetails[0]['veteranExemption_Eflag'] ?? '' }}">
+                                            placeholder="Enter Exemption (Additional)" style="flex: 1;" id="exemption_additional" name="exemption_additional" value="{{  !empty($getjsonDetails[0]['veteranExemption']) ? $getjsonDetails[0]['veteranExemption'] :'' }}">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Other :</label>
                                         <input class="form-control" type="text" placeholder="Enter Other"
-                                            style="flex: 1;" id="others" name="others" value="{{ $getjsonDetails[0]['otherExemption'] ?? '' }}">
+                                            style="flex: 1;" id="others" name="others" value="{{  !empty($getjsonDetails[0]['otherExemption']) ? $getjsonDetails[0]['otherExemption'] : '' }}">
                                     </div>
 
                                     <div class="form-group ml-3" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Net Valuation :</label>
                                         <input class="form-control" type="text" placeholder="Enter Net Valuation"
-                                            style="flex: 1;" id="net_value" name="net_value" value="{{ $getjsonDetails[0]['netTaxable'] ?? '' }}">
+                                            style="flex: 1;" id="net_value" name="net_value" value="{{  !empty($getjsonDetails[0]['netTaxable']) ? $getjsonDetails[0]['netTaxable'] : '' }}">
                                     </div>
                                 </div>
                             </div>
@@ -909,35 +908,63 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :<span
                                                 style="color:red;">*</span></label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="first_amount_id" name="first_amount_id" value="{{ $getjsonDetails[0]['firstInstBilledAmt'] ?? '' }}" required>
+                                            style="flex: 1;" id="first_amount_id" name="first_amount_id" value="{{ !empty($getjsonDetails[0]['firstInstBilledAmt']) ?  $getjsonDetails[0]['firstInstBilledAmt'] : '' }}" required>
                                         </div>
 
-                                    <div class="checkbox-group">
-                                        <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
-                                            <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
-                                                <input type="checkbox" id="first_partially_paid_id" name="first_partially_paid_id" value="1" onclick="toggleReadonly(this, 'first_partially_paid_amount')"> Partially Paid
-                                            </label>
-                                            <input id="first_partially_paid_amount" name="first_partially_paid_amount" value="{{ $getjsonDetails[0]['firstInstPaidAmt'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
-                                        </div>
-                                        <div>
-                                            <label class="checkbox-label">
-                                            <input type="checkbox" id="first_paid_id" name="first_paid_id" value="1" onclick="onlyOne(this)"
-                                             {{ isset($getjsonDetails[0]['firstInstStatus']) && trim($getjsonDetails[0]['firstInstStatus']) == 'PAID' ? 'checked' : '' }}>
-                                                Paid
-                                            </label>
-                                        </div>
-                                        <div>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" id="first_due_id" name="first_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['firstInstStatus']) && $getjsonDetails[0]['firstInstStatus'] == 'DUE' ? 'checked' : '' }}> Due
-                                            </label>
-                                        </div>
-                                        <div>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" id="first_delinquent_id" name="first_delinquent_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['first_delinquent_id']) && $getjsonDetails[0]['firstDeliqDate_flag'] == 1 ? 'checked' : '' }}> Delinquent
-                                            </label>
-                                        </div>
+                                        <div class="radio-group">
+                                            <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
+                                                <label class="radio-label" style="margin-right: 5px; width: 150px;">
+                                                    <input 
+                                                        type="radio" 
+                                                        id="first_partially_paid_id" 
+                                                        name="payment_status" 
+                                                        value="partially_paid" 
+                                                        onclick="toggleReadonly(this, 'first_partially_paid_amount')"> 
+                                                    Partially Paid
+                                                </label>
+                                                <input 
+                                                    id="first_partially_paid_amount" 
+                                                    name="first_partially_paid_amount" 
+                                                    value="{{ !empty($getjsonDetails[0]['firstInstPaidAmt']) ? $getjsonDetails[0]['firstInstPaidAmt'] : '' }}" 
+                                                    class="form-control ml-1" 
+                                                    type="text" 
+                                                    placeholder="Enter Partially Paid Amt" 
+                                                    style="flex: 1;" 
+                                                    readonly>
+                                            </div>
+                                            <div>
+                                                <label class="radio-label">
+                                                    <input 
+                                                        type="radio" 
+                                                        id="first_paid_id" 
+                                                        name="payment_status" 
+                                                        value="paid" 
+                                                        {{ isset($getjsonDetails[0]['firstInstStatus']) && trim($getjsonDetails[0]['firstInstStatus']) == 'PAID' ? 'checked' : '' }}>
+                                                    Paid
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <label class="radio-label">
+                                                    <input 
+                                                        type="radio" 
+                                                        id="first_due_id" 
+                                                        name="payment_status" 
+                                                        value="due" 
+                                                        {{ isset($getjsonDetails[0]['firstInstStatus']) && $getjsonDetails[0]['firstInstStatus'] == 'DUE' ? 'checked' : '' }}>
+                                                    Due
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <label class="radio-label">
+                                                    <input 
+                                                        type="radio" 
+                                                        id="first_delinquent_id" 
+                                                        name="payment_status" 
+                                                        value="delinquent" 
+                                                        {{ isset($getjsonDetails[0]['firstDeliqDate_flag']) && $getjsonDetails[0]['firstDeliqDate_flag'] == 1 ? 'checked' : '' }}>
+                                                    Delinquent
+                                                </label>
+                                            </div>
                                     </div>
 
                                     <div class="form-group" style="display: flex; align-items: center;">
@@ -1005,36 +1032,64 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :  
                                         </label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" value="{{ $getjsonDetails[0]['secondInstInstBilledAmt'] ?? '' }}" >
+                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" value="{{ !empty($getjsonDetails[0]['secondInstInstBilledAmt']) ? $getjsonDetails[0]['secondInstInstBilledAmt']: '' }}" >
                                     </div>
 
-                                    <div class="checkbox-group">
+                                    <div class="radio-group">
                                         <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
-                                            <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
-                                                <input type="checkbox" id="second_partially_paid_id" name="second_partially_paid_id" value="1" onclick="toggleReadonly(this, 'second_partially_paid_amount')"> Partially Paid
+                                            <label class="radio-label" style="margin-right: 5px; width: 150px;">
+                                                <input 
+                                                    type="radio" 
+                                                    id="second_partially_paid_id" 
+                                                    name="second_payment_status" 
+                                                    value="partially_paid" 
+                                                    onclick="toggleReadonly(this, 'second_partially_paid_amount')"> 
+                                                Partially Paid
                                             </label>
-                                            <input id="second_partially_paid_amount" name="second_partially_paid_amount" value="{{ $getjsonDetails[0]['secondInstPaidAmt'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input 
+                                                id="second_partially_paid_amount" 
+                                                name="second_partially_paid_amount" 
+                                                value="{{ !empty($getjsonDetails[0]['secondInstPaidAmt']) ? $getjsonDetails[0]['secondInstPaidAmt'] : '' }}" 
+                                                class="form-control ml-1" 
+                                                type="text" 
+                                                placeholder="Enter Partially Paid Amt" 
+                                                style="flex: 1;" 
+                                                readonly>
                                         </div>
                                         <div>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"
-                                                    {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['secondInstStatus']) && $getjsonDetails[0]['secondInstStatus'] == 'PAID' ? 'checked' : '' }}> Paid
+                                            <label class="radio-label">
+                                                <input 
+                                                    type="radio" 
+                                                    id="second_paid_id" 
+                                                    name="second_payment_status" 
+                                                    value="paid" 
+                                                    {{ isset($getjsonDetails[0]['secondInstStatus']) && $getjsonDetails[0]['secondInstStatus'] == 'PAID' ? 'checked' : '' }}>
+                                                Paid
                                             </label>
                                         </div>
                                         <div>
-                                            <label class="checkbox-label">
-                                            <input type="checkbox" id="second_paid_id" name="second_paid_id" value="1" onclick="onlyOne(this)"
-                                            {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['secondInstStatus']) && $getjsonDetails[0]['secondInstStatus'] == 'DUE' ? 'checked' : '' }}> Due
+                                            <label class="radio-label">
+                                                <input 
+                                                    type="radio" 
+                                                    id="second_due_id" 
+                                                    name="second_payment_status" 
+                                                    value="due" 
+                                                    {{ isset($getjsonDetails[0]['secondInstStatus']) && $getjsonDetails[0]['secondInstStatus'] == 'DUE' ? 'checked' : '' }}>
+                                                Due
                                             </label>
                                         </div>
                                         <div>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" id="second_delinquent_id" name="second_delinquent_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['second_delinquent_id']) && $getjsonDetails[0]['secondDeliqDate_flag'] == 1 ? 'checked' : '' }}> Delinquent
+                                            <label class="radio-label">
+                                                <input 
+                                                    type="radio" 
+                                                    id="second_delinquent_id" 
+                                                    name="second_payment_status" 
+                                                    value="delinquent" 
+                                                    {{ isset($getjsonDetails[0]['secondDeliqDate_flag']) && $getjsonDetails[0]['secondDeliqDate_flag'] == 1 ? 'checked' : '' }}>
+                                                Delinquent
                                             </label>
                                         </div>
                                     </div>
-
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
@@ -1091,37 +1146,65 @@
                                         style="display: flex;align-items: center;margin-bottom: 5px;">
                                         <label style="margin-right: 10px; width: 150px;">Amount : </label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="third_amount_id" name="third_amount_id" value="{{ $getjsonDetails[0]['thirdInstBilledAmt'] ?? '' }}" required>
+                                            style="flex: 1;" id="third_amount_id" name="third_amount_id" value="{{ !empty($getjsonDetails[0]['thirdInstBilledAmt']) ?$getjsonDetails[0]['thirdInstBilledAmt'] : '' }}" required>
                                     </div>
 
-                                    <div class="checkbox-group">
+                                    <div class="radio-group">
                                         <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
-                                            <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
-                                                <input type="checkbox" id="third_partially_paid_id" name="third_partially_paid_id" value="1" onclick="toggleReadonly(this, 'third_partially_paid_amount')"> Partially Paid
+                                            <label class="radio-label" style="margin-right: 5px; width: 150px;">
+                                                <input 
+                                                    type="radio" 
+                                                    id="third_partially_paid_id" 
+                                                    name="third_payment_status" 
+                                                    value="partially_paid" 
+                                                    onclick="toggleReadonly(this, 'third_partially_paid_amount')"> 
+                                                Partially Paid
                                             </label>
-                                            <input id="third_partially_paid_amount" name="third_partially_paid_amount" value="{{ $getjsonDetails[0]['thirdInstPaidAmt'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input 
+                                                id="third_partially_paid_amount" 
+                                                name="third_partially_paid_amount" 
+                                                value="{{ !empty($getjsonDetails[0]['thirdInstPaidAmt']) ? $getjsonDetails[0]['thirdInstPaidAmt'] : '' }}" 
+                                                class="form-control ml-1" 
+                                                type="text" 
+                                                placeholder="Enter Partially Paid Amt" 
+                                                style="flex: 1;" 
+                                                readonly>
                                         </div>
                                         <div>
-                                            <label class="checkbox-label">
-                                            <input type="checkbox" id="third_paid_id" name="third_paid_id" value="PAID" onclick="onlyOne(this)"
-                                            {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['thirdInstStatus']) && $getjsonDetails[0]['thirdInstStatus'] == 'PAID' ? 'checked' : '' }}> Paid
-                                            </label>
-                                            </label>
-                                        </div>
-                                        <div>
-                                            <label class="checkbox-label">
-                                            <input type="checkbox" id="third_paid_id" name="third_paid_id" value="Due" onclick="onlyOne(this)"
-                                            {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['thirdInstStatus']) && $getjsonDetails[0]['thirdInstStatus'] == 'DUE' ? 'checked' : '' }}> Due
-                                            </label>
+                                            <label class="radio-label">
+                                                <input 
+                                                    type="radio" 
+                                                    id="third_paid_id" 
+                                                    name="third_payment_status" 
+                                                    value="paid" 
+                                                    {{ isset($getjsonDetails[0]['thirdInstStatus']) && $getjsonDetails[0]['thirdInstStatus'] == 'PAID' ? 'checked' : '' }}>
+                                                Paid
                                             </label>
                                         </div>
                                         <div>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" id="third_delinquent_id" name="third_delinquent_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['third_delinquent_id']) && $getjsonDetails[0]['thirdDeliqDate_Eflag'] == 1 ? 'checked' : '' }}> Delinquent
+                                            <label class="radio-label">
+                                                <input 
+                                                    type="radio" 
+                                                    id="third_due_id" 
+                                                    name="third_payment_status" 
+                                                    value="due" 
+                                                    {{ isset($getjsonDetails[0]['thirdInstStatus']) && $getjsonDetails[0]['thirdInstStatus'] == 'DUE' ? 'checked' : '' }}>
+                                                Due
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label class="radio-label">
+                                                <input 
+                                                    type="radio" 
+                                                    id="third_delinquent_id" 
+                                                    name="third_payment_status" 
+                                                    value="delinquent" 
+                                                    {{ isset($getjsonDetails[0]['thirdDeliqDate_Eflag']) && $getjsonDetails[0]['thirdDeliqDate_Eflag'] == 1 ? 'checked' : '' }}>
+                                                Delinquent
                                             </label>
                                         </div>
                                     </div>
+
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
@@ -1177,7 +1260,7 @@
                                         style="display: flex;align-items: center;margin-bottom: 5px;">
                                         <label style="margin-right: 10px; width: 150px;">Amount :</label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="fourth_amount_id" name="fourth_amount_id" value="{{ $getjsonDetails[0]['fourthInstBilledAmt'] ?? '' }}" required>
+                                            style="flex: 1;" id="fourth_amount_id" name="fourth_amount_id" value="{{ !empty($getjsonDetails[0]['fourthInstBilledAmt']) ?  $getjsonDetails[0]['fourthInstBilledAmt']: '' }}" required>
                                     </div>
 
                                     <div class="checkbox-group">
@@ -1185,7 +1268,7 @@
                                             <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
                                                 <input type="checkbox" id="fourth_partially_paid_id" name="fourth_partially_paid_id" value="1" onclick="toggleReadonly(this, 'fourth_partially_paid_amount')"> Partially Paid
                                             </label>
-                                            <input id="fourth_partially_paid_amount" name="fourth_partially_paid_amount" value="{{ $getjsonDetails[0]['fourthInstPaidAmt'] ?? '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input id="fourth_partially_paid_amount" name="fourth_partially_paid_amount" value="{{ !empty($getjsonDetails[0]['fourthInstPaidAmt']) ? $getjsonDetails[0]['fourthInstPaidAmt'] : '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
                                         </div>
                                         <div>
                                             <label class="checkbox-label">
