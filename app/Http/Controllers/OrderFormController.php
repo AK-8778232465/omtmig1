@@ -32,11 +32,13 @@ use PhpOffice\PhpWord\IOFactory;
 use setasign\Fpdi\Fpdi;
 use App\Models\SupportingDocs;
 use App\Http\Traits\FastTaxAPI;
+use App\Http\Traits\Retryftc;
 
 
 class OrderFormController extends Controller
 {
     use FastTaxAPI;
+    use Retryftc;
 
     protected $taxCertPDFController;
 
@@ -490,7 +492,7 @@ class OrderFormController extends Controller
                             DB::table('oms_order_creations')
                                 ->where('id', $orderId)
                                 ->update([
-                                    'tax_json' => $ftcResponse, // Ensure the JSON data is saved as a string
+                                    'tax_search_status' => $ftcResponse, // Ensure the JSON data is saved as a string
                                     'status_updated_time' => Carbon::now(),
                                 ]);
                         } 
@@ -510,6 +512,7 @@ class OrderFormController extends Controller
                     ->where('order_id', $orderData->id)
                     ->pluck('json')
                     ->toArray();
+
             // Check if $getjsonDetails is empty, and if so, set each entry as null
             if (empty($getjsonDetails)) {
                 $getjsonDetails = [
@@ -517,6 +520,7 @@ class OrderFormController extends Controller
                     'type_dd' => null,
                     'fiscal_year' => null,
                     'tax_id_number' => null,
+                    'extracted_parcel' => null,
                     'tax_described_number' => null,
                     'tax_state_number' => null,
                     'taxing_entity_dd' => null,
@@ -601,15 +605,23 @@ class OrderFormController extends Controller
 
             $getTaxJson = DB::table('oms_order_creations')
                 ->where('id', $orderData->id)
+                ->pluck('tax_search_status')
+                ->first();
+
+            $inpuTaxJson = DB::table('oms_order_creations')
+                ->where('id', $orderData->id)
                 ->pluck('tax_json')
                 ->first();
+
             $getApi = DB::table('oms_order_creations')
                 ->where('id', $orderData->id)
                 ->select('api_data')
                 ->first();    
 
             $getTaxJson = json_decode($getTaxJson, true);
+            $inpuTaxJson = json_decode($inpuTaxJson, true);
 
+                // return response()->json($getTaxJson);
             $getTaxBucket = DB::table('oms_order_creations')
                 ->where('id', $orderData->id)
                 ->get();
@@ -627,21 +639,20 @@ class OrderFormController extends Controller
                 ->orderBy('oms_tax_comments_histroy.id', 'desc')
                 ->get();
 
-// dd($orderTaxInfo);
                 // return response()->json($getTaxBucket);
 
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions',
                                                         'stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo',
-                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi'));
+                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson'));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
-                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi'));
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson'));
         }else if(in_array($user->user_type_id, [22]) && (Auth::id() == $orderData->typist_id || Auth::id() == $orderData->typist_qc_id) && $orderData->status_id !=4 && $orderData->status_id != 5) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
-                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi'));
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson'));
         } else {
             return redirect('/orders_status');
         }
@@ -983,7 +994,6 @@ class OrderFormController extends Controller
 
     public function taxform_submit(Request $request)
     {
- 
         $fieldMapping = [
             'extracted_parcel' => $request['parcel'],
             'order_id' => $request['order_id'],
@@ -1060,77 +1070,8 @@ class OrderFormController extends Controller
             
         ];
 
-        // Initialize an array for the renamed fields
-      
-
-        // if (isset($renamedData['first_paid_id']) && $renamedData['first_paid_id'] == '1') {
-        //     $renamedData['first_due_id'] = 'null';
-        //     $renamedData['firstDeliqDate'] = 'null';
-        // }
-
-        // if (isset($renamedData['first_due_id']) && $renamedData['first_due_id'] == '1') {
-        //     $renamedData['first_paid_id'] = 'null';
-        //     $renamedData['firstDeliqDate'] = 'null';
-        // }
-
-        // if (isset($renamedData['first_delinquent_id']) && $renamedData['first_delinquent_id'] == '1') {
-        //     $renamedData['first_due_id'] = 'null';
-        //     $renamedData['first_paid_id'] = 'null';
-        // }
-
-
-        // if (isset($renamedData['second_paid_id']) && $renamedData['second_paid_id'] == '1') {
-        //     $renamedData['second_due_id'] = 'null';
-        //     $renamedData['second_delinquent_id'] = 'null';
-        // }
-
-        // if (isset($renamedData['second_due_id']) && $renamedData['second_due_id'] == '1') {
-        //     $renamedData['second_paid_id'] = 'null';
-        //     $renamedData['second_delinquent_id'] = 'null';
-        // }
-
-        // if (isset($renamedData['second_delinquent_id']) && $renamedData['second_delinquent_id'] == '1') {
-        //     $renamedData['second_due_id'] = 'null';
-        //     $renamedData['second_paid_id'] = 'null';
-        // }
-
-
-
-
-        // if (isset($renamedData['third_paid_id']) && $renamedData['third_paid_id'] == '1') {
-        //     $renamedData['third_due_id'] = 'null';
-        //     $renamedData['third_delinquent_id'] = 'null';
-        // }
-
-        // if (isset($renamedData['third_due_id']) && $renamedData['third_due_id'] == '1') {
-        //     $renamedData['third_paid_id'] = 'null';
-        //     $renamedData['third_delinquent_id'] = 'null';
-        // }
-
-        // if (isset($renamedData['third_delinquent_id']) && $renamedData['third_delinquent_id'] == '1') {
-        //     $renamedData['third_due_id'] = 'null';
-        //     $renamedData['third_paid_id'] = 'null';
-        // }
-
-
-        // if (isset($renamedData['fourth_paid_id']) && $renamedData['fourth_paid_id'] == '1') {
-        //     $renamedData['fourth_due_id'] = 'null';
-        //     $renamedData['fourth_delinquent_id'] = 'null';
-        // }
-
-        // if (isset($renamedData['fourth_due_id']) && $renamedData['fourth_due_id'] == '1') {
-        //     $renamedData['fourth_paid_id'] = 'null';
-        //     $renamedData['fourth_delinquent_id'] = 'null';
-        // }
-
-        // if (isset($renamedData['fourth_delinquent_id']) && $renamedData['fourth_delinquent_id'] == '1') {
-        //     $renamedData['fourth_due_id'] = 'null';
-        //     $renamedData['fourth_paid_id'] = 'null';
-        // }
-
         // Encode the renamed data as JSON
         $jsonData = json_encode($fieldMapping);
-    // dd($jsonData);
      
     $data =  $jsonData;
     // foreach ($data as $data) {
@@ -1261,55 +1202,6 @@ class OrderFormController extends Controller
                     "paid_date" => !empty($data['fourthInstPaidDate']) ? date('Y-m-d', strtotime($data['fourthInstPaidDate'])) : ""
                 ];
             }
-            // $taxPeriod = '';
-            // usort($data['priorYearTaxes'], function($a, $b) {
-            //     if ($a["accTaxYear"] != $b["accTaxYear"]) {
-            //         return strcmp($a["accTaxYear"], $b["accTaxYear"]);
-            //     } else {
-            //         return $a["accTaxPeriod"] - $b["accTaxPeriod"];
-            //     }
-            // });
-
-            // if(count($data['priorYearTaxes']) > 0) {
-            //     foreach($data['priorYearTaxes'] as $priorYearTaxes) {
-            //         if (!empty($priorYearTaxes['accNumberOfInst']) && !empty($priorYearTaxes['accTaxPeriod'])) {
-            //             switch ($priorYearTaxes['accNumberOfInst']) {
-            //                 case 4:
-            //                     $quarters = ["1ST QUARTER", "2ND QUARTER", "3RD QUARTER", "4TH QUARTER"];
-            //                     $taxPeriod = isset($quarters[$priorYearTaxes['accTaxPeriod'] - 1]) ? $quarters[$priorYearTaxes['accTaxPeriod'] - 1] : "";
-            //                     break;
-
-            //                 case 3:
-            //                     $installments = ["1ST INSTALLMENT", "2ND INSTALLMENT", "3RD INSTALLMENT"];
-            //                     $taxPeriod = isset($installments[$priorYearTaxes['accTaxPeriod'] - 1]) ? $installments[$priorYearTaxes['accTaxPeriod'] - 1] : "";
-            //                     break;
-
-            //                 case 2:
-            //                     $taxPeriod = ($priorYearTaxes['accTaxPeriod'] == 1) ? "1ST INSTALLMENT" : "2ND INSTALLMENT";
-            //                     break;
-
-            //                 case 1:
-            //                     $taxPeriod = ($priorYearTaxes['accTaxPeriod'] == 1) ? "ANNUAL" : "";
-            //                     break;
-
-            //                 default:
-            //                     $taxPeriod = "";
-            //             }
-            //         } else {
-            //             $taxPeriod = "";
-            //         }
-
-                //     $paymentData[] = [
-                //         "tax_year" => $priorYearTaxes['accTaxYear'],
-                //         "tax_type" => !empty($priorYearTaxes['accTaxType']) ? $priorYearTaxes['accTaxType'] : "COUNTY",
-                //         "tax_period" => $taxPeriod,
-                //         "status" => (strtolower($priorYearTaxes['accStatus']) == "paid") ? "PAID" : "DUE",
-                //         "tax_amount" => (string)(!empty((float)$priorYearTaxes['accBilledAmt']) ? (float)$priorYearTaxes['accBilledAmt'] : "0.00"),
-                //         "due_date" => !empty($priorYearTaxes['accDueDate']) ? date('Y-m-d', strtotime($priorYearTaxes['accDueDate'])) : "",
-                //         "paid_date" => !empty($priorYearTaxes['accPaidDate']) ? date('Y-m-d', strtotime($priorYearTaxes['accPaidDate'])) : ""
-                //     ];
-                // }
-            // }
             
             
             $taxCert[] = [
@@ -1425,10 +1317,6 @@ class OrderFormController extends Controller
 
     public function storeFile(Request $request)
         {
-            // Validate the file
-            // $request->validate([
-            //     'file' => 'required|file|mimes:jpeg,png,pdf,eml,xlsx,xlsm|max:2048'
-            // ]);
 
             // Store the file in the 'uploads' directory in the storage path
             $filePath = $request->file('file')->store('uploads', 'public');
@@ -1454,8 +1342,6 @@ class OrderFormController extends Controller
                             'updated_at' => now(),
                         ]);
 
-            // Optional: Save file information to the database, if needed
-            // File::create(['path' => $filePath, 'name' => $fileName]);
 
             return response()->json(['filePath' => $filePath, 'fileName' => $fileName]);
         }
@@ -1583,10 +1469,27 @@ class OrderFormController extends Controller
             public function submitFtcOrder(Request $request)
             {
 
-              
                 $type = $request->type;
                 $orderId = $request->orderId;
                 $search_value = $request->search_value;
+
+                if ($request->has(['tax_status', 'type', 'search_value'])) {
+
+                    $jsondata = json_encode([
+                        'tax_status' => $request->tax_status,
+                        'type' => $request->type,
+                        'search_input' => $request->search_value,
+                    ]);
+        
+                    DB::table('oms_order_creations')
+                        ->where('id', $request->orderId)
+                        ->update([
+                            'tax_json' => $jsondata,
+                            // 'tax_bucket' => 1,
+                            'api_data' => $request->search_value
+                        ]);
+        
+                }
             
                 // Retrieve order data from the database
                 $orderData = DB::table('oms_order_creations')
@@ -1595,7 +1498,6 @@ class OrderFormController extends Controller
                     ->select('oms_order_creations.*', 'oms_state.short_code as short_code', 'county.county_name as county_name')
                     ->where('oms_order_creations.id', $orderId)
                     ->first();
-            
                 if (isset($orderData->id)) {
                     // Prepare the data to be sent to FTC
                     $data = [
@@ -1609,8 +1511,24 @@ class OrderFormController extends Controller
                         "city" => "",
                         "owner_name" => "",
                     ];
-            //  dd($data);
-                    // Insert request data into the database
+
+                    $ftcOrderData = DB::table('ftc_order_data')
+                    ->where('order_id', $orderData->id)
+                    ->first();
+                
+                if ($ftcOrderData) {
+                    // Update the existing record
+                    DB::table('ftc_order_data')
+                        ->where('order_id', $orderData->id)
+                        ->update([
+                            'request_data' => json_encode($data),
+                            'created_by' => Auth::id(),
+                            'updated_at' => Carbon::now(),
+                        ]);
+                
+                    $ftc_log_id = $ftcOrderData->id; // Use the existing record's ID
+                } else {
+                    // Insert a new record and get its ID
                     $ftc_log_id = DB::table('ftc_order_data')->insertGetId([
                         'order_id' => $orderData->id,
                         'request_data' => json_encode($data),
@@ -1618,16 +1536,11 @@ class OrderFormController extends Controller
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now(),
                     ]);
-
-                    DB::table('oms_order_creations')
-                        ->where('id', $request->orderId)
-                        ->update([
-                            'api_data' => $request->search_value,
-                        ]);
+                }
                     // Call the FTC API
                     $ftcResponse = $this->getFtcData('ftc/CreateOrderFTC.php', $data);
                     // Check if FTC response is successful and contains OrderId
-                    if (isset($ftcResponse['Status']) && $ftcResponse['Status'] == "Success" && isset($ftcResponse['OrderId']) && !empty($ftcResponse['OrderId'])) {
+                    if (($ftcResponse['Status'] ?? '') === "Success" && !empty($ftcResponse['OrderId'])) {
                         // Update the FTC log with the response 
                         DB::table('ftc_order_data')
                             ->where('id', $ftc_log_id)
@@ -1636,15 +1549,19 @@ class OrderFormController extends Controller
                                 'updated_at' => Carbon::now(),
                             ]);
                             $orderId = $orderData->id;
-                            
-                            RetryFtcOrder::dispatch($orderId);
-                            return response()->json(['message' => 'FTC order created successfully.'], 200);
+                            $this->processFtcOrder($orderId);
+
+                            $ftc_status = DB::table('ftc_order_data')->select('ftc_status')
+                                    ->where('ftc_order_id', $ftcResponse['OrderId'])->get();
+
+                            // RetryFtcOrder::dispatch($orderId);
+                            return $ftc_status;
                     } else {
                         // In case of failure, log the error or provide a failure message
                         DB::table('ftc_order_data')
                             ->where('id', $ftc_log_id)
                             ->update([
-                                'status' => 'Failed',
+                                'ftc_status' => 'Failed',
                                 'updated_at' => Carbon::now(),
                             ]);
             

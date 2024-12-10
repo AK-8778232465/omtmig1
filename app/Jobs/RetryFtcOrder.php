@@ -48,7 +48,7 @@ class RetryFtcOrder implements ShouldQueue
     public function handle()
     {
         $ftcOrder = DB::table('ftc_order_data')->where('order_id', $this->orderId)->first();
-   
+
         if (!$ftcOrder) {
             \Log::error("FTC order not found", ['order_id' => $this->orderId]);
             return;
@@ -61,11 +61,23 @@ class RetryFtcOrder implements ShouldQueue
             \Log::error("Empty response from FTC API", ['order_id' => $this->orderId]);
             return;
         }
-    
-        if ($ftcResponse['result'] === null || (isset($ftcResponse['Status']) && $ftcResponse['Status'] == "In Progress")) {
-            \Log::info("FTC response in progress", ['response' => $ftcResponse]);
 
-            RetryFtcOrder::dispatch($this->orderId)->delay(now()->addSeconds(6));
+        // if ($ftcResponse['result'] === null || (isset($ftcResponse['Status']) && $ftcResponse['Status'] == "In Progress")) {
+        //     \Log::info("FTC response in progress", ['response' => $ftcResponse]);
+
+        //     RetryFtcOrder::dispatch($this->orderId)->delay(now()->addSeconds(6));
+
+        //     return;
+        // }
+
+        // dd($ftcResponse);
+        if ($ftcResponse['result'] === null || 
+            (isset($ftcResponse['Status']) && 
+            in_array($ftcResponse['Status'], ["In Progress", "Completed!!!Not supported currently!!!"]))) {
+            
+            \Log::info("FTC response needs retry", ['response' => $ftcResponse]);
+
+            // RetryFtcOrder::dispatch($this->orderId)->delay(now()->addSeconds(6));
 
             return;
         }
@@ -96,7 +108,7 @@ class RetryFtcOrder implements ShouldQueue
                 'json' => $ftcResponse['result'],
                 'updated_by' => auth()->id(),
                 'updated_at' => now(),
-            ]);
+            ]); 
           
     
             \Log::info("Tax record inserted", ['order_id' => $this->orderId]);

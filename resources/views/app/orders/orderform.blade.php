@@ -614,16 +614,27 @@
                                         <option value="offline" {{ isset($getTaxJson['Status']) && $getTaxJson['Status'] == 'Manual' ? 'selected' : '' }}>Offline</option>
                                     </select>
                                 </div>
+                                <!-- <div class="col-2 d-flex align-items-center">
+                                    <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
+                                    <select class="form-control" name="get_data" id="get_data" disabled>
+                                        <option value="">Select Source</option>
+                                        <option value="1" {{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '1' ? 'selected' : '' }}>APN</option>
+                                        <option value="0" {{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '0' ? 'selected' : '' }}>Address</option>
+                                    </select>
+                                </div> -->
                                 <div class="col-2 d-flex align-items-center">
                                     <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
                                     <select class="form-control" name="get_data" id="get_data" disabled>
                                         <option value="">Select Source</option>
-                                        <option value="apn" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' ? 'hidden' : '' }} {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'NO' ? '' : 'selected' }}>APN</option>
-                                        <option value="address" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' ? 'selected' : '' }}>Address</option>
+                                        <option value="1" {{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '1' ? 'selected' : '' }}>APN</option>
+                                        <?php if ((isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' 
+                                                    && isset($getTaxJson['Status']) && $getTaxJson['Status'] == 'Automated')): ?>
+                                            <option value="0" {{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '0' ? 'selected' : '' }}>Address</option>
+                                        <?php endif; ?>
                                     </select>
                                 </div>
                                 <div class="col-2 d-flex align-items-center">
-                                <input class="form-control" id="search_input" name="search_input" type="text"  placeholder="{{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' ? 'Enter Street Address' : 'Enter APN' }}" value="{{ $getApi->api_data ?? '' }}">
+                                <input class="form-control" id="search_input" name="search_input" type="text"  placeholder="{{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '2' ? 'Enter Street Address' : 'Enter APN' }}" value="{{ $getApi->api_data ?? '' }}">
                                 </div>
                                 <div class="col-md-2 align-items-center">
                                     <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
@@ -643,18 +654,18 @@
                                 <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
                                 <select class="form-control" name="get_data" id="get_data" >
                                     <option value="">Select Source</option>
-                                    <option value="1" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'No' ? 'selected' : '' }}>APN</option>
-                                    <option value="0" {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'No' ? 'hidden' : '' }} {{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' ? 'selected' : '' }}>Address</option>
-                                </select>
-
+                                    <option value="1" {{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '1' ? 'selected' : '' }}>APN</option>
+                                    <?php if ((isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' 
+                                                    && isset($getTaxJson['Status']) && $getTaxJson['Status'] == 'Automated')): ?>
+                                            <option value="0" {{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '0' ? 'selected' : '' }}>Address</option>
+                                        <?php endif; ?>                                </select>
                             </div>
                             <div class="col-4 d-flex align-items-center">
-                           <input class="form-control" id="search_input" name="search_input" type="text"  placeholder="{{ isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' ? 'Enter Street Address' : 'Enter APN' }}" value="{{$getApi->api_data ?? '' }}">
+                           <input class="form-control" id="search_input" name="search_input" type="text"  placeholder="{{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '2' ? 'Enter Street Address' : 'Enter APN' }}" value="{{$getApi->api_data ?? '' }}">
                             </div>
                             <div class="col-md-2 align-items-center">
                                 <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
                                 <button type="submit" class="btn btn-primary" id="fetchButton">Fetch</button>
-
                                 <button type="submit" class="btn btn-primary" id="SaveButton">Save</button>
                             </div>
                             @endif`
@@ -662,6 +673,8 @@
                         <form id="taxFormValues">
                         <input type="hidden" name="order_id" value="{{$orderData->id}}">
                         <input type="hidden" id="parcel" value="{{ $getjsonDetails[0]['extracted_parcel'] ?? '' }}">
+
+                        <!-- <input type="hidden" id="parcel" value="{{ $getjsonDetails[0]['extracted_parcel'] ?? '' }}"> -->
                             <!-- Top Section -->
                             <div class="form-row">
                                 <!-- Left Column -->
@@ -1845,12 +1858,14 @@ $(document).ready(function() {
         var taxStatus = $("#tax_status").val();
         var getData = $("#get_data").val();
         var searchInput = $("#search_input").val();
+        var parcelValue = $("#parcel").val(); // Get the value of the parcel hidden input
 
         // Create an object to hold the serialized data and additional fields
         var additionalData = {
             tax_status: taxStatus,
             get_data: getData,
-            search_input: searchInput
+            search_input: searchInput,
+            parcel: parcelValue // Include the parcel value
         };
 
         // Convert the additionalData object to a query string
@@ -1875,7 +1890,6 @@ $(document).ready(function() {
                 }).then((result) => {
                     if (result.value) {
                         window.location.href = "{{ url('/orders_status') }}/tax";
-
                     }
                 });
             },
@@ -1890,6 +1904,7 @@ $(document).ready(function() {
         });
     });
 });
+
 
 
 $(document).ready(function () {
@@ -2382,24 +2397,32 @@ $(function() {
             data: {
                 orderId: orderId,
                 type: getData,
+                tax_status: taxStatus,
                 search_value: searchInput,
                 _token: '{{ csrf_token() }}',
             },
             success: function (response) {
                 // Hide the loader on success
                 loader.hide();
-
-                // Display success message with Swal
-                Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'Order successfully fetched.',
-                            confirmButtonText: 'OK',
-                        }).then(() => {
-                            // Reload the page after closing the success alert
-                            // window.location.reload(); 
-                           window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}/tax';
-                        });
+                if(response[0].ftc_status == "Completed!!!Not supported currently!!!"){
+                    Swal.fire({
+                                            icon: 'info',
+                                            text: 'Not supported currently!',
+                                            confirmButtonText: 'OK',
+                                        });
+                } else if(response[0].ftc_status == "Success"){
+                    // Display success message with Swal
+                    Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Order successfully fetched.',
+                                confirmButtonText: 'OK',
+                            }).then(() => {
+                                // Reload the page after closing the success alert
+                                // window.location.reload(); 
+                            window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}/tax';
+                            });
+                }
             },
             error: function (xhr, status, error) {
                 // Hide the loader on error
@@ -2409,7 +2432,7 @@ $(function() {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'An error occurred. Please try again.',
+                    text: 'Loading data. Please fetch again.',
                     confirmButtonText: 'OK',
                 });
             },
@@ -2424,9 +2447,6 @@ $(function() {
         });
     }
 });
-
-
-
 
 });
 </script>
