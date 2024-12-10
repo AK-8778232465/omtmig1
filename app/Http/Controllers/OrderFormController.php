@@ -513,6 +513,13 @@ class OrderFormController extends Controller
                     ->pluck('json')
                     ->toArray();
 
+                $gettaxesDetails = DB::table('taxes')
+                ->where('order_id', $orderData->id)
+                ->select('submit_btn')
+                ->first();
+
+                // return response()->json(['submit_btn' => $gettaxesDetails]);
+
             // Check if $getjsonDetails is empty, and if so, set each entry as null
             if (empty($getjsonDetails)) {
                 $getjsonDetails = [
@@ -644,15 +651,15 @@ class OrderFormController extends Controller
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions',
                                                         'stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo',
-                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson'));
+                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson','gettaxesDetails));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
-                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson'));
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson', 'gettaxesDetails'));
         }else if(in_array($user->user_type_id, [22]) && (Auth::id() == $orderData->typist_id || Auth::id() == $orderData->typist_qc_id) && $orderData->status_id !=4 && $orderData->status_id != 5) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
-                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson'));
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson', 'gettaxesDetails'));
         } else {
             return redirect('/orders_status');
         }
@@ -994,6 +1001,8 @@ class OrderFormController extends Controller
 
     public function taxform_submit(Request $request)
     {
+        $submitBtnValue = $request->input('submit_btn');
+
         $fieldMapping = [
             'extracted_parcel' => $request['parcel'],
             'order_id' => $request['order_id'],
@@ -1239,6 +1248,7 @@ class OrderFormController extends Controller
                 ->update([
                     'json' => $jsonData,
                     'tax_cert' => $responseDataJson,
+                    'submit_btn' => $submitBtnValue,
                     'updated_by' => Auth::id(),
                     'updated_at' => Carbon::now(),
                 ]);
@@ -1253,6 +1263,7 @@ class OrderFormController extends Controller
             $inserted = DB::table('taxes')->insert([
                 'order_id' => $fieldMapping['order_id'],
                 'json' => $jsonData,
+                'submit_btn' => $submitBtnValue,
                 'updated_by' => Auth::id(),
                 'updated_at' => Carbon::now(),
             ]);

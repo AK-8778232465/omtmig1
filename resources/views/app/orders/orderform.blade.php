@@ -589,7 +589,7 @@
                         </button>
                         <button type="button" class="btn btn-inactive" id="showTaxForm"
                                     style="padding: 5px 25px; font-size: 0.9rem; position: relative;"
-                                    @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null)
+                                    @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 1)
                                         data-status="tick"
                                     @else
                                         data-status="cross"
@@ -1289,13 +1289,47 @@
                                 <textarea class="form-control" id="exampleFormControlTextarea1" name="exampleFormControlTextarea1" rows="3"
                                     placeholder="Enter Notes">{{ $getjsonDetails[0]['exampleFormControlTextarea1'] ?? '' }}</textarea>
                             </div>
-                            @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null)
+                            @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 0)
+                            <div class="row">
+                                <div class="col text-center" style="padding-left: 620px;">
+                                    <button type="submit" class="btn btn-info save_btn">SAVE</button>
+                                </div>
+                                <div class="col text-center" style="padding-right: 480px;">
+                                <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
+
+                                    {{-- <button type="button" id="generate_cert" class="btn btn-info">GENERATE CERT.</button> --}}
+                                </div>
+                            </div>
+
+                            <div class="row" style="margin-top:20px;">
+                                <div class="col-md-12 text-center modelopenhide">
+                                    <button type="submit" class="btn btn-primary submit_btn">SUBMIT</button>
+                            </div>
+                            </div>
+
+
+
+
+                            @elseif(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 1)
                             <div class="row">
                             </div>
+
                             @else
                             <div class="row">
+                                <div class="col text-center" style="padding-left: 620px;">
+                                    <button type="submit" class="btn btn-info save_btn">SAVE</button>
+                                </div>
+                                <div class="col text-center" style="padding-right: 480px;">
+                                <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
+
+                                    {{-- <button type="button" id="generate_cert" class="btn btn-info">GENERATE CERT.</button> --}}
+                                </div>
+                            </div>
+
+
+                            <div class="row" style="margin-top:20px;">
                                     <div class="col-md-12 text-center modelopenhide">
-                                    <button type="submit" class="btn btn-primary">SUBMIT</button>
+                                    <button type="submit" class="btn btn-primary submit_btn">SUBMIT</button>
                                 </div>
                             </div>
                             @endif
@@ -1854,6 +1888,12 @@ $(document).ready(function() {
         event.preventDefault(); 
         var formData = $(this).serialize();
 
+        var clickedButton = $(event.originalEvent.submitter);
+
+        // Determine the value of submit_btn based on which button was clicked
+        var submitBtnValue = clickedButton.hasClass('save_btn') ? 0 : 1;
+
+
         // Append additional data from the specified input fields
         var taxStatus = $("#tax_status").val();
         var getData = $("#get_data").val();
@@ -1865,7 +1905,8 @@ $(document).ready(function() {
             tax_status: taxStatus,
             get_data: getData,
             search_input: searchInput,
-            parcel: parcelValue // Include the parcel value
+            parcel: parcelValue,
+            submit_btn: submitBtnValue // Include the parcel value
         };
 
         // Convert the additionalData object to a query string
