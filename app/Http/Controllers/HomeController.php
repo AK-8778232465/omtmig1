@@ -253,10 +253,9 @@ class HomeController extends Controller
                     ->pluck('count', 'status_id');
         $yetToAssignUser = 0;
         $yetToAssignQa = 0;
-
         $StatusCompletedCount = [];
 
-        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
             // Handle additional query based on project_id and client_id
             if (in_array('All', $project_id) && !in_array('All', $client_id)) {
                 // Case: Project_id is 'All' and client_id is not 'All'
@@ -362,6 +361,7 @@ class HomeController extends Controller
                     ->where('is_active', 1)
                     ->count();
             }
+           
 
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
             $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0);

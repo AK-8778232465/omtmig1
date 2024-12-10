@@ -540,7 +540,7 @@
     <b class="mt-0 volume_analysis_date" id="selectedDate"></b>
     <div class="col-12">
         <div class="row my-2">
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('VP'))
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('Admin'))
                 <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)"  style="cursor: pointer;">
                     <div class="card">
                         <div class="card-content">
@@ -811,20 +811,20 @@
                         </div>
 
 
-            <!-- Completed -->
-            <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(5)"  style="cursor: pointer;">
+                        <!-- Completed -->
+                        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(5)"  style="cursor: pointer;">
                             <div class="card">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="media-body">
                                                 <div class="d-flex align-items-center">
-                                        <h3 class="icon-dual-success mb-0 mr-2" id="completed_cnt">0</h3>
+                                                    <h3 class="icon-dual-success mb-0 mr-2" id="completed_cnt">0</h3>
                                                     <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
-                                        <h3 class="icon-dual-warning mb-0" id="pre_completed_cnt">0</h3>
+                                                    <h3 class="icon-dual-warning mb-0" id="pre_completed_cnt">0</h3>
                                                 </div>
                                                 <div class="justify-content-between align-items-center mt-2">
-                                        <span>Completed</span>
+                                                <span>Completed</span>
                                                     <i class="icon-dual-success font-large-2 float-right" data-feather="check"></i>
                                                 </div>
                                             </div>
@@ -1604,6 +1604,7 @@ function fetchOrderData(projectId, clientId, fromDate, toDate, selectedDateFilte
         },
         dataType: 'json',
         success: function (response) {
+            // console.log(response);
             let statusCounts = response.StatusCounts;
             let totalValue = 0;
             

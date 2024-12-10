@@ -149,7 +149,7 @@ class OrderController extends Controller
             })
             ->count();
 
-        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
             // $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
             $statusCounts[6] = $yetToAssignUser;
@@ -382,7 +382,7 @@ class OrderController extends Controller
                 $request->status != 7
             ) {
                 if ($request->status == 1) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } elseif(in_array($user->user_type_id, [6, 7])) {
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
@@ -395,7 +395,7 @@ class OrderController extends Controller
                         // $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
                     }
                 } elseif($request->status == 4) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
                         if($request->status != 13){
@@ -426,7 +426,7 @@ class OrderController extends Controller
 
 
             }else {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } elseif(in_array($user->user_type_id, [6]) && $request->status != 13){
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
@@ -503,13 +503,13 @@ class OrderController extends Controller
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
             } elseif ($request->status == 6) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9, 23, 24])) {
                     $query->whereNull('oms_order_creations.assignee_user_id')->where('oms_order_creations.status_id', 1);
                 } else {
                     $query->whereNull('oms_order_creations.id');
                 }
             } elseif ($request->status == 7) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9, 23, 24])) {
                     $query->whereNull('oms_order_creations.assignee_qa_id')->where('oms_order_creations.status_id', 4);
                 } else {
                     $query->whereNull('oms_order_creations.id');
@@ -562,7 +562,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 ->whereHas('client', function ($query) {
                     $query->where('stl_client.is_approved', 1);
                 });
-    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])){
+    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])){
         if (in_array('All', $project_id) && !in_array('All', $client_id)) {
             $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                 ->where('status_id', '!=', 5)
@@ -1860,7 +1860,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     ]);
             }
 
-            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3,16, 17])) {
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3, 16, 17])) {
                 if ($input['user_id'] != null && $input['qcer_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([
