@@ -378,6 +378,15 @@
             
                     </div>
 
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="searchInputs"><b>Search</b>:</label>
+                            <input type="text" class="form-control" id="searchInputs" style="border:1px solid blue;">
+                            <p id="orderIdTip" class="red-text" style="display:none; color:red;">Use Comma separator for multiple search</p>
+                        </div>
+                    </div>
+
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="tat_zone_filter"><b>TAT ZONE:</b></label>
@@ -392,16 +401,6 @@
                         </div>
 
                     </div>
-
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label for="searchInputs"><b>Search</b>:</label>
-                            <input type="text" class="form-control" id="searchInputs" style="border:1px solid blue;">
-                            <p id="orderIdTip" class="red-text" style="display:none; color:red;">Use Comma separator for multiple search</p>
-                        </div>
-                    </div>
-                    
-
 
                     <div class="col-md-1 mt-4">
                         <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>

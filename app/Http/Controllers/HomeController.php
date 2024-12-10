@@ -2817,7 +2817,12 @@ public function tat_zone_count(Request $request) {
 
         //daily
 
+        $daily_received = $statusCountsQuery5->with('process', 'client')
+        ->whereIn('process_id', $processIds)
+            ->where('is_active', 1)
+            ->whereDate('order_date', '=', $currentDate);
 
+        $daily_received = $daily_received->count();
 
 
         $completed_today = $statusCountsQuery4->with('process', 'client')
@@ -2828,18 +2833,12 @@ public function tat_zone_count(Request $request) {
 
          $completed_today  = $completed_today->count();
 
-        $daily_carry_forward = $carry_forward + $received - $completed + $completed_today;
+        $daily_carry_forward = $pending - $daily_received + $completed_today;
 
 
 
 
 
-        $daily_received = $statusCountsQuery5->with('process', 'client')
-        ->whereIn('process_id', $processIds)
-            ->where('is_active', 1)
-            ->whereDate('order_date', '=', $currentDate);
-
-        $daily_received = $daily_received->count();
 
 
 
