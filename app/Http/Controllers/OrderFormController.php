@@ -120,13 +120,13 @@ class OrderFormController extends Controller
                 $request->status != 7
             ) {
                 if ($request->status == 1) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11, 23, 24])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
                     }
                 } elseif($request->status == 4) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11, 23, 24])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
                         if(in_array($user->user_type_id, [6])) {
@@ -150,7 +150,7 @@ class OrderFormController extends Controller
                         }
                     }
                 } else {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11, 23, 24])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } elseif(in_array($user->user_type_id, [6])){
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
@@ -184,13 +184,13 @@ class OrderFormController extends Controller
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
             } elseif ($request->status == 6) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9, 10, 11])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 23, 24])) {
                     $query->whereNull('oms_order_creations.assignee_user_id')->where('oms_order_creations.status_id', 1);
                 } else {
                     $query->whereNull('oms_order_creations.id');
                 }
             } elseif ($request->status == 7) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9, 10, 11])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 23, 24])) {
                     $query->whereNull('oms_order_creations.assignee_qa_id')->where('oms_order_creations.status_id', 4);
                 } else {
                     $query->whereNull('oms_order_creations.id');
@@ -652,7 +652,7 @@ class OrderFormController extends Controller
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions',
                                                         'stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo',
                                                         'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson','gettaxesDetails'));
-        } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11])) {
+        } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11, 23, 24])) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
                                                         'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson', 'gettaxesDetails'));

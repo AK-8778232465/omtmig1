@@ -361,7 +361,7 @@ class HomeController extends Controller
                     ->where('is_active', 1)
                     ->count();
             }
-           
+        //    dd($StatusCompletedCount);
 
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
             $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0);
@@ -751,7 +751,7 @@ class HomeController extends Controller
          $carriedOverCompletedCount2 = [];
          
         $statusCounts['carriedCount'] = $carriedCount;
-        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24 ])) {
             if(in_array('All', $project_id) && !in_array('All', $client_id)){
                 // Filter for getorderId query
                 $getorderId = $statusCountsQuery2->with('process', 'client')
