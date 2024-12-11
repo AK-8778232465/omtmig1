@@ -311,9 +311,9 @@
                 </div>
                 <div>
                     <div style="background-color: orange; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px; margin-top: 7px; display: inline-block;"></div>
-                    <div style="display: inline-block;">3rd Part</div><br>
+                    <div style="display: inline-block;">Rush</div><br>
                     <div style="background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px; margin-top: 7px; display: inline-block;"></div>
-                    <div style="display: inline-block;">4th Part</div>
+                    <div style="display: inline-block;">Super Rush</div>
                 </div>
             </div>
            
