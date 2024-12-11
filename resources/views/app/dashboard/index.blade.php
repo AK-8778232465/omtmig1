@@ -367,7 +367,7 @@
             <div id="leftContent" style="display: none;">
                 <div class="col-12">
                     <div class="row my-2">
-                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP'))
+                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('Admin'))
                             <div class="col-xl-4 col-sm-6 col-12">
                             <div class="h-100 card">
                                     <div class="card-content">
@@ -537,9 +537,10 @@
 
 <div id="rightContent">
     <h4 class="text-start mt-3">Volume Analysis:</h4>
+    <b class="mt-0 volume_analysis_date" id="selectedDate"></b>
     <div class="col-12">
         <div class="row my-2">
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('Admin'))
                 <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(6)"  style="cursor: pointer;">
                     <div class="card">
                         <div class="card-content">
@@ -786,6 +787,30 @@
                 </div>
             </div>
 
+                        <!-- Partially Cancelled -->
+                        <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(20)"  style="cursor: pointer;">
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body">
+                                                <div class="d-flex align-items-center">
+                                                <h3 class="icon-dual-success mb-0 mr-2" id="partially_cancel_cnt">0</h3>
+                                                <h3 class="plus-symbol mb-0 mr-2 text-info">+</h3>
+                                                <h3 class="icon-dual-warning mb-0" id="pre_partially_cancel_cnt">0</h3>
+                                                </div>
+                                                <div class="justify-content-between align-items-center mt-2">
+                                                <span>Partially Cancelled</span>
+                                                    <i class="icon-dual-danger font-large-2 float-right" data-feather="alert-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
             <!-- Completed -->
             <div class="col-xl-4 col-sm-6 col-12" onclick="gotoOrders(5)"  style="cursor: pointer;">
                 <div class="card">
@@ -982,7 +1007,7 @@
 </div>
         @endif
 
-@if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')))
+@if(!(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')|| Auth::user()->hasRole('Typist/Typist_Qcer')))
         <div class="card col-md-12 mt-3" id="pending_status_table" style="font-size: 12px;">
             <h4 class="text-center mt-3">Pending Order Status</h4>
                 <div class="card-body">
@@ -1003,10 +1028,11 @@
 
 
 
-@if(Auth::user()->hasRole(['Super Admin','AVP/VP','PM/TL','Business Head']))
+        @if(Auth::user()->hasRole(['Super Admin', 'VP','PM/TL','Business Head','AVP','Admin']))
         <div class="card mt-5 tabledetails d-none" id="userwise_table">
             <h4 class="text-center mt-3">Userwise Details</h4>
             <div class="card-body">
+            <b class="mt-0 userwise_details_date" id="selectedDate"></b>
                 <div class="p-0">
                     <table id="userwise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
@@ -1021,6 +1047,7 @@
                                 <th width="7%">Typing</th>
                                 <th width="7%">Typing QC</th>
                                 <th width="7%">Hold</th>
+                                <th width="7%">Partially Cancelled</th>
                                 <th width="7%">Cancelled</th>
                                 <th width="7%">Completed</th>
                                 <th width="7%">All</th>
@@ -1031,12 +1058,13 @@
                 </div>
             </div>
         </div>
-@endif
+        @endif
 
-        @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP','PM/TL','Process','Qcer','Process/Qcer','SPOC','Business Head']))
-        <div class="card mt-5 tabledetails d-none" id="datewise_table" style="display: none;">
+        @if(Auth::user()->hasRole(['Super Admin', 'AVP','PM/TL','Process','Qcer','Process/Qcer','SPOC','Business Head','VP','AVP','Admin']))
+        <div class="card mt-5 tabledetails d-none" id="datewise_table">
             <h4 class="text-center mt-3">ClientWise Details</h4>
             <div class="card-body">
+            <b class="mt-0 clientwise_details_date" id="selectedDate"></b>
                 <div class="p-0">
                     <table id="datewise_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="text-center">
@@ -1054,6 +1082,7 @@
                                 <th width="7%">Typing</th>
                                 <th width="7%">Typing QC</th>
                                 <th width="6%">Hold</th>
+                                <th width="6%">Parially Cancelled</th>
                                 <th width="7%">Cancelled</th>
                                 <th width="7%">Completed</th>
                                 <th width="7%">All</th>
@@ -1178,7 +1207,29 @@ function selectDateFilter(value) {
         value = 'current_month';
 }
 
-    dateDisplay.textContent = selectedDateFilter;
+    // dateDisplay.textContent = selectedDateFilter;
+    updateSelectedDateDisplay(selectedDateFilter);
+}
+
+
+function updateSelectedDateDisplay(date) {
+    let dateDisplay = document.getElementById('selectedDate');
+    dateDisplay.textContent = date;
+
+    let volumeAnalysisDates = document.querySelectorAll('.volume_analysis_date');
+    volumeAnalysisDates.forEach(function(element) {
+        element.textContent = date;
+    });
+
+    let userwiseDetailsDates = document.querySelectorAll('.userwise_details_date');
+    userwiseDetailsDates.forEach(function(element) {
+        element.textContent = date;
+    });
+
+    let clientwiseDetailsDates = document.querySelectorAll('.clientwise_details_date');
+    clientwiseDetailsDates.forEach(function(element) {
+        element.textContent = date;
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1585,6 +1636,7 @@ function fetchOrderData(projectId, clientId, fromDate, toDate, selectedDateFilte
             $('#typing_cnt').text(statusCounts[16] || 0);
             $('#typing_qc_cnt').text(statusCounts[17] || 0);
             $('#ground_abstractor_cnt').text(statusCounts[18] || 0);
+            $('#partially_cancel_cnt').text(statusCounts[20] || 0);
         }
     });
 }
@@ -1682,6 +1734,7 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
             let preTypingCnt = carriedCountMap[16] || 0;
             let preTypingQcCnt = carriedCountMap[17] || 0;
             let pregroundAbstractorCnt = carriedCountMap[18] || 0;
+            let prepartiallyCancelCnt = carriedCountMap[20] || 0;
 
 
 
@@ -1694,15 +1747,16 @@ function preOrderData(projectId, clientId, fromDate, toDate, selectedDateFilter)
             $('#pre_typing_cnt').text(preTypingCnt);
             $('#pre_typing_qc_cnt').text(preTypingQcCnt);
             $('#pre_ground_abstractor_cnt').text(pregroundAbstractorCnt);
+            $('#pre_partially_cancel_cnt').text(prepartiallyCancelCnt);
 
             // Calculate and update the total of the specified values
             @if(!Auth::user()->hasRole('Typist/Typist_Qcer'))
     // Include all values for users who are not Typists/Typist_Qcers
-            let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt + predocPurchaserCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt;
+            let totalSpecificValues = preWipCnt + preHoldCnt + preQuCnt + preCoversheetCnt + preClarificationCnt + predocPurchaserCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt + prepartiallyCancelCnt;
             $('#carried_over_cnt').text(totalSpecificValues);
         @else
             // Exclude preWipCnt for Typists/Typist_Qcers
-            let totalSpecificValues = preHoldCnt + preQuCnt + preClarificationCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt;
+            let totalSpecificValues = preHoldCnt + preQuCnt + preClarificationCnt + preTypingCnt + preTypingQcCnt + pregroundAbstractorCnt + prepartiallyCancelCnt;
             $('#carried_over_cnt').text(totalSpecificValues);
         @endif
         },
@@ -1724,6 +1778,7 @@ function datewise_datatable(fromDate, toDate, client_id, project_id, selectedDat
                 destroy: true,
                 processing: true,
                 serverSide: false,
+                scrollX: true,
                 searching: true,
                 ajax: {
                     url: "{{ route('dashboard_clientwise_count') }}",
@@ -1759,6 +1814,7 @@ function datewise_datatable(fromDate, toDate, client_id, project_id, selectedDat
                     { data: 'Typing', name: 'Typing', className: "text-center" },
                     { data: 'Typing QC', name: 'Typing QC', className: "text-center" },
                     { data: 'Hold', name: 'Hold', className: "text-center" },
+                    { data: 'partially cancelled', name: 'partially cancelled', className: "text-center" },
                     { data: 'Cancelled', name: 'Cancelled', className: "text-center" },
                     { data: 'Completed', name: 'Completed', className: "text-center" },
                     { data: 'All', name: 'All', className: "text-center" }
@@ -1774,7 +1830,7 @@ $('#datewise_datatable').on('draw.dt', function() {
 
 
 
-    @if(Auth::user()->hasRole(['Super Admin', 'AVP/VP', 'Business Head', 'PM/TL','SPOC']))
+    @if(Auth::user()->hasRole(['Super Admin', 'VP', 'Business Head', 'PM/TL','SPOC','AVP','Admin']))
     function userwise_datatable(fromDate, toDate, client_id, projectId, selectedDateFilter){
         fromDate = $('#fromDate_range').val();
         toDate = $('#toDate_range').val();
@@ -1786,6 +1842,7 @@ $('#datewise_datatable').on('draw.dt', function() {
             destroy: true,
             processing: true,
             serverSide: true,
+            scrollX: true,
             ajax: {
                 url: "{{ route('dashboard_userwise_count') }}",
                 type: 'POST',
@@ -1810,6 +1867,7 @@ $('#datewise_datatable').on('draw.dt', function() {
                 { data: 'status_16', name: 'status_16' },
                 { data: 'status_17', name: 'status_17' },
                 { data: 'status_2', name: 'status_2' },
+                { data: 'status_20', name: 'status_20' },
                 { data: 'status_3', name: 'status_3' },
                 { data: 'status_5', name: 'status_5' },
                 { data: 'All', name: 'All' },

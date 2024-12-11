@@ -66,8 +66,8 @@ class OrderCreationController extends Controller
         $exceldetail = OrderCreationAudit::with('users')->orderBy('created_at', 'desc')->get();
 
         $tierList = Tier::select('id','Tier_id')->get();
-        $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 10)->get();
-        $typist_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->where('user_type_id', 11)->get();
+        $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [10,22])->get();
+        $typist_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [11,22])->get();
 
         $mapped_lobs = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
         
@@ -311,14 +311,15 @@ public function getlobid(Request $request){
 
             if (Auth::user()->hasRole('Super Admin') && $totalRowCount >= 4000) {
                 $splitSize = ($totalRowCount/8);
-            } elseif (Auth::user()->hasRole('AVP/VP') && $totalRowCount >= 4000) {
+            } elseif (Auth::user()->hasRole('AVP') && $totalRowCount >= 4000) {
                 $splitSize = ($totalRowCount/4);
             } elseif (Auth::user()->hasRole('Business Head') && $totalRowCount >= 3000) {
                 $splitSize = ($totalRowCount/3);
             } elseif (Auth::user()->hasRole('PM/TL') && $totalRowCount > 2000) {
                 $splitSize = ($totalRowCount/2);
-            } else {
-                $splitSize = ($totalRowCount/1);
+            }elseif (Auth::user()->hasRole('VP') && $totalRowCount >= 4000) {
+                $splitSize = ($totalRowCount/4);
+            } else {                $splitSize = ($totalRowCount/1);
             }
 
             $fileCount = 1;

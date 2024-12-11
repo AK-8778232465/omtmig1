@@ -14,6 +14,8 @@ use Session;
 use DataTables;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use DateTime;
+use DateTimeZone;
 
 
 
@@ -57,10 +59,10 @@ class OrderController extends Controller
                 });
             } elseif($user->user_type_id == 10){
                 $statusCountsQuery->where('typist_id', $user->id)
-                ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18]);
+                ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18, 20]);
             }elseif($user->user_type_id == 11){
                 $statusCountsQuery->where('typist_qc_id', $user->id)
-                ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18]);
+                ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18, 20]);
 
             }elseif ($user->user_type_id == 22) {
                 $statusCountsQuery->where(function($query) use ($user) {
@@ -68,7 +70,7 @@ class OrderController extends Controller
                           ->orWhere('oms_order_creations.typist_qc_id', $user->id);
 
                 })
-                          ->whereIn('status_id', [2, 3, 4, 5, 14, 16, 17, 18]);
+                          ->whereIn('status_id', [2, 3, 4, 5, 14, 16, 17, 18, 20]);
 
             }
         }
@@ -135,7 +137,7 @@ class OrderController extends Controller
             })
             ->count();
 
-        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
             $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
             // $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQa;
             $statusCounts[6] = $yetToAssignUser;
@@ -191,17 +193,17 @@ class OrderController extends Controller
                 });
             } elseif($user->user_type_id == 10){
                 $tatstatusCountsQuery->where('oms_order_creations.typist_id', $user->id)
-                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 17, 18]);
+                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 17, 18, 20]);
             } elseif($user->user_type_id == 11){
                 $tatstatusCountsQuery->where('oms_order_creations.typist_qc_id', $user->id)
-                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 16, 18]);
+                ->whereNotIn('oms_order_creations.status_id', [1, 13, 4, 15, 16, 18, 20]);
             } elseif ($user->user_type_id == 22) {
                 $statusCountsQuery->where(function($query) use ($user) {
                     $query->where('oms_order_creations.typist_id', $user->id)
                           ->orWhere('oms_order_creations.typist_qc_id', $user->id);
 
                 })
-                ->whereIn('status_id', [2, 3, 5, 14, 16, 17, 18]);
+                ->whereIn('status_id', [2, 3, 5, 14, 16, 17, 18, 20]);
 
             }
         }
@@ -266,10 +268,10 @@ class OrderController extends Controller
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $searchType = $request->input('searchType');
         $searchInputs = $request->input('searchInputs');
-    $selectedDateFilter = $request->input('selectedDateFilter');
-    $fromDateRange = $request->input('fromDate_range');
-    $toDateRange = $request->input('toDate_range');
-
+        $selectedDateFilter = $request->input('selectedDateFilter');
+        $fromDateRange = $request->input('fromDate_range');
+        $toDateRange = $request->input('toDate_range');
+        $tat_zone_filter = $request->input('tat_zone_filter');
  
 
     if ($fromDateRange && $toDateRange) {
@@ -339,6 +341,7 @@ class OrderController extends Controller
                 'stl_client.id as client_id',
                 'stl_item_description.process_name as process', 
                 'oms_tier.Tier_id as tier_name',
+                DB::raw('DATE_FORMAT(oms_order_creations.created_at, "%m/%d/%Y %H:%i:%s") as created_at'),
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
                 DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")") as typist_user'),
@@ -359,13 +362,13 @@ class OrderController extends Controller
             
             if (
                 isset($request->status) &&
-                in_array($request->status, [1, 2, 3, 4, 5, 13, 14, 15, 16, 17, 18]) &&
+                in_array($request->status, [1, 2, 3, 4, 5, 13, 14, 15, 16, 17, 18, 20]) &&
                 $request->status != 'All' &&
                 $request->status != 6 &&
                 $request->status != 7
             ) {
                 if ($request->status == 1) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } elseif(in_array($user->user_type_id, [6, 7])) {
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
@@ -378,7 +381,7 @@ class OrderController extends Controller
                         // $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
                     }
                 } elseif($request->status == 4) {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } else {
                         if($request->status != 13){
@@ -400,7 +403,7 @@ class OrderController extends Controller
                             ->where(function ($optionalquery) use ($user) {
                                 $optionalquery->where('oms_order_creations.typist_id', $user->id)
                                     ->orWhere('oms_order_creations.typist_qc_id', $user->id)
-                                    ->whereIn('status_id', [2, 3, 5, 14, 16, 17, 18]);
+                                    ->whereIn('status_id', [2, 3, 5, 14, 16, 17, 18, 20]);
                             });
 
                         }
@@ -409,7 +412,7 @@ class OrderController extends Controller
 
 
             }else {
-                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+                    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
                         $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                     } elseif(in_array($user->user_type_id, [6]) && $request->status != 13){
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
@@ -434,7 +437,7 @@ class OrderController extends Controller
                             $optionalquery->where('oms_order_creations.typist_id', $user->id)
                                 ->orWhere('oms_order_creations.typist_qc_id', $user->id);
                         })
-                                ->whereIn('status_id', [2, 3, 4, 5, 14, 16, 17, 18]);
+                                ->whereIn('status_id', [2, 3, 4, 5, 14, 16, 17, 18, 20]);
 
                     }
                     else{
@@ -468,17 +471,17 @@ class OrderController extends Controller
                     });
                 } elseif(in_array($user->user_type_id, [10])){
                     $query->where('oms_order_creations.typist_id', $user->id)
-                    ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18]);
+                    ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18, 20]);
                 }elseif(in_array($user->user_type_id, [11])){
                     $query->where('oms_order_creations.typist_qc_id', $user->id)
-                    ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18]);
+                    ->whereNotIn('status_id', [1, 13, 4, 15, 16, 18, 20]);
                 }elseif(in_array($user->user_type_id, [22])) {
                     $query->where(function ($optionalquery) use ($user) {
                         $optionalquery->where('oms_order_creations.typist_id', $user->id)
                             ->orWhere('oms_order_creations.typist_qc_id', $user->id);
 
                     })
-                    ->whereIn('status_id', [2, 3, 4, 5, 14, 16, 17, 18]);
+                    ->whereIn('status_id', [2, 3, 4, 5, 14, 16, 17, 18, 20]);
 
 
                 }
@@ -486,13 +489,13 @@ class OrderController extends Controller
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
                 }
             } elseif ($request->status == 6) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9, 23, 24])) {
                     $query->whereNull('oms_order_creations.assignee_user_id')->where('oms_order_creations.status_id', 1);
                 } else {
                     $query->whereNull('oms_order_creations.id');
                 }
             } elseif ($request->status == 7) {
-                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9])) {
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 7, 8, 9, 23, 24])) {
                     $query->whereNull('oms_order_creations.assignee_qa_id')->where('oms_order_creations.status_id', 4);
                 } else {
                     $query->whereNull('oms_order_creations.id');
@@ -545,7 +548,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 ->whereHas('client', function ($query) {
                     $query->where('stl_client.is_approved', 1);
                 });
-    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])){
+    if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])){
         if (in_array('All', $project_id) && !in_array('All', $client_id)) {
             $currentOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                 ->where('status_id', '!=', 5)
@@ -560,7 +563,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
     
             $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                 ->where('is_active', 1)
-                ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                 ->whereIn('process_id', $processIds)
                 ->whereNotIn('status_id', [3, 5])
                 ->whereNull('completion_date')
@@ -605,7 +608,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     ->where('is_active', 1)
                     ->whereIn('process_id', $project_id)
                     ->whereIn('process_id', $processIds)
-                    ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                    ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                     ->whereNotIn('status_id', [3, 5])
                     ->whereNull('completion_date')
                     ->whereDate('order_date', '<', $fromDate);
@@ -637,7 +640,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 $carryOverAllStatusCounts = OrderCreation::select('id')
                     ->where('is_active', 1)
                     ->whereIn('process_id', $processIds)
-                    ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                    ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                     ->whereNotIn('status_id', [3, 5])
                     ->whereNull('completion_date')
                     ->whereDate('order_date', '<', $fromDate);
@@ -674,7 +677,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             
                     $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                         ->where('is_active', 1)
-                        ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                        ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                         ->whereNotIn('status_id', [3, 5])
                         ->where('assignee_user_id', $user->id)
                         ->whereIn('process_id', $processIds)
@@ -723,7 +726,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             ->whereIn('process_id', $project_id)
                             ->whereIn('process_id', $processIds)
                             ->where('assignee_user_id', $user->id)
-                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                             ->whereNotIn('status_id', [3, 5])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
@@ -758,7 +761,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             ->where('is_active', 1)
                             ->whereIn('process_id', $processIds)
                             ->where('assignee_user_id', $user->id)
-                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                             ->whereNotIn('status_id', [3, 5])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
@@ -917,7 +920,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             
                     $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                         ->where('is_active', 1)
-                        ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                        ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                         ->whereNotIn('status_id', [3,5])
                         ->where(function ($query) use($user){
                             $query->where('assignee_user_id', $user->id)
@@ -976,7 +979,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $query->where('assignee_user_id', $user->id)
                                 ->orWhere('assignee_qa_id', $user->id);
                         })
-                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                             ->whereNotIn('status_id', [3, 5])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
@@ -1019,7 +1022,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $query->where('assignee_user_id', $user->id)
                                 ->orWhere('assignee_qa_id', $user->id);
                         })
-                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                             ->whereNotIn('status_id', [3, 5])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
@@ -1062,7 +1065,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
 
                     $carryOverAllStatusCounts = OrderCreation::with('process', 'client')->select('id')
                         ->where('is_active', 1)
-                        ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                        ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                         ->whereNotIn('status_id', [3,5])
                         ->where(function ($query) use($user){
                             $query->where('typist_id', $user->id)
@@ -1121,7 +1124,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $query->where('typist_id', $user->id)
                                 ->orWhere('typist_qc_id', $user->id);
                         })
-                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                             ->whereNotIn('status_id', [3, 5])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
@@ -1164,7 +1167,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $query->where('typist_id', $user->id)
                                 ->orWhere('typist_qc_id', $user->id);
                         })
-                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18])
+                            ->whereIn('status_id', [1, 2, 4, 13, 14, 15, 16, 17, 18, 20])
                             ->whereNotIn('status_id', [3, 5])
                             ->whereNull('completion_date')
                             ->whereDate('order_date', '<', $fromDate);
@@ -1253,7 +1256,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 'stl_item_description.client_id',
                 'stl_item_description.process_name as process', 
                 'oms_tier.Tier_id as tier_name',
-                
+                DB::raw('DATE_FORMAT(oms_order_creations.created_at, "%m/%d/%Y %H:%i:%s") as created_at'),
                 DB::raw('CONCAT(assignee_users.emp_id, " (", assignee_users.username, ")") as assignee_user'),
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
                 DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")") as typist_user'),
@@ -1282,23 +1285,26 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         if($request->status == 6){
             if(in_array('All', $project_id) && !in_array('All', $client_id)){
             $query = $currentYet_to_assign->whereNull('assignee_user_id')
-                ->whereNull('assignee_qa_id')
+                // ->whereNull('assignee_qa_id')
                 ->whereIn('stl_item_description.client_id', $client_id)
             ->whereDate('order_date', '>=', $fromDate)
             ->whereDate('order_date', '<=', $toDate);
             }elseif(!in_array('All', $project_id)){
                 $query = $currentYet_to_assign->whereNull('assignee_user_id')
-                ->whereNull('assignee_qa_id')
+                // ->whereNull('assignee_qa_id')
                 ->whereIn('oms_order_creations.process_id', $project_id) 
                 ->whereDate('order_date', '>=', $fromDate)
                 ->whereDate('order_date', '<=', $toDate);
             }else{
                 $query = $currentYet_to_assign->whereNull('assignee_user_id')
-                ->whereNull('assignee_qa_id')
+                // ->whereNull('assignee_qa_id')
                 ->whereDate('order_date', '>=', $fromDate)
                 ->whereDate('order_date', '<=', $toDate);
             }
            
+        }
+        if (Auth::user()->hasRole('Typist/Typist_Qcer')) {
+            $query->where('oms_order_creations.status_id', '!=', 1);
         }
     }
     $query->whereIn('oms_order_creations.process_id', $processIds);
@@ -1348,7 +1354,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
     }
     if ($searchType == 10 && !empty($searchInputs)) {
         preg_match('/\((.*?)\)/', $searchInputs, $matches);
-        $contentInsideParentheses = $matches[1] ?? $searchInputs; // Use the extracted content or the entire input
+        $contentInsideParentheses = $matches[1] ?? $searchInputs;
 
         $query->where(function($q) use ($contentInsideParentheses) {
             $q->where('assignee_users.username', 'like', '%' . $contentInsideParentheses . '%')
@@ -1359,6 +1365,39 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $query->where('assignee_qas.username', 'like', '%' . $searchInputs . '%');
     }
 
+
+    if ($tat_zone_filter) {
+        // Get the current time in America/New_York timezone
+        $ny_time_zone = new DateTimeZone("America/New_York");
+        $current_time = new DateTime("now", $ny_time_zone); // Current time in NY timezone
+
+        switch ($tat_zone_filter) {
+            case 1:
+                // Brown color (out of TAT)
+                $query->whereRaw('TIMESTAMPDIFF(HOUR, oms_order_creations.order_date, ?) > (stl_item_description.tat_value / 4) * 4', [$current_time->format('Y-m-d H:i:s')]);
+                break;
+
+            case 2:
+                // Blue color (super rush)
+                $query->whereRaw('TIMESTAMPDIFF(HOUR, oms_order_creations.order_date, ?) BETWEEN (stl_item_description.tat_value / 4) * 3 AND (stl_item_description.tat_value / 4) * 4', [$current_time->format('Y-m-d H:i:s')]);
+                break;
+
+            case 3:
+                // Red color (rush)
+                $query->whereRaw('TIMESTAMPDIFF(HOUR, oms_order_creations.order_date, ?) BETWEEN (stl_item_description.tat_value / 4) * 2 AND (stl_item_description.tat_value / 4) * 3', [$current_time->format('Y-m-d H:i:s')]);
+                break;
+
+            case 4:
+                // Priority
+                $query->whereRaw('TIMESTAMPDIFF(HOUR, oms_order_creations.order_date, ?) BETWEEN (stl_item_description.tat_value / 4) * 1 AND (stl_item_description.tat_value / 4) * 2', [$current_time->format('Y-m-d H:i:s')]);
+                break;
+
+            case 5:
+                // Non-Priority
+                $query->whereRaw('TIMESTAMPDIFF(HOUR, oms_order_creations.order_date, ?) <= (stl_item_description.tat_value / 4) * 1', [$current_time->format('Y-m-d H:i:s')]);
+                break;
+        }
+    }
 
 
         return DataTables::of($query)
@@ -1451,38 +1490,56 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     if (Auth::user()->hasRole('Typist') && in_array($order->process_type_id, [12, 7])) {
                                 $statusMapping = [
                                     14 => 'Clarification',
+                                    4 => 'Send for QC',
                                     16 => 'Typing',
+                                    17 => 'Typing QC',
                                     18 => 'Ground Abstractor',
                                     2 => 'Hold',
                                     5 => 'Completed',
+                                    20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
-                                    17 => 'Typing QC',
-                                    4 => 'Send for QC',
                                 ];
 
                     } elseif (Auth::user()->hasRole('Typist/Qcer')  && in_array($order->process_type_id, [12, 7])) {
                             $statusMapping = [
+                                
+                                14 => 'Clarification',
+                                4 => 'Send for QC', 
+                                16 => 'Typing',
                                 17 => 'Typing QC',
                                 18 => 'Ground Abstractor',
-                                16 => 'Typing',
-                                14 => 'Clarification',
                                 2 => 'Hold',
                                 5 => 'Completed',
+                                20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
-                                4 => 'Send for QC',
                             ];
-                } elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
+                }elseif (Auth::user()->hasRole('Typist/Typist_Qcer')) {
+                    $statusMapping = [
+                        
+                        14 => 'Clarification',
+                        4 => 'Send for QC',
+                                16 => 'Typing',
+                        17 => 'Typing QC',                        
+                        18 => 'Ground Abstractor',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                        20 => 'Partially Cancelled',
+                                3 => 'Cancelled',
+                            ];
+                 }
+                 elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                     $statusMapping = [
                         1 => 'WIP',
                         15 => 'Doc Purchase',
-                        18 => 'Ground Abstractor',
                         14 => 'Clarification',
-                        2 => 'Hold',
-                        5 => 'Completed',
-                        3 => 'Cancelled',
                         4 => 'Send for QC',
                         16 => 'Typing',
-                        17 => 'Typing QC'
+                        17 => 'Typing QC',
+                        18 => 'Ground Abstractor',
+                        2 => 'Hold',
+                        5 => 'Completed',
+                        20 => 'Partially Cancelled',
+                        3 => 'Cancelled',
                     ];
                         if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86, 13, 2, 87, 88, 89, 90, 91, 92])) {
                         unset($statusMapping[15]);
@@ -1496,13 +1553,14 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $statusMapping = [
                                     1 => 'WIP',
                                     15 => 'Doc Purchase',
-                        18 => 'Ground Abstractor',
                                     14 => 'Clarification',
                                     4 => 'Send for QC',
                                     16 => 'Typing',
                                     17 => 'Typing QC',
+                                    18 => 'Ground Abstractor',
                                     2 => 'Hold',
                                     5 => 'Completed',
+                                    20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
                                 ];
                             if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86])) {
@@ -1521,11 +1579,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $statusMapping = [
                                     1 => 'WIP',
                                     13 => 'Coversheet Prep',
-                                    18 => 'Ground Abstractor',
                                     14 => 'Clarification',
+                                    18 => 'Ground Abstractor',
                                     4 => 'Send for QC',
                                     2 => 'Hold',
                                     5 => 'Completed',
+                                    20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
                                 ];
                         }elseif($order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 ){
@@ -1533,11 +1592,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             $statusMapping = [
                                 1 => 'WIP',
                                 13 => 'Coversheet Prep',
-                                18 => 'Ground Abstractor',
                                 14 => 'Clarification',
+                                18 => 'Ground Abstractor',
                                 4 => 'Send for QC',
                                 2 => 'Hold',
                                 5 => 'Completed',
+                                20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
                             ];
                         }else{
@@ -1545,11 +1605,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 $statusMapping = [
                                     1 => 'WIP',
                                     13 =>'Coversheet Prep',
-                                    18 => 'Ground Abstractor',
                                     14 => 'Clarification',
+                                    18 => 'Ground Abstractor',
                                     4 => 'Send for QC',
                                     2 => 'Hold',
                                     5 => 'Completed',
+                                    20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
                                 ];
                         }
@@ -1561,11 +1622,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             $statusMapping = [
                                 1 => 'WIP',
                                 13 => 'Coversheet Prep',
-                                18 => 'Ground Abstractor',
                                 14 => 'Clarification',
+                                18 => 'Ground Abstractor',
                                 4 => 'Send for QC',
                                 2 => 'Hold',
                                 5 => 'Completed',
+                                20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
                             ];
                         }elseif((!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 )||(!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 3 )){
@@ -1573,11 +1635,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             $statusMapping = [
                                 1 => 'WIP',
                                 13 => 'Coversheet Prep',
-                                18 => 'Ground Abstractor',
                                 14 => 'Clarification',
                                 4 => 'Send for QC',
+                                18 => 'Ground Abstractor',
                                 2 => 'Hold',
                                 5 => 'Completed',
+                                20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
                             ];
                         }else{
@@ -1585,11 +1648,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             $statusMapping = [
                                 1 => 'WIP',
                                 13 => 'Coversheet Prep',
-                                18 => 'Ground Abstractor',
                                 14 => 'Clarification',
                                 4 => 'Send for QC',
+                                18 => 'Ground Abstractor',
                                 2 => 'Hold',
                                 5 => 'Completed',
+                                20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
 
                             ];
@@ -1730,10 +1794,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $statusList = Status::select('id', 'status')->get();
         $countyList = County::select('id', 'county_name')->get();
 
-        // Set the default status based on your requirements, for example, 'WIP'
         $defaultStatus = Status::where('status', 'WIP')->first();
 
-        // Get the selected status from the request or use the default status
         $selectedStatus = $request->input('status', $defaultStatus->id);
 
         return view('app.orders.orders_status', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList', 'selectedStatus', 'typists', 'typists_qcs'));
@@ -1788,7 +1850,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     ]);
             }
  
-            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3,16, 17])) {
+            if (in_array($input['type_id'], [13, 1, 6, 14, 4, 2, 3, 16, 17])) {
                 if ($input['user_id'] != null && $input['qcer_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([
@@ -2067,9 +2129,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         // $toDate = $request->input('toDate');
         $selectedDateFilter = $request->input('selectedDateFilter');
 
-        $fromDateRange = Session::get('fromDate');
-        $toDateRange = Session::get('toDate');
-   
+        // $fromDateRange = Session::get('fromDate');
+        // $toDateRange = Session::get('toDate');
+        $fromDateRange = $request->input('fromDate');
+        $toDateRange = $request->input('toDate');
         $fromDate = null;
         $toDate = null;
    

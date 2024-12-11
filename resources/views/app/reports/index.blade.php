@@ -302,11 +302,14 @@
                                     <th width="12%">Users</th>
                                     <th width="11%">WIP</th>
                                     <th width="11%">Coversheet Prep</th>
-                                    <th width="11%">Clarification</th>
-                                    <th width="11%">Typing</th>
-                                    <th width="11%">Typing QC</th>
-                                    <th width="11%">Send For QC</th>
-                                    <th width="11%">Hold</th>
+                                    <th width="8%">Doc Purchaser</th>
+                                    <th width="8%">Ground Abstractor</th>
+                                    <th width="8%">Clarification</th>
+                                    <th width="8%">Typing</th>
+                                    <th width="8%">Typing QC</th>
+                                    <th width="8%">Send For QC</th>
+                                    <th width="8%">Hold</th>
+                                    <th width="8%">Partially Cancelled</th>
                                     <th width="11%">Cancelled</th>
                                     <th width="11%">Completed</th>
                                     <th width="11%">All</th>
@@ -528,8 +531,8 @@
                 <table id="daily_completion_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead class="text-center" style="font-size: 12px;">
                         <tr>
-                            <th width="10%">Order Received Date</th>
-                            <th width="10%">Client Name</th>
+                            <th width="10%">Date</th>
+                            <th width="10%">Client Code</th>
                             <th width="12%">Order Received</th>
                             <th width="12%">Yet to Assign</th>
                             <th width="8%">WIP</th>
@@ -559,6 +562,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
 <script>
+
+$(document).ready(function() {
+    $('.report-item').on('click', function() {
+        if ($(this).attr('id') === 'production-report') {
+            $('#client_id_dcf').val(82).trigger('change');
+            $('#client_id_dcf').prop('disabled', true);
+        } else {
+            $('#client_id_dcf').val('').trigger('change');
+            $('#client_id_dcf').prop('disabled', false);
+        }
+    });
+});
 
 $(document).ready(function() {
         $('#orderwise_timetaken_datatable').DataTable();
@@ -1118,11 +1133,14 @@ $('#newreports_datatable').on('draw.dt', function () {
             { data: 'userinfo', name: 'userinfo', class: 'text-left' },
             { data: 'status_1', name: 'status_1', visible:@if(Auth::user()->hasRole('Qcer')) false @else true @endif},
             { data: 'status_13', name: 'status_13' },
+            { data: 'status_15', name: 'status_15' },
+            { data: 'status_18', name: 'status_18' },
             { data: 'status_14', name: 'status_14' },
             { data: 'status_16', name: 'status_16' },
             { data: 'status_17', name: 'status_17' },
             { data: 'status_4', name: 'status_4' },
             { data: 'status_2', name: 'status_2' },
+            { data: 'status_20', name: 'status_20' },
             { data: 'status_3', name: 'status_3' },
             { data: 'status_5', name: 'status_5' },
             { data: 'All', name: 'All' }
@@ -1148,14 +1166,17 @@ $('#newreports_datatable').on('draw.dt', function () {
                         success: function(response) {
                             var data = response.data;
 
-                            var headers = ["Users", "WIP", "Coversheet Prep", "Clarification", "Send For QC", "Hold", "Cancelled", "Completed", "All"];
+                            var headers = ["Users", "WIP", "Coversheet Prep", "Doc Purchase", "Ground Abstractor", "Clarification", "Send For QC", "Hold", "Partially Cancelled", "Cancelled", "Completed", "All"];
                             var exportData = data.map(row => [
                                 row.userinfo,
                                 row.status_1,
                                 row.status_13,
+                                row.status_15,
+                                row.status_18,
                                 row.status_14,
                                 row.status_4,
                                 row.status_2,
+                                row.status_20,
                                 row.status_3,
                                 row.status_5,
                                 row.All
@@ -1870,7 +1891,12 @@ function orderInflow_report() {
             { data: 'pending', name: 'pending' }
         ],
         dom: 'lBfrtip',
-        buttons: ['excel'],
+        buttons:[
+                    {
+                        extend: 'excel',
+                        title: 'Order_Inflow Report',  // Set the title for the exported Excel file
+                    }
+                ],
         lengthMenu: [10, 25, 50, 75, 100],
         order: [[0, 'asc']] // Order by client name
     });

@@ -172,6 +172,7 @@
                     <button id="status_8" class="btn btn-info status-btn">Completed<span id="status_8_count"></span></button>
                     <button id="status_9" class="btn btn-info status-btn">Closed<span id="status_9_count"></span></button>
                     <button id="status_10" class="btn btn-info status-btn">Cancelled<span id="status_10_count"></span></button>
+                    <button id="status_15" class="btn btn-info status-btn">Partially Cancelled<span id="status_15_count"></span></button>
                     <button id="status_11" class="btn btn-info status-btn">Pending<span id="status_11_count"></span></button>
                     <button id="status_12" class="btn btn-info status-btn">On Hold<span id="status_12_count"></span></button>
                     <button id="status_All" class="btn btn-info status-btn @role('Lead') d-none  @endrole @role('User') d-none  @endrole" >All<span id="status_All_count"></span></button>
@@ -364,7 +365,7 @@
     function updateStatusCounts(statusCounts) {
         let total = 0;
 
-        for (let status = 1; status <= 14; status++) {
+        for (let status = 1; status <= 15; status++) {
             let count = statusCounts[status] || 0;
             total += count;
             $('#status_' + status + '_count').text(' (' + count + ')');

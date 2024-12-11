@@ -82,6 +82,27 @@
     height: 30px; /* Adjust height based on content */
     display: inline-block; /* Ensure it wraps only the content */
 }
+
+#out_of_tat{
+    color: #964B00;
+}
+
+#super_rush{
+    color:red;
+}
+
+#rush{
+    color:orange;
+}
+
+#non_priority{
+    color:green;
+}
+
+#priority{
+    color:blue;
+}
+
 </style>
 
 {{-- Edit Model Order --}}
@@ -137,7 +158,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-lg-4 mt-4">
+                        <div class="col-lg-4 mt-4" id="hide_reasign">
                             <input  type="checkbox" id="re_assign" name="re_assign"><label style="font-size: 0.8rem !important;" class="mx-2" for="">Re-Assign</label>
                         </div>
                     </div>
@@ -188,13 +209,13 @@
         <div class="card-body">
             <div class="row justify-content-start m-3 mt-2 mb-4" id="statusButtons">
                 <div class="bg-info shadow-lg p-0 rounded text-white" style="text-decoration: none; font-size:0.7rem">
-                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif" style="cursor: pointer;">Yet to Assign User<span id="status_6_count"></span>
-                     <!-- <div style=""> -->
-                            <!-- <div style="display: inline-block;"></div>
-                            <span id="tat_status_6_third_count"></span>
+                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif" style="cursor: pointer;">Yet to Assign User<span id="status_6_count"></span>
+                     <div style="">
                             <div style="display: inline-block;"></div>
-                            <span id="tat_status_6_fourth_count"></span> -->
-                        <!-- </div> -->
+                            <!-- <span id="tat_status_6_third_count"></span> -->
+                            <div style="display: inline-block;"></div>
+                            <!-- <span id="tat_status_6_fourth_count"></span> -->
+                        </div>
                     </button>
                     <button id="status_7"  class="btn btn-info status-btn d-none">Yet to Assign QA<span id="status_7_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
@@ -221,6 +242,12 @@
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_15_fourth_count">0</span>
                         </div></button>
+  					<button id="status_18" class="btn btn-info status-btn">Ground Abstractor<span id="status_18_count"></span><div style="">
+                        <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                        <span id="tat_status_18_third_count">0</span>
+                        <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                        <span id="tat_status_18_fourth_count">0</span>
+                    </div></button>
                     <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_14_third_count">0</span>
@@ -257,6 +284,12 @@
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_5_fourth_count">0</span>
                         </div></button>
+                    <button id="status_20" class="btn btn-info status-btn">Partially Cancelled<span id="status_20_count"></span><div style="">
+                            <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
+                            <span id="tat_status_20_third_count">0</span>
+                            <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                            <span id="tat_status_20_fourth_count">0</span>
+                    </div></button>
                     <button id="status_3" class="btn btn-info status-btn">Cancelled<span id="status_3_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_3_third_count">0</span>
@@ -269,6 +302,12 @@
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_All_fourth_count">0</span>
                         </div></button>
+                </div>
+                <div>
+                    <div style="background-color: orange; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px; margin-top: 7px; display: inline-block;"></div>
+                    <div style="display: inline-block;">3rd Part</div><br>
+                    <div style="background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px; margin-top: 7px; display: inline-block;"></div>
+                    <div style="display: inline-block;">4th Part</div>
                 </div>
             </div>
            
@@ -341,6 +380,21 @@
                         </div>
                     </div>
                     
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="tat_zone_filter"><b>TAT ZONE:</b></label>
+                            <select class="form-control " id="tat_zone_filter" name="tat_zone_filter" style="border:1px solid blue;">
+                                <option value="" selected >Select Tat Zone</option>
+                                <option value="1" id="out_of_tat">Out of TAT</option>
+                                <option value="2" id="super_rush">Super Rush</option>
+                                <option value="3" id="rush">Rush</option>
+                                <option value="4" id="priority">Priority</option>
+                                <option value="5" id="non_priority">Non Priority</option>
+                            </select>
+                        </div>
+
+                    </div>
+
                     <div class="col-md-1 mt-4">
                         <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
                     </div>
@@ -378,6 +432,8 @@
                             @endif
                             <th style="width:7%">Action</th>
                             <th style="width:10%">Coversheet Preparer</th>
+                            <th style="width:7%">Created Date</th>
+
                         </tr>
                         </thead>
                         <tbody>
@@ -755,6 +811,9 @@ $(document).ready(function() {
             case 'status_17':
                 defaultStatus = 17;
                 break;
+            case 'status_18':
+                defaultStatus = 18;
+                break;
             case 'status_4':
                 defaultStatus = 4;
                 break;
@@ -767,6 +826,11 @@ $(document).ready(function() {
             case 'status_3':
                 defaultStatus = 3;
                 break;
+
+            case 'status_20':
+                defaultStatus = 20;
+                break;
+
             case 'status_All':
                 defaultStatus = 'All'; // Adjust if 'All' should be treated differently
                 break;
@@ -796,7 +860,7 @@ $(document).ready(function() {
             processing: true,
             serverSide: true,
             scrollX: true,
-            lengthMenu: [10, 25, 50, 100, 200, 500],
+            lengthMenu:  [10, 25, 50, 100, 500, 750, 1000],
             dom: 'lrtip',
             ajax: {
                 url: '{{ route("getOrderData") }}',
@@ -810,6 +874,7 @@ $(document).ready(function() {
                d.fromDate_range = $('#fromDate_range').val();
                d.toDate_range = $('#toDate_range').val();
                d.sessionfilter = sessionfilter;
+               d.tat_zone_filter = $('#tat_zone_filter').val();
 
 
               
@@ -846,6 +911,8 @@ $(document).ready(function() {
                     "orderable": false,
                 },
                 { "data": "associate_name", "name": "associate_name", "visible": true},
+                { "data": "created_at", "name": "created_at", "visible": true},
+
             ],
             "order": [[1, 'asc']],
             createdRow: function (row, data, dataIndex) {
@@ -993,7 +1060,7 @@ $(document).ready(function() {
             datatable.column(15).visible(false);
         }
         // //
-        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') ||Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') ||Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('VP'))
             if(status == 13){
                 $('.status-dropdown').prop('disabled', false);
                 datatable.column(15).visible(true);
@@ -1050,7 +1117,7 @@ $(document).ready(function() {
         @endif
 
         if(status == 5) {
-            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP/VP'))
+            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Business Head') ||Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('VP'))
             $('.status-dropdown').prop('disabled', false);
             @endif
         }
@@ -1089,6 +1156,9 @@ $(document).ready(function() {
             @endif
         }
 
+        if(status == 15){
+            $('.status-dropdown').prop('disabled', true);
+        }
 		 @if(Auth::user()->hasRole('Typist/Typist_Qcer'))
 		            if(status == 4){
 		            $('.status-dropdown').prop('disabled', true);
@@ -1611,6 +1681,12 @@ $(document).on('focus', '.status-dropdown', function() {
 
                 var orderDate = res['order_date'].replace(' ', 'T');
                 $("#order_date_ed").val(orderDate);
+
+                if (res['status_id'] === 5) {
+                $("#hide_reasign").hide();
+                } else {
+                    $("#hide_reasign").show();
+                }
 
 				$("#myModalEdit").modal('show');
 			}
