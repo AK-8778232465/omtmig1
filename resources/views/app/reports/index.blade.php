@@ -235,7 +235,7 @@
                 <div class="form-group">
                     <label for="client">Client</label>
                     <select class="form-control select2-basic-multiple" name="dcf_client_id_2" id="client_id_dcf_2" multiple="multiple">
-                        <option selected value="">Select Client</option>
+                        <option selected value="All">All</option>
                         @forelse($clients as $client)
                         <option value="{{ $client->id }}">{{ $client->client_no }} ({{ $client->client_name }})</option>
                         @empty
@@ -824,6 +824,58 @@ $(document).ready(function() {
         });
     });
 
+    $(document).ready(function() {
+        var isClientChanging = false;
+        $(document).on('change', '#client_id_dcf_2', function() {
+            if (isClientChanging) return;
+            isClientChanging = true;
+            var selectedClientOption = $(this).val();
+            if (selectedClientOption === 'All') {
+                $("#client_id_dcf_2").val('All');
+            }
+            isClientChanging = false;
+        });
+
+        $(document).ready(function() {
+        var isLobChanging = false;
+        $(document).on('change', '#lob_id', function() {
+            if (isLobChanging) return;
+            isLobChanging = true;
+            var selectedLobOption = $(this).val();
+                if (selectedLobOption === 'All') {
+                    $("#lob_id").val('All');
+            }
+            isLobChanging = false;
+        });
+        });
+
+        var isProcessChanging = false;
+        $(document).on('change', '#process_type_id', function() {
+            if (isProcessChanging) return;
+            isProcessChanging = true;
+            var selectedProcessOption = $(this).val();
+            $("#process_type_id").val(selectedProcessOption && selectedProcessOption.includes('All') ? ['All'] : selectedProcessOption);
+            if ($("#process_type_id").val() !== selectedProcessOption) {
+                $("#process_type_id").trigger('change');
+            }
+            isProcessChanging = false;
+        });
+
+
+        var isProductChanging = false;
+        $(document).on('change', '#product_id', function() {
+            if (isProductChanging) return;
+            isProductChanging = true;
+            var selectedProductOption = $(this).val();
+            $("#product_id").val(selectedProductOption && selectedProductOption.includes('All') ? ['All'] : selectedProductOption);
+            if ($("#product_id").val() !== selectedProductOption) {
+                $("#product_id").trigger('change');
+            }
+            isProductChanging = false;
+        });
+    });
+
+
 
 function orderWise() {
     var fromDate = $('#fromDate_range').val();
@@ -1063,11 +1115,75 @@ $('#newreports_datatable').on('draw.dt', function () {
         });
     })
 
+    $('#lob_id').on('change', function () {
+    var lob_id = $(this).val();
+    var client_id = $('#client_id_dcf_2').val();
+    $("#process_type_id").html('');
+    $("#product_id").html(''); 
+
+        $.ajax({
+            url: "{{ url('get_process') }}",
+            type: "POST",
+            data: {
+                lob_id: lob_id,
+                client_id: client_id,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: 'json',
+            success: function (response) {
+                $('#process_type_id').html('<option selected value="All">All</option>');
+                $('#product_id').html('<option selected value="All">All</option>');
+
+
+                $.each(response.process, function (index, item) {
+                $("#process_type_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+                });
+
+                $.each(response.products, function (index, item) {
+                $("#product_id").append('<option value="' + item.id + '">' + item.process_name + ' (' + item.project_code + ')</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error: ' + status + ' - ' + error);
+            }
+        });
+    })
+
 
 
     $('#process_type_id').on('change', function () {
     var process_type_id = $(this).val();
     var client_id = $('#client_id_dcf').val();
+    var lob_id = $('#lob_id').val();
+
+    console.log(process_type_id);
+    $("#product_id").html(''); 
+        $.ajax({
+            url: "{{ url('get_product') }}",
+            type: "POST",
+            data: {
+                process_type_id: process_type_id,
+                client_id: client_id,
+                lob_id:lob_id,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: 'json',
+            success: function (response) {
+                $('#product_id').html('<option selected value="All">All</option>');
+                $.each(response, function (index, item) {
+                    $("#product_id").append('<option value="' + item.id + '">' + '(' + item.project_code + ') ' + item.process_name + '</option>');
+
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error: ' + status + ' - ' + error);
+            }
+        });
+    })
+
+    $('#process_type_id').on('change', function () {
+    var process_type_id = $(this).val();
+    var client_id = $('#client_id_dcf_2').val();
     var lob_id = $('#lob_id').val();
 
     console.log(process_type_id);
@@ -1209,6 +1325,16 @@ $('#client_id_dcf').on('change', function () {
     $("#product_id").html('<option selected value="All">All</option>');
     $("#process_type_id").html('<option selected value="All">All</option>');
 
+    fetchProData(client_id,product_id);
+});
+
+$('#client_id_dcf_2').on('change', function () {
+    let client_id = $("#client_id_dcf_2").val();
+    let product_id = $("#product_id").val();
+
+    $("#lob_id").html('<option selected value="All">All</option>');
+    $("#product_id").html('<option selected value="All">All</option>');
+    $("#process_type_id").html('<option selected value="All">All</option>');
 
     fetchProData(client_id,product_id);
 });
@@ -1223,6 +1349,11 @@ $(document).ready(function() {
 
     $('#client_id_dcf').on('change', function () {
        let getproject_id = $("#client_id_dcf").val();
+       $("#project_id_dcf").html('All');
+        fetchProData(getproject_id);
+    });
+    $('#client_id_dcf_2').on('change', function () {
+       let getproject_id = $("#client_id_dcf_2").val();
        $("#project_id_dcf").html('All');
         fetchProData(getproject_id);
     });
@@ -1423,9 +1554,9 @@ $(document).ready(function() {
             $('#selected_date_range').show();
             $('#hidefilter_3').show();
             $('#client_filter').hide();
-            $('#lob_filter').hide();
-            $('#process_filter').hide();
-            $('#hidefilter_2').hide();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+            $('#hidefilter_2').show();
             $('#role_filter').hide();
             $('#user_filter').hide();
             $('#client_filter_2').show();
@@ -2067,7 +2198,10 @@ function daily_completion() {
     var fromDate = $('#fromDate_range').val();
     var toDate = $('#toDate_range').val();
     let client_id = $("#client_id_dcf_2").val();
-    console.log(client_id);
+    var lob_id = $('#lob_id').val();
+    var process_type_id = $('#process_type_id').val();
+    let product_id = $("#product_id").val();
+
 
     $.ajax({
         url: "{{ route('daily_completion') }}",
@@ -2076,6 +2210,9 @@ function daily_completion() {
             toDate_range: toDate,
             fromDate_range: fromDate,
             client_id: client_id,
+            lob_id: lob_id,
+            process_type_id: process_type_id,
+            product_id: product_id,
             selectedDateFilter: selectedDateFilter,
             _token: '{{ csrf_token() }}'
         },

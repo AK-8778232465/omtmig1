@@ -1272,8 +1272,6 @@ class OrderFormController extends Controller
                 'tax_bucket' => null,
             ]);
 
-
-
             $status = $inserted ? 'success' : 'error';
             $message = $inserted ? 'Data inserted successfully' : 'Failed to insert data';
         }
@@ -1285,17 +1283,18 @@ class OrderFormController extends Controller
                         'updated_by' => Auth::id(),
                         'updated_at' => Carbon::now('America/New_York'),
                     ]);
-   
-        // Prepare the response with the renamed fields
+
+            $redirect = DB::table('taxes')->select('submit_btn')->where('order_id', $request['order_id'])->get();
+            // Prepare the response with the renamed fields
         $responseData = [
             'status' => $status,
             'data' => $jsonData,
             'message' => $message,
+            'redirect' => $redirect,
         ];
 
             if($status === 'success'){
                 $this->taxCertPDFController->fillPDF($request['order_id'],$DataJson);
-                
             }
     
         return response()->json($responseData, $status === 'success' ? 201 : 500);

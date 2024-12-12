@@ -1422,6 +1422,9 @@ public function daily_completion(Request $request)
     $firstDateOfCurrentMonth = Carbon::now()->startOfMonth();
 
     $client_id = $request->input('client_id');
+    $lob_id = $request->input('lob_id');
+    $process_type_id = $request->input('process_type_id');
+    $project_id = $request->input('product_id');
     $selectedDateFilter = $request->input('selectedDateFilter');
     $fromDateRange = $request->input('fromDate_range');
     $toDateRange = $request->input('toDate_range');
@@ -1453,8 +1456,10 @@ public function daily_completion(Request $request)
     ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
     ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
     ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
-    ->whereIn('stl_item_description.client_id', $client_id)
-    ->whereDate('oms_order_creations.order_date', '>=', $from_date)  // Explicit 'from_date' condition
+    ->where('oms_order_creations.is_active', 1)
+    ->where('stl_item_description.is_approved', 1)
+    ->where('stl_client.is_approved', 1)
+    ->whereDate('oms_order_creations.order_date', '>=', $from_date)
     ->whereDate('oms_order_creations.order_date', '<=', $to_date)
     ->select(
         DB::raw('DATE(oms_order_creations.order_date) as date'),
@@ -1471,14 +1476,24 @@ public function daily_completion(Request $request)
         DB::raw('DATE(oms_order_creations.order_date)'),
         'stl_client.client_no',
         'stl_client.client_name',
-        'oms_order_creations.status_id', // Add this to the GROUP BY
-        'oms_order_creations.assignee_user_id' // Add this to the GROUP BY
+        'oms_order_creations.status_id',
+        'oms_order_creations.assignee_user_id'
     )
-    ->orderBy('date')
-    ->where('oms_order_creations.is_active', 1)
-    ->where('stl_item_description.is_approved', 1)
-    ->where('stl_client.is_approved', 1)
-    ->get();
+    ->orderBy('date');
+
+// Add conditional filters for project_id and client_id.
+if (!empty($project_id) && $project_id[0] !== 'All') {
+    $orders->whereIn('oms_order_creations.process_id', $project_id);
+}
+
+if (!empty($client_id) && $client_id[0] !== 'All') {
+    $orders->whereIn('stl_item_description.client_id', $client_id);
+}
+
+// Retrieve the results after all conditions.
+$orders = $orders->get();
+
+
 
     // Format the data to match the desired response
     $result = [];

@@ -151,6 +151,30 @@
     white-space: normal;
 }
 
+#progress-cont {
+    display: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    width: 50%;
+}
+
+.progress {
+    background-color: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-color: #17a2b8;
+    text-align: center;
+    color: white;
+    line-height: 30px;
+}
+
+
+
 </style>
 <div class="col-lg-12">
     <div class="col-lg-12 mt-2" id="ip_div">
@@ -1263,32 +1287,62 @@
                                             style="flex: 1;" id="fourth_amount_id" name="fourth_amount_id" value="{{ !empty($getjsonDetails[0]['fourthInstBilledAmt']) ?  $getjsonDetails[0]['fourthInstBilledAmt']: '' }}" required>
                                     </div>
 
-                                    <div class="checkbox-group">
+                                    <div class="radio-group">
                                         <div class="form-group" style="display: flex; align-items: center; margin-bottom: 0px;">
-                                            <label class="checkbox-label" style="margin-right: 5px; width: 150px;">
-                                                <input type="checkbox" id="fourth_partially_paid_id" name="fourth_partially_paid_id" value="1" onclick="toggleReadonly(this, 'fourth_partially_paid_amount')"> Partially Paid
+                                            <label class="radio-label" style="margin-right: 5px; width: 150px;">
+                                                <input 
+                                                    type="radio" 
+                                                    id="fourth_partially_paid_id" 
+                                                    name="fourth_payment_status" 
+                                                    value="partially_paid" 
+                                                    onclick="toggleReadonly(this, 'fourth_partially_paid_amount')"> 
+                                                Partially Paid
                                             </label>
-                                            <input id="fourth_partially_paid_amount" name="fourth_partially_paid_amount" value="{{ !empty($getjsonDetails[0]['fourthInstPaidAmt']) ? $getjsonDetails[0]['fourthInstPaidAmt'] : '' }}" class="form-control ml-1" type="text" placeholder="Enter Partially Paid Amt" style="flex: 1;" readonly>
+                                            <input 
+                                                id="fourth_partially_paid_amount" 
+                                                name="fourth_partially_paid_amount" 
+                                                value="{{ !empty($getjsonDetails[0]['fourthInstPaidAmt']) ? $getjsonDetails[0]['fourthInstPaidAmt'] : '' }}" 
+                                                class="form-control ml-1" 
+                                                type="text" 
+                                                placeholder="Enter Partially Paid Amt" 
+                                                style="flex: 1;" 
+                                                readonly>
                                         </div>
                                         <div>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" id="fourth_paid_id" name="fourth_paid_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'PAID' ? 'checked' : '' }}> Paid
+                                            <label class="radio-label">
+                                                <input 
+                                                    type="radio" 
+                                                    id="fourth_paid_id" 
+                                                    name="fourth_payment_status" 
+                                                    value="paid" 
+                                                    {{ isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'PAID' ? 'checked' : '' }}>
+                                                Paid
                                             </label>
                                         </div>
                                         <div>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" id="fourth_due_id" name="fourth_due_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'DUE' ? 'checked' : '' }}> Due
+                                            <label class="radio-label">
+                                                <input 
+                                                    type="radio" 
+                                                    id="fourth_due_id" 
+                                                    name="fourth_payment_status" 
+                                                    value="due" 
+                                                    {{ isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'DUE' ? 'checked' : '' }}>
+                                                Due
                                             </label>
                                         </div>
                                         <div>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" id="fourth_delinquent_id" name="fourth_delinquent_id" value="1" onclick="onlyOne(this)"
-                                                {{ isset($getjsonDetails[0]) && isset($getjsonDetails[0]['fourth_delinquent_id']) && $getjsonDetails[0]['fourthDeliqDate_flag'] == 1 ? 'checked' : '' }}> Delinquent
+                                            <label class="radio-label">
+                                                <input 
+                                                    type="radio" 
+                                                    id="fourth_delinquent_id" 
+                                                    name="fourth_payment_status" 
+                                                    value="delinquent" 
+                                                    {{ isset($getjsonDetails[0]['fourthDeliqDate_flag']) && $getjsonDetails[0]['fourthDeliqDate_flag'] == 1 ? 'checked' : '' }}>
+                                                Delinquent
                                             </label>
                                         </div>
                                     </div>
+
 
                                     <div class="form-group" style="display: flex; align-items: center;">
                                         <label style="margin-right: 10px; width: 150px;">Taxes Out :</label>
@@ -1366,56 +1420,51 @@
                                 </div>
                                 <button id="merge-button" style="display: none; margin-top: 10px;">Merge Selected Files</button>
 
-                            <!-- Notes Section -->
-                            <div class="form-group mt-2">
-                                <label for="">Comments :</label>
-                                <textarea class="form-control" id="exampleFormControlTextarea1" name="exampleFormControlTextarea1" rows="3"
-                                    placeholder="Enter Notes">{{ $getjsonDetails[0]['exampleFormControlTextarea1'] ?? '' }}</textarea>
-                            </div>
-                            @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 0)
-                            <div class="row">
-                                <div class="col text-center" style="padding-left: 620px;">
-                                    <button type="submit" class="btn btn-info save_btn">SAVE</button>
-                                </div>
-                                <div class="col text-center" style="padding-right: 480px;">
-                                <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
-
-                                    {{-- <button type="button" id="generate_cert" class="btn btn-info">GENERATE CERT.</button> --}}
-                                </div>
-                            </div>
-
-                            <div class="row" style="margin-top:20px;">
-                                <div class="col-md-12 text-center modelopenhide">
-                                    <button type="submit" class="btn btn-primary submit_btn">SUBMIT</button>
-                            </div>
-                            </div>
-
-
-
-
+                                @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 0)
+                                    <div class="row">
+                                        <div class="col-6" style="text-align: right; padding-left: 20px;">
+                                            <button type="submit" class="btn btn-info save_btn mt-0 mb-0" style="width: 100px;">Save</button>
+                                        </div>
+                                        <div class="col-6" style="text-align: left;">
+                                            <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
+                                            <button type="button" id="generate_cert" class="btn btn-info">Generate Certificate</button>
+                                        </div>
+                                    </div>                            
                             @elseif(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 1)
-                            <div class="row">
-                            </div>
-
+                                <div class="row">
+                                </div>
                             @else
-                            <div class="row">
-                                <div class="col text-center" style="padding-left: 620px;">
-                                    <button type="submit" class="btn btn-info save_btn">SAVE</button>
+                                <div class="row">
+                                    <div class="col-6" style="text-align: right; padding-left: 20px;">
+                                        <button type="submit" class="btn btn-info save_btn mt-0 mb-0" style="width: 100px;">Save</button>
+                                    </div>
+                                    <div class="col-6" style="text-align: left;">
+                                        <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
+                                        <button type="button" id="generate_cert" class="btn btn-info">Generate Certificate</button>
+                                    </div>
                                 </div>
-                                <div class="col text-center" style="padding-right: 480px;">
-                                <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
-
-                                    {{-- <button type="button" id="generate_cert" class="btn btn-info">GENERATE CERT.</button> --}}
-                                </div>
-                            </div>
-
-
-                            <div class="row" style="margin-top:20px;">
-                                    <div class="col-md-12 text-center modelopenhide">
-                                    <button type="submit" class="btn btn-primary submit_btn">SUBMIT</button>
-                                </div>
-                            </div>
                             @endif
+
+                            <div id="progress-cont" class="col-12 justify-content-center">
+                                <div>
+                                    <div class="progress mt-5" style="height: 20px; width: 100%;">
+                                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 20%; height: 100%;">
+                                            0%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                <!-- Notes Section -->
+                                <div class="form-group mt-2">
+                                    <label for="">Comments :</label>
+                                    <textarea class="form-control" id="exampleFormControlTextarea1" name="exampleFormControlTextarea1" rows="3"
+                                    placeholder="Enter Notes">{{ $getjsonDetails[0]['exampleFormControlTextarea1'] ?? '' }}</textarea>
+                                </div>
+                                <div class="row" style="margin-top:20px;">
+                                    <div class="col-md-12 text-center modelopenhide">
+                                    <button type="submit" class="btn btn-primary submit_btn" style="width: 100px;">SUBMIT</button>
+                                </div>
+                        </div>
                             <!-- /s history -->
                             <div class="card-body mt-3 d-flex justify-content-between">
                                     <!-- Attachment History Table -->
@@ -2012,7 +2061,11 @@ $(document).ready(function() {
                     icon: 'success',
                     confirmButtonText: 'OK'
                 }).then((result) => {
-                    if (result.value) {
+                    // if (result.value) {
+                    //     window.location.href = "{{ url('/orders_status') }}/tax";
+                    // }
+                     // Check if submit_btn is 1
+                     if (submitBtnValue == 1 && result.value) {
                         window.location.href = "{{ url('/orders_status') }}/tax";
                     }
                 });
@@ -2126,69 +2179,139 @@ $(document).ready(function () {
     }
 
 
-    function displaycertFiles() {
-        let orderId = $("#order_id").val();
+//     function updateSaveButton() {
+//     let fileList = $('#fileList-cert');
 
-        $.ajax({
-            url: "{{ url('getCertFiles') }}",
-            type: 'GET',
-            data: { order_id: orderId },
-            success: function (data) {
-                let fileList = $('#fileList-cert');
-                let attachmentsHeader = $('#attachmentsHeader');
-                fileList.empty(); // Clear previous file list
+//     if (fileList.children().length > 0) {
+//         $('#generate_cert').text('Generate Certificate');
+//     } else {
+//         $('#generate_cert').text('Update Certificate');
+//     }
+// }
+function updateSaveButton() {
+    let fileList = $('#fileList-cert');
 
-                if (data.length > 0) {
-                    attachmentsHeader.show();
-                    data.forEach(file => {
-                        let fileType = file.name.split('.').pop().toLowerCase();
-                        let filePreview = '';
-
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
-                        } else if (fileType === 'pdf') {
-                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
-                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                            filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
-                        } else {
-                            filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
-                        }
-
-                        fileList.append(`<div class="m-2">${filePreview}</div>`);
-                    });
-
-                    $('.file-link').on('click', function (e) {
-                        e.preventDefault();
-                        let fileUrl = $(this).data('file-url');
-                        let fileType = fileUrl.split('.').pop().toLowerCase();
-
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                            Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
-                        } else if (fileType === 'pdf') {
-                            Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
-                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                            window.open(fileUrl, '_blank');
-                        } else {
-                            Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
-                        }
-                    });
-                } else {
-                    attachmentsHeader.hide(); // Hide header if no files are available
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
-            }
-        });
+    // Check if there are any children (i.e., files) in the file list
+    if (fileList.children().length > 0) {
+        $('#generate_cert').text('Update Certificate');
+    } else {
+        $('#generate_cert').text('Generate Certificate');
     }
+}
+ 
+    function displaycertFiles() {
+    let orderId = $("#order_id").val();
+
+    $.ajax({
+        url: "{{ url('getCertFiles') }}",
+        type: 'GET',
+        data: { order_id: orderId },
+        success: function (data) {
+            let fileList = $('#fileList-cert');
+            let attachmentsHeader = $('#attachmentsHeader');
+            fileList.empty(); // Clear previous file list
+
+            if (data.length > 0) {
+                attachmentsHeader.show();
+                data.forEach(file => {
+                    let fileType = file.name.split('.').pop().toLowerCase();
+                    let filePreview = '';
+
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                        filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                    } else if (fileType === 'pdf') {
+                        filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                        filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
+                    } else {
+                        filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
+                    }
+
+                    fileList.append(`<div class="m-2">${filePreview}</div>`);
+                });
+
+                $('.file-link').on('click', function (e) {
+                    e.preventDefault();
+                    let fileUrl = $(this).data('file-url');
+                    let fileType = fileUrl.split('.').pop().toLowerCase();
+
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                        Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                    } else if (fileType === 'pdf') {
+                        Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                        window.open(fileUrl, '_blank');
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
+                    }
+                });
+            } else {
+                attachmentsHeader.hide(); // Hide header if no files are available
+            }
+
+            // Update button text
+            updateSaveButton();
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
+        }
+    });
+}
 
     // Initial call to load files if `order_id` is already set
     displayFiles();
     displaycertFiles();
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    const generateCertButton = document.getElementById('generate_cert');
+    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-cont');
+
+    if (generateCertButton) {
+        generateCertButton.addEventListener('click', function () {
+            // Show the progress container
+            progressContainer.style.display = 'block';
+
+            // Initialize progress
+            let progress = 0;
+
+            // Simulate progress
+            const interval = setInterval(function () {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+
+                    // Hide the progress container after a brief delay
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+
+                        // Display SweetAlert2 message after a brief delay
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Generation Completed',
+                            text: 'The certificate has been successfully generated!',
+                            showConfirmButton: false,
+                            timer: 1500 // Auto-close after 1.5 seconds
+                        }).then(() => {
+                            // Reload the page after the alert closes
+                            window.location.reload();
+                        });
+                    }, 1000); // 1-second delay before showing the SweetAlert
+                }
+            }, 300); // Update progress every 300ms
+        });
+    }
+});
+
+
+
 
 $(document).ready(function() {
+    updateSaveButton();
     // Handle file selection and display clickable file names
 
 
@@ -2430,17 +2553,71 @@ $(document).ready(function() {
         document.getElementById(id).addEventListener('input', validateDecimalInput);
     });
 
-function onlyOne(checkbox) {
-    const checkboxes = checkbox.closest('.checkbox-group').querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach((cb) => {
-        if (cb !== checkbox) cb.checked = false;
-    });
+// function onlyOne(checkbox) {
+//     const checkboxes = checkbox.closest('.checkbox-group').querySelectorAll('input[type="checkbox"]');
+//     checkboxes.forEach((cb) => {
+//         if (cb !== checkbox) cb.checked = false;
+//     });
+// }
+
+// function toggleReadonly(checkbox, inputId) {
+//         const inputField = document.getElementById(inputId);
+//         inputField.readOnly = !checkbox.checked;
+//     }
+
+//s
+function toggleReadonly(radioButton, partiallyPaidInputId) {
+    const partiallyPaidInput = document.getElementById(partiallyPaidInputId);
+    
+    // Check if Paid, Due, or Delinquent is selected
+    const isPaidDueDelinquent = 
+        ['paid', 'due', 'delinquent'].includes(radioButton.value);
+    
+    // If Partially Paid is checked, make input editable
+    if (radioButton.value === 'partially_paid') {
+        partiallyPaidInput.removeAttribute('readonly');
+        partiallyPaidInput.focus(); // Optional: automatically focus the input
+    } 
+    // If Paid, Due, or Delinquent is selected, make Partially Paid input readonly and clear its value
+    else if (isPaidDueDelinquent) {
+        partiallyPaidInput.setAttribute('readonly', 'readonly');
+        partiallyPaidInput.value = ''; // Clear the input value
+    }
 }
 
-function toggleReadonly(checkbox, inputId) {
-        const inputField = document.getElementById(inputId);
-        inputField.readOnly = !checkbox.checked;
-    }
+// Add event listeners to all radio button groups
+document.addEventListener('DOMContentLoaded', function() {
+    const installments = ['first', 'second', 'third', 'fourth'];
+    
+    installments.forEach(installment => {
+        const partiallyPaidRadio = document.getElementById(`${installment}_partially_paid_id`);
+        const partiallyPaidInput = document.getElementById(`${installment}_partially_paid_amount`);
+        
+        // Initial state handling
+        if (partiallyPaidRadio && partiallyPaidInput) {
+            // Determine the correct name for radio buttons
+            const radioName = installment === 'first' ? 'payment_status' : `${installment}_payment_status`;
+            
+            // Check if Partially Paid is initially selected
+            if (partiallyPaidRadio.checked) {
+                partiallyPaidInput.removeAttribute('readonly');
+            } else {
+                partiallyPaidInput.setAttribute('readonly', 'readonly');
+                partiallyPaidInput.value = ''; // Clear the input
+            }
+            
+            // Add change event listeners to all radio buttons in the group
+            const radioGroup = document.getElementsByName(radioName);
+            radioGroup.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    toggleReadonly(this, `${installment}_partially_paid_amount`);
+                });
+            });
+        }
+    });
+});
+
+//e
 
 
 $(function() {
@@ -3142,39 +3319,38 @@ function updateESTTime() {
     });
 
 
-
-                $('.file-link').on('click', function (e) {
-    e.preventDefault();
-    let fileUrl = $(this).data('file-url');
-    let fileType = fileUrl.split('.').pop().toLowerCase();
-    
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-        Swal.fire({
-            title: 'View Image',
-            html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`,
-            showCloseButton: true,
-            confirmButtonText: 'Close',
-            width: '80%'
-        });
-    } else if (fileType === 'pdf') {
-        Swal.fire({
-            title: 'View File',
-            html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`,
-            showCloseButton: true,
-            confirmButtonText: 'Close',
-            width: '100%'
-        });
-    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-        window.open(fileUrl, '_blank');
-    } else {
-        Swal.fire({
-            icon: 'error',
-            title: 'Unsupported File Type',
-            text: 'This file type is not supported for viewing.',
-            confirmButtonText: 'OK'
-        });
-    }
-});
+            $('.file-link').on('click', function (e) {
+                e.preventDefault();
+                let fileUrl = $(this).data('file-url');
+                let fileType = fileUrl.split('.').pop().toLowerCase();
+                
+                if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                    Swal.fire({
+                        title: 'View Image',
+                        html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`,
+                        showCloseButton: true,
+                        confirmButtonText: 'Close',
+                        width: '80%'
+                    });
+                } else if (fileType === 'pdf') {
+                    Swal.fire({
+                        title: 'View File',
+                        html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`,
+                        showCloseButton: true,
+                        confirmButtonText: 'Close',
+                        width: '100%'
+                    });
+                } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                    window.open(fileUrl, '_blank');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Unsupported File Type',
+                        text: 'This file type is not supported for viewing.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
 
             } else {
                 attachmentsHeader.hide(); // Hide header if no files are available
