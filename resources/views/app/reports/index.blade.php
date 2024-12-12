@@ -135,6 +135,124 @@
     text-align: center; 
 }
 
+
+/* Apply a fixed table layout for consistent column width */
+#daily_completion_table {
+    table-layout: fixed;  /* Ensure that the table respects fixed column widths */
+    width: 100%;
+}
+
+/* Remove padding and margin between the first two columns to avoid unwanted spacing */
+#daily_completion_table th,
+#daily_completion_table td {
+    padding: 8px;  /* Standard padding */
+    margin: 0;  /* Ensure no margin */
+    border: 1px solid #ddd;  /* Tight border between cells */
+}
+
+/* Ensure that the first two columns (Date and Client Code) have no space between them */
+#daily_completion_table th:nth-child(1),
+#daily_completion_table td:nth-child(1),
+#daily_completion_table th:nth-child(2),
+#daily_completion_table td:nth-child(2) {
+    padding-left: 8px;   /* Padding to align text */
+    padding-right: 8px;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Fix the first column (Date) with sticky positioning */
+#daily_completion_table th:nth-child(1),
+#daily_completion_table td:nth-child(1) {
+    position: sticky;
+    left: 0%;   /* Stick it to the left side */
+    background-color: #fff;  /* Match the background color */
+    z-index: 1;  /* Ensure it stays above other content */
+    width: 10%;  /* Fix the width of the first column */
+}
+
+/* Fix the second column (Client Code) with sticky positioning right next to the first column */
+#daily_completion_table th:nth-child(2),
+#daily_completion_table td:nth-child(2) {
+    position: sticky;
+    left: 7%;  /* Position this column right next to the first column */
+    background-color: #fff;  /* Match the background color */
+    z-index: 1;  /* Ensure it stays below the first column */
+    width: 10%;  /* Fix the width of the second column */
+}
+
+/* Ensure no extra space between the first two columns */
+#daily_completion_table th:nth-child(1),
+#daily_completion_table td:nth-child(1),
+#daily_completion_table th:nth-child(2),
+#daily_completion_table td:nth-child(2) {
+    border-right: 1px solid #ddd;  /* Tighten borders between the first and second columns */
+}
+
+/* Optional: Add a subtle shadow effect for visual separation */
+#daily_completion_table th:nth-child(1),
+#daily_completion_table td:nth-child(1),
+#daily_completion_table th:nth-child(2),
+#daily_completion_table td:nth-child(2) {
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Apply a fixed width for the first two columns to prevent shifting */
+#daily_completion_table th:nth-child(1),
+#daily_completion_table td:nth-child(1) {
+    width: 10%;  /* Fix the width of the first column */
+}
+
+#daily_completion_table th:nth-child(2),
+#daily_completion_table td:nth-child(2) {
+    width: 10%;  /* Fix the width of the second column */
+}
+
+/* Prevent column width changes for the rest of the columns */
+#daily_completion_table th:nth-child(n+3),
+#daily_completion_table td:nth-child(n+3) {
+    width: 8%;  /* Set fixed widths for other columns */
+}
+
+/* Optional: Tighten the overall border for better alignment */
+#daily_completion_table th,
+#daily_completion_table td {
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+}
+
+
+/* Make all table rows white, including the table header */
+#daily_completion_table th,
+#daily_completion_table tbody tr {
+    background-color: white !important;  /* Set header and row backgrounds to white */
+    color: #333;  /* Dark text for good contrast */
+}
+
+/* Remove hover effects for rows */
+#daily_completion_table tbody tr:hover {
+    background-color: white !important;  /* Ensure hover rows are also white */
+}
+
+/* Optional: Set header styling to match the white background */
+#daily_completion_table th {
+    background-color: white !important;  /* Ensure the headers are white */
+    color: #333;  /* Set text color to dark for readability */
+    border-bottom: 2px solid #ddd;  /* Light border under the header */
+}
+
+/* Optional: Remove any default row striping (even/odd) */
+#daily_completion_table tbody tr.odd,
+#daily_completion_table tbody tr.even {
+    background-color: white !important;  /* Remove zebra striping */
+}
+
+/* Remove any background color from rows with hover */
+#daily_completion_table tbody tr:hover {
+    background-color: white !important;  /* Ensure hover does not change the row color */
+}
+
+
 </style>
 <div class="container-fluid d-flex reports">
     <div class="col-md-2 text-center left-menu">
@@ -2251,7 +2369,11 @@ function daily_completion() {
                     }
                 ],
                 lengthMenu: [10, 25, 50, 75, 100],
-                order: [[0, 'asc']]
+                order: [[0, 'asc']],
+                initComplete: function() {
+                    // Apply CSS for row styling directly
+                    $('#daily_completion_table tbody tr').css('background-color', 'white');
+                }
             });
 
         }
