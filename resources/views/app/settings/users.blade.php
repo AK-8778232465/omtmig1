@@ -113,6 +113,7 @@
                                 <th>User Name</th>
                                 <th>Role</th>
                                 <th>Email</th>
+                                <th>Created Date</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -125,6 +126,7 @@
                                 <td>{{ $users->username }}</td>
                                 <td>{{ isset($users->roles) ? $users->roles : ""}}</td>
                                 <td>{{ $users->email}}</td>
+                                <td>{{ $users->created_date}}</td>
                                 <td class="text-center">
                                     <div class="custom-control custom-switch">
                                         <input type="checkbox"  class="custom-control-input" id="customSwitch{{ $users->id }}"  value="{{ $users->id }}" onclick="userStatus(this.value)" @if($users->is_active==1) checked @endif>

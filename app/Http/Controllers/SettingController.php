@@ -82,6 +82,7 @@ class SettingController extends Controller
                     'oms_users.emp_id', 
                     'oms_users.username', 
                     'oms_users.email', 
+                    DB::raw("DATE_FORMAT(oms_users.created_at, '%m/%d/%Y') as created_date"), // Format the created_at field
                     'reporting_user.username as reporting_username', 
                     'roles.name as roles', 
                     'oms_users.is_active'
@@ -114,7 +115,7 @@ class SettingController extends Controller
                         ->get();
                  }elseif($loggedInUserTypeId == 1){
                     $userTypes = UserType::where('id','>=', $loggedInUserTypeId)
-                        ->whereNotIn('id', [4])
+                        ->whereNotIn('id', [1,4])
                         ->get();
                  }else{
                     $userTypes = UserType::where('id', '>', $loggedInUserTypeId)
@@ -182,6 +183,9 @@ class SettingController extends Controller
             'password' => Hash::make($input['password']),
             'is_active' => $isactive,
             'reporting_to' => isset($input['reporting_to']) ? $input['reporting_to'] : null,
+            'created_at' => now(),
+            'updated_at' => now(),
+            'created_by' => Auth::id(),
         ];
 
         $userId = User::insertGetId($usersData);
@@ -236,6 +240,7 @@ class SettingController extends Controller
             'password' => $input['password'],
             'reporting_to' => isset($input['reporting_to']) ? $input['reporting_to'] : null,
             'is_active' => $isactive,
+            'updated_at' => now(),
         ];
 
         $checkPass = User::where('id', $input['user_id'])->first();
