@@ -1295,18 +1295,21 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 // ->whereNull('assignee_qa_id')
                 ->whereIn('stl_item_description.client_id', $client_id)
                 ->whereDate('order_date', '>=', $fromDate)
-                ->whereDate('order_date', '<=', $toDate);
+                ->whereDate('order_date', '<=', $toDate)
+                ->where('status_id', '!=', 16);
             }elseif(!in_array('All', $project_id)){
                 $query = $currentYet_to_assign->whereNull('assignee_user_id')
                 // ->whereNull('assignee_qa_id')
                 ->whereIn('oms_order_creations.process_id', $project_id) 
                 ->whereDate('order_date', '>=', $fromDate)
-                ->whereDate('order_date', '<=', $toDate);
+                ->whereDate('order_date', '<=', $toDate)
+                ->where('status_id', '!=', 16);
             }else{
                 $query = $currentYet_to_assign->whereNull('assignee_user_id')
                 // ->whereNull('assignee_qa_id')
                 ->whereDate('order_date', '>=', $fromDate)
-                ->whereDate('order_date', '<=', $toDate);
+                ->whereDate('order_date', '<=', $toDate)
+                ->where('status_id', '!=', 16);
             }
            
         }
@@ -1541,7 +1544,6 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     if (in_array($order->status_id, [16, 17])) {
                         unset($statusMapping[4]);
                  }
-            }
                  elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                     $statusMapping = [
                         1 => 'WIP',
