@@ -1541,6 +1541,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     if (in_array($order->status_id, [16, 17])) {
                         unset($statusMapping[4]);
                  }
+            }
                  elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                     $statusMapping = [
                         1 => 'WIP',
