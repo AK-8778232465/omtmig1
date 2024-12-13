@@ -1592,10 +1592,12 @@
                                     <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                         <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
                                         <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                            @if($orderData->status_id != 16)
                                             <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                            @endif
                                             <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>-
                                             <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
-                                            <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                                             <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                             <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                                             <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
@@ -1672,10 +1674,12 @@
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                 <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
                                                 <select style="width:300px"  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                    @if($orderData->status_id != 16)
                                                     <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                        <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                    @endif
                                                     <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
                                                     <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
-                                                    <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>   
                                                     <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                     <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                                                     <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
@@ -1751,12 +1755,15 @@
                                                 <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
                                                     <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
                                                         @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer') && !Auth::user()->hasRole('Typist/Typist_Qcer'))
+                                                        @if($orderData->status_id != 16)
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                        @endif
                                                             <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
                                                         <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         @endif
-
+                                                        @if($orderData->status_id != 16)
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                        @endif
                                                         @if(in_array($orderData->stl_process_id, [12, 7]))
                                                         <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
 
@@ -1835,8 +1842,9 @@
                                                         @endif                                               -->
                                                         <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         @endif
-
+                                                        @if($orderData->status_id != 16)
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                        @endif
                                                         @if(in_array($orderData->stl_process_id, [12, 7]))
                                                         <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
 

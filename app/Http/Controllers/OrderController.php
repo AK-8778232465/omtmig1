@@ -1522,6 +1522,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
                             ];
+                            if (in_array($order->status_id, [16, 17])) {
+                                unset($statusMapping[4]);
+                            }
                 }elseif (Auth::user()->hasRole('Typist/Typist_Qcer')) {
                     $statusMapping = [
                         
@@ -1535,6 +1538,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         20 => 'Partially Cancelled',
                         3 => 'Cancelled',
                     ];
+                    if (in_array($order->status_id, [16, 17])) {
+                        unset($statusMapping[4]);
                  }
                  elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                     $statusMapping = [
@@ -1556,6 +1561,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         if (!in_array($order->process_type_id, [12, 7])) {
                             unset($statusMapping[16]);
                             unset($statusMapping[17]);
+                        }
+                        if (in_array($order->status_id, [16, 17])) {
+                            unset($statusMapping[1]);
+                            unset($statusMapping[4]);
                         }
                     
                 } else {
@@ -1579,6 +1588,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 unset($statusMapping[16]);
                                 unset($statusMapping[17]);
                             }
+
+                            if (in_array($order->status_id, [16, 17])) {
+                                unset($statusMapping[1]);
+                                unset($statusMapping[4]);
+                            }
+
                 }
             
                         }else{
@@ -1596,6 +1611,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
                                 ];
+                                if (in_array($order->status_id, [16, 17])) {
+                                    unset($statusMapping[1]);
+                                    unset($statusMapping[4]);
+                                }
                         }elseif($order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 ){
                             $statusMapping = [];
                             $statusMapping = [
@@ -1609,6 +1628,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
                             ];
+                            if (in_array($order->status_id, [16, 17])) {
+                                unset($statusMapping[1]);
+                                unset($statusMapping[4]);
+                            }
                         }else{
                             $statusMapping = [];
                                 $statusMapping = [
@@ -1622,6 +1645,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
                                 ];
+                                if (in_array($order->status_id, [16, 17])) {
+                                    unset($statusMapping[1]);
+                                    unset($statusMapping[4]);
+                                }
                         }
                             } else {
 
@@ -1639,6 +1666,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
                             ];
+                                if (in_array($order->status_id, [16, 17])) {
+                                    unset($statusMapping[1]);
+                                    unset($statusMapping[4]);
+                                }
                         }elseif((!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 )||(!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 3 )){
                             $statusMapping = [];
                             $statusMapping = [
@@ -1652,6 +1683,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 20 => 'Partially Cancelled',
                                 3 => 'Cancelled',
                             ];
+                            if (in_array($order->status_id, [16, 17])) {
+                                unset($statusMapping[1]);
+                                unset($statusMapping[4]);
+                            }
                         }else{
                             $statusMapping = [];
                             $statusMapping = [
@@ -1668,6 +1703,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             ];
                             if (in_array($order->client_id, [2,13])) {
                                 unset($statusMapping[13]);
+                            }
+                            if (in_array($order->status_id, [16, 17])) {
+                                unset($statusMapping[1]);
+                                unset($statusMapping[4]);
                             }
                         }
                         }

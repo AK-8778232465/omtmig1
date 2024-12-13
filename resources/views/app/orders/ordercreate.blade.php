@@ -268,11 +268,6 @@
                             <label class="font-weight-bold">Status<span style="color:red;">*</span></label>
                             <select id="order_status" name="order_status" required type="text" class="form-control" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup" data-parsley-error-message="Status should not be Empty ">
                                 <option selected="" disabled="" value="">Select Status</option>
-                                @foreach ($statusList as $status)
-                                @if($status->id == 1)
-                                    <option value="{{ $status->id }}">{{ $status->status }}</option>
-                                @endif
-                                @endforeach
                             </select>
                         </div>
                         <div class="form-group col-lg-3 mb-3 pb-0">
@@ -920,6 +915,12 @@ $('#process_type_id').on('change', function () {
                     console.error('Tier_id is undefined for one of the records.');
                 }
             });
+
+            if (response.status) {
+                $("#order_status").html('<option value="' + response.status.id + '" selected>' + response.status.status + '</option>');
+            } else {
+                console.error('Status is undefined.');
+            }
         }
     });
 });
