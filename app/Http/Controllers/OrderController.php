@@ -1484,7 +1484,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
         ->addColumn('status', function ($order) use ($request) {
-            if (in_array($order->client_id, [82, 84, 85, 86, 87, 89, 91, 88, 2, 13, 90, 92]))
+            if (in_array($order->client_id, [82, 84, 85, 86, 87, 89, 91, 88, 2, 13, 90, 92, 99, 100]))
                 {
                                 $statusMapping = [];
                     if (Auth::user()->hasRole('Typist') && in_array($order->process_type_id, [12, 7])) {
