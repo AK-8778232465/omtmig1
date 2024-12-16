@@ -1797,6 +1797,20 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         unset($statusMapping[4]);
                  }
             }
+        
+        elseif((!$order->typist_id  && $order->status_id == 16 )||($order->typist_id && $order->status_id == 16 )){
+                    $statusMapping = [];
+                    $statusMapping = [
+                        14 => 'Clarification',
+                        16 => 'Typing',
+                        17 => 'Typing QC',
+                        18 => 'Ground Abstractor',
+                        2 => 'Hold',
+                        5 => 'Completed',
+                        20 => 'Partially Cancelled',
+                        3 => 'Cancelled',
+                    ];
+                }
                  elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                     $statusMapping = [
                         1 => 'WIP',
@@ -1943,7 +1957,21 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 unset($statusMapping[1]);
                                 unset($statusMapping[4]);
                             }
-                        }else{
+                        }elseif((!$order->typist_id  && $order->status_id == 16 )||($order->typist_id && $order->status_id == 16 )){
+                            $statusMapping = [];
+                            $statusMapping = [
+                                13 => 'Coversheet Prep',
+                                14 => 'Clarification',
+                                16 => 'Typing',
+                                17 => 'Typing QC',
+                                18 => 'Ground Abstractor',
+                                2 => 'Hold',
+                                5 => 'Completed',
+                                20 => 'Partially Cancelled',
+                                3 => 'Cancelled',
+                            ];
+                        }
+                    else{
                             $statusMapping = [];
                             $statusMapping = [
                                 1 => 'WIP',
