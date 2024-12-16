@@ -102,9 +102,6 @@
 #priority{
     color:blue;
 }
-.black-text {
-    color: black;
-}
 
 </style>
 
@@ -1215,14 +1212,13 @@ function updateStatusCounts() {
             let count = statusCounts[status] || 0;
             total += count;
             $('#status_' + status + '_count').text(' (' + count + ')');
-
           }
         }
         @endif
 
         @if(Auth::user()->hasRole('Typist/Typist_Qcer'))
-        for (let status = 1; status <= 21; status++) {
-            if (status == 18 || status == 14 || status == 16 || status == 17 || status == 2 || status == 5 || status == 3 || status == 4 || status == 20) {
+        for (let status = 1; status <= 20; status++) {
+            if (status == 18 || status == 14 || status == 16 || status == 17 || status == 2 || status == 5 || status == 3 || status == 4) { // Include statuses 1, 4, and 6
                 let count = statusCounts[status] || 0;
                 total += count;
                 $('#status_' + status + '_count').text(' (' + count + ')');
@@ -1231,43 +1227,14 @@ function updateStatusCounts() {
         @endif
 
 
-        // @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
-        // $('#status_13_count').text("(" + statusCounts[13] + "+" + assign + ")");
-        // @endif
-        // let count6 = statusCounts[6] || 0;
-        // let count7 = statusCounts[7] || 0;
-        // $('#status_6_count').text(' (' + count6 + ')');
-        // $('#status_7_count').text(' (' + count7 + ')');
-        // $('#status_All_count').text(' (' + total + "+<span class='black-text'>" + (yetToAssignTotal) + "</span>)");
-        // $('#status_4_count').html("(" + (statusCounts[4] ?? 0) + "+<span class='black-text'>" + (response.yetToAssignCounts.yetToAssignQa ?? 0) + "</span>)");
-        // $('#status_16_count').html("(" + (statusCounts[16] ?? 0) + "+<span class='black-text'>" + (response.yetToAssignCounts.yetToAssignTypist ?? 0) + "</span>)");
-        // $('#status_17_count').html("(" + (statusCounts[17] ?? 0) + "+<span class='black-text'>" + (response.yetToAssignCounts.yetToAssignTypistQa ?? 0) + "</span>)");
-
         @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
-    $('#status_13_count').text("(" + statusCounts[13] + "+" + assign + ")");
-@endif
-
-let count6 = statusCounts[6] || 0;
-let count7 = statusCounts[7] || 0;
-$('#status_6_count').text(' (' + count6 + ')');
-$('#status_7_count').text(' (' + count7 + ')');
-
-// Calculate yetToAssignTotal
-let yetToAssignQa = response.yetToAssignCounts.yetToAssignQa ?? 0;
-let yetToAssignTypist = response.yetToAssignCounts.yetToAssignTypist ?? 0;
-let yetToAssignTypistQa = response.yetToAssignCounts.yetToAssignTypistQa ?? 0;
-
-let yetToAssignTotal = yetToAssignQa + yetToAssignTypist + yetToAssignTypistQa;
-
-// Update the UI
-$('#status_All_count').html(' (' + total + "+<span class='black-text'>" + yetToAssignTotal + "</span>)");
-$('#status_4_count').html("(" + (statusCounts[4] ?? 0) + "+<span class='black-text'>" + yetToAssignQa + "</span>)");
-$('#status_16_count').html("(" + (statusCounts[16] ?? 0) + "+<span class='black-text'>" + yetToAssignTypist + "</span>)");
-$('#status_17_count').html("(" + (statusCounts[17] ?? 0) + "+<span class='black-text'>" + yetToAssignTypistQa + "</span>)");
-
-
-
-
+        $('#status_13_count').text("(" + statusCounts[13] + "+" + assign + ")");
+        @endif
+        let count6 = statusCounts[6] || 0;
+        let count7 = statusCounts[7] || 0;
+        $('#status_6_count').text(' (' + count6 + ')');
+        $('#status_7_count').text(' (' + count7 + ')');
+        $('#status_All_count').text(' (' + total + ')');
 
         // Initialize sums for third and fourth counts
         let allThirdCount = 0;
