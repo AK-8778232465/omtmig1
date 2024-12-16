@@ -49,9 +49,9 @@ class User extends Authenticatable
         $this->notify(new ResetPasswordNotification($token));
     }
 
-    public function usertypes()
+        public function stl_usertype()
     {
-        return $this->belongsTo(UserType::class, 'user_type_id', 'id');
+        return $this->belongsTo(UserType::class, 'user_type_id');
     }
 
     public static function getAllLowerLevelUserIds($parentId)
