@@ -127,7 +127,6 @@ class OrderController extends Controller
         } else {
             $yetToAssignQaValue = 0;
         }
-            dd();
         if(!in_array($user->user_type_id, [7])){
 
             $yetToAssignTypistValue = OrderCreation::with('process', 'client')
