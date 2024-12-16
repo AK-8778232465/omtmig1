@@ -1325,7 +1325,7 @@ $(document).ready(function() {
             });
         } else {
             $('#assign_tab').addClass('d-none');
-            $('#typist_id').empty();
+            $('#typist_id').empty().append('<option selected disabled value="">Select Typist</option>');
     }
     });
 
@@ -1349,7 +1349,7 @@ $(document).ready(function() {
             });
         } else {
             $('#assign_tab').addClass('d-none');
-            $('#typist_qc_id').empty();
+            $('#typist_qc_id').empty().append('<option selected disabled value="">Select Typist_QC</option>');
     }
     });
 
@@ -1492,22 +1492,22 @@ $(document).on('change', 'input.check-one', function() {
                 if (status != null) {
                         userlist = <?php echo json_encode($typists); ?>;
                 }
-
-                $('#typist_id').empty();
-                $('#typist_id').append('<option selected disabled value="">Select Typist</option>');
                 $.each(userlist, function(index, user) {
                     $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
                 });
         }else{
             $('#assign_tab').addClass('d-none');
-            $('#typist_id').empty();
-            $('#typist_div').addClass('d-none');
+                $.each(userlist, function(index, user) {
+                    $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+                });
+
         }
 
         } else {
             $('#assign_tab').addClass('d-none');
-            $('#typist_id').empty();
-            $('#typist_div').addClass('d-none');
+                $.each(userlist, function(index, user) {
+                    $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+                });
         }
 });
 
@@ -1534,13 +1534,16 @@ $(document).on('change', 'input.check-one', function() {
             });
         }else{
             $('#assign_tab').addClass('d-none');
-            $('#typist_id').empty();
-            $('#typist_qc_div').addClass('d-none');
+            $.each(userlist, function(index, user) {
+                $('#typist_qc_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+            });
+
         }
         } else {
             $('#assign_tab').addClass('d-none');
-            $('#typist_qc_id').empty();
-            $('#typist_qc_div').addClass('d-none');
+            $.each(userlist, function(index, user) {
+                $('#typist_qc_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
+            });
 
         }
 });
@@ -1958,6 +1961,8 @@ $(document).on('focus', '.status-dropdown', function() {
         }
     });
 });
+
+
 
 
     $(document).on("click", "#assignBtn", function (event) {

@@ -1854,11 +1854,25 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
     public function assignment_update(Request $request)
     {
         $input = $request->all();
+        $orderId = $request->input('orders');
+        // dd($orderId);
         $validatedData = $request->validate([
             'type_id' => 'required',
           
             'orders' => 'required',
         ]);
+
+
+        $orders = DB::table('oms_order_creations')->where('id', $orderId)->select('client_id', 'process_type_id')->get();
+
+    if ($orders) {
+        foreach ($orders as $order) {
+            $process_typeId = $order->process_type_id;
+        }
+    } else {
+        // Handle the case where no orders were found (optional)
+        return response()->json(['message' => 'Orders not found'], 404);
+    }
 
         if (count($request->input('orders')) > 0) {
             $orderIds = $input['orders'];
@@ -1881,10 +1895,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         ->update(['associate_id' => $input['cover_prep_id']]);
                 }elseif ($input['typist_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
-                        ->update(['typist_id' => $input['typist_id']]);
+                        ->update(['typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null]);
                 }elseif ($input['typist_qc_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
-                        ->update(['typist_qc_id' => $input['typist_qc_id']]);
+                        ->update(['typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null]);
                 }
 
             }
@@ -1895,8 +1909,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         'assignee_user_id' => $input['user_id'],
                         'assignee_qa_id' => $input['qcer_id'],
                         'associate_id' => $input['cover_prep_id'],
-                        'typist_id' => $input['typist_id'],
-                        'typist_qc_id' => $input['typist_qc_id']
+                    'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                    'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
                     ]);
             }
 
@@ -1907,8 +1921,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => $input['typist_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
 
                         ]);
             }
@@ -1919,8 +1933,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => $input['typist_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
 
                         ]);
                 }
@@ -1932,8 +1946,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => $input['typist_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
 
                         ]);
                 }
@@ -1945,8 +1959,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => $input['typist_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
 
                         ]);
                 }
@@ -1957,8 +1971,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => $input['typist_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
 
                         ]);
                 }
@@ -1969,8 +1983,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => $input['typist_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
 
                         ]);
                 }
@@ -1980,8 +1994,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => $input['typist_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_id' => ($clientId != 16) ? $input['typist_id'] : null,
+                            'typist_qc_id' => ($clientId != 16) ? $input['typist_qc_id'] : null,
 
                         ]);
                 }
@@ -1992,8 +2006,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => $input['typist_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
 
                         ]);
                 }
@@ -2004,8 +2018,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => $input['typist_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
 
                         ]);
                 }
@@ -2014,7 +2028,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([
                             'assignee_user_id' => $input['user_id'],
-                            'typist_id' => $input['typist_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
                         ]);
                 }
 
@@ -2023,7 +2037,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([
                             'assignee_user_id' => $input['user_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
                         ]);
                 }
 
@@ -2033,7 +2047,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => $input['typist_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
                         ]);
                 }
 
@@ -2041,7 +2055,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
                         ]);
                 }
 
@@ -2051,7 +2065,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([
                             'assignee_qa_id' => $input['qcer_id'],
-                            'typist_id' => $input['typist_id'],
+                                'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
                         ]);
                 }
 
@@ -2060,7 +2074,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([
                             'assignee_qa_id' => $input['qcer_id'],
-                            'typist_qc_id' => $input['typist_qc_id'],
+                                'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
                         ]);
                 }
 
@@ -2068,8 +2082,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 if ($input['typist_qc_id'] != null && $input['typist_id'] != null) {
                     OrderCreation::whereIn('id', $orderIds)
                         ->update([
-                            'typist_qc_id' => $input['typist_qc_id'],
-                            'typist_id' => $input['typist_id'],
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
                         ]);
                 }
 
