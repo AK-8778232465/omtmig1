@@ -269,13 +269,13 @@
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_4_fourth_count">0</span>
                         </div></button>
-                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing<span id="status_16_count"></span><div style="">
+                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Qcer')) d-none @endif">Typing<span id="status_16_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_16_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_16_fourth_count">0</span>
                         </div></button>
-                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing QC<span id="status_17_count"></span> <div style="">
+                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Qcer')) d-none @endif">Typing QC<span id="status_17_count"></span> <div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_17_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
@@ -906,7 +906,7 @@ $(document).ready(function() {
                 { "data": "county_name", "name": "county_name" },
                 { "data": "status", "name": "status" },
                 { "data": "assignee_user", "name": "assignee_user", "visible": @if(Auth::user()->hasRole('Process')) false @else true @endif },
-                { "data": "assignee_qa", "name": "assignee_qa", "visible": @if(Auth::user()->hasRole('Qcer')) false @else true @endif },
+                { "data": "assignee_qa", "name": "assignee_qa" },
                 { "data": "typist_user", "name": "typist_user", "visible": @if(Auth::user()->hasRole('Typist')) false @else true @endif },
                 { "data": "typist_qa", "name": "typist_qa", "visible": @if(Auth::user()->hasRole('Typist/Qcer')) false @else true @endif },
                

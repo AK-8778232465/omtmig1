@@ -936,13 +936,36 @@ class OrderFormController extends Controller
 
     public function updateClickTime(Request $request)
     {
-    $request->validate([
-        'order_id' => 'required|integer',
-        'status' => 'required|integer',
-    ]);
+    // $request->validate([
+    //     'order_id' => 'required|integer',
+    //     'status' => 'required|integer',
+    // ]);
 
+    $user = Auth::user();
     $orderId = $request->input('order_id');
     $statusId = $request->input('status');
+
+    if (in_array($statusId, [4, 16, 17]) && in_array($user->user_type_id, [7, 8, 9, 10, 11])) {
+        $fieldMap = [
+            4 => 'assignee_qa_id',
+            16 => 'typist_id',
+            17 => 'typist_qc_id'
+        ];
+    
+        $field = $fieldMap[$statusId];
+    
+        $order = DB::table('oms_order_creations')
+            ->where('id', $orderId)
+            ->where('status_id', $statusId)
+            ->where($field, null)
+            ->first();
+    
+        if ($order) {
+            DB::table('oms_order_creations')->where('id', $orderId)->update([
+                $field => Auth::id(),
+            ]);
+        }
+    }    
 
     if ($statusId == 1) {
         $order = DB::table('oms_order_creations')

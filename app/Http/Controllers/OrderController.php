@@ -50,6 +50,7 @@ class OrderController extends Controller
                 if ($user->user_type_id == 6) {
                     // For user_type_id = 6
                     $statusCountsQuery->where('assignee_user_id', $user->id);
+
                 } elseif ($user->user_type_id == 7) {
                     // For user_type_id = 7
                     $statusCountsQuery->where(function ($query) use ($user) {
@@ -108,7 +109,6 @@ class OrderController extends Controller
                 $query->where('stl_client.is_approved', 1);
             })
             ->count();
-
         
         // Calculate the values for each separately
         if(!in_array($user->user_type_id, [10, 11, 22])){
@@ -127,7 +127,8 @@ class OrderController extends Controller
         } else {
             $yetToAssignQaValue = 0;
         }
-            
+            dd();
+        if(!in_array($user->user_type_id, [7])){
 
             $yetToAssignTypistValue = OrderCreation::with('process', 'client')
                 ->where('typist_id', null)
@@ -154,6 +155,10 @@ class OrderController extends Controller
                     $query->where('stl_client.is_approved', 1);
                 })
                 ->count();
+            } else {
+                $yetToAssignTypistValue = 0;
+                $yetToAssignTypistQaValue = 0;
+            }
 
                 $yetToAssignCounts = [
                     'yetToAssignQa' => isset($yetToAssignQaValue) ? $yetToAssignQaValue : 0,
@@ -204,38 +209,67 @@ class OrderController extends Controller
             })
             ->count();
 
-
-        if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
-            $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
-            if((!empty($statusCounts[4]) ? $statusCounts[4] : 0) != 0){
+            if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
+                // Subtract yetToAssignUser from $statusCounts[1], but only if $statusCounts[1] is not empty
+                $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
+            
+                // Subtract yetToAssignQaValue from $statusCounts[4], but only if $statusCounts[4] is not empty
                 $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQaValue;
+
+                // Subtract yetToAssignTypistValue from $statusCounts[16], but only if $statusCounts[16] is not empty
+                if (!empty($statusCounts[16]) && $statusCounts[16] != 0) {
+                    $statusCounts[16] -= $yetToAssignTypistValue;
+                }
+            
+                // Subtract yetToAssignTypistQaValue from $statusCounts[17], but only if $statusCounts[17] is not empty
+                if (!empty($statusCounts[17]) && $statusCounts[17] != 0) {
+                    $statusCounts[17] -= $yetToAssignTypistQaValue;
+                }
+            
+                // Assign yetToAssignUser to $statusCounts[6]
+                $statusCounts[6] = $yetToAssignUser;
+                
+                // (Optional) Assign yetToAssignQa to $statusCounts[7] if needed
+                // $statusCounts[7] = $yetToAssignQa;  // Uncomment if needed
             }
-            if((!empty($statusCounts[16]) ? $statusCounts[16] : 0) != 0){
-            $statusCounts[16] = (!empty($statusCounts[16]) ? $statusCounts[16] : 0) - $yetToAssignTypistValue;
-            }
-            if((!empty($statusCounts[17]) ? $statusCounts[17] : 0) != 0){
-                $statusCounts[17] = (!empty($statusCounts[17]) ? $statusCounts[17] : 0) - $yetToAssignTypistQaValue;
-            }
-            $statusCounts[6] = $yetToAssignUser;
-            // $statusCounts[7] = $yetToAssignQa;
-        } else {
-            $statusCounts[6] = in_array($user->user_type_id, [6, 8]) ? $yetToAssignUser : 0;
-            // if((!empty($statusCounts[4]) ? $statusCounts[4] : 0) != 0){
-            //     $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQaValue;
+             else {
+            // $statusCounts[6] = in_array($user->user_type_id, [6, 8]) ? $yetToAssignUser : 0;
+            // // if((!empty($statusCounts[4]) ? $statusCounts[4] : 0) != 0){
+            // //     $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQaValue;
+            // // }
+            // if((!empty($statusCounts[4]) ? $statusCounts[4] : 0) != 0) {
+            //     $statusCounts[4] = (!in_array($user->user_type_id, [10, 11, 22]) ?? (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQaValue);
+            // }            
+            // if((!empty($statusCounts[16]) ? $statusCounts[16] : 0) != 0){
+            // $statusCounts[16] = (!empty($statusCounts[16]) ? $statusCounts[16] : 0) - $yetToAssignTypistValue;
             // }
-            if((!empty($statusCounts[4]) ? $statusCounts[4] : 0) != 0) {
-                $statusCounts[4] = (!in_array($user->user_type_id, [10, 11, 22]) ?? (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQaValue);
-            }            
-            if((!empty($statusCounts[16]) ? $statusCounts[16] : 0) != 0){
-            $statusCounts[16] = (!empty($statusCounts[16]) ? $statusCounts[16] : 0) - $yetToAssignTypistValue;
+            // if((!empty($statusCounts[17]) ? $statusCounts[17] : 0) != 0){
+            //     $statusCounts[17] = (!empty($statusCounts[17]) ? $statusCounts[17] : 0) - $yetToAssignTypistQaValue;
+            // }
+            // // $statusCounts[7] = in_array($user->user_type_id, [7, 8]) ? $yetToAssignQa : 0;
+            // $statusCounts[13] = $user_coverSheet;
+            $statusCounts[6] = in_array($user->user_type_id, [6, 8]) ? $yetToAssignUser : 0;
+            if (!empty($statusCounts[4])) {
+                if (!in_array($user->user_type_id, [10, 11, 22])) {
+                    $statusCounts[4] -= $yetToAssignQaValue;
+                }
             }
-            if((!empty($statusCounts[17]) ? $statusCounts[17] : 0) != 0){
-                $statusCounts[17] = (!empty($statusCounts[17]) ? $statusCounts[17] : 0) - $yetToAssignTypistQaValue;
+            if (!in_array($user->user_type_id, [7])) {
+
+                if (!empty($statusCounts[16])) {
+                    $statusCounts[16] -= $yetToAssignTypistValue;
+                }
+                if (!empty($statusCounts[17])) {
+                    $statusCounts[17] -= $yetToAssignTypistQaValue;
+                }
+            } else {
+                $statusCounts[16] = 0;
+                $statusCounts[17] = 0;
             }
-            // $statusCounts[7] = in_array($user->user_type_id, [7, 8]) ? $yetToAssignQa : 0;
+            
             $statusCounts[13] = $user_coverSheet;
+            
         }
-        // dd(($statusCounts));
 
     $tatstatusCountsQuery = DB::table('oms_order_creations')
         ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
@@ -470,61 +504,173 @@ class OrderController extends Controller
                                 $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
                                     ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
                             });
-                        // $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
                     }
                 } elseif($request->status == 4) {
                     if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
-                        // $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                         $query->where('oms_order_creations.status_id', $request->status);
                     } else {
                         if($request->status != 13){
-                        if(in_array($user->user_type_id, [6])) {
-                            // $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
-                            $query->where('oms_order_creations.status_id', $request->status)
-                                        ->where(function ($query) use ($user) {
-                                            $query->where('oms_order_creations.assignee_user_id', $user->id)
-                                                    ->orWhereNull('oms_order_creations.assignee_user_id');
-                                        });
+                            if(in_array($user->user_type_id, [6])) {
+                                $query->where('oms_order_creations.status_id', $request->status)
+                                            ->where(function ($query) use ($user) {
+                                                $query->where('oms_order_creations.assignee_user_id', $user->id)
+                                                        ->orWhereNull('oms_order_creations.assignee_user_id');
+                                            });
 
-                        } elseif(in_array($user->user_type_id, [7])) {
-                            // $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_qa_id', $user->id);
-                            $query->where('oms_order_creations.status_id', $request->status)
-                                        ->where(function ($query) use ($user) {
-                                            $query->where('oms_order_creations.assignee_qa_id', $user->id)
+                            } elseif(in_array($user->user_type_id, [7])) {
+                                $query->where('oms_order_creations.status_id', $request->status)
+                                            ->where(function ($query) use ($user) {
+                                                $query->where('oms_order_creations.assignee_qa_id', $user->id)
+                                                        ->orWhereNull('oms_order_creations.assignee_qa_id');
+                                            });
+
+                            } elseif(in_array($user->user_type_id, [8])) {
+
+                                $query->where('oms_order_creations.status_id', $request->status)
+                                    ->where(function ($query) use ($user) {
+                                        $query->where(function ($subQuery) use ($user) {
+                                            $subQuery->where('oms_order_creations.assignee_user_id', $user->id)
+                                                    ->orWhereNull('oms_order_creations.assignee_user_id');
+                                        })
+                                        ->orWhere(function ($subQuery) use ($user) {
+                                            $subQuery->where('oms_order_creations.assignee_qa_id', $user->id)
                                                     ->orWhereNull('oms_order_creations.assignee_qa_id');
                                         });
+                                    });
 
-                        } elseif(in_array($user->user_type_id, [8])) {
-                            // $query->where('oms_order_creations.status_id', $request->status)
-                            // ->where(function ($optionalquery) use ($user) {
-                            //     $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
-                            //         ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
-                            // });
 
+                            } elseif(in_array($user->user_type_id, [22])) {
+                                $query->where('oms_order_creations.status_id', $request->status)
+                                ->where(function ($optionalquery) use ($user) {
+                                    $optionalquery->where('oms_order_creations.typist_id', $user->id)
+                                        ->orWhere('oms_order_creations.typist_qc_id', $user->id)
+                                        ->whereIn('status_id', [2, 3, 5, 14, 16, 17, 18, 20]);
+                                });
+
+                            }
+                        }
+                    }
+            } else if($request->status == 16){
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
+                    $query->where('oms_order_creations.status_id', $request->status);
+                } else {
+                        if($request->status != 13){
+                            // if(in_array($user->user_type_id, [6])) {
+                            //     $query->where('oms_order_creations.status_id', $request->status)
+                            //                 ->where(function ($query) use ($user) {
+                            //                     $query->where('oms_order_creations.assignee_user_id', $user->id)
+                            //                             ->orWhereNull('oms_order_creations.assignee_user_id');
+                            //                 });
+                            // } elseif(in_array($user->user_type_id, [7])) {
+                            //     $query->where('oms_order_creations.status_id', $request->status)
+                            //                 ->where(function ($query) use ($user) {
+                            //                     $query->where('oms_order_creations.assignee_qa_id', $user->id)
+                            //                             ->orWhereNull('oms_order_creations.assignee_qa_id');
+                            //                 });
+
+                            // } elseif(in_array($user->user_type_id, [8])) {
+
+                            //     $query->where('oms_order_creations.status_id', $request->status)
+                            //         ->where(function ($query) use ($user) {
+                            //             $query->where(function ($subQuery) use ($user) {
+                            //                 $subQuery->where('oms_order_creations.assignee_user_id', $user->id)
+                            //                         ->orWhereNull('oms_order_creations.assignee_user_id');
+                            //             })
+                            //             ->orWhere(function ($subQuery) use ($user) {
+                            //                 $subQuery->where('oms_order_creations.assignee_qa_id', $user->id)
+                            //                         ->orWhereNull('oms_order_creations.assignee_qa_id');
+                            //             });
+                            //         });
+
+                            if(in_array($user->user_type_id, [10])){
+                                $query->where('oms_order_creations.status_id', $request->status)
+                                    ->where(function ($query) use ($user) {
+                                        $query->where('oms_order_creations.typist_id', $user->id)
+                                                ->orWhereNull('oms_order_creations.typist_id');
+                                    });
+                            } else if(in_array($user->user_type_id, [11])){
+                                $query->where('oms_order_creations.status_id', $request->status)
+                                ->where(function ($query) use ($user) {
+                                    $query->where('oms_order_creations.typist_qc_id', $user->id)
+                                            ->orWhereNull('oms_order_creations.typist_qc_id');
+                                });
+                            }
+                             else if (in_array($user->user_type_id, [22])) {
+
+                                $query->where('oms_order_creations.status_id', $request->status)
+                                ->where(function ($query) use ($user) {
+                                    $query->where(function ($subQuery) use ($user) {
+                                        $subQuery->where('oms_order_creations.typist_id', $user->id)
+                                                 ->orWhereNull('oms_order_creations.typist_id');
+                                    })
+                                    ->orWhere(function ($subQuery) use ($user) {
+                                        $subQuery->where('oms_order_creations.typist_qc_id', $user->id)
+                                                 ->orWhereNull('oms_order_creations.typist_qc_id');
+                                    });
+                                });
+                            }
+                        }
+                }
+            } else if ($request->status == 17){
+                if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
+                    $query->where('oms_order_creations.status_id', $request->status);
+                } else {
+                    if($request->status != 13){
+                        // if(in_array($user->user_type_id, [6])) {
+                        //     $query->where('oms_order_creations.status_id', $request->status)
+                        //                 ->where(function ($query) use ($user) {
+                        //                     $query->where('oms_order_creations.assignee_user_id', $user->id)
+                        //                             ->orWhereNull('oms_order_creations.assignee_user_id');
+                        //                 });
+                        // } elseif(in_array($user->user_type_id, [7])) {
+                        //     $query->where('oms_order_creations.status_id', $request->status)
+                        //                 ->where(function ($query) use ($user) {
+                        //                     $query->where('oms_order_creations.assignee_qa_id', $user->id)
+                        //                             ->orWhereNull('oms_order_creations.assignee_qa_id');
+                        //                 });
+
+                        // } elseif(in_array($user->user_type_id, [8])) {
+
+                        //     $query->where('oms_order_creations.status_id', $request->status)
+                        //         ->where(function ($query) use ($user) {
+                        //             $query->where(function ($subQuery) use ($user) {
+                        //                 $subQuery->where('oms_order_creations.assignee_user_id', $user->id)
+                        //                         ->orWhereNull('oms_order_creations.assignee_user_id');
+                        //             })
+                        //             ->orWhere(function ($subQuery) use ($user) {
+                        //                 $subQuery->where('oms_order_creations.assignee_qa_id', $user->id)
+                        //                         ->orWhereNull('oms_order_creations.assignee_qa_id');
+                        //             });
+                        //         });
+
+                        if(in_array($user->user_type_id, [10])){
+                            $query->where('oms_order_creations.status_id', $request->status)
+                                ->where(function ($query) use ($user) {
+                                    $query->where('oms_order_creations.typist_id', $user->id)
+                                            ->orWhereNull('oms_order_creations.typist_id');
+                                });
+                        } else if(in_array($user->user_type_id, [11])){
+                            $query->where('oms_order_creations.status_id', $request->status)
+                            ->where(function ($query) use ($user) {
+                                $query->where('oms_order_creations.typist_qc_id', $user->id)
+                                        ->orWhereNull('oms_order_creations.typist_qc_id');
+                            });
+                        }
+                         else if (in_array($user->user_type_id, [22])) {
                             $query->where('oms_order_creations.status_id', $request->status)
                                 ->where(function ($query) use ($user) {
                                     $query->where(function ($subQuery) use ($user) {
-                                        $subQuery->where('oms_order_creations.assignee_user_id', $user->id)
-                                                 ->orWhereNull('oms_order_creations.assignee_user_id');
+                                        $subQuery->where('oms_order_creations.typist_id', $user->id)
+                                                 ->orWhereNull('oms_order_creations.typist_id');
                                     })
                                     ->orWhere(function ($subQuery) use ($user) {
-                                        $subQuery->where('oms_order_creations.assignee_qa_id', $user->id)
-                                                 ->orWhereNull('oms_order_creations.assignee_qa_id');
+                                        $subQuery->where('oms_order_creations.typist_qc_id', $user->id)
+                                                 ->orWhereNull('oms_order_creations.typist_qc_id');
                                     });
                                 });
-
-
-                        } elseif(in_array($user->user_type_id, [22])) {
-                            $query->where('oms_order_creations.status_id', $request->status)
-                            ->where(function ($optionalquery) use ($user) {
-                                $optionalquery->where('oms_order_creations.typist_id', $user->id)
-                                    ->orWhere('oms_order_creations.typist_qc_id', $user->id)
-                                    ->whereIn('status_id', [2, 3, 5, 14, 16, 17, 18, 20]);
-                            });
-
                         }
                     }
-                    }
+                }
             }
             else {
                     if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
@@ -541,41 +687,6 @@ class OrderController extends Controller
                             $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
                                 ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
                         });
-
-                    }elseif(in_array($user->user_type_id, [10]) && $request->status != 13) {
-                        // $query->where('oms_order_creations.status_id', $request->status)->Where('oms_order_creations.typist_id', $user->id);
-                        $query->where('oms_order_creations.status_id', $request->status)
-                            ->where(function ($query) use ($user) {
-                                $query->where('oms_order_creations.typist_id', $user->id)
-                                        ->orWhereNull('oms_order_creations.typist_id');
-                            });
-                    }elseif(in_array($user->user_type_id, [11]) && $request->status != 13) {
-                    // $query->where('oms_order_creations.status_id', $request->status)->Where('oms_order_creations.typist_qc_id', $user->id);
-                    $query->where('oms_order_creations.status_id', $request->status)
-                            ->where(function ($query) use ($user) {
-                                $query->where('oms_order_creations.typist_qc_id', $user->id)
-                                        ->orWhereNull('oms_order_creations.typist_qc_id');
-                            });
-                    }elseif(in_array($user->user_type_id, [22])) {
-                        // $query->where('oms_order_creations.status_id', $request->status)
-                        // ->where(function ($optionalquery) use ($user) {
-                        //     $optionalquery->where('oms_order_creations.typist_id', $user->id)
-                        //         ->orWhere('oms_order_creations.typist_qc_id', $user->id);
-                        // })
-                        //         ->whereIn('status_id', [2, 3, 4, 5, 14, 16, 17, 18, 20]);
-
-                                $query->where('oms_order_creations.status_id', $request->status)
-                                    ->where(function ($query) use ($user) {
-                                        $query->where(function ($subQuery) use ($user) {
-                                            $subQuery->where('oms_order_creations.typist_id', $user->id)
-                                                    ->orWhereNull('oms_order_creations.typist_id');
-                                        })
-                                        ->orWhere(function ($subQuery) use ($user) {
-                                            $subQuery->where('oms_order_creations.typist_qc_id', $user->id)
-                                                    ->orWhereNull('oms_order_creations.typist_qc_id');
-                                        });
-                                    })
-                                    ->whereIn('oms_order_creations.status_id', [2, 3, 5, 14, 16, 17, 18, 20]);
                     }
                     else{
                         if($request->status != 13){
@@ -602,10 +713,17 @@ class OrderController extends Controller
                     $query->where('oms_order_creations.assignee_qa_id', $user->id)
                     ->whereNotIn('status_id', [1, 13]);
                 } elseif(in_array($user->user_type_id, [8])) {
-                    $query->where(function ($optionalquery) use($user) {
+                    // $query->where(function ($optionalquery) use($user) {
+                    //     $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
+                    //         ->orWhere('oms_order_creations.assignee_qa_id', $user->id)->whereNotIn('status_id', [16, 17]);
+                    // });
+                    $query->where(function ($optionalquery) use ($user) {
                         $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
-                            ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
-                    });
+                            ->orWhere(function ($subquery) use ($user) {
+                                $subquery->where('oms_order_creations.assignee_qa_id', $user->id);
+                            });
+                    })->whereNotIn('status_id', [16, 17]);                    
+                    
                 } elseif(in_array($user->user_type_id, [10])){
                     $query->where('oms_order_creations.typist_id', $user->id)
                     ->whereNotIn('status_id', [1, 13, 4, 15, 17, 18, 20]);
@@ -620,9 +738,24 @@ class OrderController extends Controller
                             ->orWhereNull('oms_order_creations.typist_qc_id');
                     })
                     ->whereIn('status_id', [2, 3, 5, 14, 16, 17, 18, 20]);
+                    // $query->where('oms_order_creations.status_id', $request->status)
+                    //         ->where(function ($query) use ($user) {
+                    //             $query->where(function ($subQuery) use ($user) {
+                    //                 $subQuery->where('oms_order_creations.typist_id', $user->id)
+                    //                             ->orWhereNull('oms_order_creations.typist_id');
+                    //             })
+                    //             ->orWhere(function ($subQuery) use ($user) {
+                    //                 $subQuery->where('oms_order_creations.typist_qc_id', $user->id)
+                    //                             ->orWhereNull('oms_order_creations.typist_qc_id');
+                    //             });
+                    //         });
+                    // $query->where(function ($optionalquery) use($user) {
+                    //     $optionalquery->where('oms_order_creations.typist_id', $user->id)
+                    //         ->orWhere('oms_order_creations.typist_qc_id', $user->id);
+                    // });
                 }
                 else {
-                    $query->whereNotNull('oms_order_creations.assignee_user_id');
+                    $query->whereNotNull('oms_order_creations.assignee_user_id')->orWhereIn('oms_order_creations.process_type_id',[2, 4, 6, 8, 9, 16]);
                 }
             } elseif ($request->status == 6) {
                 if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9, 23, 24])) {
