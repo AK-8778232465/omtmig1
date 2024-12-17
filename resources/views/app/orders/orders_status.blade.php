@@ -913,10 +913,10 @@ $(document).ready(function() {
                 { "data": "short_code", "name": "short_code" },
                 { "data": "county_name", "name": "county_name" },
                 { "data": "status", "name": "status" },
-                { "data": "assignee_user", "name": "assignee_user", "visible": @if(Auth::user()->hasRole('Process')) false @else true @endif },
+                { "data": "assignee_user", "name": "assignee_user" },
                 { "data": "assignee_qa", "name": "assignee_qa" },
-                { "data": "typist_user", "name": "typist_user", "visible": @if(Auth::user()->hasRole('Typist')) false @else true @endif },
-                { "data": "typist_qa", "name": "typist_qa", "visible": @if(Auth::user()->hasRole('Typist/Qcer')) false @else true @endif },
+                { "data": "typist_user", "name": "typist_user", "visible": @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) false @else true @endif },
+                { "data": "typist_qa", "name": "typist_qa", "visible": @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) false @else true @endif },
                
 
                 {
