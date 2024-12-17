@@ -270,7 +270,7 @@
                                 <option selected="" disabled="" value="">Select Status</option>
                             </select>
                         </div>
-                        <div class="form-group col-lg-3 mb-3 pb-0">
+                        <div class="form-group col-lg-3 mb-3 pb-0" id = "assign_user_container">
                             <label class="font-weight-bold">Assign User</label>
                             <select id="assignee_user" name="assignee_user" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected disabled value="">Select Assignee</option>
@@ -279,7 +279,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group col-lg-3 mb-3 pb-0">
+                        <div class="form-group col-lg-3 mb-3 pb-0" id = "assign_qa_container">
                             <label class="font-weight-bold">Assign QA</label>
                             <select id="assignee_qa" name="assignee_qa" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select QA</option>
@@ -958,30 +958,39 @@ $(document).ready(function() {
 
 
 $(document).ready(function() {
-    $('#select_client_id').change(function() {
+    $('#process_type_id').change(function() {
         var selectedOption = $(this).find('option:selected');
         var clientId = selectedOption.data('client-id');
-console.log(clientId);
+        var process_type_id = $("#process_type_id").val();
+        console.log(process_type_id);
+
         // Check if the client_id is 16
-        if (clientId == 16 || clientId == 88 || clientId == 90 || clientId == 92 || clientId == 2 || clientId == 13) {
+        if (process_type_id == 1 || process_type_id == 3 || process_type_id == 5 || process_type_id == 15 || process_type_id == 18) {
             $('#typist-container').hide();
             $('#typist-qc-container').hide();
             $('#municipality-container').show();
             $('#tier-container').show();
+            $('#assign_user_container').show();
+            $('#assign_qa_container').show();
+
         }
 
-        if(clientId == 82){
+        if (process_type_id == 2 || process_type_id == 4 || process_type_id == 6 || process_type_id == 8 || process_type_id == 9 || process_type_id == 16) {
+            $('#assign_user_container').hide();
+            $('#assign_qa_container').hide();
             $('#municipality-container').hide();
-            $('#tier-container').hide();
             $('#typist-container').show();
             $('#typist-qc-container').show();
         }
 
-        if(clientId == 86 || clientId == 84 || clientId == 85 || clientId == 87 || clientId == 89 || clientId == 91){
-            $('#municipality-container').hide();
-            $('#tier-container').hide();
+        if (process_type_id == 7 || process_type_id == 12 || process_type_id == 17) {
             $('#typist-container').show();
             $('#typist-qc-container').show();
+            $('#municipality-container').show();
+            $('#tier-container').show();
+            $('#assign_user_container').show();
+            $('#assign_qa_container').show();
+
         }
 
 
@@ -993,7 +1002,7 @@ console.log(clientId);
 
     });
 
-    $('#select_client_id').trigger('change');
+    $('#process_type_id').trigger('change');
 });
 
 $(document).ready(function () {
