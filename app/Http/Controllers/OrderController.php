@@ -1756,7 +1756,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $order->whereRaw($sql, ["%{$keyword}%"]);
         })
         ->addColumn('status', function ($order) use ($request) {
-            if (in_array($order->client_id, [82, 84, 85, 86, 87, 89, 91, 88, 2, 13, 90, 92]))
+            if (in_array($order->client_id, [82, 84, 85, 86, 87, 89, 91, 88, 2, 13, 90, 92, 100, 99]))
                 {
                     $statusMapping = [];
                     if (Auth::user()->hasRole('Typist') && in_array($order->process_type_id, [12, 7])) {
@@ -1806,7 +1806,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                  }
             }
         
-        elseif((!$order->typist_id  && $order->status_id == 16 )||($order->typist_id && $order->status_id == 16 )){
+        elseif((!$order->typist_id  && $order->status_id == 16 )||($order->typist_id && $order->status_id == 16 ) || (!$order->typist_id  && $order->status_id == 17 )||($order->typist_id && $order->status_id == 17 )){
                     $statusMapping = [];
                     $statusMapping = [
                         14 => 'Clarification',
@@ -1965,7 +1965,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 unset($statusMapping[1]);
                                 unset($statusMapping[4]);
                             }
-                        }elseif((!$order->typist_id  && $order->status_id == 16 )||($order->typist_id && $order->status_id == 16 )){
+                        }elseif((!$order->typist_id  && $order->status_id == 16 )||($order->typist_id && $order->status_id == 16 )|| (!$order->typist_id  && $order->status_id == 17 )||($order->typist_id && $order->status_id == 17 )){
                             $statusMapping = [];
                             $statusMapping = [
                                 13 => 'Coversheet Prep',
