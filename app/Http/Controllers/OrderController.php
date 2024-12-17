@@ -2285,8 +2285,8 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             'assignee_user_id' => $input['user_id'],
                             'assignee_qa_id' => $input['qcer_id'],
                             'associate_id' => $input['cover_prep_id'],
-                            'typist_id' => ($clientId != 16) ? $input['typist_id'] : null,
-                            'typist_qc_id' => ($clientId != 16) ? $input['typist_qc_id'] : null,
+                            'typist_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_id'] : null,
+                            'typist_qc_id' => !in_array($process_typeId, [1, 3, 5, 15, 18]) ? $input['typist_qc_id'] : null,
 
                         ]);
                 }
