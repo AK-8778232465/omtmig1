@@ -488,7 +488,6 @@ class OrderFormController extends Controller
                         // Check the FTC response
                         if (isset($ftcResponse['Status']) && in_array(strtolower($ftcResponse['Status']),['automated','manual'])) {
                        
-                            // dd($ftcResponse);
                             DB::table('oms_order_creations')
                                 ->where('id', $orderId)
                                 ->update([
@@ -953,7 +952,7 @@ class OrderFormController extends Controller
             ];
 
             // Check for allowed statuses and user types
-            if (in_array($statusId, [4, 16, 17]) && in_array($user->user_type_id, [7, 8, 9, 10, 11])) {
+            if (in_array($statusId, [4, 16, 17]) && in_array($user->user_type_id, [7, 8, 9, 10, 11, 22])) {
                 $field = $fieldMap[$statusId];
 
                 $order = DB::table('oms_order_creations')
@@ -1375,7 +1374,6 @@ private function findOrder($orderId, $statusId, $userId = null)
             $fileName = $file->getClientOriginalName();
             $pathfileName = uniqid() . '-' . $file->getClientOriginalName();
             $filePath = $file->storeAs('texAttachments', $pathfileName, 'public');
-            // dd($request);
             TaxAttachmentFile::create([
                             'order_id' => $request->input('order_id'),
                             'file_path' => $filePath,

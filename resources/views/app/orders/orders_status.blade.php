@@ -1232,18 +1232,6 @@ function updateStatusCounts() {
         @endif
 
 
-        // @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
-        // $('#status_13_count').text("(" + statusCounts[13] + "+" + assign + ")");
-        // @endif
-        // let count6 = statusCounts[6] || 0;
-        // let count7 = statusCounts[7] || 0;
-        // $('#status_6_count').text(' (' + count6 + ')');
-        // $('#status_7_count').text(' (' + count7 + ')');
-        // $('#status_All_count').text(' (' + total + "+<span class='black-text'>" + (yetToAssignTotal) + "</span>)");
-        // $('#status_4_count').html("(" + (statusCounts[4] ?? 0) + "+<span class='black-text'>" + (response.yetToAssignCounts.yetToAssignQa ?? 0) + "</span>)");
-        // $('#status_16_count').html("(" + (statusCounts[16] ?? 0) + "+<span class='black-text'>" + (response.yetToAssignCounts.yetToAssignTypist ?? 0) + "</span>)");
-        // $('#status_17_count').html("(" + (statusCounts[17] ?? 0) + "+<span class='black-text'>" + (response.yetToAssignCounts.yetToAssignTypistQa ?? 0) + "</span>)");
-
         @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Process/Qcer'))
             $('#status_13_count').text("(" + statusCounts[13] + "+" + assign + ")");
         @endif
@@ -1261,10 +1249,22 @@ function updateStatusCounts() {
         let yetToAssignTotal = yetToAssignQa + yetToAssignTypist + yetToAssignTypistQa;
 
         // Update the UI
-        $('#status_All_count').html(' (' + total + "+<span class='black-text'>" + yetToAssignTotal + "</span>)");
-        $('#status_4_count').html("(" + (statusCounts[4] ?? 0) + "+<span class='black-text'>" + yetToAssignQa + "</span>)");
-        $('#status_16_count').html("(" + (statusCounts[16] ?? 0) + "+<span class='black-text'>" + yetToAssignTypist + "</span>)");
-        $('#status_17_count').html("(" + (statusCounts[17] ?? 0) + "+<span class='black-text'>" + yetToAssignTypistQa + "</span>)");
+       
+        @if(Auth::user()->hasRole('Process'))
+            $('#status_All_count').html(' (' + total + ')');
+            $('#status_4_count').html('(' + (statusCounts[4] ?? 0) + ')');
+            $('#status_16_count').html('(' + (statusCounts[16] ?? 0) + ')');
+            $('#status_17_count').html('(' + (statusCounts[17] ?? 0) + ')');
+        @else
+            $('#status_All_count').html(' (' + total + 
+                "+<span class='black-text'>" + yetToAssignTotal + "</span>)");
+            $('#status_4_count').html('(' + (statusCounts[4] ?? 0) + 
+                "+<span class='black-text'>" + yetToAssignQa + "</span>)");
+            $('#status_16_count').html('(' + (statusCounts[16] ?? 0) + 
+                "+<span class='black-text'>" + yetToAssignTypist + "</span>)");
+            $('#status_17_count').html('(' + (statusCounts[17] ?? 0) + 
+                "+<span class='black-text'>" + yetToAssignTypistQa + "</span>)");
+        @endif
 
 
 
