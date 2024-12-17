@@ -1596,11 +1596,7 @@
                                             <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                 <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                                             @endif
-                                            @if($orderData->status_id = 16 || $orderData->status_id = 17)
-                                                <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
-                                                <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                            @endif
-                                            <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
+                                            <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>-
                                             <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                             <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                             <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
@@ -1681,10 +1677,6 @@
                                                     @if($orderData->status_id != 16)
                                                     <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                                    @endif
-                                                    @if($orderData->status_id = 16 || $orderData->status_id = 17)
-                                                        <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
-                                                        <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
                                                     @endif
                                                     <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
                                                     <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
@@ -1777,10 +1769,6 @@
 
                                                         <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
                                                         @endif
-                                                        @if($orderData->status_id = 16 || $orderData->status_id = 17)
-                                                            <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
-                                                            <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                                        @endif
                                                         <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                         <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                                                         <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
@@ -1861,10 +1849,6 @@
                                                         <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
 
                                                         <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                                        @endif
-                                                        @if($orderData->status_id = 16 || $orderData->status_id = 17)
-                                                            <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
-                                                            <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
                                                         @endif
                                                         <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                         <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
