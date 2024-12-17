@@ -935,67 +935,81 @@ class OrderFormController extends Controller
 
 
     public function updateClickTime(Request $request)
-    {
-    // $request->validate([
-    //     'order_id' => 'required|integer',
-    //     'status' => 'required|integer',
-    // ]);
-
-    $user = Auth::user();
-    $orderId = $request->input('order_id');
-    $statusId = $request->input('status');
-
-    if (in_array($statusId, [4, 16, 17]) && in_array($user->user_type_id, [7, 8, 9, 10, 11])) {
-        $fieldMap = [
-            4 => 'assignee_qa_id',
-            16 => 'typist_id',
-            17 => 'typist_qc_id'
-        ];
-    
-        $field = $fieldMap[$statusId];
-    
-        $order = DB::table('oms_order_creations')
-            ->where('id', $orderId)
-            ->where('status_id', $statusId)
-            ->where($field, null)
-            ->first();
-    
-        if ($order) {
-            DB::table('oms_order_creations')->where('id', $orderId)->update([
-                $field => Auth::id(),
+        {
+            $request->validate([
+                'order_id' => 'required|integer',
+                'status' => 'required|integer',
             ]);
-        }
-    }    
 
+            $user = Auth::user();
+            $orderId = $request->input('order_id');
+            $statusId = $request->input('status');
+
+            // Map status ID to fields
+            $fieldMap = [
+                4 => 'assignee_qa_id',
+                16 => 'typist_id',
+                17 => 'typist_qc_id'
+            ];
+
+            // Check for allowed statuses and user types
+            if (in_array($statusId, [4, 16, 17]) && in_array($user->user_type_id, [7, 8, 9, 10, 11])) {
+                $field = $fieldMap[$statusId];
+
+                $order = DB::table('oms_order_creations')
+                    ->where('id', $orderId)
+                    ->where('status_id', $statusId)
+                    ->whereNull($field)
+                    ->first();
+
+                if ($order) {
+                    DB::table('oms_order_creations')->where('id', $orderId)->update([
+                        $field => $user->id,
+                    ]);
+                    return response()->json(['message' => 'Order updated successfully.']);
+                }
+            }
+
+    // If status ID is 1
     if ($statusId == 1) {
-        $order = DB::table('oms_order_creations')
-            ->where('id', $orderId)
-            ->where('status_id', 1)
-            ->where('assignee_user_id', Auth::id())
-            ->first();
+        $order = $this->findOrder($orderId, 1, $user->id);
 
         if ($order) {
-            $existingHistory = DB::table('order_status_history')->where('order_id', $orderId)->first();
-            if (!$existingHistory) {
+            $historyExists = DB::table('order_status_history')
+                ->where('order_id', $orderId)
+                ->doesntExist();
+
+            if ($historyExists) {
                 DB::table('order_status_history')->insert([
                     'order_id' => $orderId,
                     'status_id' => $statusId,
                     'comment' => null,
                     'checked_array' => null,
                     'created_at' => Carbon::now()->setTimezone('America/New_York'),
-                    'created_by' => Auth::id(),
+                    'created_by' => $user->id,
                 ]);
+
                 return response()->json(['message' => 'Time duration updated successfully.']);
             } else {
                 return response()->json(['message' => 'Order status history already exists.'], 409);
             }
         } else {
-            return response()->json(['message' => 'Failed to update time duration.'], 500);
+            return response()->json(['message' => 'Order not found.'], 404);
         }
-    } else {
-        return response()->json(['message' => 'Invalid status ID.'], 400);
     }
-    }
+
+    return response()->json(['message' => 'Invalid status ID or unauthorized action.'], 400);
+}
+
+private function findOrder($orderId, $statusId, $userId = null)
+{
+    return DB::table('oms_order_creations')
+        ->where('id', $orderId)
+        ->where('status_id', $statusId)
+        ->when($userId, fn($query) => $query->where('assignee_user_id', $userId))
+        ->first();
+}
+
 
     public function getaccurateClientId(Request $request){
         $getclientid = $request->client_id;

@@ -52,11 +52,13 @@ class OrderController extends Controller
                     $statusCountsQuery->where('assignee_user_id', $user->id);
 
                 } elseif ($user->user_type_id == 7) {
+                    $statusCountsQuery->where('assignee_qa_id', $user->id)->whereNotIn('status_id', [1]);
                     // For user_type_id = 7
-                    $statusCountsQuery->where(function ($query) use ($user) {
-                        $query->where('assignee_qa_id', $user->id)
-                            ->orWhereNotNull('assignee_qa_id'); // Allow records where assignee_qa_id is not null
-                    })->whereNotIn('status_id', [1]); // Exclude status_id = 1
+                    // $statusCountsQuery->where(function ($query) use ($user) {
+                    //     $query->where('assignee_qa_id', $user->id)
+                    //         ->orWhereNotNull('assignee_qa_id'); // Allow records where assignee_qa_id is not null
+                    // })->whereNotIn('status_id', [1]); // Exclude status_id = 1
+
                 } elseif ($user->user_type_id == 8) {
                     // For user_type_id = 8
                     $statusCountsQuery->where(function ($query) use ($user) {
@@ -249,7 +251,7 @@ class OrderController extends Controller
             // $statusCounts[13] = $user_coverSheet;
             $statusCounts[6] = in_array($user->user_type_id, [6, 8]) ? $yetToAssignUser : 0;
             if (!empty($statusCounts[4])) {
-                if (!in_array($user->user_type_id, [10, 11, 22])) {
+                if (!in_array($user->user_type_id, [7, 10, 11, 22])) {
                     $statusCounts[4] -= $yetToAssignQaValue;
                 }
             }
@@ -710,7 +712,14 @@ class OrderController extends Controller
                     $query->where('oms_order_creations.assignee_user_id', $user->id);
                 } elseif(in_array($user->user_type_id, [7])) {
                     $query->where('oms_order_creations.assignee_qa_id', $user->id)
-                    ->whereNotIn('status_id', [1, 13]);
+                    ->whereNotIn('status_id', [1, 13, 16, 17]);
+
+                //     $query->where(function ($q) use ($user) {
+                //         $q->where('oms_order_creations.assignee_qa_id', $user->id)
+                //           ->orWhereNull('oms_order_creations.assignee_qa_id');
+                //    })
+                //    ->whereNotIn('status_id', [1, 13, 16, 17]);
+            
                 } elseif(in_array($user->user_type_id, [8])) {
                     // $query->where(function ($optionalquery) use($user) {
                     //     $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
@@ -1749,7 +1758,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         ->addColumn('status', function ($order) use ($request) {
             if (in_array($order->client_id, [82, 84, 85, 86, 87, 89, 91, 88, 2, 13, 90, 92]))
                 {
-                                $statusMapping = [];
+                    $statusMapping = [];
                     if (Auth::user()->hasRole('Typist') && in_array($order->process_type_id, [12, 7])) {
                                 $statusMapping = [
                                     14 => 'Clarification',
