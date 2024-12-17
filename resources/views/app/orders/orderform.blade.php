@@ -1591,7 +1591,11 @@
                                             <div class="col-12 mb-2">
                                     <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                         <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
+                                        @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer'))
+                                            <select style=" "  class="form-control" name="order_status" id="order_status">
+                                        @else
                                         <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                        @endif
                                             @if($orderData->status_id != 16)
                                             <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                 <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
@@ -1673,7 +1677,11 @@
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                 <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                <select style="width:300px"  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer'))
+                                                <select style=" "  class="form-control" name="order_status" id="order_status">
+                                                @else
+                                                    <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                @endif
                                                     @if($orderData->status_id != 16)
                                                     <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
@@ -1753,7 +1761,11 @@
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                 <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer'))
+                                                <select style=" "  class="form-control" name="order_status" id="order_status">
+                                                @else
+                                                    <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                @endif
                                                         @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer') && !Auth::user()->hasRole('Typist/Typist_Qcer'))
                                                         @if($orderData->status_id != 16)
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
@@ -1834,7 +1846,11 @@
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                     <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                    @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer'))
+                                                    <select style=" "  class="form-control" name="order_status" id="order_status">
+                                                @else
+                                                    <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                @endif
                                                         @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                         <!-- @if(in_array($orderData->stl_process_id, [12, 7, 8, 9]) || !in_array($orderData->client_id, [84, 85, 86]))
