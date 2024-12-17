@@ -2131,6 +2131,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $qcers = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [7, 8])->orderBy('emp_id')->get();
         $typists = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [10, 22])->orderBy('emp_id')->get();
         $typists_qcs = User::select('id', 'username', 'emp_id', 'user_type_id')->where('is_active', 1)->whereIn('user_type_id', [11, 22])->orderBy('emp_id')->get();
+        $status_changes = Status::select('id', 'status')->where('id', '!=', 19)->get();
 
         $statusList = Status::select('id', 'status')->get();
         $countyList = County::select('id', 'county_name')->get();
@@ -2139,7 +2140,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
 
         $selectedStatus = $request->input('status', $defaultStatus->id);
 
-        return view('app.orders.orders_status', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList', 'selectedStatus', 'typists', 'typists_qcs'));
+        return view('app.orders.orders_status', compact('processList', 'stateList', 'statusList', 'processors', 'qcers', 'countyList', 'selectedStatus', 'typists', 'typists_qcs', 'status_changes'));
     }
 
     public function assignment_update(Request $request)
@@ -2523,4 +2524,114 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
 
         return response()->json(['success' => 'Filter values stored in session.']);
     }
+
+
+
+
+public function status_change(Request $request)
+{
+    $statusId = $request->input('status_id');
+    $orderIds = $request->input('orders');
+
+    // Check if both orderIds and statusId are provided
+    if (!$orderIds || !$statusId) {
+        return response()->json(['success' => false, 'message' => 'Invalid data provided.']);
+    }
+
+    // List of process_type_ids to exclude when status_id is 15
+    $excludedProcessTypes1 = [1, 3, 5, 15, 18];
+    $excludedProcessTypes2 = [2, 4, 6, 8, 9, 16];
+    $excludedProcessTypes3 = [7, 12, 17];
+
+    // Get the order details
+    $orderDetails = OrderCreation::whereIn('id', $orderIds)
+        ->select('id', 'order_id', 'process_type_id', 'client_id', 'status_id')
+        ->get();
+
+    // Initialize a flag for validation
+    $validationFailed = false;
+    $errorMessage = '';
+
+    // Check if all orders have the same client_id and process_type_id
+    $firstOrder = $orderDetails->first(); // Get the first order
+    foreach ($orderDetails as $order) {
+        if ($order->client_id !== $firstOrder->client_id) {
+            $validationFailed = true;
+            $errorMessage = 'Please select orders with the same client.';
+            break;
+        }
+        // if ($order->process_type_id !== $firstOrder->process_type_id) {
+        //     $validationFailed = true;
+        //     $errorMessage = 'Please select orders with the same Client, Lob, Process';
+        //     break;
+        // }
+    }
+
+    // Loop through the order details for other validation checks
+    if (!$validationFailed) {
+        foreach ($orderDetails as $order) {
+            // If client_id is 16, allow statusId 13 for excluded process types
+            if ($order->client_id == 16) {
+                // No restriction on status_id 13 for client_id 16
+                if (in_array($order->process_type_id, $excludedProcessTypes1) && in_array($statusId, [15, 16, 17])) {
+                    $validationFailed = true;
+                    $errorMessage = "Please check your client and process to update the status";
+                    break;
+                } else if (in_array($order->process_type_id, $excludedProcessTypes2) && in_array($statusId, [1, 4, 15])) {
+                    $validationFailed = true;
+                    $errorMessage = "Please check your client and process to update the status";
+                    break;
+                } else if (in_array($order->process_type_id, $excludedProcessTypes3) && in_array($statusId, [13, 7, 12, 17, 15])) {
+                    $validationFailed = true;
+                    $errorMessage = "Please check your client and process to update the status";
+                    break;
+                }
+            } else if($order->client_id == 82){
+                if (in_array($order->process_type_id, $excludedProcessTypes2) && in_array($statusId, [1, 4, 13])) {
+                    $validationFailed = true;
+                    $errorMessage = "Please check your client and process to update the status";
+                    break;
+                } else if (in_array($order->process_type_id, $excludedProcessTypes3) && in_array($statusId, [13, 7, 12, 17])) {
+                    $validationFailed = true;
+                    $errorMessage = "Please check your client and process to update the status";
+                    break;
+                }
+            }else {
+                if (in_array($order->process_type_id, $excludedProcessTypes1) && in_array($statusId, [13, 15, 16, 17])) {
+                    $validationFailed = true;
+                    $errorMessage = "Please check your client and process to update the status";
+                    break;
+                } else if (in_array($order->process_type_id, $excludedProcessTypes2) && in_array($statusId, [13, 1, 4, 15])) {
+                    $validationFailed = true;
+                    $errorMessage = "Please check your client and process to update the status";
+                    break;
+                } else if (in_array($order->process_type_id, $excludedProcessTypes3) && in_array($statusId, [13,15])) {
+                    $validationFailed = true;
+                    $errorMessage = "Please check your client and process to update the status";
+                    break;
+                }
+            }
+        }
+    }
+
+    // If validation fails, return error response
+    if ($validationFailed) {
+        return response()->json([
+            'success' => false,
+            'message' => $errorMessage
+        ]);
+    }
+
+    // If validation passes, proceed with the status update
+    $update_status = OrderCreation::whereIn('id', $orderIds)
+        ->update(['status_id' => $statusId]);
+
+    if ($update_status) {
+        return response()->json(['success' => true, 'message' => 'Status has been updated.']);
+    } else {
+        return response()->json(['success' => false, 'message' => 'Failed to update status.']);
+    }
+}
+
+
 }

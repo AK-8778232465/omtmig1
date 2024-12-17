@@ -453,7 +453,7 @@
 
                     <div class="form-group">
                         <div class="row d-none" id="assign_tab">
-                            <div class="col-12 row">
+                            <div class="col-12 row mt-5">
                                 <div class="col-2">
                                     <select style="width: 100%;" class="form-control form-control-sm" id="user_id" name="user_id">
                                         <option selected disabled value="">Select User</option>
@@ -489,6 +489,14 @@
                                         <option selected disabled value="">Select Typists_QC</option>
                                         @foreach ($typists_qcs as $typists_qc)
                                             <option value="{{ $typists_qc->id }}">{{ $typists_qc->username }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                 <div class="col-2" id="status_change_div">
+                                    <select style="width: 100%;" class="form-control form-control" id="status_change" name="status_change">
+                                        <option selected disabled value="">Select Status</option>
+                                        @foreach ($status_changes as $status_change)
+                                            <option value="{{ $status_change->id }}">{{ $status_change->status }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -1997,6 +2005,79 @@ $(document).on('focus', '.status-dropdown', function() {
 });
 
 
+$(document).ready(function() {
+    // Handle change event on the select element
+    $('#status_change').on('change', function() {
+        // Get the selected value from the select element
+        var selectedStatus = $(this).val();
+        let checkedOrdersArray = $('input[name="orders[]"]:checked');
+
+        // Check if a valid status is selected
+        if (selectedStatus) {
+            // Trigger SweetAlert for confirmation
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to change the status.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.value) {
+                    // Send the selected status to your server via AJAX
+                    $.ajax({
+                        url: "{{ route('status_change') }}",
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}', // CSRF token for Laravel
+                            status_id: selectedStatus,
+                            orders: checkedOrdersArray.map(function() {
+                                return this.value;
+                            }).get(),
+                        },
+                        success: function(response) {
+                            // Handle the response (optional)
+                            if (response.success) {
+                                Swal.fire(
+                                    'Success!',
+                                    'Status has been updated.',
+                                    'success'
+                                ).then(() => {
+                                    // Reload the page after a successful update
+                                    location.reload();
+                                });
+                            }else {
+                                Swal.fire(
+                                    'Error!',
+                                    response.message || 'Something went wrong.',
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            // Handle error (optional)
+                            Swal.fire(
+                                'Error!',
+                                'Something went wrong, please try again.',
+                                'error'
+                            );
+                        }
+                    });
+                } else {
+                    // If the user cancels, reset the select box to the default value
+                    $('#status_change').val('');
+                }
+            });
+        } else {
+            // If no status is selected, show the warning
+            Swal.fire(
+                'Warning!',
+                'Please select a status before proceeding.',
+                'warning'
+            );
+        }
+    });
+});
 
 
     $(document).on("click", "#assignBtn", function (event) {
