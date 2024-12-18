@@ -38,13 +38,15 @@ class OrderController extends Controller
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $statusCountsQuery = OrderCreation::query();
         $statusCountsQuery = $statusCountsQuery->with('process', 'client')
-            ->whereIn('process_id', $processIds)
-            ->whereHas('process', function ($query) {
-                $query->where('stl_item_description.is_approved', 1);
-            })
-            ->whereHas('client', function ($query) {
-                $query->where('stl_client.is_approved', 1);
-            });
+                ->whereIn('process_id', $processIds)
+                ->where('is_active', 1) 
+                ->whereHas('process', function ($query) {
+                    $query->where('stl_item_description.is_approved', 1);
+                })
+                ->whereHas('client', function ($query) {
+                    $query->where('stl_client.is_approved', 1);
+                });
+
 
            if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                 if ($user->user_type_id == 6) {
@@ -65,17 +67,7 @@ class OrderController extends Controller
                         $query->where('assignee_user_id', $user->id)
                             ->orWhere('assignee_qa_id', $user->id)
                             ->orWhereNull('assignee_qa_id'); // Allow records where assignee_qa_id is not null
-                    })->whereNotIn('status_id', [16, 17]);
-                    // $statusCountsQuery->where(function ($query) use ($user) {
-                    //     $query->where(function ($subQuery) use ($user) {
-                    //         $subQuery->where('oms_order_creations.assignee_user_id', $user->id)
-                    //                  ->orWhereNull('oms_order_creations.assignee_user_id'); // Match user ID or null for typist_id
-                    //     })
-                    //     ->orWhere(function ($subQuery) use ($user) {
-                    //         $subQuery->where('oms_order_creations.assignee_qa_id', $user->id)
-                    //                  ->orWhereNull('oms_order_creations.assignee_qa_id'); // Match user ID or null for typist_qc_id
-                    //     });
-                    // })->whereNotIn('status_id', [16, 17]);
+                    })->whereNotIn('status_id', [16, 17]);                   
 
                 } elseif ($user->user_type_id == 10) {
                     // For user_type_id = 10
@@ -122,7 +114,6 @@ class OrderController extends Controller
                 $query->where('stl_client.is_approved', 1);
             })
             ->count();
-        
         // Calculate the values for each separately
         if(!in_array($user->user_type_id, [10, 11, 22])){
             $yetToAssignQaValue = OrderCreation::with('process', 'client')
@@ -556,33 +547,6 @@ class OrderController extends Controller
                     $query->where('oms_order_creations.status_id', $request->status);
                 } else {
                         if($request->status != 13){
-                            // if(in_array($user->user_type_id, [6])) {
-                            //     $query->where('oms_order_creations.status_id', $request->status)
-                            //                 ->where(function ($query) use ($user) {
-                            //                     $query->where('oms_order_creations.assignee_user_id', $user->id)
-                            //                             ->orWhereNull('oms_order_creations.assignee_user_id');
-                            //                 });
-                            // } elseif(in_array($user->user_type_id, [7])) {
-                            //     $query->where('oms_order_creations.status_id', $request->status)
-                            //                 ->where(function ($query) use ($user) {
-                            //                     $query->where('oms_order_creations.assignee_qa_id', $user->id)
-                            //                             ->orWhereNull('oms_order_creations.assignee_qa_id');
-                            //                 });
-
-                            // } elseif(in_array($user->user_type_id, [8])) {
-
-                            //     $query->where('oms_order_creations.status_id', $request->status)
-                            //         ->where(function ($query) use ($user) {
-                            //             $query->where(function ($subQuery) use ($user) {
-                            //                 $subQuery->where('oms_order_creations.assignee_user_id', $user->id)
-                            //                         ->orWhereNull('oms_order_creations.assignee_user_id');
-                            //             })
-                            //             ->orWhere(function ($subQuery) use ($user) {
-                            //                 $subQuery->where('oms_order_creations.assignee_qa_id', $user->id)
-                            //                         ->orWhereNull('oms_order_creations.assignee_qa_id');
-                            //             });
-                            //         });
-
                             if(in_array($user->user_type_id, [10])){
                                 $query->where('oms_order_creations.status_id', $request->status)
                                     ->where(function ($query) use ($user) {
@@ -617,33 +581,6 @@ class OrderController extends Controller
                     $query->where('oms_order_creations.status_id', $request->status);
                 } else {
                     if($request->status != 13){
-                        // if(in_array($user->user_type_id, [6])) {
-                        //     $query->where('oms_order_creations.status_id', $request->status)
-                        //                 ->where(function ($query) use ($user) {
-                        //                     $query->where('oms_order_creations.assignee_user_id', $user->id)
-                        //                             ->orWhereNull('oms_order_creations.assignee_user_id');
-                        //                 });
-                        // } elseif(in_array($user->user_type_id, [7])) {
-                        //     $query->where('oms_order_creations.status_id', $request->status)
-                        //                 ->where(function ($query) use ($user) {
-                        //                     $query->where('oms_order_creations.assignee_qa_id', $user->id)
-                        //                             ->orWhereNull('oms_order_creations.assignee_qa_id');
-                        //                 });
-
-                        // } elseif(in_array($user->user_type_id, [8])) {
-
-                        //     $query->where('oms_order_creations.status_id', $request->status)
-                        //         ->where(function ($query) use ($user) {
-                        //             $query->where(function ($subQuery) use ($user) {
-                        //                 $subQuery->where('oms_order_creations.assignee_user_id', $user->id)
-                        //                         ->orWhereNull('oms_order_creations.assignee_user_id');
-                        //             })
-                        //             ->orWhere(function ($subQuery) use ($user) {
-                        //                 $subQuery->where('oms_order_creations.assignee_qa_id', $user->id)
-                        //                         ->orWhereNull('oms_order_creations.assignee_qa_id');
-                        //             });
-                        //         });
-
                         if(in_array($user->user_type_id, [10])){
                             $query->where('oms_order_creations.status_id', $request->status)
                                 ->where(function ($query) use ($user) {
@@ -723,33 +660,20 @@ class OrderController extends Controller
                 } elseif(in_array($user->user_type_id, [8])) {
                     // $query->where(function ($optionalquery) use($user) {
                     //     $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
-                    //         ->orWhere('oms_order_creations.assignee_qa_id', $user->id)->whereNotIn('status_id', [16, 17]);
-                    // });
-                    // $query->where(function ($optionalquery) use ($user) {
-                    //     $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
-                    //         ->orWhere(function ($subquery) use ($user) {
-                    //             $subquery->where('oms_order_creations.assignee_qa_id', $user->id);
-                    //         });
-                    // })->whereNotIn('status_id', [16, 17]);  
-
-                    $query->where(function ($statusCountsQuery) use ($user) {
-                        $statusCountsQuery->where(function ($subQuery) use ($user) {
-                            $subQuery->where('oms_order_creations.assignee_user_id', $user->id)
-                                     ->orWhereNull('oms_order_creations.assignee_user_id'); // Match user ID or null for typist_id
-                        })
-                        ->orWhere(function ($subQuery) use ($user) {
-                            $subQuery->where('oms_order_creations.assignee_qa_id', $user->id)
-                                     ->orWhereNull('oms_order_creations.assignee_qa_id'); // Match user ID or null for typist_qc_id
-                        });
-                    })->whereNotIn('status_id', [16, 17]);
-                    
-                    // $query->where(function ($optionalquery) use ($user) {
-                    //     $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
                     //         ->orWhere('oms_order_creations.assignee_qa_id', $user->id)
-                    //         ->orWhereNull('oms_order_creations.assignee_user_id')
-                    //         ->orWhereNull('oms_order_creations.assignee_qa_id');
-                    // })
-                    // ->whereNotIn('status_id', [16, 17]);
+                    //         ->whereNotIn('status_id', [16, 17]);
+                    // });
+                    $query->where(function ($optionalquery) use ($user) {
+                        $optionalquery->where(function ($subQuery) use ($user) {
+                            $subQuery->where('oms_order_creations.assignee_user_id', $user->id)
+                                ->orWhere('oms_order_creations.assignee_qa_id', $user->id)
+                                ->whereNotIn('status_id', [16, 17]);
+                        })
+                        ->orWhere(function ($subQuery) {
+                            $subQuery->where('status_id', 4)
+                                ->whereNull('assignee_qa_id');
+                        });
+                    });
                     
                 } elseif(in_array($user->user_type_id, [10])){
                     $query->where('oms_order_creations.typist_id', $user->id)
