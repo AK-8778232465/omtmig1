@@ -987,7 +987,7 @@ $(document).ready(function() {
             $('#typist-container').show();
             $('#typist-qc-container').show();
             $('#municipality-container').show();
-            $('#tier-container').show();
+            $('#tier-container').hide();
             $('#assign_user_container').show();
             $('#assign_qa_container').show();
 

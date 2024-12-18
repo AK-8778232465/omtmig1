@@ -2051,7 +2051,10 @@ $(document).ready(function() {
                                     'Error!',
                                     response.message || 'Something went wrong.',
                                     'error'
-                                );
+                                ).then(() => {
+                                    // Reset the dropdown after the error message
+                                    $('#status_change').val('');
+                                });
                             }
                         },
                         error: function(xhr, status, error) {
