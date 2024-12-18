@@ -269,13 +269,13 @@
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_4_fourth_count">0</span>
                         </div></button>
-                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Qcer')) d-none @endif">Typing<span id="status_16_count"></span><div style="">
+                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process')) d-none @endif">Typing<span id="status_16_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_16_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_16_fourth_count">0</span>
                         </div></button>
-                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Qcer')) d-none @endif">Typing QC<span id="status_17_count"></span> <div style="">
+                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process')) d-none @endif">Typing QC<span id="status_17_count"></span> <div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_17_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
@@ -1199,20 +1199,22 @@ $(document).ready(function() {
             $('.status-dropdown').prop('disabled', false);
         }
         @endif
-
-
-
     });
+
+
+    // $(document).on('click', '.status-btn', function () {
+    //     let status = $(this).attr('id').replace("status_", "");
+    //     updateStatusCounts(status);
+    // })
 
 function updateStatusCounts() {
   $.ajax({
     url: "{{ route('getStatusCount') }}",
     type: 'POST',
     data: {
-      _token: '{{ csrf_token() }}'
+        _token: '{{ csrf_token() }}'
     },
     success: function(response) {
-        console.log(response);
       if (response.StatusCounts !== undefined) {
         let taxCount = response.tax_bucket_count;
         let statusCounts = response.StatusCounts;
@@ -1622,7 +1624,7 @@ $(document).on('click', '.status-dropdown', function() {
     var rowId = $(this).data('row-id');
 
     $.ajax({
-        url: '{{ route('updateClickTime') }}',
+        url: "{{ route('updateClickTime') }}",
         type: 'POST',
         data: {
             order_id: rowId,
@@ -2253,7 +2255,6 @@ $('#deleteBtn').click(function (event) {
         var elementId = $(this).attr('id');
         let order_id = elementId.split('_')[1];
         localStorage.setItem("lastOrderStatus", task_status);
-
     $.ajax({
         url: "{{ route('updateClickTime') }}",
         type: 'POST',
