@@ -729,9 +729,7 @@
                                             Tax ID Number: <span style="color:red;">*</span>
                                         </label>
                                         <input class="form-control" type="text" placeholder="Enter Tax ID Number" 
-                                            style="flex: 1;" id="tax_id" name="tax_id" required 
-                                            pattern="^[a-zA-Z0-9]+$" 
-                                            title="Tax ID must contain only letters and numbers without special characters" value="{{ $getjsonDetails[0]['taxAccountId'] ?? '' }}">
+                                            style="flex: 1;" id="tax_id" name="tax_id" required >
                                     </div>
 
 
@@ -958,12 +956,7 @@
                                             </div>
                                             <div>
                                                 <label class="radio-label">
-                                                    <input 
-                                                        type="radio" 
-                                                        id="first_paid_id" 
-                                                        name="payment_status" 
-                                                        value="paid" 
-                                                        {{ isset($getjsonDetails[0]['firstInstStatus']) && trim($getjsonDetails[0]['firstInstStatus']) == 'PAID' ? 'checked' : '' }}>
+                                                <input type="radio"  id="first_paid_id"  name="payment_status"  value="paid" {{ isset($getjsonDetails[0]['firstInstStatus']) && strtoupper(trim($getjsonDetails[0]['firstInstStatus'])) === 'PAID' ? 'checked' : '' }}>
                                                     Paid
                                                 </label>
                                             </div>
@@ -974,7 +967,7 @@
                                                         id="first_due_id" 
                                                         name="payment_status" 
                                                         value="due" 
-                                                        {{ isset($getjsonDetails[0]['firstInstStatus']) && $getjsonDetails[0]['firstInstStatus'] == 'DUE' ? 'checked' : '' }}>
+                                                        {{ isset($getjsonDetails[0]['firstInstStatus']) && strtoupper(trim($getjsonDetails[0]['firstInstStatus'])) === 'DUE' ? 'checked' : '' }}>
                                                     Due
                                                 </label>
                                             </div>
@@ -1056,7 +1049,7 @@
                                         <label style="margin-right: 10px; width: 150px;">Amount :  
                                         </label>
                                         <input class="form-control" type="text" placeholder="Enter Amount"
-                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" value="{{ !empty($getjsonDetails[0]['secondInstInstBilledAmt']) ? $getjsonDetails[0]['secondInstInstBilledAmt']: '' }}" >
+                                            style="flex: 1;" id="second_amount_id" name="second_amount_id" value="{{ !empty($getjsonDetails[0]['secondInstBilledAmt']) ? $getjsonDetails[0]['secondInstBilledAmt']: '' }}" >
                                     </div>
 
                                     <div class="radio-group">
@@ -1082,23 +1075,25 @@
                                         </div>
                                         <div>
                                             <label class="radio-label">
-                                                <input 
-                                                    type="radio" 
-                                                    id="second_paid_id" 
-                                                    name="second_payment_status" 
-                                                    value="paid" 
-                                                    {{ isset($getjsonDetails[0]['secondInstStatus']) && $getjsonDetails[0]['secondInstStatus'] == 'PAID' ? 'checked' : '' }}>
+                                            <input 
+                                                type="radio" 
+                                                id="second_paid_id" 
+                                                name="second_payment_status" 
+                                                value="paid" 
+                                                {{ isset($getjsonDetails[0]['secondInstStatus']) && strtoupper(trim($getjsonDetails[0]['secondInstStatus'])) === 'PAID' ? 'checked' : '' }}>
+
                                                 Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="radio-label">
-                                                <input 
+                                            <input 
                                                     type="radio" 
                                                     id="second_due_id" 
                                                     name="second_payment_status" 
                                                     value="due" 
-                                                    {{ isset($getjsonDetails[0]['secondInstStatus']) && $getjsonDetails[0]['secondInstStatus'] == 'DUE' ? 'checked' : '' }}>
+                                                    {{ isset($getjsonDetails[0]['secondInstStatus']) && strtoupper(trim($getjsonDetails[0]['secondInstStatus'])) === 'DUE' ? 'checked' : '' }}>
+
                                                 Due
                                             </label>
                                         </div>
@@ -1196,23 +1191,25 @@
                                         </div>
                                         <div>
                                             <label class="radio-label">
-                                                <input 
+                                            <input 
                                                     type="radio" 
                                                     id="third_paid_id" 
                                                     name="third_payment_status" 
                                                     value="paid" 
-                                                    {{ isset($getjsonDetails[0]['thirdInstStatus']) && $getjsonDetails[0]['thirdInstStatus'] == 'PAID' ? 'checked' : '' }}>
+                                                    {{ isset($getjsonDetails[0]['thirdInstStatus']) && strtoupper(trim($getjsonDetails[0]['thirdInstStatus'])) === 'PAID' ? 'checked' : '' }}>
+
                                                 Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="radio-label">
-                                                <input 
-                                                    type="radio" 
-                                                    id="third_due_id" 
-                                                    name="third_payment_status" 
-                                                    value="due" 
-                                                    {{ isset($getjsonDetails[0]['thirdInstStatus']) && $getjsonDetails[0]['thirdInstStatus'] == 'DUE' ? 'checked' : '' }}>
+                                            <input 
+                                                type="radio" 
+                                                id="third_paid_id" 
+                                                name="third_payment_status" 
+                                                value="paid" 
+                                                {{ isset($getjsonDetails[0]['thirdInstStatus']) && strtoupper(trim($getjsonDetails[0]['thirdInstStatus'])) === 'DUE' ? 'checked' : '' }}>
+
                                                 Due
                                             </label>
                                         </div>
@@ -1310,23 +1307,25 @@
                                         </div>
                                         <div>
                                             <label class="radio-label">
-                                                <input 
+                                            <input 
                                                     type="radio" 
                                                     id="fourth_paid_id" 
                                                     name="fourth_payment_status" 
                                                     value="paid" 
-                                                    {{ isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'PAID' ? 'checked' : '' }}>
+                                                    {{ isset($getjsonDetails[0]['fourthInstStatus']) && strtoupper(trim($getjsonDetails[0]['fourthInstStatus'])) === 'PAID' ? 'checked' : '' }}>
+
                                                 Paid
                                             </label>
                                         </div>
                                         <div>
                                             <label class="radio-label">
-                                                <input 
-                                                    type="radio" 
-                                                    id="fourth_due_id" 
-                                                    name="fourth_payment_status" 
-                                                    value="due" 
-                                                    {{ isset($getjsonDetails[0]['fourthInstStatus']) && $getjsonDetails[0]['fourthInstStatus'] == 'DUE' ? 'checked' : '' }}>
+                                            <input 
+                                                type="radio" 
+                                                id="fourth_due_id" 
+                                                name="fourth_payment_status" 
+                                                value="due" 
+                                                {{ isset($getjsonDetails[0]['fourthInstStatus']) && strtoupper(trim($getjsonDetails[0]['fourthInstStatus'])) === 'DUE' ? 'checked' : '' }}>
+
                                                 Due
                                             </label>
                                         </div>
@@ -3481,46 +3480,59 @@ $(document).ready(function() {
         }
     });
 
+    document.addEventListener('DOMContentLoaded', function () {
+    // Get the payment frequency dropdown element
+    const paymentFrequencyDropdown = document.getElementById('payment_frequency');
 
-    // document.addEventListener('DOMContentLoaded', function () {
-    //     if (e.target && e.target.id === 'payment_frequency') {
-    //         const selectedValue = parseInt(e.target.value, 10);
+    if (paymentFrequencyDropdown) {
+        // Get the default selected value from the dropdown
+        const selectedValue = parseInt(paymentFrequencyDropdown.value, 10); // Default value on page load
+        
+        // Get all installment containers
+        const containers = [
+            document.getElementById('container1'),
+            document.getElementById('container2'),
+            document.getElementById('container3'),
+            document.getElementById('container4')
+        ];
 
-    //         // Get all installment containers
-    //         const containers = [
-    //             document.getElementById('container1'),
-    //             document.getElementById('container2'),
-    //             document.getElementById('container3'),
-    //             document.getElementById('container4')
-    //         ];
+        // Enable/disable fields based on the default value
+        containers.forEach((container, index) => {
+            const enable = index < selectedValue; // Enable containers up to the selected value
+            toggleContainerFields(container, enable);
+        });
 
-    //         // Enable/disable fields based on selected value
-    //         containers.forEach((container, index) => {
-    //             const enable = index < selectedValue; // Enable containers up to the selected value
-    //             toggleContainerFields(container, enable);
-    //         });
-    //     }
-    //     });
-document.addEventListener('change', function (e) {
-        // Check if the event is triggered by the payment frequency dropdown
-        if (e.target && e.target.id === 'payment_frequency') {
-            const selectedValue = parseInt(e.target.value, 10);
-
-            // Get all installment containers
-            const containers = [
-                document.getElementById('container1'),
-                document.getElementById('container2'),
-                document.getElementById('container3'),
-                document.getElementById('container4')
-            ];
-
-            // Enable/disable fields based on selected value
+        // Optionally, also add a change event listener for future changes
+        paymentFrequencyDropdown.addEventListener('change', function () {
+            const newValue = parseInt(paymentFrequencyDropdown.value, 10); // Get the new value
             containers.forEach((container, index) => {
-                const enable = index < selectedValue; // Enable containers up to the selected value
+                const enable = index < newValue; // Enable containers up to the new value
                 toggleContainerFields(container, enable);
             });
-        }
-    }); 
+        });
+    }
+});
+
+// document.addEventListener('change', function (e) {
+//         // Check if the event is triggered by the payment frequency dropdown
+//         if (e.target && e.target.id === 'payment_frequency') {
+//             const selectedValue = parseInt(e.target.value, 10);
+
+//             // Get all installment containers
+//             const containers = [
+//                 document.getElementById('container1'),
+//                 document.getElementById('container2'),
+//                 document.getElementById('container3'),
+//                 document.getElementById('container4')
+//             ];
+
+//             // Enable/disable fields based on selected value
+//             containers.forEach((container, index) => {
+//                 const enable = index < selectedValue; // Enable containers up to the selected value
+//                 toggleContainerFields(container, enable);
+//             });
+//         }
+//     }); 
 function toggleContainerFields(container, enable) {
         if (!container) return;
 

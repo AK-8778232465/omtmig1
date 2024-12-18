@@ -146,7 +146,7 @@ trait Retryftc
                 $historyToInsert[] = [
                     'order_id' => $ftcOrder->order_id,
                     'updated_by' => auth()->id(),
-                    'action' => 'Uploaded',
+                    'action' => 'Fetched',
                     'file_name' => $file['file_name'],
                     'updated_at' => now(),
                 ];
