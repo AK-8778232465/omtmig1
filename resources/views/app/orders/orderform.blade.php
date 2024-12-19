@@ -629,7 +629,7 @@
                     <div id="taxForm" class="p-3" style="display:none; ">
                         <h5>Taxes :</h5>
                         <div class="row mb-5 mt-2">
-                            `@if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null)
+                            @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null)
                                 <div class="col-2 d-flex align-items-center">
                                     <label for="tax_status" class="mr-2 font-weight-bold">Tax:</label>
                                     <select class="form-control" name="tax_status" id="tax_status" disabled>
@@ -660,7 +660,7 @@
                                 <div class="col-2 d-flex align-items-center">
                                 <input class="form-control" id="search_input" name="search_input" type="text"  placeholder="{{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '2' ? 'Enter Street Address' : 'Enter APN' }}" value="{{ $getApi->api_data ?? '' }}">
                                 </div>
-                                <div class="col-md-2 align-items-center">
+                                <div class="col-md-1 align-items-center" style="margin-top: 1.2rem;">
                                     <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
                                     <button type="submit" class="btn btn-primary" id="fetchButton" disabled>Fetch</button>
                                     <button type="submit" class="btn btn-primary" id="SaveButton" disabled>Save</button>
@@ -687,13 +687,51 @@
                             <div class="col-4 d-flex align-items-center">
                            <input class="form-control" id="search_input" name="search_input" type="text"  placeholder="{{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '2' ? 'Enter Street Address' : 'Enter APN' }}" value="{{$getApi->api_data ?? '' }}">
                             </div>
-                            <div class="col-md-2 align-items-center">
+                            <div class="col-md-1 align-items-center" style="margin-top: 1.2rem;">
                                 <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
                                 <button type="submit" class="btn btn-primary" id="fetchButton">Fetch</button>
                                 <button type="submit" class="btn btn-primary" id="SaveButton">Save</button>
                             </div>
-                            @endif`
+                            @endif
+                            <div class="col-lg-2 ml-5">
+                                <div class="my-4">
+                                    <svg onclick="viewjson()" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512; cursor: pointer;" xml:space="preserve" class=""><g><path d="M406.069 105.931H300.138V0z" style="" fill="#bdc3c7" data-original="#bdc3c7"></path><path d="M35.31 406.069H512V194.207H35.31z" style="" fill="#9777a8" data-original="#9777a8" class=""></path><path d="M203.034 379.586c-24.338 0-44.138-19.8-44.138-44.138 0-4.873 3.955-8.828 8.828-8.828s8.828 3.955 8.828 8.828c0 14.601 11.882 26.483 26.483 26.483s26.483-11.882 26.483-26.483-11.882-26.483-26.483-26.483c-24.338 0-44.138-19.8-44.138-44.138 0-24.338 19.8-44.138 44.138-44.138s44.138 19.8 44.138 44.138c0 4.873-3.955 8.828-8.828 8.828-4.873 0-8.828-3.955-8.828-8.828 0-14.601-11.882-26.483-26.483-26.483s-26.483 11.882-26.483 26.483 11.882 26.483 26.483 26.483c24.338 0 44.138 19.8 44.138 44.138s-19.8 44.138-44.138 44.138" style="" fill="#ffffff" data-original="#ffffff" class=""></path><path d="M35.31 406.069V194.207h370.759v-88.276H300.138V0H0v512h406.069V406.069z" style="" fill="#ecf0f1" data-original="#ecf0f1" class=""></path><path d="M97.103 379.586c-19.474 0-35.31-15.837-35.31-35.31 0-4.873 3.955-8.828 8.828-8.828s8.828 3.955 8.828 8.828c0 9.737 7.918 17.655 17.655 17.655s17.655-7.918 17.655-17.655V238.345c0-4.873 3.955-8.828 8.828-8.828s8.828 3.955 8.828 8.828v105.931c-.001 19.474-15.838 35.31-35.312 35.31M308.966 238.345c-9.737 0-17.655 7.918-17.655 17.655v88.276c0 9.737 7.918 17.655 17.655 17.655h8.828c9.737 0 17.655-7.918 17.655-17.655V256c0-9.737-7.918-17.655-17.655-17.655h-8.828zm8.827 141.241h-8.828c-19.474 0-35.31-15.837-35.31-35.31V256c0-19.474 15.837-35.31 35.31-35.31h8.828c19.474 0 35.31 15.837 35.31 35.31v88.276c0 19.474-15.836 35.31-35.31 35.31zM476.69 379.586a8.825 8.825 0 0 1-7.486-4.149l-71.962-115.138v110.46c0 4.873-3.955 8.828-8.828 8.828s-8.828-3.955-8.828-8.828V229.517a8.82 8.82 0 0 1 6.391-8.483c3.787-1.077 7.839.459 9.922 3.805l71.962 115.138v-110.46c0-4.873 3.955-8.828 8.828-8.828 4.873 0 8.828 3.955 8.828 8.828v141.241a8.82 8.82 0 0 1-6.391 8.483 8.854 8.854 0 0 1-2.436.345" style="" fill="#ffffff" data-original="#ffffff" class=""></path></g></svg>
+                                </div>
+                            </div>
                         </div>
+                        <div id="json_">
+                            <div class="modal fade" id="json_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
+                                style="display: none;">
+                                <div class="modal-dialog modal-xl">
+                                    <div class="modal-content" style="min-height:70vh;">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" style="font-weight: 500;">Json Stucture</h4>
+                                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                                                    class="sr-only">Close</span></button>
+                                        </div>
+                                        <div class='modal-body' style='overflow-y:scroll;'>
+                                            <style>
+                                                /* Default style for line break */
+                                                .line-break {
+                                                    white-space: pre-wrap;
+                                                    word-break: break-word;
+                                                }
+
+                                                /* Style for smaller screens */
+                                                @media (max-width: 768px) {
+                                                    .line-break {
+                                                        white-space: normal;
+                                                        word-break: normal;
+                                                    }
+                                                }
+                                            </style>
+                                            <code> <pre class='line-break text-primary'>{{ $input_json }}</pre></code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                         <!-- /// -->
                         <form id="taxFormValues">
                         <input type="hidden" name="order_id" value="{{$orderData->id}}">
                         <input type="hidden" id="parcel" value="{{ $getjsonDetails[0]['extracted_parcel'] ?? '' }}">
@@ -2787,8 +2825,12 @@ $(function() {
         });
     }
 });
-
 });
+
+function viewjson() {
+    var modal = document.getElementById('json_modal');
+    $(modal).modal('show');
+}
 </script>
 @endif
 

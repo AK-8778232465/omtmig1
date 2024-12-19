@@ -47,7 +47,6 @@ class OrderController extends Controller
                     $query->where('stl_client.is_approved', 1);
                 });
 
-
            if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                 if ($user->user_type_id == 6) {
                     // For user_type_id = 6
@@ -65,8 +64,8 @@ class OrderController extends Controller
                     // For user_type_id = 8
                     $statusCountsQuery->where(function ($query) use ($user) {
                         $query->where('assignee_user_id', $user->id)
-                            ->orWhere('assignee_qa_id', $user->id)
-                            ->orWhereNull('assignee_qa_id'); // Allow records where assignee_qa_id is not null
+                            ->orWhere('assignee_qa_id', $user->id);
+                            // ->orWhereNull('assignee_qa_id'); // Allow records where assignee_qa_id is not null
                     })->whereNotIn('status_id', [16, 17]);                   
 
                 } elseif ($user->user_type_id == 10) {

@@ -645,20 +645,35 @@ class OrderFormController extends Controller
                 ->orderBy('oms_tax_comments_histroy.id', 'desc')
                 ->get();
 
+                $taxInfo = DB::table('taxes')->where('order_id', $orderData->id)->first();
+
+                if ($taxInfo && isset($taxInfo->json)) {
+                    $jsonString = json_decode($taxInfo->json, true);
+
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $formattedJson = json_encode($jsonString, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                        $input_json = strip_tags(html_entity_decode($formattedJson));
+                    } else {
+                        $input_json = 'Invalid JSON';
+                    }
+                } else {
+                    $input_json = 'Json Not Available';
+                }
+
                 // return response()->json($getTaxBucket);
 
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions',
                                                         'stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo',
-                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson','gettaxesDetails'));
+                                                        'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson','gettaxesDetails','input_json'));
         } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11, 23, 24])) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
-                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson', 'gettaxesDetails'));
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson', 'gettaxesDetails','input_json'));
         }else if(in_array($user->user_type_id, [22]) && (Auth::id() == $orderData->typist_id || Auth::id() == $orderData->typist_qc_id) && $orderData->status_id !=4 && $orderData->status_id != 5) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
-                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson', 'gettaxesDetails'));
+                                                        'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson', 'gettaxesDetails','input_json'));
         } else {
             return redirect('/orders_status');
         }

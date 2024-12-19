@@ -212,7 +212,7 @@
         <div class="card-body">
             <div class="row justify-content-start m-3 mt-2 mb-4" id="statusButtons">
                 <div class="bg-info shadow-lg p-0 rounded text-white" style="text-decoration: none; font-size:0.7rem">
-                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif" style="cursor: pointer;">Yet to Assign User<span id="status_6_count"></span>
+                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Qcer', 'Typist', 'Typist/Qcer', 'Typist/Typist_Qcer', 'Tax User'])) d-none @endif" style="cursor: pointer;">Yet to Assign User<span id="status_6_count"></span>
                      <div style="">
                             <div style="display: inline-block;"></div>
                             <!-- <span id="tat_status_6_third_count"></span> -->
@@ -227,85 +227,85 @@
                             <span id="tat_status_7_fourth_count">0</span>
                         </div>
                     </button>
-                    <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif">WIP<span id="status_1_count"></span> <div style="">
+                    <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Qcer', 'Typist', 'Typist/Qcer', 'Typist/Typist_Qcer', 'Tax User'])) d-none @endif">WIP<span id="status_1_count"></span> <div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_1_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_1_fourth_count">0</span>
                         </div></button>
-                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span><div style="">
+                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Qcer', 'Typist', 'Typist/Qcer', 'Typist/Typist_Qcer', 'Tax User'])) d-none @endif">Coversheet Prep<span id="status_13_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_13_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_13_fourth_count">0</span>
                         </div></button>
-                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif" >Doc Purchase<span id="status_15_count"></span> <div style="">
+                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Process/Qcer', 'Typist', 'Typist/Qcer', 'Typist/Typist_Qcer', 'Tax User'])) d-none @endif" >Doc Purchase<span id="status_15_count"></span> <div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_15_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_15_fourth_count">0</span>
                         </div></button>
-                    <button id="status_18" class="btn btn-info status-btn">Ground Abstractor<span id="status_18_count"></span><div style="">
+                    <button id="status_18" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Ground Abstractor<span id="status_18_count"></span><div style="">
                         <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                         <span id="tat_status_18_third_count">0</span>
                         <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                         <span id="tat_status_18_fourth_count">0</span>
                     </div></button>
-                    <button id="status_tax" class="btn btn-info status-btn  @if(Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif">TAX<span id="status_tax_count"></span><div style="">
+                    <button id="status_tax" class="btn btn-info status-btn  @if(!(Auth::user()->hasAnyRole(['Tax User', 'Super Admin', 'Business Head', 'PM/TL', 'SPOC', 'AVP', 'Admin', 'VP']))) d-none @endif">TAX<span id="status_tax_count"></span><div style="">
                         <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px;"></div>
                         <!-- <span id="tat_status_19_third_count">0</span> -->
                         <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                         <!-- <span id="tat_status_19_fourth_count">0</span> -->
                     </div></button>
-                    <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span><div style="">
+                    <button id="status_14" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Clarification<span id="status_14_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_14_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_14_fourth_count">0</span>
                         </div></button>
-                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Send For QC<span id="status_4_count"></span><div style="">
+                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User', 'Typist', 'Typist/Qcer'])) d-none @endif">Send For QC<span id="status_4_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_4_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_4_fourth_count">0</span>
                         </div></button>
-                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process')) d-none @endif">Typing<span id="status_16_count"></span><div style="">
+                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User', 'Typist/Qcer', 'Process/Qcer', 'Qcer', 'Process'])) d-none @endif">Typing<span id="status_16_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_16_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_16_fourth_count">0</span>
                         </div></button>
-                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process')) d-none @endif">Typing QC<span id="status_17_count"></span> <div style="">
+                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User', 'Typist', 'Process/Qcer', 'Qcer', 'Process'])) d-none @endif">Typing QC<span id="status_17_count"></span> <div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_17_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_17_fourth_count">0</span>
                         </div></button>
-                    <button id="status_2" class="btn btn-info status-btn">Hold<span id="status_2_count"></span><div style="">
+                    <button id="status_2" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Hold<span id="status_2_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_2_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_2_fourth_count">0</span>
                         </div></button>
-                    <button id="status_5" class="btn btn-info status-btn">Completed<span id="status_5_count"></span><div style="">
+                    <button id="status_5" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Completed<span id="status_5_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_5_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_5_fourth_count">0</span>
                         </div></button>
-                    <button id="status_20" class="btn btn-info status-btn">Partially Cancelled<span id="status_20_count"></span><div style="">
+                    <button id="status_20" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Partially Cancelled<span id="status_20_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_20_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_20_fourth_count">0</span>
                     </div></button>
-                    <button id="status_3" class="btn btn-info status-btn">Cancelled<span id="status_3_count"></span><div style="">
+                    <button id="status_3" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Cancelled<span id="status_3_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_3_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_3_fourth_count">0</span>
                         </div></button>
-                    <button id="status_All" class="btn btn-info status-btn" >All<span id="status_All_count"></span><div style="">
+                    <button id="status_All" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif" >All<span id="status_All_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_All_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
