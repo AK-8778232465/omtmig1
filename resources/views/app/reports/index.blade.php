@@ -1835,7 +1835,7 @@ function production_report() {
                             _token: '{{ csrf_token() }}'
                         },
                         success: function (response) {
-                            exportToExcel(response.data); 
+                            exportToExcel(response.data);
                         }
                     });
                 }
@@ -2016,7 +2016,7 @@ function exportToExcel(data) {
             "State": row.short_code,
             "County": row.county_name,
             "Portal Fee Cost": row.portal_fee_cost,
-            "Source": row.source,
+            "Source": row.source_name,
             "Production Date": row.completion_date,
             "User EMP ID": row.assignee_empid,
             "QA EMP ID": row.qa_empid,
