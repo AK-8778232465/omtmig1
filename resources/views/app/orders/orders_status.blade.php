@@ -263,7 +263,7 @@
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_14_fourth_count">0</span>
                         </div></button>
-                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User', 'Typist', 'Typist/Qcer'])) d-none @endif">Send For QC<span id="status_4_count"></span><div style="">
+                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Send For QC<span id="status_4_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_4_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
@@ -354,7 +354,6 @@
                             <input type="date" class="form-control" id="toDate_range">
                         </div>
                     </div>
-                    
                     {{--  --}}
                     <div class="col-md-2">
                         <div class="form-group">
@@ -915,8 +914,8 @@ $(document).ready(function() {
                 { "data": "status", "name": "status" },
                 { "data": "assignee_user", "name": "assignee_user" },
                 { "data": "assignee_qa", "name": "assignee_qa" },
-                { "data": "typist_user", "name": "typist_user", "visible": @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) false @else true @endif },
-                { "data": "typist_qa", "name": "typist_qa", "visible": @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer')) false @else true @endif },
+                { "data": "typist_user", "name": "typist_user", "visible": @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Process')) false @else true @endif },
+                { "data": "typist_qa", "name": "typist_qa", "visible": @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Process')) false @else true @endif },
                
 
                 {
@@ -928,7 +927,7 @@ $(document).ready(function() {
                 {
                     "data": "action",
                     "name": "action",
-                    "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) false @else true @endif,
+                    "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist_Qcer')) false @else true @endif,
                     "orderable": false,
                 },
                 { "data": "associate_name", "name": "associate_name", "visible": true},
