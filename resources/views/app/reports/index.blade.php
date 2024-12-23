@@ -643,6 +643,38 @@
 
     <div class="card col-md-10 mt-2 tabledetails" id="daily_completion" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
         <h4 class="text-center mt-3">Daily Completion Status</h4>
+        <div class="card shadow" style="width: 100%; margin: 20px;">
+            <div class="card-body">
+                {{-- <h5 class="card-title" style="font-weight:bold;">Order Summary:</h5> --}}
+
+                <!-- First Row for all the buttons -->
+                <div class="d-flex flex-wrap">
+                    <span style="margin: 0 2px; font-weight:bold;">Orders Received: <span id="total_orders_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Yet to Assign: <span id="yet_to_Assign_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">WIP: <span id="wip_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Coversheet Prep: <span id="coversheet_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Doc Purchase: <span id="doc_purchase_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Clarification: <span id="clarification_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Ground Abstractor: <span id="ground_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Send for QC: <span id="send_qc_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Typing: <span id="typing_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Typing QC: <span id="typing_qc_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Hold: <span id="hold_sum">0</span></span>,
+                </div>
+
+
+                <!-- Second Row for the last two buttons with top margin -->
+                <div class="d-flex flex-wrap mt-3">
+                    <span style="margin: 0 2px; font-weight:bold;">Completed: <span id="completed_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Partially Cancelled: <span id="partially_can_sum">0</span></span>,
+                    <span style="margin: 0 2px; font-weight:bold;">Cancelled: <span id="cancelled_sum">0</span></span>
+                </div>
+            </div>
+        </div>
+
+
+
+
         <div class="card-body">
             <div class="p-0">
                 <table id="daily_completion_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -673,10 +705,45 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="countModal" tabindex="-1" aria-labelledby="countModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="countModalLabel">Order Details</h5>
+                    <button id="exportModalData" class="btn" style="background-color: #28a745; color: white;">Export to Excel</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Table inside modal with headers like Date, Client, Status -->
+                    <table id="orderTable" class="table table-bordered display">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Order ID</th>
+                                <th>Client</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="order_details_list">
+                            <!-- Static or Dynamic order details will be appended here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 </div>
 
 <script src="{{asset('./assets/js/jquery.min.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
 
 <script>
 
@@ -1106,11 +1173,15 @@ function orderWise() {
                         success: function(response) {
                             var data = response.data;
 
-                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Client Name", "LOB", "Process", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source","Process Type","Tier", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments"];
+                            // Define headers with the "Received EST" column next to "Order Date"
+                            var headers = ["S.No", "Process", "Order Date", "Received EST", "Completion Date", "Order ID", "Client Name", "LOB", "Process", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source", "Process Type", "Tier", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments"];
+
+                            // Add the "Received EST" column (next to "Order Date") with only the date (no time)
                             var exportData = data.map((row, index) => [
                                 index + 1,
                                 row.process,
                                 formatExcelDate(row.order_date),
+                                formatDateOnly(row.order_date), // Received EST (date part only)
                                 formatExcelDate(row.completion_date),
                                 row.order_id,
                                 row.client_name,
@@ -1160,6 +1231,12 @@ function orderWise() {
         }
         return '';
     }
+}
+
+function formatDateOnly(datetime) {
+    if (!datetime) return '';
+    var date = new Date(datetime);
+    return date.toLocaleDateString(); // Format the date (e.g., "MM/DD/YYYY")
 }
 
 $('#newreports_datatable').on('draw.dt', function () {
@@ -2119,7 +2196,9 @@ function production_report() {
                     return meta.row + meta.settings._iDisplayStart + 1; // Serial number
                 }
             },
-            { data: 'order_date', title: 'Received EST' },
+            { data: 'order_date', title: 'Received EST',render: function (data, type, row) {
+                return moment(data).format('MM/DD/YYYY HH:mm:ss'); // Format the date and time using moment.js
+            }},
             { data: 'acc_client_id', title: 'Client ID' },
             // { data: 'process_name', title: 'Product' },
             { 
@@ -2281,7 +2360,7 @@ function formatResponseData(response) {
 
         if (!existing) {
             // If no entry exists, create a new one
-            formattedData.push({
+            let newEntry = {
                 date: item.date,
                 client_name: item.client_name,
                 "Order Received": 0, // Initialize the "Order Received" count
@@ -2298,8 +2377,18 @@ function formatResponseData(response) {
                 "Completed": 0,
                 "Partially Cancelled": 0,
                 "Cancelled": 0
+            };
+
+            // Set client_id as a non-enumerable property
+            Object.defineProperty(newEntry, 'client_id', {
+                value: item.client_id,
+                writable: true,
+                enumerable: false,  // This makes the property "hidden" during enumeration
+                configurable: true
             });
-            existing = formattedData[formattedData.length - 1]; // Get reference to the new entry
+
+            formattedData.push(newEntry);
+            existing = newEntry; // Get reference to the new entry
         }
 
         // Increment the count for the corresponding status
@@ -2311,6 +2400,19 @@ function formatResponseData(response) {
 
     return formattedData;
 }
+
+
+
+$(document).ready(function() {
+        // Initialize DataTable when the page loads
+        $('#orderTable').DataTable({
+            paging: true, // Enable pagination
+            searching: true, // Enable search
+            pageLength: 10, // Set the default number of entries per page
+            lengthChange: true
+
+        });
+    });
 
 function daily_completion() {
     var fromDate = $('#fromDate_range').val();
@@ -2335,7 +2437,22 @@ function daily_completion() {
             _token: '{{ csrf_token() }}'
         },
         success: function(response) {
-            let formattedData = formatResponseData(response);
+            let formattedData = formatResponseData(response.data);
+
+            $('#total_orders_sum').text(response.total_orders);
+            $('#yet_to_Assign_sum').text(response.summary['Yet to Assign']);
+            $('#wip_sum').text(response.summary['WIP']);
+            $('#coversheet_sum').text(response.summary['Coversheet Prep']);
+            $('#doc_purchase_sum').text(response.summary['Doc Purchaser']);
+            $('#clarification_sum').text(response.summary['Clarification']);
+            $('#ground_sum').text(response.summary['Ground Abstractor']);
+            $('#send_qc_sum').text(response.summary['Send for QC']);
+            $('#typing_sum').text(response.summary['Typing']);
+            $('#typing_qc_sum').text(response.summary['Typing QC']);
+            $('#hold_sum').text(response.summary['Hold']);
+            $('#completed_sum').text(response.summary['Completed']);
+            $('#partially_can_sum').text(response.summary['Partially Cancelled']);
+            $('#cancelled_sum').text(response.summary['Cancelled']);
 
             $('#daily_completion_table').DataTable({
                 destroy: true,
@@ -2370,6 +2487,21 @@ function daily_completion() {
                 ],
                 lengthMenu: [10, 25, 50, 75, 100],
                 order: [[0, 'asc']],
+    rowCallback: function(row, data) {
+        // Iterate over each cell in the row
+        $('td', row).each(function(index) {
+            if (index >= 2 && index <= 14) { // Columns with count data (Order Received, WIP, Completed, etc.)
+                // Create an anchor element with data attributes
+                const countValue = data[Object.keys(data)[index]]; // Dynamically get the correct count value
+                $(this).html(`<a href="javascript:void(0);" class="count-link"
+                    data-date="${data.date}"
+                    data-client_id="${data.client_id}"
+                    data-client="${data.client_name}"
+                    data-status="${Object.keys(data)[index]}"
+                    data-order-id="${data.order_id}"> ${countValue} </a>`);  // Add order_id here
+            }
+        });
+    },
                 initComplete: function() {
                     // Apply CSS for row styling directly
                     $('#daily_completion_table tbody tr').css('background-color', 'white');
@@ -2381,6 +2513,113 @@ function daily_completion() {
 }
 
 
+$(document).on('click', '.count-link', function() {
+    // Get data attributes from the clicked link
+    const date = $(this).data('date');
+    const client_id = $(this).data('client_id');
+    const client = $(this).data('client');
+    const status = $(this).data('status');
+    const orderId = $(this).data('order-id'); // Capture order_id if necessary
+    // const clientId = $("#client_id_dcf_2").val(); // Get the client_id from the select input
+
+    // If it's not "Order Received", send date, client_id, and status
+    if (status !== 'Order Received') {
+        $.ajax({
+            url: "{{ route('get_orders_by_status') }}", // New route to fetch orders by date, client_id, and status
+            type: 'GET',
+            data: {
+                date: date,           // Send the selected order date
+                // client_id: clientId,
+                client_id: client_id,
+                status: status,       // Send the status
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                // Clear previous order details in the modal
+                $('#order_details_list').empty();
+
+                // Loop through the response and append order details to the modal
+                response.forEach(order => {
+                    $('#order_details_list').append(`
+                        <tr>
+                            <td>${order.order_date}</td>
+                            <td>${order.order_id}</td>
+                            <td>${order.client_name}</td>
+                            <td>${order.status}</td>
+                        </tr>
+                    `);
+                });
+
+                // Show the modal with order details
+                $('#countModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX request failed: " + error);
+            }
+        });
+    } else {
+        // When clicking on "Order Received", fetch all orders for that date
+        $.ajax({
+            url: "{{ route('getOrdersByDate') }}", // Route to fetch all orders for the selected date
+            type: 'GET',
+            data: {
+                date: date,
+                // client_id: clientId,
+                client_id: client_id,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                // Clear previous order details in the modal
+                $('#order_details_list').empty();
+
+                // Loop through the response and append order details to the modal
+                response.forEach(order => {
+                    $('#order_details_list').append(`
+                        <tr>
+                            <td>${order.order_date}</td>
+                            <td>${order.order_id}</td>
+                            <td>${order.client_name}</td>
+                            <td>${order.status}</td>
+                        </tr>
+                    `);
+                });
+
+                // Show the modal with order details
+                $('#countModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX request failed: " + error);
+            }
+        });
+    }
+});
+
+// Add the Excel export functionality
+$(document).on('click', '#exportModalData', function() {
+    // Define the headers for the Excel sheet
+    var headers = ['Date', 'Order ID', 'Client', 'Status'];
+
+    // Collect data from the modal's order details table
+    var tableData = [headers]; // Start with headers as the first row
+
+    $('#order_details_list tr').each(function() {
+        var row = [];
+        $(this).find('td').each(function() {
+            row.push($(this).text());
+        });
+        tableData.push(row); // Add each row's data to tableData
+    });
+
+    // Create a worksheet from the table data
+    var ws = XLSX.utils.aoa_to_sheet(tableData);
+
+    // Create a workbook and add the worksheet
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Order Details");
+
+    // Export the workbook to Excel
+    XLSX.writeFile(wb, "Order_Details.xlsx");
+});
 
 function exportToExcel(data) {
     var exportData = data.map(function (row, index) {

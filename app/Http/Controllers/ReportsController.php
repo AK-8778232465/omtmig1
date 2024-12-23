@@ -1456,6 +1456,9 @@ public function daily_completion(Request $request)
     ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
     ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
     ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+    ->whereIn('stl_item_description.client_id', $client_id)
+    ->whereDate('oms_order_creations.order_date', '>=', $from_date)  // Explicit 'from_date' condition
+    ->whereDate('oms_order_creations.order_date', '<=', $to_date)
     ->where('oms_order_creations.is_active', 1)
     ->where('stl_item_description.is_approved', 1)
     ->where('stl_client.is_approved', 1)
@@ -1465,6 +1468,8 @@ public function daily_completion(Request $request)
         DB::raw('DATE(oms_order_creations.order_date) as date'),
         'stl_client.client_no',
         'stl_client.client_name',
+        'stl_client.id as client_id',
+        'oms_order_creations.order_id as order_id',
         DB::raw("CASE
                     WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NULL THEN 'Yet to Assign'
                     WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NOT NULL THEN 'WIP'
@@ -1473,12 +1478,17 @@ public function daily_completion(Request $request)
         DB::raw('COUNT(*) as count')
     )
     ->groupBy(
+        'oms_order_creations.order_id',
         DB::raw('DATE(oms_order_creations.order_date)'),
         'stl_client.client_no',
         'stl_client.client_name',
+        'stl_client.id',
         'oms_order_creations.status_id',
         'oms_order_creations.assignee_user_id'
     )
+    ->where('oms_order_creations.is_active', 1)
+    ->where('stl_item_description.is_approved', 1)
+    ->where('stl_client.is_approved', 1)
     ->orderBy('date');
 
 // Add conditional filters for project_id and client_id.
@@ -1494,23 +1504,113 @@ if (!empty($client_id) && $client_id[0] !== 'All') {
 $orders = $orders->get();
 
 
+    $summaryCount = [
+        'Yet to Assign' => 0,
+        'WIP' => 0,
+        'Coversheet Prep' => 0,
+        'Doc Purchaser' => 0,
+        'Clarification' => 0,
+        'Ground Abstractor' => 0,
+        'Send for QC' => 0,
+        'Typing' => 0,
+        'Typing QC' => 0,
+        'Hold' => 0,
+        'Completed' => 0,
+        'Partially Cancelled' => 0,
+        'Cancelled' => 0,
+
+    ];
+    $totalOrders = 0;
 
     // Format the data to match the desired response
     $result = [];
     foreach ($orders as $order) {
+
+        $status = $order->status;
+        if (isset($summaryCount[$status])) {
+            $summaryCount[$status] += $order->count;
+        }
+
+        $totalOrders += $order->count;
         $orderDate = Carbon::parse($order->date)->format('m-d-Y');
         $result[] = [
             'date' => $orderDate,
+            'client_id' => $order->client_id,
             'client_name' => $order->client_no . ' (' . $order->client_name . ')', 
             'status' => $order->status,
             'count' => $order->count,
+            'order_id' => $order->order_id,
         ];
     }
 
-    return response()->json($result);
+
+    return response()->json([
+        'data' => $result,
+        'summary' => $summaryCount,
+        'total_orders' => $totalOrders,
+    ]);
 }
 
+public function get_orders_by_status(Request $request)
+{
+    $client_id = $request->input('client_id');
+    $status = $request->input('status');
+    $date = $request->input('date');
 
+    // Convert the date string to a Carbon instance if necessary
+    $formattedDate = Carbon::createFromFormat('m-d-Y', $date)->toDateString();
+
+    // Query orders based on client_id, status, and date
+    $orders = DB::table('oms_order_creations')
+        ->join('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->join('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+        ->where('stl_item_description.client_id', $client_id)
+        ->where('oms_status.status', $status)
+        ->whereDate('oms_order_creations.order_date', '=', $formattedDate)
+        ->where('oms_order_creations.is_active', 1)
+        ->select('oms_order_creations.order_id', 'oms_order_creations.order_date', 'oms_status.status', 'stl_client.client_name')
+        ->get();
+
+        $orders->transform(function($order) {
+            $order->order_date = Carbon::parse($order->order_date)->format('m-d-Y');
+            return $order;
+        });
+
+    return response()->json($orders);
+}
+
+public function getOrdersByDate(Request $request)
+{
+    $date = $request->input('date'); // Order date
+    $formattedDate = Carbon::createFromFormat('m-d-Y', $date)->toDateString();
+    $client_id = $request->input('client_id');
+
+    // Query all orders for the given date (ignoring client and status)
+    $orders = DB::table('oms_order_creations')
+        ->join('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
+        ->join('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
+        ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+        ->whereDate('oms_order_creations.order_date', '=', $formattedDate)
+        ->where('stl_item_description.client_id', $client_id)
+        ->where('oms_order_creations.is_active', 1)
+
+        ->select(
+            'oms_order_creations.order_id',
+            'oms_order_creations.order_date',
+            'oms_status.status',
+            'stl_client.client_name'
+        )
+        ->get();
+
+        $orders->transform(function($order) {
+            $order->order_date = Carbon::parse($order->order_date)->format('m-d-Y');
+            return $order;
+        });
+
+    // Return the orders as a JSON response
+    return response()->json($orders);
+}
 
 
 }

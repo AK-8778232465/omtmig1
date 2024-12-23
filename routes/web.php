@@ -217,6 +217,10 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,VP,Business Head,SPOC,Ad
     Route::any('getUsersByRole', 'getUsersByRole')->name('getUsersByRole');
     Route::any('getUserData', 'getUserData')->name('getUserData');
     Route::any('daily_completion', 'daily_completion')->name('daily_completion');
+    Route::any('get_orders_by_status', 'get_orders_by_status')->name('get_orders_by_status');
+    Route::any('getOrdersByDate', 'getOrdersByDate')->name('getOrdersByDate');
+
+
 
 
 });
