@@ -1784,6 +1784,19 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                             unset($statusMapping[4]);
                                         }
 
+                            }elseif (Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')  && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16])) {
+                                $statusMapping = [
+
+                                    14 => 'Clarification',
+                                    18 => 'Ground Abstractor',
+                                    2 => 'Hold',
+                                    5 => 'Completed',
+                                    20 => 'Partially Cancelled',
+                                    3 => 'Cancelled',
+                                    16 => 'Typing',
+                                    17 => 'Typing QC',
+                                ];
+
                             }elseif (Auth::user()->hasRole('Typist/Typist_Qcer')) {
                                 $statusMapping = [
                                     
@@ -1995,6 +2008,17 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                         unset($statusMapping[1]);
                                         unset($statusMapping[4]);
                                     }
+
+                                    if (Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist')) {
+                                        unset($statusMapping[1]);
+                                        unset($statusMapping[13]);
+                                        unset($statusMapping[4]);
+
+
+                                        $statusMapping[16] = 'Typing';  // Ensure 16 is set to 'Typing'
+                                        $statusMapping[17] = 'Typing QC';  // Set 17 to a desired status name (replace with actual status name)
+
+                                    }
                                 }
                         }
                     }
@@ -2027,6 +2051,18 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 $makedisable = 'select-disabled';
             }
         }
+
+        if($order->status_id == 16 && ($order->typist_id == null ||$order->typist_id == "null" )){
+             $disabled = 'readonly';
+            $makedisable = 'select-disabled';
+        }
+
+        if($order->status_id == 17 && ($order->typist_qc_id == null ||$order->typist_qc_id == "null" )){
+            $disabled = 'readonly';
+           $makedisable = 'select-disabled';
+       }
+
+
         return '<select style="width:100%" class="status-dropdown ' . $makedisable . ' form-control" data-row-id="' . $order->id . '" ' . $disabled . '>' .
             collect($statusMapping)->map(function ($value, $key) use ($order) {
                 return '<option value="' . $key . '" ' . ($key == $order->status_id ? 'selected' : '') . '>' . $value . '</option>';
