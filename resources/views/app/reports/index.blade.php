@@ -2639,6 +2639,7 @@ function exportToExcel(data) {
         return {
             "S.No": index + 1,
             "Received EST": row.order_date,
+            "Date of order": formatDateOnly(row.order_date),
             "Client ID": row.acc_client_id,
             "Product": row.process_name,
             "Order Num": row.order_num,
