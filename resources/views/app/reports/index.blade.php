@@ -668,6 +668,8 @@
                     <span style="margin: 0 2px; font-weight:bold;">Completed: <span id="completed_sum">0</span></span>,
                     <span style="margin: 0 2px; font-weight:bold;">Partially Cancelled: <span id="partially_can_sum">0</span></span>,
                     <span style="margin: 0 2px; font-weight:bold;">Cancelled: <span id="cancelled_sum">0</span></span>
+                    <span style="margin: 0 2px; font-weight:bold;">Pending: <span id="pending_sum">0</span></span>
+
                 </div>
             </div>
         </div>
@@ -696,7 +698,7 @@
                             <th width="8%">Completed</th>
                             <th width="8%">Partially Cancelled</th>
                             <th width="8%">Cancelled</th>
-
+                            <th width="8%">Pending</th>
                         </tr>
                     </thead>
                     <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -2376,7 +2378,8 @@ function formatResponseData(response) {
                 "Hold": 0,
                 "Completed": 0,
                 "Partially Cancelled": 0,
-                "Cancelled": 0
+                "Cancelled": 0,
+                "pending" : 0
             };
 
             // Set client_id as a non-enumerable property
@@ -2396,6 +2399,8 @@ function formatResponseData(response) {
 
         // Add to the "Order Received" count (sum of all statuses for this date/client)
         existing["Order Received"] += item.count;
+
+        existing["Pending"] = existing["Order Received"] - existing["Completed"];
     });
 
     return formattedData;
@@ -2454,6 +2459,12 @@ function daily_completion() {
             $('#partially_can_sum').text(response.summary['Partially Cancelled']);
             $('#cancelled_sum').text(response.summary['Cancelled']);
 
+            let pendingSum = formattedData.reduce((sum, entry) => sum + entry.Pending, 0);
+            console.log(pendingSum);
+
+    // Display the total pending sum
+    $('#pending_sum').text(pendingSum);
+
             $('#daily_completion_table').DataTable({
                 destroy: true,
                 data: formattedData,
@@ -2473,7 +2484,9 @@ function daily_completion() {
                     { data: 'Hold' },
                     { data: 'Completed' },
                     { data: 'Partially Cancelled' },
-                    { data: 'Cancelled' }
+                    { data: 'Cancelled' },
+                    { data: 'Pending' },
+
                 ],
                 processing: true,
                 serverSide: false, // Local processing now

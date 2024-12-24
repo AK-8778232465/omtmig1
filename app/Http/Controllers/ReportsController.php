@@ -96,6 +96,9 @@ class ReportsController extends Controller
 
         }
 
+    $get_product = [];
+
+
     if($lob_id && $client_id){
         $get_product = DB::table('stl_item_description')
                     ->select('id', 'process_name', 'project_code')
