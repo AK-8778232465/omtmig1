@@ -1459,12 +1459,15 @@ public function daily_completion(Request $request)
     ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
     ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
     ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
-    ->whereIn('stl_item_description.client_id', $client_id)
+    ->leftJoin('stl_process', 'oms_order_creations.process_type_id', '=', 'stl_process.id')
+    ->leftJoin('stl_lob', 'oms_order_creations.lob_id', '=', 'stl_lob.id')
+
     ->whereDate('oms_order_creations.order_date', '>=', $from_date)  // Explicit 'from_date' condition
     ->whereDate('oms_order_creations.order_date', '<=', $to_date)
     ->where('oms_order_creations.is_active', 1)
     ->where('stl_item_description.is_approved', 1)
     ->where('stl_client.is_approved', 1)
+    ->whereIn('oms_order_creations.process_id', $processIds)
     ->whereDate('oms_order_creations.order_date', '>=', $from_date)
     ->whereDate('oms_order_creations.order_date', '<=', $to_date)
     ->select(
@@ -1473,6 +1476,9 @@ public function daily_completion(Request $request)
         'stl_client.client_name',
         'stl_client.id as client_id',
         'oms_order_creations.order_id as order_id',
+        'stl_item_description.id as product_id',
+        'stl_lob.id as lob_id',
+        'stl_process.id as process_type_id',
         DB::raw("CASE
                     WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NULL THEN 'Yet to Assign'
                     WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NOT NULL THEN 'WIP'
@@ -1487,7 +1493,10 @@ public function daily_completion(Request $request)
         'stl_client.client_name',
         'stl_client.id',
         'oms_order_creations.status_id',
-        'oms_order_creations.assignee_user_id'
+        'oms_order_creations.assignee_user_id',
+        'stl_item_description.id',
+        'stl_lob.id',
+        'stl_process.id',
     )
     ->where('oms_order_creations.is_active', 1)
     ->where('stl_item_description.is_approved', 1)
@@ -1500,7 +1509,15 @@ if (!empty($project_id) && $project_id[0] !== 'All') {
 }
 
 if (!empty($client_id) && $client_id[0] !== 'All') {
-    $orders->whereIn('stl_item_description.client_id', $client_id);
+    $orders->where('stl_item_description.client_id', $client_id);
+}
+
+if (!empty($lob_id) && $lob_id !== 'All') {
+    $orders->where('oms_order_creations.lob_id', $lob_id);
+}
+
+if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
+    $orders->whereIn('oms_order_creations.process_type_id', $process_type_id);
 }
 
 // Retrieve the results after all conditions.
@@ -1543,6 +1560,9 @@ $orders = $orders->get();
             'status' => $order->status,
             'count' => $order->count,
             'order_id' => $order->order_id,
+            'product_id' => $order->product_id,
+            'lob_id' => $order->lob_id,
+            'process_type_id' => $order->process_type_id,
         ];
     }
 
@@ -1559,6 +1579,12 @@ public function get_orders_by_status(Request $request)
     $client_id = $request->input('client_id');
     $status = $request->input('status');
     $date = $request->input('date');
+    $date = $request->input('date');
+    $product_id = $request->input('product_id');
+    $lob_id = $request->input('lob_id');
+    $process_type_id = $request->input('process_type_id');
+
+
 
     // Convert the date string to a Carbon instance if necessary
     $formattedDate = Carbon::createFromFormat('m-d-Y', $date)->toDateString();
@@ -1569,6 +1595,9 @@ public function get_orders_by_status(Request $request)
         ->join('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
         ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
         ->where('stl_item_description.client_id', $client_id)
+        ->where('oms_order_creations.lob_id', $lob_id)
+        ->where('oms_order_creations.process_type_id', $process_type_id)
+        ->where('stl_item_description.id', $product_id)
         ->where('oms_status.status', $status)
         ->whereDate('oms_order_creations.order_date', '=', $formattedDate)
         ->where('oms_order_creations.is_active', 1)
@@ -1588,6 +1617,11 @@ public function getOrdersByDate(Request $request)
     $date = $request->input('date'); // Order date
     $formattedDate = Carbon::createFromFormat('m-d-Y', $date)->toDateString();
     $client_id = $request->input('client_id');
+    $product_id = $request->input('product_id');
+    $lob_id = $request->input('lob_id');
+    $process_type_id = $request->input('process_type_id');
+    // dd($product_id);
+
 
     // Query all orders for the given date (ignoring client and status)
     $orders = DB::table('oms_order_creations')
@@ -1596,6 +1630,9 @@ public function getOrdersByDate(Request $request)
         ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
         ->whereDate('oms_order_creations.order_date', '=', $formattedDate)
         ->where('stl_item_description.client_id', $client_id)
+        ->where('oms_order_creations.lob_id', $lob_id)
+        ->where('oms_order_creations.process_type_id', $process_type_id)
+        ->where('stl_item_description.id', $product_id)
         ->where('oms_order_creations.is_active', 1)
 
         ->select(

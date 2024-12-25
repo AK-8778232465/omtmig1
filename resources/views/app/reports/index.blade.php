@@ -253,6 +253,31 @@
 }
 
 
+.highlight-container {
+        text-align: center;
+        margin: 10px;
+        width: 120px;
+        white-space: nowrap;
+    }
+
+    .highlight-text {
+        display: block;
+        font-weight: bold;
+        color: #fff;
+        background-color: #959796; /* Green color for the text */
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 11px; /* Reduced font size for the text */
+    }
+
+    .highlight-count {
+        display: block;
+        font-weight: bold;
+        color: #121213; /* Blue color for the count */
+        font-size: 11px; /* Reduced font size for the count */
+    }
+
+
 </style>
 <div class="container-fluid d-flex reports">
     <div class="col-md-2 text-center left-menu">
@@ -352,8 +377,8 @@
             <div class="col-md-2" id="client_filter_2">
                 <div class="form-group">
                     <label for="client">Client</label>
-                    <select class="form-control select2-basic-multiple" name="dcf_client_id_2" id="client_id_dcf_2" multiple="multiple">
-                        <option selected value="All">All</option>
+                    <select class="form-control select2-basic-multiple" name="dcf_client_id_2" id="client_id_dcf_2">
+                        <option selected value="All">Select Client</option>
                         @forelse($clients as $client)
                         <option value="{{ $client->id }}">{{ $client->client_no }} ({{ $client->client_name }})</option>
                         @empty
@@ -645,31 +670,71 @@
         <h4 class="text-center mt-3">Daily Completion Status</h4>
         <div class="card shadow" style="width: 100%; margin: 20px;">
             <div class="card-body">
-                {{-- <h5 class="card-title" style="font-weight:bold;">Order Summary:</h5> --}}
+                <h5 class="card-title ml-3" style="font-weight:bold;">Order Summary:</h5>
 
                 <!-- First Row for all the buttons -->
                 <div class="d-flex flex-wrap">
-                    <span style="margin: 0 2px; font-weight:bold;">Orders Received: <span id="total_orders_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Yet to Assign: <span id="yet_to_Assign_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">WIP: <span id="wip_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Coversheet Prep: <span id="coversheet_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Doc Purchase: <span id="doc_purchase_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Clarification: <span id="clarification_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Ground Abstractor: <span id="ground_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Send for QC: <span id="send_qc_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Typing: <span id="typing_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Typing QC: <span id="typing_qc_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Hold: <span id="hold_sum">0</span></span>,
+                    <div class="highlight-container">
+                        <span class="highlight-text">Orders Received</span>
+                        <span id="total_orders_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Yet to Assign</span>
+                        <span id="yet_to_Assign_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">WIP</span>
+                        <span id="wip_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Coversheet Prep</span>
+                        <span id="coversheet_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Doc Purchase</span>
+                        <span id="doc_purchase_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Clarification</span>
+                        <span id="clarification_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Ground Abstractor</span>
+                        <span id="ground_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Send for QC</span>
+                        <span id="send_qc_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Typing</span>
+                        <span id="typing_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Typing QC</span>
+                        <span id="typing_qc_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Hold</span>
+                        <span id="hold_sum" class="highlight-count">0</span>
+                    </div>
+
+                    <div class="highlight-container">
+                        <span class="highlight-text">Completed</span>
+                        <span id="completed_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Partially Cancelled</span>
+                        <span id="partially_can_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Cancelled</span>
+                        <span id="cancelled_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Pending</span>
+                        <span id="pending_sum" class="highlight-count">0</span>
                 </div>
-
-
-                <!-- Second Row for the last two buttons with top margin -->
-                <div class="d-flex flex-wrap mt-3">
-                    <span style="margin: 0 2px; font-weight:bold;">Completed: <span id="completed_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Partially Cancelled: <span id="partially_can_sum">0</span></span>,
-                    <span style="margin: 0 2px; font-weight:bold;">Cancelled: <span id="cancelled_sum">0</span></span>
-                    <span style="margin: 0 2px; font-weight:bold;">Pending: <span id="pending_sum">0</span></span>
-
                 </div>
             </div>
         </div>
@@ -2390,6 +2455,27 @@ function formatResponseData(response) {
                 configurable: true
             });
 
+            Object.defineProperty(newEntry, 'product_id', {
+                value: item.product_id,
+                writable: true,
+                enumerable: false,  // This makes the property "hidden" during enumeration
+                configurable: true
+            });
+
+            Object.defineProperty(newEntry, 'lob_id', {
+                value: item.lob_id,
+                writable: true,
+                enumerable: false,  // This makes the property "hidden" during enumeration
+                configurable: true
+            });
+
+            Object.defineProperty(newEntry, 'process_type_id', {
+                value: item.process_type_id,
+                writable: true,
+                enumerable: false,  // This makes the property "hidden" during enumeration
+                configurable: true
+            });
+
             formattedData.push(newEntry);
             existing = newEntry; // Get reference to the new entry
         }
@@ -2408,16 +2494,7 @@ function formatResponseData(response) {
 
 
 
-$(document).ready(function() {
-        // Initialize DataTable when the page loads
-        $('#orderTable').DataTable({
-            paging: true, // Enable pagination
-            searching: true, // Enable search
-            pageLength: 10, // Set the default number of entries per page
-            lengthChange: true
 
-        });
-    });
 
 function daily_completion() {
     var fromDate = $('#fromDate_range').val();
@@ -2460,8 +2537,6 @@ function daily_completion() {
             $('#cancelled_sum').text(response.summary['Cancelled']);
 
             let pendingSum = formattedData.reduce((sum, entry) => sum + entry.Pending, 0);
-            console.log(pendingSum);
-
     // Display the total pending sum
     $('#pending_sum').text(pendingSum);
 
@@ -2511,7 +2586,10 @@ function daily_completion() {
                     data-client_id="${data.client_id}"
                     data-client="${data.client_name}"
                     data-status="${Object.keys(data)[index]}"
-                    data-order-id="${data.order_id}"> ${countValue} </a>`);  // Add order_id here
+                    data-order-id="${data.order_id}"
+                    data-product_id ="${data.product_id}"
+                    data-lob_id ="${data.lob_id}"
+                    data-process_type_id ="${data.process_type_id}"> ${countValue} </a>`);  // Add order_id here
             }
         });
     },
@@ -2533,7 +2611,20 @@ $(document).on('click', '.count-link', function() {
     const client = $(this).data('client');
     const status = $(this).data('status');
     const orderId = $(this).data('order-id'); // Capture order_id if necessary
+    const product_id = $(this).data('product_id');
+    const lob_id = $(this).data('lob_id');
+    const process_type_id = $(this).data('process_type_id');
     // const clientId = $("#client_id_dcf_2").val(); // Get the client_id from the select input
+    // Initialize DataTable before AJAX request to avoid reinitialization
+    if (!$.fn.dataTable.isDataTable('#orderTable')) {
+        $('#orderTable').DataTable({
+            destroy: true, // Allow reinitialization
+            paging: true,
+            searching: true,
+            info: true,
+            lengthChange: true
+        });
+    }
 
     // If it's not "Order Received", send date, client_id, and status
     if (status !== 'Order Received') {
@@ -2544,6 +2635,9 @@ $(document).on('click', '.count-link', function() {
                 date: date,           // Send the selected order date
                 // client_id: clientId,
                 client_id: client_id,
+                product_id: product_id,
+                lob_id: lob_id,
+                process_type_id: process_type_id,
                 status: status,       // Send the status
                 _token: '{{ csrf_token() }}'
             },
@@ -2553,15 +2647,18 @@ $(document).on('click', '.count-link', function() {
 
                 // Loop through the response and append order details to the modal
                 response.forEach(order => {
-                    $('#order_details_list').append(`
-                        <tr>
+                    $('#order_details_list').append(
+                        `<tr>
                             <td>${order.order_date}</td>
                             <td>${order.order_id}</td>
                             <td>${order.client_name}</td>
                             <td>${order.status}</td>
-                        </tr>
-                    `);
+                        </tr>`
+                    );
                 });
+
+                // Initialize DataTable after AJAX request to handle the newly loaded data
+                $('#orderTable').DataTable().clear().rows.add($('#order_details_list tr')).draw();
 
                 // Show the modal with order details
                 $('#countModal').modal('show');
@@ -2579,6 +2676,9 @@ $(document).on('click', '.count-link', function() {
                 date: date,
                 // client_id: clientId,
                 client_id: client_id,
+                product_id: product_id,
+                lob_id: lob_id,
+                process_type_id: process_type_id,
                 _token: '{{ csrf_token() }}'
             },
             success: function(response) {
@@ -2587,15 +2687,18 @@ $(document).on('click', '.count-link', function() {
 
                 // Loop through the response and append order details to the modal
                 response.forEach(order => {
-                    $('#order_details_list').append(`
-                        <tr>
+                    $('#order_details_list').append(
+                        `<tr>
                             <td>${order.order_date}</td>
                             <td>${order.order_id}</td>
                             <td>${order.client_name}</td>
                             <td>${order.status}</td>
-                        </tr>
-                    `);
+                        </tr>`
+                    );
                 });
+
+                // Initialize DataTable after AJAX request to handle the newly loaded data
+                $('#orderTable').DataTable().clear().rows.add($('#order_details_list tr')).draw();
 
                 // Show the modal with order details
                 $('#countModal').modal('show');
