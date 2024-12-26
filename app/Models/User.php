@@ -22,7 +22,7 @@ class User extends Authenticatable
     protected $table = 'oms_users';
     public $timestamps = false;
 
-    protected $fillable = ['username', 'emp_id', 'email', 'password', 'user_type_id', 'is_active','logged_in'];
+    protected $fillable = ['username', 'emp_id', 'email', 'password', 'user_type_id', 'is_active','logged_in', 'created_at','updated_at','created_by'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -49,9 +49,9 @@ class User extends Authenticatable
         $this->notify(new ResetPasswordNotification($token));
     }
 
-    public function usertypes()
+        public function stl_usertype()
     {
-        return $this->belongsTo(UserType::class, 'user_type_id', 'id');
+        return $this->belongsTo(UserType::class, 'user_type_id');
     }
 
     public static function getAllLowerLevelUserIds($parentId)
