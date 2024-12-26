@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 class UserImpersonateController extends Controller
 {
     public function index(){
-        $userList = User::with('stl_usertype:id,usertype')->get();
+        $userList = User::with('usertypes:id,user_types')->get();
         
         return view('impersonate', compact('userList'));
    }
@@ -21,7 +21,7 @@ class UserImpersonateController extends Controller
           session(['uid' => Auth::id()]);
           session(['user_type_id' => $user->user_type_id]);
           session(['is_approver' => $user->is_approver]);
-          // session(['department_id' => $user->usertype]);
+          session(['department_id' => $user->department_id]);
           session(['company_id' => isset($user->departments->company_id) ? $user->departments->company_id : 0]);
         
         return response()->json(['success' => true]);

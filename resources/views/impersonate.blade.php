@@ -28,14 +28,7 @@
                 <select id="userDropdown" class="form-control form-control-lg">
                     <option value="">Select a user</option>
                     @foreach($userList as $user)
-                    <option value="{{ $user->id }}">
-                            {{ trim($user->first_name . " " . $user->last_name) . " (" . $user->email . ")" }}
-                            @if($user->stl_usertype)
-                                - {{ $user->stl_usertype->usertype}}
-                            @else
-                                - No User Type
-                            @endif
-                        </option>
+                        <option value="{{ $user->id }}">{{ trim($user->first_name . " " . $user->last_name) . " (" .$user->email . ") - " . $user->usertypes->user_types}}</option>
                     @endforeach
                 </select>
             </div>

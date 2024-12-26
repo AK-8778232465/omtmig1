@@ -10,10 +10,4 @@ class UserType extends Model
     use HasFactory;
     protected $table = 'stl_usertype';
     public $timestamps = false;
-
-    public function users()
-    {
-        return $this->hasMany(User::class, 'user_type_id', 'id');
-    }
-
 }
