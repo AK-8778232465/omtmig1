@@ -1866,6 +1866,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 unset($statusMapping[16]);
                                 unset($statusMapping[17]);
                             }
+
                             if (in_array($order->status_id, [16, 17])) {
                                 unset($statusMapping[1]);
                                 unset($statusMapping[4]);
@@ -1917,6 +1918,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     unset($statusMapping[1]);
                                     unset($statusMapping[4]);
                                 }
+                               
                         }elseif($order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 ){
                             $statusMapping = [];
                             $statusMapping = [
@@ -1971,6 +1973,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                         if (in_array($order->status_id, [16, 17])) {
                                             unset($statusMapping[1]);
                                             unset($statusMapping[4]);
+                                        }
+                                        if (in_array($order->status_id, [16, 17]) && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16]) && Auth::user()->hasRole('PM/TL')) {
+                                            $statusMapping[16] = 'Typing';
+                                            $statusMapping[17] = 'Typing QC';
                                         }
                                 }elseif((!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 )||(!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 3 )){
                                     $statusMapping = [];
@@ -2033,7 +2039,6 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                         unset($statusMapping[1]);
                                         unset($statusMapping[13]);
                                         unset($statusMapping[4]);
-
 
                                         $statusMapping[16] = 'Typing';  // Ensure 16 is set to 'Typing'
                                         $statusMapping[17] = 'Typing QC';  // Set 17 to a desired status name (replace with actual status name)

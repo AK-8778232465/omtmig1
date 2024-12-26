@@ -1831,7 +1831,6 @@
                                                                 <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                                                             @endif
                                                                 <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
-                                                                <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         @endif
                                                             @if(in_array($orderData->client_id, [82]) && in_array($orderData->stl_process_id, [7]))
                                                                 <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
@@ -1842,6 +1841,7 @@
                                                                 <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
                                                                 <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
                                                         @endif
+                                                                <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                                 <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                                 <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
                                                                 <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
@@ -1913,14 +1913,9 @@
                                                                 ?>
                                                             <select class="form-control" style="width:300px" name="order_status" id="order_status" 
                                                                 <?= $isDisabled ? 'disabled' : '' ?>>
-                                                        @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
-                                                        <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                        <!-- @if(in_array($orderData->stl_process_id, [12, 7, 8, 9]) || !in_array($orderData->client_id, [84, 85, 86]))
-                                                            <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
-                                                        @endif                                               -->
-                                                        <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
-                                                        @endif
                                                         @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
+                                                        <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                        <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                                                         @endif
                                                         @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
