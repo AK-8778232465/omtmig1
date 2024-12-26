@@ -1636,15 +1636,15 @@
                                                 ?>
                                                 <select class="form-control" style="width:300px" name="order_status" id="order_status" 
                                                     <?= $isDisabled ? 'disabled' : '' ?>>
-                                            @if($orderData->status_id != 16)
+                                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
                                                 <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                 <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
                                             @endif
                                             @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
                                                 <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
                                                 <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
                                             @endif
-                                                <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>-
                                                 <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                 <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                 <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
@@ -1662,10 +1662,12 @@
                                         <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
                                             onclick="order_submition({{ $orderData->id }}, 1)" type="submit">Submit
                                     </button>
+                                    @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
                                     <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit"
                                             name="coversheetsubmit" onclick="order_submition({{ $orderData->id }}, 2)"
                                         type="submit">Coversheet Prep & Submit
                                     </button>
+                                    @endif
                         </div>
                                 @endif
                     </div>
@@ -1730,15 +1732,15 @@
                                                     <select class="form-control" style="width:300px" name="order_status" id="order_status" 
                                                         <?= $isDisabled ? 'disabled' : '' ?>>
 
-                                                    @if($orderData->status_id != 16)
-                                                    <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                    @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
+                                                        <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                        <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
                                                     @endif
                                                     @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
                                                         <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
                                                         <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
                                                     @endif
-                                                    <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
                                                     <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                     <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                     <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
@@ -1754,10 +1756,12 @@
                             <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
                                 onclick="order_submition({{$orderData->id}},1)" type="submit">Submit
                             </button>
+                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
                             <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit" name="coversheetsubmit"
                                 onclick="order_submition({{$orderData->id}},2)" type="submit">Coversheet Prep &
                                 Submit
                             </button>
+                            @endif
                                 </div>
                         </div>
                     </div>
@@ -1822,15 +1826,18 @@
                                                             <select class="form-control" style="width:300px" name="order_status" id="order_status" 
                                                                 <?= $isDisabled ? 'disabled' : '' ?>>
                                                         @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer') && !Auth::user()->hasRole('Typist/Typist_Qcer'))
-                                                            @if($orderData->status_id != 16)
+                                                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
                                                                 <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                                <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                                                             @endif
                                                                 <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
                                                                 <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         @endif
-                                                        @if($orderData->status_id != 16)
+                                                            @if(in_array($orderData->client_id, [82]) && in_array($orderData->stl_process_id, [7]))
+                                                                <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                                 <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                                        @endif
+                                                                <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
+                                                            @endif
                                                         @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
                                                                 <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
                                                                 <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
@@ -1913,7 +1920,7 @@
                                                         @endif                                               -->
                                                         <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         @endif
-                                                        @if($orderData->status_id != 16)
+                                                        @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
                                                         <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                                                         @endif
                                                         @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
@@ -1965,7 +1972,6 @@
                             </div>
                         </div>
                     </div>
-                   
                 <!-- // -->
             </div>
         @endif
@@ -1979,15 +1985,15 @@
                     <img src="{{ asset('assets/images/p_ip_error.png') }}" style="height: 30vh;" alt="IP Error">
                     <span class="error-message mt-3">
                     <span style="font-size: 30px;">Switch to US IP Address</span>
-    </span>
+            </span>
                 </div>
                 <div class="modal-footer d-flex justify-content-center">
                     @if($orderData && $orderData->id)
                         <button 
                             onclick="window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}';" 
                             class="btn btn-success me-2">
-        Refresh
-    </button>
+                            Refresh
+                        </button>
                     @endif
                     <button type="button" class="btn btn-warning" data-bs-dismiss="modal" aria-label="Close" onclick="window.location.href='{{ url('orders_status') }}'">Back</button>
                 </div>

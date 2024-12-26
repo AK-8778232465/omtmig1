@@ -1754,9 +1754,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         ->addColumn('status', function ($order) use ($request) {
                 if (in_array($order->client_id, [82, 84, 85, 86, 87, 89, 91, 88, 2, 13, 90, 92, 100, 99]))
                     {
-                            $statusMapping = [];
+                        $statusMapping = [];
                         if (Auth::user()->hasRole('Typist') && in_array($order->process_type_id, [12, 7])) {
                                             $statusMapping = [
+                                                1 => 'WIP',
                                                 14 => 'Clarification',
                                                 4 => 'Send for QC',
                                                 16 => 'Typing',
@@ -1767,9 +1768,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                                 20 => 'Partially Cancelled',
                                                 3 => 'Cancelled',
                                             ];
+                                            if(in_array($order->client_id, [82]) && in_array($order->process_type_id, [7])){
+                                                $statusMapping[15] = 'Doc Purchase';
+                                            }
                                 } elseif (Auth::user()->hasRole('Typist/Qcer')  && in_array($order->process_type_id, [12, 7])) {
                                         $statusMapping = [
-                                            
+                                            1 => 'WIP',
                                             14 => 'Clarification',
                                             4 => 'Send for QC', 
                                             16 => 'Typing',
@@ -1783,10 +1787,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                         if (in_array($order->status_id, [16, 17])) {
                                             unset($statusMapping[4]);
                                         }
+                                        if(in_array($order->client_id, [82]) && in_array($order->process_type_id, [7])){
+                                            $statusMapping[15] = 'Doc Purchase';
+                                        }
 
                             }elseif (Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')  && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16])) {
                                 $statusMapping = [
-
                                     14 => 'Clarification',
                                     18 => 'Ground Abstractor',
                                     2 => 'Hold',
@@ -1796,6 +1802,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     16 => 'Typing',
                                     17 => 'Typing QC',
                                 ];
+
+                                if(in_array($order->client_id, [82]) && in_array($order->process_type_id, [7])){
+                                    $statusMapping[15] = 'Doc Purchase';
+                                }
 
                             }elseif (Auth::user()->hasRole('Typist/Typist_Qcer')) {
                                 $statusMapping = [
@@ -1813,6 +1823,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 if (in_array($order->status_id, [16, 17])) {
                                     unset($statusMapping[4]);
                             }
+                            if(in_array($order->client_id, [82]) && in_array($order->process_type_id, [7])){
+                                $statusMapping[15] = 'Doc Purchase';
+                            }
 
                         }
         
@@ -1828,6 +1841,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     20 => 'Partially Cancelled',
                                     3 => 'Cancelled',
                                 ];
+                                if(in_array($order->client_id, [82]) || in_array($order->process_type_id, [7])){
+                                    $statusMapping[15] = 'Doc Purchase';
+                                }
                             }
                 elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
                         $statusMapping = [
@@ -1986,6 +2002,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                         20 => 'Partially Cancelled',
                                         3 => 'Cancelled',
                                     ];
+
+                                    if (in_array($order->status_id, [16, 17])) {
+                                        unset($statusMapping[13]);
+                                    }
                                 }
                             else{
                                     $statusMapping = [];
