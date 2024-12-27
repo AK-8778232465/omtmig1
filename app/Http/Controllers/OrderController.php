@@ -50,7 +50,7 @@ class OrderController extends Controller
            if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
                 if ($user->user_type_id == 6) {
                     // For user_type_id = 6
-                    $statusCountsQuery->where('assignee_user_id', $user->id);
+                    $statusCountsQuery->where('assignee_user_id', $user->id)->whereNotIn('oms_order_creations.status_id', [16, 17]);
                 } elseif ($user->user_type_id == 7) {
                     $statusCountsQuery->where('assignee_qa_id', $user->id)->whereNotIn('status_id', [1, 16, 17]);
                 } elseif ($user->user_type_id == 8) {
@@ -692,7 +692,7 @@ class OrderController extends Controller
                 }
             } elseif ($request->status == 'All') {
                 if(in_array($user->user_type_id, [6])) {
-                    $query->where('oms_order_creations.assignee_user_id', $user->id);
+                    $query->where('oms_order_creations.assignee_user_id', $user->id)->whereNotIn('oms_order_creations.status_id', [16, 17]);
                 } elseif(in_array($user->user_type_id, [7])) {
                 $query->where(function ($optionalquery) use ($user) {
                     $optionalquery->where(function ($subQuery) use ($user) {
@@ -1772,7 +1772,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                             $statusMapping[15] = 'Doc Purchase';
                                         }
 
-                            }elseif (Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')  && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16])) {
+                            }elseif ((Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer'))  && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16])) {
                                 $statusMapping = [
                                     14 => 'Clarification',
                                     18 => 'Ground Abstractor',
@@ -1784,10 +1784,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     17 => 'Typing QC',
                                 ];
 
-                                if(in_array($order->client_id, [82]) && in_array($order->process_type_id, [7])){
+                                if(in_array($order->client_id, [82]) && in_array($order->process_type_id, [7, 8, 9])){
                                     $statusMapping[15] = 'Doc Purchase';
                                 }
-
                             }elseif (Auth::user()->hasRole('Typist/Typist_Qcer')) {
                                 $statusMapping = [
                                     
