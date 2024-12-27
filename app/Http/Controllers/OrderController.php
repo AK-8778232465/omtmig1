@@ -1818,7 +1818,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             
                         }
         
-                elseif((!$order->typist_id  && $order->status_id == 16 )||($order->typist_id && $order->status_id == 16 ) || (!$order->typist_id  && $order->status_id == 17 ) || ($order->typist_id && $order->status_id == 17 )){
+                    elseif((!$order->typist_id  && $order->status_id == 16 )||($order->typist_id && $order->status_id == 16 ) || (!$order->typist_id  && $order->status_id == 17 ) || ($order->typist_id && $order->status_id == 17 )){
                                 $statusMapping = [];
                                 $statusMapping = [
                                     14 => 'Clarification',
@@ -1832,6 +1832,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 ];
                                 if(in_array($order->client_id, [82]) || in_array($order->process_type_id, [7])){
                                     $statusMapping[15] = 'Doc Purchase';
+                                }
+                                if(in_array($order->process_type_id, [12, 7])){
+                                    $statusMapping[1] = 'WIP';
+                                    $statusMapping[4] = 'Send for QC';
                                 }
                                 
                             }
@@ -1857,10 +1861,11 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 unset($statusMapping[17]);
                             }
 
-                            if (in_array($order->status_id, [16, 17])) {
+                            if (in_array($order->status_id, [16, 17]) && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16])) {
                                 unset($statusMapping[1]);
                                 unset($statusMapping[4]);
                             }
+            
                 } else {
                         $statusMapping = [
                             1 => 'WIP',
@@ -1883,10 +1888,11 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                             unset($statusMapping[17]);
                         }
 
-                        if (in_array($order->status_id, [16, 17])) {
+                        if (in_array($order->status_id, [16, 17]) && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16])) {
                             unset($statusMapping[1]);
                             unset($statusMapping[4]);
                         }
+                        
                 }
             
                 }else{
