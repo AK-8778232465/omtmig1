@@ -618,7 +618,15 @@ class OrderController extends Controller
             }
             else {
                     if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
-                        $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
+                        // $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
+                        $query->where(function ($query) {
+                            $query->whereNotNull('oms_order_creations.assignee_user_id')
+                                  ->orWhere(function ($query) {
+                                      $query->whereNotNull('oms_order_creations.typist_id')
+                                            ->whereNull('oms_order_creations.assignee_user_id');
+                                  });
+                        })->where('oms_order_creations.status_id', $request->status);
+                        
                     } elseif(in_array($user->user_type_id, [6]) && $request->status != 13){
                         $query->where('oms_order_creations.status_id', $request->status)->where('oms_order_creations.assignee_user_id', $user->id);
                     }
@@ -678,6 +686,7 @@ class OrderController extends Controller
                             $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
                                 ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
                         });
+                                    
                         } else{
                             $query->where('oms_order_creations.status_id', $request->status);
                             $query->where(function ($optionalquery) use($user) {
@@ -1787,6 +1796,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 if(in_array($order->client_id, [82]) && in_array($order->process_type_id, [7, 8, 9])){
                                     $statusMapping[15] = 'Doc Purchase';
                                 }
+
                             }elseif (Auth::user()->hasRole('Typist/Typist_Qcer')) {
                                 $statusMapping = [
                                     
@@ -1839,7 +1849,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 }
                                 
                             }
-                elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP/VP')) {
+                elseif (Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('VP')) {
                         $statusMapping = [
                             1 => 'WIP',
                             15 => 'Doc Purchase',
@@ -1855,7 +1865,12 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                         ];
                             if (!in_array($order->process_type_id, [12, 7, 8, 9]) || in_array($order->client_id, [84, 85, 86, 13, 2, 87, 88, 89, 90, 91, 92])) {
                             unset($statusMapping[15]);
-                        }
+                            }
+                            
+                            if(Auth::user()->hasRole('PM/TL') && in_array($order->client_id, [82]) && in_array($order->process_type_id, [7, 8, 9])){
+                                $statusMapping[15] = 'Doc Purchase';
+                            }
+
                             if (!in_array($order->process_type_id, [12, 7])) {
                                 unset($statusMapping[16]);
                                 unset($statusMapping[17]);
