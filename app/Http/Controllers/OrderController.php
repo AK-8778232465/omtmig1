@@ -732,14 +732,7 @@ class OrderController extends Controller
                         ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15]);
                 }
                 else {
-                    // $query->whereNotNull('oms_order_creations.assignee_user_id')->orWhereIn('oms_order_creations.process_type_id',[2, 4, 6, 8, 9, 16]);
-                    $query->where(function ($query) {
-                        $query->whereNotNull('oms_order_creations.assignee_user_id')
-                              ->orWhere(function ($query) {
-                                  $query->whereNotNull('oms_order_creations.typist_id')
-                                        ->whereNull('oms_order_creations.assignee_user_id');
-                              });
-                    })->orWhereIn('oms_order_creations.process_type_id',[2, 4, 6, 8, 9, 16]);
+                    $query->whereNotNull('oms_order_creations.assignee_user_id')->orWhereIn('oms_order_creations.process_type_id',[2, 4, 6, 8, 9, 16]);
                 }
             } elseif ($request->status == 6) {
                 if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9, 23, 24])) {
