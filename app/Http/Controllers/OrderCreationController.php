@@ -157,9 +157,20 @@ public function getlobid(Request $request){
         })
         ->get();
 
+        $status_id = in_array($process_type_id, [2, 4, 6, 8, 9, 16]) ? 16 : 1;
+
+
+        // Get the status record based on the determined status_id
+        $get_status = DB::table('oms_status')
+            ->select('id', 'status')
+            ->where('id', $status_id)
+            ->first();
+
     return response()->json([
         'process_code' => $process_code,
-        'tiers' => $get_tier
+        'tiers' => $get_tier,
+        'status' => $get_status
+
     ]);
  
  
