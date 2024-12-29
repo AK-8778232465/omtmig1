@@ -416,7 +416,7 @@ class OrderController extends Controller
                 'oms_order_creations.assignee_qa_id',
                 'oms_order_creations.typist_id',
                 'oms_order_creations.typist_qc_id',
-                // 'oms_order_creations.tax_bucket',
+                'oms_order_creations.tax_bucket',
                 'oms_order_creations.associate_id',
                 'stl_lob.name as lob_name',
                 'stl_process.name as process_name',
@@ -1548,9 +1548,9 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
     }
     $query->whereIn('oms_order_creations.process_id', $processIds);
 
-    // if ($request->status == 'tax'){
-    //     $query->where('oms_order_creations.tax_bucket', 1);
-    // }
+    if ($request->status == 'tax'){
+        $query->where('oms_order_creations.tax_bucket', 1);
+    }
 
     if ($searchType == 1 && !empty($searchInputs)) {
 
