@@ -102,9 +102,6 @@
 #priority{
     color:blue;
 }
-.black-text {
-    color: black;
-}
 
 </style>
 
@@ -212,7 +209,7 @@
         <div class="card-body">
             <div class="row justify-content-start m-3 mt-2 mb-4" id="statusButtons">
                 <div class="bg-info shadow-lg p-0 rounded text-white" style="text-decoration: none; font-size:0.7rem">
-                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Qcer', 'Typist', 'Typist/Qcer', 'Typist/Typist_Qcer', 'Tax User'])) d-none @endif" style="cursor: pointer;">Yet to Assign User<span id="status_6_count"></span>
+                    <button id="status_6"  class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif" style="cursor: pointer;">Yet to Assign User<span id="status_6_count"></span>
                      <div style="">
                             <div style="display: inline-block;"></div>
                             <!-- <span id="tat_status_6_third_count"></span> -->
@@ -227,85 +224,79 @@
                             <span id="tat_status_7_fourth_count">0</span>
                         </div>
                     </button>
-                    <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Qcer', 'Typist', 'Typist/Qcer', 'Typist/Typist_Qcer', 'Tax User'])) d-none @endif">WIP<span id="status_1_count"></span> <div style="">
+                    <button id="status_1" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif">WIP<span id="status_1_count"></span> <div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_1_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_1_fourth_count">0</span>
                         </div></button>
-                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Qcer', 'Typist', 'Typist/Qcer', 'Typist/Typist_Qcer', 'Tax User'])) d-none @endif">Coversheet Prep<span id="status_13_count"></span><div style="">
+                    <button id="status_13" class="btn btn-info status-btn @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif">Coversheet Prep<span id="status_13_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_13_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_13_fourth_count">0</span>
                         </div></button>
-                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Process/Qcer', 'Typist', 'Typist/Qcer', 'Typist/Typist_Qcer', 'Tax User'])) d-none @endif" >Doc Purchase<span id="status_15_count"></span> <div style="">
+                    <button id="status_15" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) d-none @endif" >Doc Purchase<span id="status_15_count"></span> <div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_15_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_15_fourth_count">0</span>
                         </div></button>
-                    <button id="status_18" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Ground Abstractor<span id="status_18_count"></span><div style="">
+  					<button id="status_18" class="btn btn-info status-btn">Ground Abstractor<span id="status_18_count"></span><div style="">
                         <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                         <span id="tat_status_18_third_count">0</span>
                         <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                         <span id="tat_status_18_fourth_count">0</span>
                     </div></button>
-                    <button id="status_tax" class="btn btn-info status-btn  @if(!(Auth::user()->hasAnyRole(['Tax User', 'Super Admin', 'Business Head', 'PM/TL', 'SPOC', 'AVP', 'Admin', 'VP']))) d-none @endif">TAX<span id="status_tax_count"></span><div style="">
-                        <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px;"></div>
-                        <!-- <span id="tat_status_19_third_count">0</span> -->
-                        <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
-                        <!-- <span id="tat_status_19_fourth_count">0</span> -->
-                    </div></button>
-                    <button id="status_14" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Clarification<span id="status_14_count"></span><div style="">
+                    <button id="status_14" class="btn btn-info status-btn">Clarification<span id="status_14_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_14_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_14_fourth_count">0</span>
                         </div></button>
-                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User', 'Typist', 'Typist/Qcer', 'Typist/Typist_Qcer' ])) d-none @endif">Send For QC<span id="status_4_count"></span><div style="">
+                    <button id="status_4" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist/Qcer')) d-none @endif">Send For QC<span id="status_4_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_4_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_4_fourth_count">0</span>
                         </div></button>
-                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User', 'Typist/Qcer', 'Process/Qcer', 'Qcer', 'Process'])) d-none @endif">Typing<span id="status_16_count"></span><div style="">
+                    <button id="status_16" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist/Qcer') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing<span id="status_16_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_16_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_16_fourth_count">0</span>
                         </div></button>
-                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User', 'Typist', 'Process/Qcer', 'Qcer', 'Process'])) d-none @endif">Typing QC<span id="status_17_count"></span> <div style="">
+                    <button id="status_17" class="btn btn-info status-btn @if(Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Process/Qcer')) d-none @endif">Typing QC<span id="status_17_count"></span> <div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_17_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_17_fourth_count">0</span>
                         </div></button>
-                    <button id="status_2" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Hold<span id="status_2_count"></span><div style="">
+                    <button id="status_2" class="btn btn-info status-btn">Hold<span id="status_2_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_2_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_2_fourth_count">0</span>
                         </div></button>
-                    <button id="status_5" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Completed<span id="status_5_count"></span><div style="">
+                    <button id="status_5" class="btn btn-info status-btn">Completed<span id="status_5_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_5_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_5_fourth_count">0</span>
                         </div></button>
-                    <button id="status_20" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Partially Cancelled<span id="status_20_count"></span><div style="">
+                    <button id="status_20" class="btn btn-info status-btn">Partially Cancelled<span id="status_20_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_20_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_20_fourth_count">0</span>
                     </div></button>
-                    <button id="status_3" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Cancelled<span id="status_3_count"></span><div style="">
+                    <button id="status_3" class="btn btn-info status-btn">Cancelled<span id="status_3_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_3_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                             <span id="tat_status_3_fourth_count">0</span>
                         </div></button>
-                    <button id="status_All" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif" >All<span id="status_All_count"></span><div style="">
+                    <button id="status_All" class="btn btn-info status-btn" >All<span id="status_All_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_All_third_count">0</span>
                             <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
@@ -452,7 +443,7 @@
 
                     <div class="form-group">
                         <div class="row d-none" id="assign_tab">
-                            <div class="col-12 row mt-5">
+                            <div class="col-12 row">
                                 <div class="col-2">
                                     <select style="width: 100%;" class="form-control form-control-sm" id="user_id" name="user_id">
                                         <option selected disabled value="">Select User</option>
@@ -488,14 +479,6 @@
                                         <option selected disabled value="">Select Typists_QC</option>
                                         @foreach ($typists_qcs as $typists_qc)
                                             <option value="{{ $typists_qc->id }}">{{ $typists_qc->username }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                 <div class="col-2" id="status_change_div">
-                                    <select style="width: 100%;" class="form-control form-control" id="status_change" name="status_change">
-                                        <option selected disabled value="">Select Status</option>
-                                        @foreach ($status_changes as $status_change)
-                                            <option value="{{ $status_change->id }}">{{ $status_change->status }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -909,10 +892,10 @@ $(document).ready(function() {
                 { "data": "short_code", "name": "short_code" },
                 { "data": "county_name", "name": "county_name" },
                 { "data": "status", "name": "status" },
-                { "data": "assignee_user", "name": "assignee_user" },
-                { "data": "assignee_qa", "name": "assignee_qa" },
-                { "data": "typist_user", "name": "typist_user", "visible": @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Process')) false @else true @endif },
-                { "data": "typist_qa", "name": "typist_qa", "visible": @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Process')) false @else true @endif },
+                { "data": "assignee_user", "name": "assignee_user", "visible": @if(Auth::user()->hasRole('Process')) false @else true @endif },
+                { "data": "assignee_qa", "name": "assignee_qa", "visible": @if(Auth::user()->hasRole('Qcer')) false @else true @endif },
+                { "data": "typist_user", "name": "typist_user", "visible": @if(Auth::user()->hasRole('Typist')) false @else true @endif },
+                { "data": "typist_qa", "name": "typist_qa", "visible": @if(Auth::user()->hasRole('Typist/Qcer')) false @else true @endif },
                
 
                 {
@@ -924,7 +907,7 @@ $(document).ready(function() {
                 {
                     "data": "action",
                     "name": "action",
-                    "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer') || Auth::user()->hasRole('Typist') || Auth::user()->hasRole('Typist_Qcer')) false @else true @endif,
+                    "visible": @if(Auth::user()->hasRole('Process') || Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Typist/Typist_Qcer')) false @else true @endif,
                     "orderable": false,
                 },
                 { "data": "associate_name", "name": "associate_name", "visible": true},
@@ -1212,8 +1195,8 @@ function updateStatusCounts() {
         @endif
 
         @if(Auth::user()->hasRole('Typist/Typist_Qcer'))
-        for (let status = 1; status <= 21; status++) {
-            if (status == 18 || status == 14 || status == 16 || status == 17 || status == 2 || status == 5 || status == 3 || status == 4 || status == 20) {
+        for (let status = 1; status <= 20; status++) {
+            if (status == 18 || status == 14 || status == 16 || status == 17 || status == 2 || status == 5 || status == 3 || status == 4) { // Include statuses 1, 4, and 6
                 let count = statusCounts[status] || 0;
                 total += count;
                 $('#status_' + status + '_count').text(' (' + count + ')');
@@ -1229,35 +1212,7 @@ function updateStatusCounts() {
         let count7 = statusCounts[7] || 0;
         $('#status_6_count').text(' (' + count6 + ')');
         $('#status_7_count').text(' (' + count7 + ')');
-
-        // Calculate yetToAssignTotal
-        let yetToAssignQa = response.yetToAssignCounts.yetToAssignQa ?? 0;
-        let yetToAssignTypist = response.yetToAssignCounts.yetToAssignTypist ?? 0;
-        let yetToAssignTypistQa = response.yetToAssignCounts.yetToAssignTypistQa ?? 0;
-
-        let yetToAssignTotal = yetToAssignQa + yetToAssignTypist + yetToAssignTypistQa;
-
-        // Update the UI
-       
-        @if(Auth::user()->hasRole('Process'))
-            $('#status_All_count').html(' (' + total + ')');
-            $('#status_4_count').html('(' + (statusCounts[4] ?? 0) + ')');
-            $('#status_16_count').html('(' + (statusCounts[16] ?? 0) + ')');
-            $('#status_17_count').html('(' + (statusCounts[17] ?? 0) + ')');
-        @else
-            $('#status_All_count').html(' (' + total + 
-                "+<span class='black-text'>" + yetToAssignTotal + "</span>)");
-            $('#status_4_count').html('(' + (statusCounts[4] ?? 0) + 
-                "+<span class='black-text'>" + yetToAssignQa + "</span>)");
-            $('#status_16_count').html('(' + (statusCounts[16] ?? 0) + 
-                "+<span class='black-text'>" + yetToAssignTypist + "</span>)");
-            $('#status_17_count').html('(' + (statusCounts[17] ?? 0) + 
-                "+<span class='black-text'>" + yetToAssignTypistQa + "</span>)");
-        @endif
-
-
-
-
+        $('#status_All_count').text(' (' + total + ')');
 
         // Initialize sums for third and fourth counts
         let allThirdCount = 0;
@@ -1346,7 +1301,7 @@ $(document).ready(function() {
             });
         } else {
             $('#assign_tab').addClass('d-none');
-            $('#typist_id').empty().append('<option selected disabled value="">Select Typist</option>');
+            $('#typist_id').empty();
     }
     });
 
@@ -1370,7 +1325,7 @@ $(document).ready(function() {
             });
         } else {
             $('#assign_tab').addClass('d-none');
-            $('#typist_qc_id').empty().append('<option selected disabled value="">Select Typist_QC</option>');
+            $('#typist_qc_id').empty();
     }
     });
 
@@ -1513,22 +1468,22 @@ $(document).on('change', 'input.check-one', function() {
                 if (status != null) {
                         userlist = <?php echo json_encode($typists); ?>;
                 }
+
+                $('#typist_id').empty();
+                $('#typist_id').append('<option selected disabled value="">Select Typist</option>');
                 $.each(userlist, function(index, user) {
                     $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
                 });
         }else{
             $('#assign_tab').addClass('d-none');
-                $.each(userlist, function(index, user) {
-                    $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
-                });
-
+            $('#typist_id').empty();
+            $('#typist_div').addClass('d-none');
         }
 
         } else {
             $('#assign_tab').addClass('d-none');
-                $.each(userlist, function(index, user) {
-                    $('#typist_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
-                });
+            $('#typist_id').empty();
+            $('#typist_div').addClass('d-none');
         }
 });
 
@@ -1555,16 +1510,13 @@ $(document).on('change', 'input.check-one', function() {
             });
         }else{
             $('#assign_tab').addClass('d-none');
-            $.each(userlist, function(index, user) {
-                $('#typist_qc_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
-            });
-
+            $('#typist_id').empty();
+            $('#typist_qc_div').addClass('d-none');
         }
         } else {
             $('#assign_tab').addClass('d-none');
-            $.each(userlist, function(index, user) {
-                $('#typist_qc_id').append('<option value="' + user.id + '">' + user.emp_id + ' (' + user.username + ')' + '</option>');
-            });
+            $('#typist_qc_id').empty();
+            $('#typist_qc_div').addClass('d-none');
 
         }
 });
@@ -1601,7 +1553,7 @@ $(document).on('click', '.status-dropdown', function() {
     var rowId = $(this).data('row-id');
 
     $.ajax({
-        url: "{{ route('updateClickTime') }}",
+        url: '{{ route('updateClickTime') }}',
         type: 'POST',
         data: {
             order_id: rowId,
@@ -1979,84 +1931,6 @@ $(document).on('focus', '.status-dropdown', function() {
                     );
                 }
             });
-        }
-    });
-});
-
-
-$(document).ready(function() {
-    // Handle change event on the select element
-    $('#status_change').on('change', function() {
-        // Get the selected value from the select element
-        var selectedStatus = $(this).val();
-        let checkedOrdersArray = $('input[name="orders[]"]:checked');
-
-        // Check if a valid status is selected
-        if (selectedStatus) {
-            // Trigger SweetAlert for confirmation
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You are about to change the status.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.value) {
-                    // Send the selected status to your server via AJAX
-                    $.ajax({
-                        url: "{{ route('status_change') }}",
-                        type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}', // CSRF token for Laravel
-                            status_id: selectedStatus,
-                            orders: checkedOrdersArray.map(function() {
-                                return this.value;
-                            }).get(),
-                        },
-                        success: function(response) {
-                            // Handle the response (optional)
-                            if (response.success) {
-                                Swal.fire(
-                                    'Success!',
-                                    'Status has been updated.',
-                                    'success'
-                                ).then(() => {
-                                    // Reload the page after a successful update
-                                    location.reload();
-                                });
-                            }else {
-                                Swal.fire(
-                                    'Error!',
-                                    response.message || 'Something went wrong.',
-                                    'error'
-                                ).then(() => {
-                                    // Reset the dropdown after the error message
-                                    $('#status_change').val('');
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            // Handle error (optional)
-                            Swal.fire(
-                                'Error!',
-                                'Something went wrong, please try again.',
-                                'error'
-                            );
-                        }
-                    });
-                } else {
-                    // If the user cancels, reset the select box to the default value
-                    $('#status_change').val('');
-                }
-            });
-        } else {
-            // If no status is selected, show the warning
-            Swal.fire(
-                'Warning!',
-                'Please select a status before proceeding.',
-                'warning'
-            );
         }
     });
 });

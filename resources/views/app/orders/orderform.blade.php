@@ -559,30 +559,16 @@
                                             <div class="col-10 mb-2">
                                     <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                         <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                        <!-- <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif> -->
-                                                <?php
-                                                    $isDisabled = Auth::user()->hasRole('Typist') && 
-                                                            Auth::user()->hasRole('Typist/Qcer') && 
-                                                            !isset($orderData->assignee_user);
-                                                ?>
-                                                <select class="form-control" style="width:300px" name="order_status" id="order_status" 
-                                                    <?= $isDisabled ? 'disabled' : '' ?>>
-                                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
+                                        <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
                                             <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                            <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
+                                            <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                                             <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                            <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
                                             <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
-                                            @endif
-                                            @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
-                                                <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
-                                                <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                            @endif
                                             <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                             <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
-                                                <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                                <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
                                             <option value="20" id="status_20"  @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
-                                                <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
-
                                         </select>
                                     </div>
                                 </div>
@@ -595,8 +581,7 @@
                         </div>
                     </div>
                         <div class="card-body">
-                                <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
-                                    style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                            <table id="orderstatusdetail_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                 <thead>
                                     <tr>
                                         <th>Comments</th>
@@ -612,14 +597,12 @@
                                                 <td>{{ $status->comment ?? 'N/A' }}</td>
                                                 <td>{{ $status->status }}</td>
                                                 <td>{{ $status->username ?? 'N/A' }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}
-                                            </td>
+                                                <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}</td>
                                             </tr>
                                         @endforeach
                                     @else
                                         <tr>
-                                            <td class="text-center" colspan="4">No status history available for this
-                                                order.</td>
+                                            <td class="text-center" colspan="4">No status history available for this order.</td>
                                         </tr>
                                     @endif
                                 </tbody>
@@ -633,59 +616,36 @@
                                     <div class="row mt-4 mb-4">
                                 <div class="col-lg-4 ">
                                     <div class="font-weight-bold">Comments :</div>
-                                <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment"
-                                    cols="30" rows="4"></textarea>
+                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4"></textarea>
                                 </div>
                                     <div class="col-lg-5 mx-5 mt-1">
                                         <div class="row">
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                 <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                <!-- <select style="width:300px"  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif> -->
-                                                    <?php
-                                                        $isDisabled = Auth::user()->hasRole('Typist') && 
-                                                                Auth::user()->hasRole('Typist/Qcer') && 
-                                                                !isset($orderData->assignee_user);
-                                                    ?>
-                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" 
-                                                        <?= $isDisabled ? 'disabled' : '' ?>>
-
-                                                    @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
+                                                <select style="width:300px"  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
                                                     <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                    <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
+                                                    <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                                                     <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                    <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
                                                     <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
-                                                    @endif
-                                                    @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
-                                                        <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
-                                                        <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                                    @endif
                                                     <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                     <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
-                                                    <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                                    <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
                                                     <option value="20" id="status_20" @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
-                                                    <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-center my-4">
-                            <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
-                                onclick="order_submition({{$orderData->id}},1)" type="submit">Submit
-                            </button>
-                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
-                            <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit" name="coversheetsubmit"
-                                onclick="order_submition({{$orderData->id}},2)" type="submit">Coversheet Prep &
-                                Submit
-                            </button>
-                            @endif
+                                    <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
+                                    <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit" name="coversheetsubmit" onclick="order_submition({{$orderData->id}},2)" type="submit">Coversheet Prep & Submit</button>
                                 </div>
                         </div>
                     </div>
                         <div class="card-body">
-                    <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
-                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                            <table id="orderstatusdetail_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                 <thead>
                                     <tr>
                                         <th>Comments</th>
@@ -716,10 +676,8 @@
                 </div>
             </div>
         </div>
-</div>
-</div>
-@endif
-<!-- // -->
+                @endif
+                <!-- // -->
                 @if($orderData->client_id == 82)
                 <h6 class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> font-weight-bold">Order Submission :</h6>
                 <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
@@ -735,42 +693,24 @@
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                 <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                    <!-- <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif> -->
-                                                            <?php
-                                                                $isDisabled = Auth::user()->hasRole('Typist') && 
-                                                                            Auth::user()->hasRole('Typist/Qcer') && 
-                                                                            !isset($orderData->assignee_user);
-                                                            ?>
-                                                            <select class="form-control" style="width:300px" name="order_status" id="order_status" 
-                                                                <?= $isDisabled ? 'disabled' : '' ?>>
-                                                        <!-- @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer') && !Auth::user()->hasRole('Typist/Typist_Qcer'))
-                                                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
-                                                                <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                                <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                                            @endif
-                                                                <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
-                                                        @endif -->
-                                                            <!-- @if(in_array($orderData->client_id, [82]) && in_array($orderData->stl_process_id, [7]))
+                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                        @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer') && !Auth::user()->hasRole('Typist/Typist_Qcer'))
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                                <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                                                             <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
-                                                            @endif -->
-                                                            @if(in_array($orderData->client_id, [82]) && !in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
-                                                                <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                                <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                        <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         @endif
-                                                        @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
+
+                                                        <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                        @if(in_array($orderData->stl_process_id, [12, 7]))
                                                         <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
 
                                                         <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
                                                         @endif
-                                                                <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
-                                                                <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
                                                         <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                         <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                                                <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
                                                         <option value="20" id="status_20" @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
                                                         <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+                                                        <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -830,29 +770,26 @@
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
                                                     <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                    <!-- <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif> -->
-                                                                <?php
-                                                                    $isDisabled = !Auth::user()->hasRole('Typist') && 
-                                                                                !Auth::user()->hasRole('Typist/Qcer') && 
-                                                                                !isset($orderData->assignee_user);
-                                                                ?>
-                                                            <select class="form-control" style="width:300px" name="order_status" id="order_status" 
-                                                                <?= $isDisabled ? 'disabled' : '' ?>>
-                                                        @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
+                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif>
+                                                        @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer'))
                                                         <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                        <!-- @if(in_array($orderData->stl_process_id, [12, 7, 8, 9]) || !in_array($orderData->client_id, [84, 85, 86]))
+                                                            <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
+                                                        @endif                                               -->
                                                         <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
-                                                        <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
                                                         @endif
-                                                        @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
+
+                                                        <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                        @if(in_array($orderData->stl_process_id, [12, 7]))
                                                         <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
 
                                                         <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
                                                         @endif
                                                         <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
                                                         <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                                        <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
 														<option value="20" id="status_20" @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
                                                         <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+                                                        <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
                                                     </select>
                                                 </div>
                                             </div>

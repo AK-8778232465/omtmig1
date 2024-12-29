@@ -258,45 +258,18 @@ class OrdersCreationImport implements ToModel, ShouldQueue, WithEvents, WithHead
         }
 
         if ($Status == 'WIP') {
-        if (!in_array($stl_process->id, [2, 4, 6, 8, 9, 16])) {
             $statusRecord = Status::where('status', $Status)->first();
+
             if ($statusRecord) {
                 $Status = $statusRecord->id;
-            } else {
+        } else {
                 $data['comments'] = 'The status WIP does not match the records in the database';
                 OrderTemp::insert($data);
                 ++$this->unsuccess_rows;
                 return null;
             }
         } else {
-            // If process_type_id is not in [2,4,6], Typing status is not allowed
-            $data['comments'] = 'The status WIP is not allowed for this process type';
-            OrderTemp::insert($data);
-            ++$this->unsuccess_rows;
-            return null;
-        }
-
-        } else if ($Status == 'Typing') {
-        // Handle Typing status, check allowed process_type_id values
-        if (in_array($stl_process->id, [2, 4, 6, 8, 9, 16])) {
-            $statusRecord = Status::where('status', $Status)->first();
-            if ($statusRecord) {
-                $Status = $statusRecord->id;
-        } else {
-                $data['comments'] = 'The status Typing does not match the records in the database';
-                OrderTemp::insert($data);
-                ++$this->unsuccess_rows;
-                return null;
-            }
-        } else {
-            // If process_type_id is not in [2,4,6], Typing status is not allowed
-            $data['comments'] = 'The status Typing is not allowed for this process type';
-                OrderTemp::insert($data);
-                ++$this->unsuccess_rows;
-                return null;
-            }
-        } else {
-            $data['comments'] = 'The status is not WIP or Typing';
+            $data['comments'] = 'The status is not WIP';
             OrderTemp::insert($data);
             ++$this->unsuccess_rows;
             return null;
