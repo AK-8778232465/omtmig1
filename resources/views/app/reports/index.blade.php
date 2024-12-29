@@ -135,6 +135,149 @@
     text-align: center; 
 }
 
+
+/* Apply a fixed table layout for consistent column width */
+#daily_completion_table {
+    table-layout: fixed;  /* Ensure that the table respects fixed column widths */
+    width: 100%;
+}
+
+/* Remove padding and margin between the first two columns to avoid unwanted spacing */
+#daily_completion_table th,
+#daily_completion_table td {
+    padding: 8px;  /* Standard padding */
+    margin: 0;  /* Ensure no margin */
+    border: 1px solid #ddd;  /* Tight border between cells */
+}
+
+/* Ensure that the first two columns (Date and Client Code) have no space between them */
+#daily_completion_table th:nth-child(1),
+#daily_completion_table td:nth-child(1),
+#daily_completion_table th:nth-child(2),
+#daily_completion_table td:nth-child(2) {
+    padding-left: 8px;   /* Padding to align text */
+    padding-right: 8px;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Fix the first column (Date) with sticky positioning */
+#daily_completion_table th:nth-child(1),
+#daily_completion_table td:nth-child(1) {
+    position: sticky;
+    left: 0%;   /* Stick it to the left side */
+    background-color: #fff;  /* Match the background color */
+    z-index: 1;  /* Ensure it stays above other content */
+    width: 10%;  /* Fix the width of the first column */
+}
+
+/* Fix the second column (Client Code) with sticky positioning right next to the first column */
+#daily_completion_table th:nth-child(2),
+#daily_completion_table td:nth-child(2) {
+    position: sticky;
+    left: 7%;  /* Position this column right next to the first column */
+    background-color: #fff;  /* Match the background color */
+    z-index: 1;  /* Ensure it stays below the first column */
+    width: 10%;  /* Fix the width of the second column */
+}
+
+/* Ensure no extra space between the first two columns */
+#daily_completion_table th:nth-child(1),
+#daily_completion_table td:nth-child(1),
+#daily_completion_table th:nth-child(2),
+#daily_completion_table td:nth-child(2) {
+    border-right: 1px solid #ddd;  /* Tighten borders between the first and second columns */
+}
+
+/* Optional: Add a subtle shadow effect for visual separation */
+#daily_completion_table th:nth-child(1),
+#daily_completion_table td:nth-child(1),
+#daily_completion_table th:nth-child(2),
+#daily_completion_table td:nth-child(2) {
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Apply a fixed width for the first two columns to prevent shifting */
+#daily_completion_table th:nth-child(1),
+#daily_completion_table td:nth-child(1) {
+    width: 10%;  /* Fix the width of the first column */
+}
+
+#daily_completion_table th:nth-child(2),
+#daily_completion_table td:nth-child(2) {
+    width: 10%;  /* Fix the width of the second column */
+}
+
+/* Prevent column width changes for the rest of the columns */
+#daily_completion_table th:nth-child(n+3),
+#daily_completion_table td:nth-child(n+3) {
+    width: 8%;  /* Set fixed widths for other columns */
+}
+
+/* Optional: Tighten the overall border for better alignment */
+#daily_completion_table th,
+#daily_completion_table td {
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+}
+
+
+/* Make all table rows white, including the table header */
+#daily_completion_table th,
+#daily_completion_table tbody tr {
+    background-color: white !important;  /* Set header and row backgrounds to white */
+    color: #333;  /* Dark text for good contrast */
+}
+
+/* Remove hover effects for rows */
+#daily_completion_table tbody tr:hover {
+    background-color: white !important;  /* Ensure hover rows are also white */
+}
+
+/* Optional: Set header styling to match the white background */
+#daily_completion_table th {
+    background-color: white !important;  /* Ensure the headers are white */
+    color: #333;  /* Set text color to dark for readability */
+    border-bottom: 2px solid #ddd;  /* Light border under the header */
+}
+
+/* Optional: Remove any default row striping (even/odd) */
+#daily_completion_table tbody tr.odd,
+#daily_completion_table tbody tr.even {
+    background-color: white !important;  /* Remove zebra striping */
+}
+
+/* Remove any background color from rows with hover */
+#daily_completion_table tbody tr:hover {
+    background-color: white !important;  /* Ensure hover does not change the row color */
+}
+
+
+.highlight-container {
+        text-align: center;
+        margin: 10px;
+        width: 120px;
+        white-space: nowrap;
+    }
+
+    .highlight-text {
+        display: block;
+        font-weight: bold;
+        color: #fff;
+        background-color: #959796; /* Green color for the text */
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 11px; /* Reduced font size for the text */
+    }
+
+    .highlight-count {
+        display: block;
+        font-weight: bold;
+        color: #121213; /* Blue color for the count */
+        font-size: 11px; /* Reduced font size for the count */
+    }
+
+
 </style>
 <div class="container-fluid d-flex reports">
     <div class="col-md-2 text-center left-menu">
@@ -235,8 +378,8 @@
             <div class="col-md-2" id="client_filter_2">
                 <div class="form-group">
                     <label for="client">Client</label>
-                    <select class="form-control select2-basic-multiple" name="dcf_client_id_2" id="client_id_dcf_2" multiple="multiple">
-                        <option selected value="">Select Client</option>
+                    <select class="form-control select2-basic-multiple" name="dcf_client_id_2" id="client_id_dcf_2">
+                        <option selected value="All">Select Client</option>
                         @forelse($clients as $client)
                         <option value="{{ $client->id }}">{{ $client->client_no }} ({{ $client->client_name }})</option>
                         @empty
@@ -526,15 +669,89 @@
 
     <div class="card col-md-10 mt-2 tabledetails" id="daily_completion" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
         <h4 class="text-center mt-3">Daily Completion Status</h4>
+        <div class="card shadow" style="width: 100%; margin: 20px;">
+            <div class="card-body">
+                <h5 class="card-title ml-3" style="font-weight:bold;">Order Summary:</h5>
+
+                <!-- First Row for all the buttons -->
+                <div class="d-flex flex-wrap">
+                    <div class="highlight-container">
+                        <span class="highlight-text">Orders Received</span>
+                        <span id="total_orders_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Yet to Assign</span>
+                        <span id="yet_to_Assign_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">WIP</span>
+                        <span id="wip_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Coversheet Prep</span>
+                        <span id="coversheet_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Doc Purchase</span>
+                        <span id="doc_purchase_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Clarification</span>
+                        <span id="clarification_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Ground Abstractor</span>
+                        <span id="ground_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Send for QC</span>
+                        <span id="send_qc_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Typing</span>
+                        <span id="typing_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Typing QC</span>
+                        <span id="typing_qc_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Hold</span>
+                        <span id="hold_sum" class="highlight-count">0</span>
+                    </div>
+
+                    <div class="highlight-container">
+                        <span class="highlight-text">Completed</span>
+                        <span id="completed_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Partially Cancelled</span>
+                        <span id="partially_can_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Cancelled</span>
+                        <span id="cancelled_sum" class="highlight-count">0</span>
+                    </div>
+                    <div class="highlight-container">
+                        <span class="highlight-text">Pending</span>
+                        <span id="pending_sum" class="highlight-count">0</span>
+                </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
         <div class="card-body">
             <div class="p-0">
-                <table id="daily_completion_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                    <thead class="text-center" style="font-size: 12px;">
+                <table id="daily_completion_table" class="table table-striped table-bordered">
+                    <thead class="text-center" style="font-size: 11px;">
                         <tr>
                             <th width="10%">Date</th>
                             <th width="10%">Client Code</th>
-                            <th width="12%">Order Received</th>
-                            <th width="12%">Yet to Assign</th>
+                            <th width="10%">Order Received</th>
+                            <th width="10%">Yet to Assign</th>
                             <th width="8%">WIP</th>
                             <th width="8%">Coversheet Prep</th>
                             <th width="8%">Doc purchase</th>
@@ -547,11 +764,44 @@
                             <th width="8%">Completed</th>
                             <th width="8%">Partially Cancelled</th>
                             <th width="8%">Cancelled</th>
-
+                            <th width="8%">Pending</th>
                         </tr>
                     </thead>
-                    <tbody class="text-center" style="font-size: 12px;"></tbody>
+                    <tbody>
+                        <!-- Data will be populated dynamically -->
+                    </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <!-- Modal to display order details -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1"  aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                    <button id="exportModalData" class="btn" style="background-color: #28a745; color: white;">Export to Excel</button>
+                </div>
+                <div class="modal-body">
+                <table class= "table table-bordered display" id="orderDetailsTable">
+                        <thead>
+                            <tr>
+                            <th>Order Date</th>
+                                <th>Order ID</th>
+                                <th>Client</th>
+                                <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderDetailsBody">
+                            <!-- Static or Dynamic order details will be appended here -->
+                        </tbody>
+                </table>
+            </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -560,6 +810,8 @@
 
 <script src="{{asset('./assets/js/jquery.min.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
 
 <script>
 
@@ -825,6 +1077,58 @@ $(document).ready(function() {
         });
     });
 
+    $(document).ready(function() {
+        var isClientChanging = false;
+        $(document).on('change', '#client_id_dcf_2', function() {
+            if (isClientChanging) return;
+            isClientChanging = true;
+            var selectedClientOption = $(this).val();
+            if (selectedClientOption === 'All') {
+                $("#client_id_dcf_2").val('All');
+            }
+            isClientChanging = false;
+        });
+
+        $(document).ready(function() {
+        var isLobChanging = false;
+        $(document).on('change', '#lob_id', function() {
+            if (isLobChanging) return;
+            isLobChanging = true;
+            var selectedLobOption = $(this).val();
+                if (selectedLobOption === 'All') {
+                    $("#lob_id").val('All');
+            }
+            isLobChanging = false;
+        });
+        });
+
+        var isProcessChanging = false;
+        $(document).on('change', '#process_type_id', function() {
+            if (isProcessChanging) return;
+            isProcessChanging = true;
+            var selectedProcessOption = $(this).val();
+            $("#process_type_id").val(selectedProcessOption && selectedProcessOption.includes('All') ? ['All'] : selectedProcessOption);
+            if ($("#process_type_id").val() !== selectedProcessOption) {
+                $("#process_type_id").trigger('change');
+            }
+            isProcessChanging = false;
+        });
+
+
+        var isProductChanging = false;
+        $(document).on('change', '#product_id', function() {
+            if (isProductChanging) return;
+            isProductChanging = true;
+            var selectedProductOption = $(this).val();
+            $("#product_id").val(selectedProductOption && selectedProductOption.includes('All') ? ['All'] : selectedProductOption);
+            if ($("#product_id").val() !== selectedProductOption) {
+                $("#product_id").trigger('change');
+            }
+            isProductChanging = false;
+        });
+    });
+
+
 
 function orderWise() {
     var fromDate = $('#fromDate_range').val();
@@ -937,11 +1241,15 @@ function orderWise() {
                         success: function(response) {
                             var data = response.data;
 
-                            var headers = ["S.No", "Process", "Order Date", "Completion Date", "Order ID", "Client Name", "LOB", "Process", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source","Process Type","Tier", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments"];
+                            // Define headers with the "Received EST" column next to "Order Date"
+                            var headers = ["S.No", "Process", "Order Date", "Received EST", "Completion Date", "Order ID", "Client Name", "LOB", "Process", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source", "Process Type", "Tier", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments"];
+
+                            // Add the "Received EST" column (next to "Order Date") with only the date (no time)
                             var exportData = data.map((row, index) => [
                                 index + 1,
                                 row.process,
                                 formatExcelDate(row.order_date),
+                                formatDateOnly(row.order_date), // Received EST (date part only)
                                 formatExcelDate(row.completion_date),
                                 row.order_id,
                                 row.client_name,
@@ -991,6 +1299,12 @@ function orderWise() {
         }
         return '';
     }
+}
+
+function formatDateOnly(datetime) {
+    if (!datetime) return '';
+    var date = new Date(datetime);
+    return date.toLocaleDateString(); // Format the date (e.g., "MM/DD/YYYY")
 }
 
 $('#newreports_datatable').on('draw.dt', function () {
@@ -1061,11 +1375,75 @@ $('#newreports_datatable').on('draw.dt', function () {
         });
     })
 
+    $('#lob_id').on('change', function () {
+    var lob_id = $(this).val();
+    var client_id = $('#client_id_dcf_2').val();
+    $("#process_type_id").html('');
+    $("#product_id").html(''); 
+
+        $.ajax({
+            url: "{{ url('get_process') }}",
+            type: "POST",
+            data: {
+                lob_id: lob_id,
+                client_id: client_id,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: 'json',
+            success: function (response) {
+                $('#process_type_id').html('<option selected value="All">All</option>');
+                $('#product_id').html('<option selected value="All">All</option>');
+
+
+                $.each(response.process, function (index, item) {
+                $("#process_type_id").append('<option value="' + item.id + '">' + item.name + '</option>');
+                });
+
+                $.each(response.products, function (index, item) {
+                $("#product_id").append('<option value="' + item.id + '">' + item.process_name + ' (' + item.project_code + ')</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error: ' + status + ' - ' + error);
+            }
+        });
+    })
+
 
 
     $('#process_type_id').on('change', function () {
     var process_type_id = $(this).val();
     var client_id = $('#client_id_dcf').val();
+    var lob_id = $('#lob_id').val();
+
+    console.log(process_type_id);
+    $("#product_id").html(''); 
+        $.ajax({
+            url: "{{ url('get_product') }}",
+            type: "POST",
+            data: {
+                process_type_id: process_type_id,
+                client_id: client_id,
+                lob_id:lob_id,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: 'json',
+            success: function (response) {
+                $('#product_id').html('<option selected value="All">All</option>');
+                $.each(response, function (index, item) {
+                    $("#product_id").append('<option value="' + item.id + '">' + '(' + item.project_code + ') ' + item.process_name + '</option>');
+
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error: ' + status + ' - ' + error);
+            }
+        });
+    })
+
+    $('#process_type_id').on('change', function () {
+    var process_type_id = $(this).val();
+    var client_id = $('#client_id_dcf_2').val();
     var lob_id = $('#lob_id').val();
 
     console.log(process_type_id);
@@ -1208,6 +1586,16 @@ $('#client_id_dcf').on('change', function () {
     $("#product_id").html('<option selected value="All">All</option>');
     $("#process_type_id").html('<option selected value="All">All</option>');
 
+    fetchProData(client_id,product_id);
+});
+
+$('#client_id_dcf_2').on('change', function () {
+    let client_id = $("#client_id_dcf_2").val();
+    let product_id = $("#product_id").val();
+
+    $("#lob_id").html('<option selected value="All">All</option>');
+    $("#product_id").html('<option selected value="All">All</option>');
+    $("#process_type_id").html('<option selected value="All">All</option>');
 
     fetchProData(client_id,product_id);
 });
@@ -1222,6 +1610,11 @@ $(document).ready(function() {
 
     $('#client_id_dcf').on('change', function () {
        let getproject_id = $("#client_id_dcf").val();
+       $("#project_id_dcf").html('All');
+        fetchProData(getproject_id);
+    });
+    $('#client_id_dcf_2').on('change', function () {
+       let getproject_id = $("#client_id_dcf_2").val();
        $("#project_id_dcf").html('All');
         fetchProData(getproject_id);
     });
@@ -1422,9 +1815,9 @@ $(document).ready(function() {
             $('#selected_date_range').show();
             $('#hidefilter_3').show();
             $('#client_filter').hide();
-            $('#lob_filter').hide();
-            $('#process_filter').hide();
-            $('#hidefilter_2').hide();
+            $('#lob_filter').show();
+            $('#process_filter').show();
+            $('#hidefilter_2').show();
             $('#role_filter').hide();
             $('#user_filter').hide();
             $('#client_filter_2').show();
@@ -1752,7 +2145,9 @@ function production_report() {
                     return meta.row + meta.settings._iDisplayStart + 1; // Serial number
                 }
             },
-            { data: 'order_date', title: 'Received EST' },
+            { data: 'order_date', title: 'Received EST',render: function (data, type, row) {
+                return moment(data).format('MM/DD/YYYY HH:mm:ss'); // Format the date and time using moment.js
+            }},
             { data: 'acc_client_id', title: 'Client ID' },
             // { data: 'process_name', title: 'Product' },
             { 
@@ -1904,112 +2299,48 @@ function orderInflow_report() {
 
 
 
-function formatResponseData(response) {
-    let formattedData = [];
+// Add the Excel export functionality
+$(document).on('click', '#exportModalData', function() {
+    // Define the headers for the Excel sheet
+    var headers = ['Date', 'Order ID', 'Client', 'Status'];
+
+    // Collect data from the modal's order details table
+    var tableData = []; // Start with an empty array, no need to include headers here
 
     // Group data by date and client_name
-    response.forEach(item => {
-        // Find if an entry for the same date and client_name exists in the formattedData
-        let existing = formattedData.find(entry => entry.date === item.date && entry.client_name === item.client_name);
-
-        if (!existing) {
-            // If no entry exists, create a new one
-            formattedData.push({
-                date: item.date,
-                client_name: item.client_name,
-                "Order Received": 0, // Initialize the "Order Received" count
-                "Yet to Assign": 0,
-                "WIP": 0,
-                "Coversheet Prep": 0,
-                "Doc Purchaser": 0,
-                "Clarification": 0,
-                "Ground Abstractor": 0,
-                "Send for QC": 0,
-                "Typing": 0,
-                "Typing QC": 0,
-                "Hold": 0,
-                "Completed": 0,
-                "Partially Cancelled": 0,
-                "Cancelled": 0
-            });
-            existing = formattedData[formattedData.length - 1]; // Get reference to the new entry
-        }
+    tableData.push(headers);
 
         // Increment the count for the corresponding status
-        existing[item.status] += item.count;
+    $('#orderDetailsTable tr').each(function() {
+        var row = [];
 
         // Add to the "Order Received" count (sum of all statuses for this date/client)
-        existing["Order Received"] += item.count;
+        if ($(this).find('td').length > 0) {
+            // Collect cell data for each row (skip header row)
+        $(this).find('td').each(function() {
+            row.push($(this).text());
+    });
+        tableData.push(row); // Add each row's data to tableData
+}
     });
 
-    return formattedData;
-}
+    // Create a worksheet from the table data
+    var ws = XLSX.utils.aoa_to_sheet(tableData);
 
-function daily_completion() {
-    var fromDate = $('#fromDate_range').val();
-    var toDate = $('#toDate_range').val();
-    let client_id = $("#client_id_dcf_2").val();
-    console.log(client_id);
+    // Create a workbook and add the worksheet
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Order Details");
 
-    $.ajax({
-        url: "{{ route('daily_completion') }}",
-        type: 'POST',
-        data: {
-            toDate_range: toDate,
-            fromDate_range: fromDate,
-            client_id: client_id,
-            selectedDateFilter: selectedDateFilter,
-            _token: '{{ csrf_token() }}'
-        },
-        success: function(response) {
-            let formattedData = formatResponseData(response);
 
-            $('#daily_completion_table').DataTable({
-                destroy: true,
-                data: formattedData,
-                columns: [
-                    { data: 'date' },
-                    { data: 'client_name' },
-                    { data: 'Order Received' },
-                    { data: 'Yet to Assign' },
-                    { data: 'WIP' },
-                    { data: 'Coversheet Prep' },
-                    { data: 'Doc Purchaser' },
-                    { data: 'Clarification' },
-                    { data: 'Ground Abstractor' },
-                    { data: 'Send for QC' },
-                    { data: 'Typing' },
-                    { data: 'Typing QC' },
-                    { data: 'Hold' },
-                    { data: 'Completed' },
-                    { data: 'Partially Cancelled' },
-                    { data: 'Cancelled' }
-                ],
-                processing: true,
-                serverSide: false, // Local processing now
-                searching: true,
-                dom: 'lBfrtip',
-                buttons:[
-                    {
-                        extend: 'excel',
-                        title: 'Daily Completion_Reports',  // Set the title for the exported Excel file
-                    }
-                ],
-                lengthMenu: [10, 25, 50, 75, 100],
-                order: [[0, 'asc']]
-            });
-
-        }
+    XLSX.writeFile(wb, "Order_Details.xlsx");
     });
-}
-
-
 
 function exportToExcel(data) {
     var exportData = data.map(function (row, index) {
         return {
             "S.No": index + 1,
             "Received EST": row.order_date,
+            "Date of order": formatDateOnly(row.order_date),
             "Client ID": row.acc_client_id,
             "Product": row.process_name,
             "Order Num": row.order_num,
@@ -2154,6 +2485,197 @@ $('#user_id').on('change', function() {
         });
     }
 });
+
+function daily_completion() {
+    var fromDate = $('#fromDate_range').val();
+    var toDate = $('#toDate_range').val();
+    let client_id = $("#client_id_dcf_2").val();
+    var lob_id = $('#lob_id').val();
+    var process_type_id = $('#process_type_id').val();
+    let product_id = $("#product_id").val();
+    let selectedDateFilter = $("#selectedDateFilter").val();  // Assuming this is an input value
+
+    $.ajax({
+        url: "{{ route('daily_completion') }}",
+        type: 'POST',
+        data: {
+            toDate_range: toDate,
+            fromDate_range: fromDate,
+            client_id: client_id,
+            lob_id: lob_id,
+            process_type_id: process_type_id,
+            product_id: product_id,
+            selectedDateFilter: selectedDateFilter,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            const summaryCount = response.summaryCount;
+
+            // Display the summary count values
+            $('#yet_to_Assign_sum').text(summaryCount['Yet to Assign']);
+            $('#wip_sum').text(summaryCount['WIP']);
+            $('#coversheet_sum').text(summaryCount['Coversheet Prep']);
+            $('#doc_purchase_sum').text(summaryCount['Doc Purchaser']);
+            $('#clarification_sum').text(summaryCount['Clarification']);
+            $('#ground_sum').text(summaryCount['Ground Abstractor']);
+            $('#send_qc_sum').text(summaryCount['Send for QC']);
+            $('#typing_sum').text(summaryCount['Typing']);
+            $('#typing_qc_sum').text(summaryCount['Typing QC']);
+            $('#hold_sum').text(summaryCount['Hold']);
+            $('#completed_sum').text(summaryCount['Completed']);
+            $('#partially_can_sum').text(summaryCount['Partially Cancelled']);
+            $('#cancelled_sum').text(summaryCount['Cancelled']);
+            $('#pending_sum').text(response.pendingCount);
+
+            // Optionally, display the total orders count
+            $('#total_orders_sum').text(response.totalOrders);
+
+
+
+            const statuses = response.statuses;  // {1: "WIP", 2: "Hold", ...}
+            const counts = response.counts;  // { "2024-12-19": { "82": { ... } }, ... }
+
+
+            // Prepare the data for the table
+            const tableData = [];
+
+            // Loop through the dates in the response counts
+            for (let date in counts) {
+                for (let clientId in counts[date]) {
+                    let clientData = counts[date][clientId];
+                    console.log('sd',clientData);
+                    let client_code = clientData[Object.keys(clientData)[0]].client_code;
+
+                    let rowData = { date: date, client_code: client_code };
+
+                    // Add the "Yet to Assign" count
+                    rowData['Yet to Assign'] = 0;  // Initialize "Yet to Assign" count
+                    rowData['Pending'] = 0;
+                    rowData['Order Received'] = 0;
+
+
+                    // Initialize all status counts to 0
+                    for (let statusId in statuses) {
+                        rowData[statuses[statusId]] = 0;  // Default count is 0
+                    }
+
+                    // Add count_html for each status (make sure it's the clickable link)
+                    for (let statusName in clientData) {
+                        if (statusName !== 'client_code') {
+                            let statusData = clientData[statusName];
+                            if (statusData.count_html) {
+                                rowData[statusName] = statusData.count_html;  // Use the HTML from the controller
+                            } else {
+                                rowData[statusName] = statusData.count;  // Otherwise, just show the count
+                            }
+                        }
+                    }
+
+                    tableData.push(rowData);
+                }
+            }
+
+            // Initialize or reinitialize the DataTable with the new data
+            $('#daily_completion_table').DataTable({
+                destroy: true,   // Destroy the previous DataTable instance
+                data: tableData,
+                columns: [
+                    { data: 'date' },
+                    { data: 'client_code' },
+                    { data: 'Order Received' },
+                    { data: 'Yet to Assign' },
+                    { data: 'WIP' },
+                    { data: 'Coversheet Prep' },
+                    { data: 'Doc Purchaser' },
+                    { data: 'Clarification' },
+                    { data: 'Ground Abstractor' },
+                    { data: 'Send for QC' },
+                    { data: 'Typing' },
+                    { data: 'Typing QC' },
+                    { data: 'Hold' },
+                    { data: 'Completed' },
+                    { data: 'Partially Cancelled' },
+                    { data: 'Cancelled' },
+                    { data: 'Pending' }
+                ],
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                lengthChange: true,
+                autoWidth: false
+            });
+
+            // Attach click event to the order-link to capture the order_ids
+            $('#daily_completion_table').on('click', '.order-link', function() {
+                let orderIds = $(this).data('order-ids');  // Get the order IDs from the clicked link
+                console.log('Order IDs:', orderIds);  // Log them to the console
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error("An error occurred: ", error);
+        }
+    });
+}
+
+
+
+
+$(document).on('click', '.order-link', function () {
+    // Get the order IDs from the clicked link's data attribute
+    var orderIds = $(this).data('order-ids');
+
+    // Send AJAX request to fetch the details of the orders
+    $.ajax({
+        url: "{{ route('fetch_order_details') }}",  // Your route to fetch order details
+        type: 'GET',
+        data: {
+            order_ids: orderIds  // Pass the order_ids
+        },
+        success: function (response) {
+            console.log(response);  // Log the response to check the structure
+
+            // Check if the response is an array (the expected format for DataTable)
+            if (Array.isArray(response)) {
+                // Show the modal first, then initialize the DataTable
+                $('#orderDetailsModal').modal('show').on('shown.bs.modal', function () {
+                    // Initialize the modal DataTable with the response data
+                    $('#orderDetailsTable').DataTable({
+                        destroy: true,  // Reset the table when fetching new data
+                        data: response,  // Pass the order details from the server
+                        columns: [
+                            { data: 'order_date', title: 'Order Date' },
+                            { data: 'order_id', title: 'Order ID' },
+                            { data: 'client_name', title: 'Client' },
+                            { data: 'status', title: 'Status' },  // You can replace this with actual status name if needed
+                        ],
+                        paging: true,    // Enable pagination for the modal table
+                        searching: true, // Enable search functionality
+                        ordering: true,  // Enable column sorting
+                        info: true,      // Show table info
+                        lengthChange: true  // Allow changing the number of rows per page
+                    });
+                });
+            } else {
+                console.error('Unexpected response format:', response);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error fetching order details:', error);
+        }
+    });
+});
+
+
+    // Handling the modal close action via jQuery
+    $('.btn-secondary').on('click', function() {
+        $('#orderDetailsModal').modal('hide'); // Close the modal
+    });
+
+    // Optional: Show the modal for demonstration (you can trigger this with a button or event)
+    $('#orderDetailsModal').modal('show');
+
+
 
 </script>
 

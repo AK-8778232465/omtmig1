@@ -208,8 +208,13 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,VP,Business Head,SPOC,Ad
 
     Route::any('daily_completion', 'daily_completion')->name('daily_completion');
 
+    Route::any('daily_completion', 'daily_completion')->name('daily_completion');
+    Route::any('fetch_order_details', 'fetch_order_details')->name('fetch_order_details');
+
 
 });
+
+
 
 
 Route::get('/test-email', function () {
