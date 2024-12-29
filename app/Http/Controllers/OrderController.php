@@ -1880,6 +1880,13 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                 unset($statusMapping[1]);
                                 unset($statusMapping[4]);
                             }
+                            if ((Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('SPOC')) && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16]) && in_array($order->status_id, [14])) {
+                                unset($statusMapping[1]);
+                                unset($statusMapping[4]);
+                                unset($statusMapping[13]);
+                                $statusMapping[16] = 'Typing';
+                                $statusMapping[17] = 'Typing QC';
+                            }
             
                 } else {
                         $statusMapping = [
@@ -1929,7 +1936,14 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     unset($statusMapping[1]);
                                     unset($statusMapping[4]);
                                 }
-                               
+
+                                if ((Auth::user()->hasRole('PM/TL')) && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16]) && in_array($order->status_id, [14])) {
+                                    unset($statusMapping[1]);
+                                    unset($statusMapping[4]);
+                                    unset($statusMapping[13]);
+                                    $statusMapping[16] = 'Typing';
+                                    $statusMapping[17] = 'Typing QC';
+                                }
                         }elseif($order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 ){
                             $statusMapping = [];
                             $statusMapping = [
@@ -1964,6 +1978,13 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     unset($statusMapping[1]);
                                     unset($statusMapping[4]);
                                 }
+                                if ((Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('SPOC')) && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16]) && in_array($order->status_id, [14])) {
+                                    unset($statusMapping[1]);
+                                    unset($statusMapping[4]);
+                                    unset($statusMapping[13]);
+                                    $statusMapping[16] = 'Typing';
+                                    $statusMapping[17] = 'Typing QC';
+                                }
                         }
                     } else {
 
@@ -1989,6 +2010,13 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                             $statusMapping[16] = 'Typing';
                                             $statusMapping[17] = 'Typing QC';
                                             unset($statusMapping[13]);
+                                        }
+                                        if ((Auth::user()->hasRole('PM/TL')) && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16]) && in_array($order->status_id, [14])) {
+                                            unset($statusMapping[1]);
+                                            unset($statusMapping[4]);
+                                            unset($statusMapping[13]);
+                                            $statusMapping[16] = 'Typing';
+                                            $statusMapping[17] = 'Typing QC';
                                         }
                                 }elseif((!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 1 )||(!$order->assignee_qa_id && Auth::user()->hasRole('Process') && $order->status_id == 3 )){
                                     $statusMapping = [];
@@ -2024,6 +2052,13 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                     if (in_array($order->status_id, [16, 17])) {
                                         unset($statusMapping[13]);
                                     }
+                                    if ((Auth::user()->hasRole('PM/TL')) && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16]) && in_array($order->status_id, [14])) {
+                                        unset($statusMapping[1]);
+                                        unset($statusMapping[4]);
+                                        unset($statusMapping[13]);
+                                        $statusMapping[16] = 'Typing';
+                                        $statusMapping[17] = 'Typing QC';
+                                    }
                                 }
                             else{
                                     $statusMapping = [];
@@ -2055,6 +2090,13 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                                         $statusMapping[16] = 'Typing';  // Ensure 16 is set to 'Typing'
                                         $statusMapping[17] = 'Typing QC';  // Set 17 to a desired status name (replace with actual status name)
 
+                                    }
+                                    if ((Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('VP') || Auth::user()->hasRole('SPOC')) && in_array($order->process_type_id, [2, 4, 6, 8, 9, 16]) && in_array($order->status_id, [14])) {
+                                        unset($statusMapping[1]);
+                                        unset($statusMapping[4]);
+                                        unset($statusMapping[13]);
+                                        $statusMapping[16] = 'Typing';
+                                        $statusMapping[17] = 'Typing QC';
                                     }
                                 }
                         }
