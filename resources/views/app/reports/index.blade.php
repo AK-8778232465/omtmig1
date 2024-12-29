@@ -2670,6 +2670,9 @@ function daily_completion() {
 
                     // Add the "Yet to Assign" count
                     rowData['Yet to Assign'] = 0;  // Initialize "Yet to Assign" count
+                    rowData['Pending'] = 0;
+                    rowData['Order Received'] = 0;
+
 
                     // Initialize all status counts to 0
                     for (let statusId in statuses) {
