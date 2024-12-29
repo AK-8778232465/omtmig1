@@ -1427,7 +1427,7 @@ public function daily_completion(Request $request)
     $client_id = $request->input('client_id');
     $lob_id = $request->input('lob_id');
     $process_type_id = $request->input('process_type_id');
-    $project_id = $request->input('product_id');
+    $product_id = $request->input('product_id');
     $selectedDateFilter = $request->input('selectedDateFilter');
     $fromDateRange = $request->input('fromDate_range');
     $toDateRange = $request->input('toDate_range');
@@ -1455,7 +1455,11 @@ public function daily_completion(Request $request)
         }
     }
 
-    $orders = DB::table('oms_order_creations')
+    // Fetch all possible statuses (same as original code)
+    $statuses = DB::table('oms_status')->pluck('status', 'id')->toArray();
+
+    // Query to get the status counts grouped by date, client_id, and order_id (same as original code)
+    $statusCounts = DB::table('oms_order_creations')
     ->leftJoin('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
     ->leftJoin('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
     ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
@@ -1468,61 +1472,45 @@ public function daily_completion(Request $request)
     ->where('stl_item_description.is_approved', 1)
     ->where('stl_client.is_approved', 1)
     ->whereIn('oms_order_creations.process_id', $processIds)
-    ->whereDate('oms_order_creations.order_date', '>=', $from_date)
-    ->whereDate('oms_order_creations.order_date', '<=', $to_date)
     ->select(
-        DB::raw('DATE(oms_order_creations.order_date) as date'),
+            DB::raw('DATE_FORMAT(oms_order_creations.order_date, "%m-%d-%Y") as order_date'),
+            'oms_order_creations.client_id',
         'stl_client.client_no',
         'stl_client.client_name',
-        'stl_client.id as client_id',
-        'oms_order_creations.order_id as order_id',
-        'stl_item_description.id as product_id',
-        'stl_lob.id as lob_id',
-        'stl_process.id as process_type_id',
-        DB::raw("CASE
-                    WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NULL THEN 'Yet to Assign'
-                    WHEN oms_order_creations.status_id = 1 AND oms_order_creations.assignee_user_id IS NOT NULL THEN 'WIP'
-                    ELSE oms_status.status
-                 END as status"),
-        DB::raw('COUNT(*) as count')
-    )
-    ->groupBy(
-        'oms_order_creations.order_id',
-        DB::raw('DATE(oms_order_creations.order_date)'),
-        'stl_client.client_no',
-        'stl_client.client_name',
-        'stl_client.id',
-        'oms_order_creations.status_id',
-        'oms_order_creations.assignee_user_id',
-        'stl_item_description.id',
-        'stl_lob.id',
-        'stl_process.id',
-    )
-    ->where('oms_order_creations.is_active', 1)
-    ->where('stl_item_description.is_approved', 1)
-    ->where('stl_client.is_approved', 1)
-    ->orderBy('date');
+            'oms_order_creations.id as order_id',
+            'oms_status.id as status_id',
+            'oms_status.status',
+            'oms_order_creations.lob_id',
+            'oms_order_creations.process_id',
+            'oms_order_creations.process_type_id',
+            'oms_order_creations.assignee_user_id'
+        );
 
 // Add conditional filters for project_id and client_id.
-if (!empty($project_id) && $project_id[0] !== 'All') {
-    $orders->whereIn('oms_order_creations.process_id', $project_id);
+    if (!empty($product_id) && $product_id[0] !== 'All') {
+        $statusCounts->whereIn('oms_order_creations.process_id', $product_id);
 }
 
 if (!empty($client_id) && $client_id[0] !== 'All') {
-    $orders->where('stl_item_description.client_id', $client_id);
+        $statusCounts->where('stl_item_description.client_id', $client_id);
 }
 
 if (!empty($lob_id) && $lob_id !== 'All') {
-    $orders->where('oms_order_creations.lob_id', $lob_id);
+        $statusCounts->where('oms_order_creations.lob_id', $lob_id);
 }
 
 if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
-    $orders->whereIn('oms_order_creations.process_type_id', $process_type_id);
+        $statusCounts->whereIn('oms_order_creations.process_type_id', $process_type_id);
 }
 
 // Retrieve the results after all conditions.
-$orders = $orders->get();
+    $statusCounts = $statusCounts->get();
 
+    // Initialize arrays for the response
+    $statusCountMap = [];
+    $orderReceivedMap = [];
+    $pendingMap = [];
+    $totalOrders = 0;
 
     $summaryCount = [
         'Yet to Assign' => 0,
@@ -1538,119 +1526,159 @@ $orders = $orders->get();
         'Completed' => 0,
         'Partially Cancelled' => 0,
         'Cancelled' => 0,
-
     ];
-    $totalOrders = 0;
 
-    // Format the data to match the desired response
-    $result = [];
-    foreach ($orders as $order) {
+    // Process the status counts (same as original code)
+    foreach ($statusCounts as $statusCount) {
+        $dateKey = $statusCount->order_date;
+        $clientKey = $statusCount->client_id;
+        $statusName = $statusCount->status;
+        $client_code = $statusCount->client_no . ' - ' . $statusCount->client_name;
+        $status = $statusCount->status;
 
-        $status = $order->status;
-        if (isset($summaryCount[$status])) {
-            $summaryCount[$status] += $order->count;
+        // Add "Yet to Assign" or "WIP" based on conditions
+        if ($statusCount->status_id == 1) {
+            if ($statusCount->assignee_user_id === null) {
+                $statusName = 'Yet to Assign';
+            } else {
+                $statusName = 'WIP';
+            }
         }
 
-        $totalOrders += $order->count;
-        $orderDate = Carbon::parse($order->date)->format('m-d-Y');
-        $result[] = [
-            'date' => $orderDate,
-            'client_id' => $order->client_id,
-            'client_name' => $order->client_no . ' (' . $order->client_name . ')', 
-            'status' => $order->status,
-            'count' => $order->count,
-            'order_id' => $order->order_id,
-            'product_id' => $order->product_id,
-            'lob_id' => $order->lob_id,
-            'process_type_id' => $order->process_type_id,
+        if (isset($summaryCount[$statusName])) {
+            $summaryCount[$statusName] += 1;  // Increment the count for that status
+            $totalOrders++;  // Increment total order count
+        }
+
+        // Initialize structure if not already present
+        if (!isset($statusCountMap[$dateKey])) {
+            $statusCountMap[$dateKey] = [];
+        }
+        if (!isset($statusCountMap[$dateKey][$clientKey])) {
+            $statusCountMap[$dateKey][$clientKey] = [];
+        }
+        if (!isset($statusCountMap[$dateKey][$clientKey][$statusName])) {
+            $statusCountMap[$dateKey][$clientKey][$statusName] = [
+                'count' => 0,
+                'lob_id' => $statusCount->lob_id,
+                'process_id' => $statusCount->process_id,
+                'process_type_id' => $statusCount->process_type_id,
+                'client_code' => $client_code,
+                'order_ids' => []
+            ];
+        }
+
+        // Add the count and order_id
+        $statusCountMap[$dateKey][$clientKey][$statusName]['count'] += 1;
+        $statusCountMap[$dateKey][$clientKey][$statusName]['order_ids'][] = $statusCount->order_id;
+
+        // Track "Order Received" count and order IDs
+        if (!isset($orderReceivedMap[$dateKey])) {
+            $orderReceivedMap[$dateKey] = ['count' => 0, 'order_ids' => []];
+        }
+        $orderReceivedMap[$dateKey]['count'] += 1;
+        $orderReceivedMap[$dateKey]['order_ids'][] = $statusCount->order_id;
+
+        // Track "Pending" count and order IDs (assumed logic: Order Received - Completed)
+        $completedCount = $statusCountMap[$dateKey][$clientKey]['Completed']['count'] ?? 0;
+        $pendingMap[$dateKey] = [
+            'count' => ($orderReceivedMap[$dateKey]['count'] - $completedCount),
+            'order_ids' => array_diff($orderReceivedMap[$dateKey]['order_ids'], $statusCountMap[$dateKey][$clientKey]['Completed']['order_ids'] ?? []),
         ];
     }
+    $pendingCount = $totalOrders - $summaryCount['Completed'];
 
+    // Merge "Order Received" and "Pending" into "counts"
+    foreach ($orderReceivedMap as $date => $data) {
+        foreach ($data['order_ids'] as $orderId) {
+            $statusCountMap[$date][$clientKey]['Order Received'] = [
+                'count' => $data['count'],
+                'order_ids' => $data['order_ids']
+    ];
+        }
+    }
 
-    return response()->json([
-        'data' => $result,
-        'summary' => $summaryCount,
-        'total_orders' => $totalOrders,
-    ]);
+    foreach ($pendingMap as $date => $data) {
+        foreach ($data['order_ids'] as $orderId) {
+            $statusCountMap[$date][$clientKey]['Pending'] = [
+                'count' => $data['count'],
+                'order_ids' => $data['order_ids']
+            ];
+        }
+    }
+
+    // Prepare the final response with HTML links for counts (same as original code)
+    $responseData = [
+        'statuses' => $statuses,
+        'counts' => $statusCountMap,
+        'summaryCount' => $summaryCount,
+        'totalOrders' => $totalOrders,
+        'pendingCount' => $pendingCount
+    ];
+
+    // Add links to the counts in the responseData (same as original code)
+    foreach ($responseData['counts'] as $date => $clients) {
+        foreach ($clients as $clientId => $statusData) {
+            foreach ($statusData as $statusName => $data) {
+                // Wrap count in <a> tag with data attributes for order_ids
+                $order_ids = implode(',', $data['order_ids']);
+                $responseData['counts'][$date][$clientId][$statusName]['count_html'] =
+                    '<a href="javascript:void(0);" data-order-ids="' . $order_ids . '" class="order-link">' .
+                    $data['count'] . '</a>';
+            }
+        }
+    }
+
+    return response()->json($responseData);
 }
 
-public function get_orders_by_status(Request $request)
+
+
+
+public function fetch_order_details(Request $request)
 {
-    $client_id = $request->input('client_id');
-    $status = $request->input('status');
-    $date = $request->input('date');
-    $date = $request->input('date');
-    $product_id = $request->input('product_id');
-    $lob_id = $request->input('lob_id');
-    $process_type_id = $request->input('process_type_id');
+    // Get the order IDs from the request
+    $orderIds = $request->input('order_ids');
 
 
+    // Convert the string of IDs into an array if necessary
+    if (is_string($orderIds)) {
+        $orderIds = explode(',', $orderIds);
+    }
 
-    // Convert the date string to a Carbon instance if necessary
-    $formattedDate = Carbon::createFromFormat('m-d-Y', $date)->toDateString();
+    // Ensure that orderIds is an array before running the query
+    if (!is_array($orderIds)) {
+        return response()->json(['error' => 'Invalid order_ids format'], 400);
+    }
 
-    // Query orders based on client_id, status, and date
+    // Query the oms_order_creations table to get the records matching the order IDs
     $orders = DB::table('oms_order_creations')
-        ->join('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
-        ->join('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
-        ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
-        ->where('stl_item_description.client_id', $client_id)
-        ->where('oms_order_creations.lob_id', $lob_id)
-        ->where('oms_order_creations.process_type_id', $process_type_id)
-        ->where('stl_item_description.id', $product_id)
-        ->where('oms_status.status', $status)
-        ->whereDate('oms_order_creations.order_date', '=', $formattedDate)
-        ->where('oms_order_creations.is_active', 1)
-        ->select('oms_order_creations.order_id', 'oms_order_creations.order_date', 'oms_status.status', 'stl_client.client_name')
-        ->get();
-
-        $orders->transform(function($order) {
-            $order->order_date = Carbon::parse($order->order_date)->format('m-d-Y');
-            return $order;
-        });
-
-    return response()->json($orders);
-}
-
-public function getOrdersByDate(Request $request)
-{
-    $date = $request->input('date'); // Order date
-    $formattedDate = Carbon::createFromFormat('m-d-Y', $date)->toDateString();
-    $client_id = $request->input('client_id');
-    $product_id = $request->input('product_id');
-    $lob_id = $request->input('lob_id');
-    $process_type_id = $request->input('process_type_id');
-    // dd($product_id);
-
-
-    // Query all orders for the given date (ignoring client and status)
-    $orders = DB::table('oms_order_creations')
-        ->join('stl_item_description', 'oms_order_creations.process_id', '=', 'stl_item_description.id')
-        ->join('stl_client', 'stl_item_description.client_id', '=', 'stl_client.id')
-        ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
-        ->whereDate('oms_order_creations.order_date', '=', $formattedDate)
-        ->where('stl_item_description.client_id', $client_id)
-        ->where('oms_order_creations.lob_id', $lob_id)
-        ->where('oms_order_creations.process_type_id', $process_type_id)
-        ->where('stl_item_description.id', $product_id)
-        ->where('oms_order_creations.is_active', 1)
-
-        ->select(
-            'oms_order_creations.order_id',
-            'oms_order_creations.order_date',
-            'oms_status.status',
-            'stl_client.client_name'
+    ->leftJoin('stl_client', 'oms_order_creations.client_id', '=', 'stl_client.id')
+    ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
+    ->whereIn('oms_order_creations.id', $orderIds)
+    ->select(
+        DB::raw('DATE_FORMAT(oms_order_creations.order_date, "%m-%d-%Y") as order_date'),
+        'oms_order_creations.order_id as order_id',
+        'stl_client.client_name',
+        DB::raw(
+            'CASE
+                WHEN oms_order_creations.assignee_user_id IS NULL AND oms_order_creations.status_id = 1 THEN "Yet to Assign"
+                WHEN oms_order_creations.assignee_user_id IS NOT NULL AND oms_order_creations.status_id = 1 THEN "WIP"
+                ELSE oms_status.status
+            END as status'
         )
-        ->get();
+    )
+    ->get();
 
-        $orders->transform(function($order) {
-            $order->order_date = Carbon::parse($order->order_date)->format('m-d-Y');
-            return $order;
-        });
 
-    // Return the orders as a JSON response
+    // Return the fetched order details as JSON
     return response()->json($orders);
 }
+
+
+
+
+
 
 
 }

@@ -744,13 +744,13 @@
 
         <div class="card-body">
             <div class="p-0">
-                <table id="daily_completion_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                    <thead class="text-center" style="font-size: 12px;">
+                <table id="daily_completion_table" class="table table-striped table-bordered">
+                    <thead class="text-center" style="font-size: 11px;">
                         <tr>
                             <th width="10%">Date</th>
                             <th width="10%">Client Code</th>
-                            <th width="12%">Order Received</th>
-                            <th width="12%">Yet to Assign</th>
+                            <th width="10%">Order Received</th>
+                            <th width="10%">Yet to Assign</th>
                             <th width="8%">WIP</th>
                             <th width="8%">Coversheet Prep</th>
                             <th width="8%">Doc purchase</th>
@@ -766,38 +766,40 @@
                             <th width="8%">Pending</th>
                         </tr>
                     </thead>
-                    <tbody class="text-center" style="font-size: 12px;"></tbody>
+                    <tbody>
+                        <!-- Data will be populated dynamically -->
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="countModal" tabindex="-1" aria-labelledby="countModalLabel" aria-hidden="true">
+    <!-- Modal to display order details -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1"  aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="countModalLabel">Order Details</h5>
+                <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
                     <button id="exportModalData" class="btn" style="background-color: #28a745; color: white;">Export to Excel</button>
                 </div>
                 <div class="modal-body">
-                    <!-- Table inside modal with headers like Date, Client, Status -->
-                    <table id="orderTable" class="table table-bordered display">
+                <table class= "table table-bordered display" id="orderDetailsTable">
                         <thead>
                             <tr>
-                                <th>Date</th>
+                            <th>Order Date</th>
                                 <th>Order ID</th>
                                 <th>Client</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody id="order_details_list">
+                    <tbody id="orderDetailsBody">
                             <!-- Static or Dynamic order details will be appended here -->
                         </tbody>
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -2417,313 +2419,29 @@ function orderInflow_report() {
 
 
 
-function formatResponseData(response) {
-    let formattedData = [];
-
-    // Group data by date and client_name
-    response.forEach(item => {
-        // Find if an entry for the same date and client_name exists in the formattedData
-        let existing = formattedData.find(entry => entry.date === item.date && entry.client_name === item.client_name);
-
-        if (!existing) {
-            // If no entry exists, create a new one
-            let newEntry = {
-                date: item.date,
-                client_name: item.client_name,
-                "Order Received": 0, // Initialize the "Order Received" count
-                "Yet to Assign": 0,
-                "WIP": 0,
-                "Coversheet Prep": 0,
-                "Doc Purchaser": 0,
-                "Clarification": 0,
-                "Ground Abstractor": 0,
-                "Send for QC": 0,
-                "Typing": 0,
-                "Typing QC": 0,
-                "Hold": 0,
-                "Completed": 0,
-                "Partially Cancelled": 0,
-                "Cancelled": 0,
-                "pending" : 0
-            };
-
-            // Set client_id as a non-enumerable property
-            Object.defineProperty(newEntry, 'client_id', {
-                value: item.client_id,
-                writable: true,
-                enumerable: false,  // This makes the property "hidden" during enumeration
-                configurable: true
-            });
-
-            Object.defineProperty(newEntry, 'product_id', {
-                value: item.product_id,
-                writable: true,
-                enumerable: false,  // This makes the property "hidden" during enumeration
-                configurable: true
-            });
-
-            Object.defineProperty(newEntry, 'lob_id', {
-                value: item.lob_id,
-                writable: true,
-                enumerable: false,  // This makes the property "hidden" during enumeration
-                configurable: true
-            });
-
-            Object.defineProperty(newEntry, 'process_type_id', {
-                value: item.process_type_id,
-                writable: true,
-                enumerable: false,  // This makes the property "hidden" during enumeration
-                configurable: true
-            });
-
-            formattedData.push(newEntry);
-            existing = newEntry; // Get reference to the new entry
-        }
-
-        // Increment the count for the corresponding status
-        existing[item.status] += item.count;
-
-        // Add to the "Order Received" count (sum of all statuses for this date/client)
-        existing["Order Received"] += item.count;
-
-        existing["Pending"] = existing["Order Received"] - existing["Completed"];
-    });
-
-    return formattedData;
-}
-
-
-
-
-
-function daily_completion() {
-    var fromDate = $('#fromDate_range').val();
-    var toDate = $('#toDate_range').val();
-    let client_id = $("#client_id_dcf_2").val();
-    var lob_id = $('#lob_id').val();
-    var process_type_id = $('#process_type_id').val();
-    let product_id = $("#product_id").val();
-
-
-    $.ajax({
-        url: "{{ route('daily_completion') }}",
-        type: 'POST',
-        data: {
-            toDate_range: toDate,
-            fromDate_range: fromDate,
-            client_id: client_id,
-            lob_id: lob_id,
-            process_type_id: process_type_id,
-            product_id: product_id,
-            selectedDateFilter: selectedDateFilter,
-            _token: '{{ csrf_token() }}'
-        },
-        success: function(response) {
-            let formattedData = formatResponseData(response.data);
-
-            $('#total_orders_sum').text(response.total_orders);
-            $('#yet_to_Assign_sum').text(response.summary['Yet to Assign']);
-            $('#wip_sum').text(response.summary['WIP']);
-            $('#coversheet_sum').text(response.summary['Coversheet Prep']);
-            $('#doc_purchase_sum').text(response.summary['Doc Purchaser']);
-            $('#clarification_sum').text(response.summary['Clarification']);
-            $('#ground_sum').text(response.summary['Ground Abstractor']);
-            $('#send_qc_sum').text(response.summary['Send for QC']);
-            $('#typing_sum').text(response.summary['Typing']);
-            $('#typing_qc_sum').text(response.summary['Typing QC']);
-            $('#hold_sum').text(response.summary['Hold']);
-            $('#completed_sum').text(response.summary['Completed']);
-            $('#partially_can_sum').text(response.summary['Partially Cancelled']);
-            $('#cancelled_sum').text(response.summary['Cancelled']);
-
-            let pendingSum = formattedData.reduce((sum, entry) => sum + entry.Pending, 0);
-    // Display the total pending sum
-    $('#pending_sum').text(pendingSum);
-
-            $('#daily_completion_table').DataTable({
-                destroy: true,
-                data: formattedData,
-                columns: [
-                    { data: 'date' },
-                    { data: 'client_name' },
-                    { data: 'Order Received' },
-                    { data: 'Yet to Assign' },
-                    { data: 'WIP' },
-                    { data: 'Coversheet Prep' },
-                    { data: 'Doc Purchaser' },
-                    { data: 'Clarification' },
-                    { data: 'Ground Abstractor' },
-                    { data: 'Send for QC' },
-                    { data: 'Typing' },
-                    { data: 'Typing QC' },
-                    { data: 'Hold' },
-                    { data: 'Completed' },
-                    { data: 'Partially Cancelled' },
-                    { data: 'Cancelled' },
-                    { data: 'Pending' },
-
-                ],
-                processing: true,
-                serverSide: false, // Local processing now
-                searching: true,
-                dom: 'lBfrtip',
-                buttons:[
-                    {
-                        extend: 'excel',
-                        title: 'Daily Completion_Reports',  // Set the title for the exported Excel file
-                    }
-                ],
-                lengthMenu: [10, 25, 50, 75, 100],
-                order: [[0, 'asc']],
-    rowCallback: function(row, data) {
-        // Iterate over each cell in the row
-        $('td', row).each(function(index) {
-            if (index >= 2 && index <= 14) { // Columns with count data (Order Received, WIP, Completed, etc.)
-                // Create an anchor element with data attributes
-                const countValue = data[Object.keys(data)[index]]; // Dynamically get the correct count value
-                $(this).html(`<a href="javascript:void(0);" class="count-link"
-                    data-date="${data.date}"
-                    data-client_id="${data.client_id}"
-                    data-client="${data.client_name}"
-                    data-status="${Object.keys(data)[index]}"
-                    data-order-id="${data.order_id}"
-                    data-product_id ="${data.product_id}"
-                    data-lob_id ="${data.lob_id}"
-                    data-process_type_id ="${data.process_type_id}"> ${countValue} </a>`);  // Add order_id here
-            }
-        });
-    },
-                initComplete: function() {
-                    // Apply CSS for row styling directly
-                    $('#daily_completion_table tbody tr').css('background-color', 'white');
-                }
-            });
-
-        }
-    });
-}
-
-
-$(document).on('click', '.count-link', function() {
-    // Get data attributes from the clicked link
-    const date = $(this).data('date');
-    const client_id = $(this).data('client_id');
-    const client = $(this).data('client');
-    const status = $(this).data('status');
-    const orderId = $(this).data('order-id'); // Capture order_id if necessary
-    const product_id = $(this).data('product_id');
-    const lob_id = $(this).data('lob_id');
-    const process_type_id = $(this).data('process_type_id');
-    // const clientId = $("#client_id_dcf_2").val(); // Get the client_id from the select input
-    // Initialize DataTable before AJAX request to avoid reinitialization
-    if (!$.fn.dataTable.isDataTable('#orderTable')) {
-        $('#orderTable').DataTable({
-            destroy: true, // Allow reinitialization
-            paging: true,
-            searching: true,
-            info: true,
-            lengthChange: true
-        });
-    }
-
-    // If it's not "Order Received", send date, client_id, and status
-    if (status !== 'Order Received') {
-        $.ajax({
-            url: "{{ route('get_orders_by_status') }}", // New route to fetch orders by date, client_id, and status
-            type: 'GET',
-            data: {
-                date: date,           // Send the selected order date
-                // client_id: clientId,
-                client_id: client_id,
-                product_id: product_id,
-                lob_id: lob_id,
-                process_type_id: process_type_id,
-                status: status,       // Send the status
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                // Clear previous order details in the modal
-                $('#order_details_list').empty();
-
-                // Loop through the response and append order details to the modal
-                response.forEach(order => {
-                    $('#order_details_list').append(
-                        `<tr>
-                            <td>${order.order_date}</td>
-                            <td>${order.order_id}</td>
-                            <td>${order.client_name}</td>
-                            <td>${order.status}</td>
-                        </tr>`
-                    );
-                });
-
-                // Initialize DataTable after AJAX request to handle the newly loaded data
-                $('#orderTable').DataTable().clear().rows.add($('#order_details_list tr')).draw();
-
-                // Show the modal with order details
-                $('#countModal').modal('show');
-            },
-            error: function(xhr, status, error) {
-                console.error("AJAX request failed: " + error);
-            }
-        });
-    } else {
-        // When clicking on "Order Received", fetch all orders for that date
-        $.ajax({
-            url: "{{ route('getOrdersByDate') }}", // Route to fetch all orders for the selected date
-            type: 'GET',
-            data: {
-                date: date,
-                // client_id: clientId,
-                client_id: client_id,
-                product_id: product_id,
-                lob_id: lob_id,
-                process_type_id: process_type_id,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                // Clear previous order details in the modal
-                $('#order_details_list').empty();
-
-                // Loop through the response and append order details to the modal
-                response.forEach(order => {
-                    $('#order_details_list').append(
-                        `<tr>
-                            <td>${order.order_date}</td>
-                            <td>${order.order_id}</td>
-                            <td>${order.client_name}</td>
-                            <td>${order.status}</td>
-                        </tr>`
-                    );
-                });
-
-                // Initialize DataTable after AJAX request to handle the newly loaded data
-                $('#orderTable').DataTable().clear().rows.add($('#order_details_list tr')).draw();
-
-                // Show the modal with order details
-                $('#countModal').modal('show');
-            },
-            error: function(xhr, status, error) {
-                console.error("AJAX request failed: " + error);
-            }
-        });
-    }
-});
-
 // Add the Excel export functionality
 $(document).on('click', '#exportModalData', function() {
     // Define the headers for the Excel sheet
     var headers = ['Date', 'Order ID', 'Client', 'Status'];
 
     // Collect data from the modal's order details table
-    var tableData = [headers]; // Start with headers as the first row
+    var tableData = []; // Start with an empty array, no need to include headers here
 
-    $('#order_details_list tr').each(function() {
+    // Add headers as the first row in the table data
+    tableData.push(headers);
+
+    // Iterate through each row in the table
+    $('#orderDetailsTable tr').each(function() {
         var row = [];
+
+        // Skip the header row (assuming the first <tr> is the header)
+        if ($(this).find('td').length > 0) {
+            // Collect cell data for each row (skip header row)
         $(this).find('td').each(function() {
             row.push($(this).text());
         });
         tableData.push(row); // Add each row's data to tableData
+        }
     });
 
     // Create a worksheet from the table data
@@ -2887,6 +2605,194 @@ $('#user_id').on('change', function() {
         });
     }
 });
+
+function daily_completion() {
+    var fromDate = $('#fromDate_range').val();
+    var toDate = $('#toDate_range').val();
+    let client_id = $("#client_id_dcf_2").val();
+    var lob_id = $('#lob_id').val();
+    var process_type_id = $('#process_type_id').val();
+    let product_id = $("#product_id").val();
+    let selectedDateFilter = $("#selectedDateFilter").val();  // Assuming this is an input value
+
+    $.ajax({
+        url: "{{ route('daily_completion') }}",
+        type: 'POST',
+        data: {
+            toDate_range: toDate,
+            fromDate_range: fromDate,
+            client_id: client_id,
+            lob_id: lob_id,
+            process_type_id: process_type_id,
+            product_id: product_id,
+            selectedDateFilter: selectedDateFilter,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            const summaryCount = response.summaryCount;
+
+            // Display the summary count values
+            $('#yet_to_Assign_sum').text(summaryCount['Yet to Assign']);
+            $('#wip_sum').text(summaryCount['WIP']);
+            $('#coversheet_sum').text(summaryCount['Coversheet Prep']);
+            $('#doc_purchase_sum').text(summaryCount['Doc Purchaser']);
+            $('#clarification_sum').text(summaryCount['Clarification']);
+            $('#ground_sum').text(summaryCount['Ground Abstractor']);
+            $('#send_qc_sum').text(summaryCount['Send for QC']);
+            $('#typing_sum').text(summaryCount['Typing']);
+            $('#typing_qc_sum').text(summaryCount['Typing QC']);
+            $('#hold_sum').text(summaryCount['Hold']);
+            $('#completed_sum').text(summaryCount['Completed']);
+            $('#partially_can_sum').text(summaryCount['Partially Cancelled']);
+            $('#cancelled_sum').text(summaryCount['Cancelled']);
+            $('#pending_sum').text(response.pendingCount);
+
+            // Optionally, display the total orders count
+            $('#total_orders_sum').text(response.totalOrders);
+
+
+
+            const statuses = response.statuses;  // {1: "WIP", 2: "Hold", ...}
+            const counts = response.counts;  // { "2024-12-19": { "82": { ... } }, ... }
+
+
+            // Prepare the data for the table
+            const tableData = [];
+
+            // Loop through the dates in the response counts
+            for (let date in counts) {
+                for (let clientId in counts[date]) {
+                    let clientData = counts[date][clientId];
+                    console.log('sd',clientData);
+                    let client_code = clientData[Object.keys(clientData)[0]].client_code;
+
+                    let rowData = { date: date, client_code: client_code };
+
+                    // Add the "Yet to Assign" count
+                    rowData['Yet to Assign'] = 0;  // Initialize "Yet to Assign" count
+
+                    // Initialize all status counts to 0
+                    for (let statusId in statuses) {
+                        rowData[statuses[statusId]] = 0;  // Default count is 0
+                    }
+
+                    // Add count_html for each status (make sure it's the clickable link)
+                    for (let statusName in clientData) {
+                        if (statusName !== 'client_code') {
+                            let statusData = clientData[statusName];
+                            if (statusData.count_html) {
+                                rowData[statusName] = statusData.count_html;  // Use the HTML from the controller
+                            } else {
+                                rowData[statusName] = statusData.count;  // Otherwise, just show the count
+                            }
+                        }
+                    }
+
+                    tableData.push(rowData);
+                }
+            }
+
+            // Initialize or reinitialize the DataTable with the new data
+            $('#daily_completion_table').DataTable({
+                destroy: true,   // Destroy the previous DataTable instance
+                data: tableData,
+                columns: [
+                    { data: 'date' },
+                    { data: 'client_code' },
+                    { data: 'Order Received' },
+                    { data: 'Yet to Assign' },
+                    { data: 'WIP' },
+                    { data: 'Coversheet Prep' },
+                    { data: 'Doc Purchaser' },
+                    { data: 'Clarification' },
+                    { data: 'Ground Abstractor' },
+                    { data: 'Send for QC' },
+                    { data: 'Typing' },
+                    { data: 'Typing QC' },
+                    { data: 'Hold' },
+                    { data: 'Completed' },
+                    { data: 'Partially Cancelled' },
+                    { data: 'Cancelled' },
+                    { data: 'Pending' }
+                ],
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                lengthChange: true,
+                autoWidth: false
+            });
+
+            // Attach click event to the order-link to capture the order_ids
+            $('#daily_completion_table').on('click', '.order-link', function() {
+                let orderIds = $(this).data('order-ids');  // Get the order IDs from the clicked link
+                console.log('Order IDs:', orderIds);  // Log them to the console
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error("An error occurred: ", error);
+        }
+    });
+}
+
+
+
+
+$(document).on('click', '.order-link', function () {
+    // Get the order IDs from the clicked link's data attribute
+    var orderIds = $(this).data('order-ids');
+
+    // Send AJAX request to fetch the details of the orders
+    $.ajax({
+        url: "{{ route('fetch_order_details') }}",  // Your route to fetch order details
+        type: 'GET',
+        data: {
+            order_ids: orderIds  // Pass the order_ids
+        },
+        success: function (response) {
+            console.log(response);  // Log the response to check the structure
+
+            // Check if the response is an array (the expected format for DataTable)
+            if (Array.isArray(response)) {
+                // Show the modal first, then initialize the DataTable
+                $('#orderDetailsModal').modal('show').on('shown.bs.modal', function () {
+                    // Initialize the modal DataTable with the response data
+                    $('#orderDetailsTable').DataTable({
+                        destroy: true,  // Reset the table when fetching new data
+                        data: response,  // Pass the order details from the server
+                        columns: [
+                            { data: 'order_date', title: 'Order Date' },
+                            { data: 'order_id', title: 'Order ID' },
+                            { data: 'client_name', title: 'Client' },
+                            { data: 'status', title: 'Status' },  // You can replace this with actual status name if needed
+                        ],
+                        paging: true,    // Enable pagination for the modal table
+                        searching: true, // Enable search functionality
+                        ordering: true,  // Enable column sorting
+                        info: true,      // Show table info
+                        lengthChange: true  // Allow changing the number of rows per page
+                    });
+                });
+            } else {
+                console.error('Unexpected response format:', response);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error fetching order details:', error);
+        }
+    });
+});
+
+
+    // Handling the modal close action via jQuery
+    $('.btn-secondary').on('click', function() {
+        $('#orderDetailsModal').modal('hide'); // Close the modal
+    });
+
+    // Optional: Show the modal for demonstration (you can trigger this with a button or event)
+    $('#orderDetailsModal').modal('show');
+
+
 
 </script>
 
