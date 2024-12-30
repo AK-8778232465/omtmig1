@@ -2792,10 +2792,11 @@ $(document).on('click', '.order-link', function () {
 function fetchOrderDetails(page) {
     $.ajax({
         url: "{{ route('fetch_order_details') }}",  // Your route to fetch order details
-        type: 'GET',
+        type: 'POST',
         data: {
             order_ids: orderIds,  // Pass the order_ids
-            page: page            // Pass the current page
+            page: page,
+            _token: '{{ csrf_token() }}'          
         },
         success: function (response) {
             console.log(response);  // Log the response to check the structure
