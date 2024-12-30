@@ -251,12 +251,12 @@
                         <div style="display: inline-block; background-color: red; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
                         <span id="tat_status_18_fourth_count">0</span>
                     </div></button>
-                    <button id="status_tax" class="btn btn-info status-btn  @if(!(Auth::user()->hasAnyRole(['Tax User', 'Super Admin', 'Business Head', 'PM/TL', 'SPOC', 'AVP', 'Admin', 'VP']))) d-none @endif">TAX<span id="status_tax_count"></span><div style="">
-                        <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px;"></div>
+                    <!-- <button id="status_tax" class="btn btn-info status-btn  @if(!(Auth::user()->hasAnyRole(['Tax User', 'Super Admin', 'Business Head', 'PM/TL', 'SPOC', 'AVP', 'Admin', 'VP']))) d-none @endif">TAX<span id="status_tax_count"></span><div style=""> -->
+                        <!-- <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px;"></div> -->
                         <!-- <span id="tat_status_19_third_count">0</span> -->
-                        <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div>
+                        <!-- <div style="display: inline-block; background-color: ; width: 10px; height: 10px; margin-right: 5px; margin-left: 10px;"></div> -->
                         <!-- <span id="tat_status_19_fourth_count">0</span> -->
-                    </div></button>
+                    <!-- </div></button> -->
                     <button id="status_14" class="btn btn-info status-btn @if(Auth::user()->hasAnyRole(['Tax User'])) d-none @endif">Clarification<span id="status_14_count"></span><div style="">
                             <div style="display: inline-block; background-color: orange; width: 10px; height: 10px; margin-right: 5px;"></div>
                             <span id="tat_status_14_third_count">0</span>
