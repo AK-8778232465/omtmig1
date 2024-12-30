@@ -1639,7 +1639,8 @@ public function fetch_order_details(Request $request)
 {
     // Get the order IDs from the request
     $orderIds = $request->input('order_ids');
-
+    $page = $request->input('page', 1); // Default to the first page
+    $limit = 10; // Number of records per page
 
     // Convert the string of IDs into an array if necessary
     if (is_string($orderIds)) {
@@ -1651,11 +1652,16 @@ public function fetch_order_details(Request $request)
         return response()->json(['error' => 'Invalid order_ids format'], 400);
     }
 
+    // Calculate the offset based on the current page
+    $offset = ($page - 1) * $limit;
+
     // Query the oms_order_creations table to get the records matching the order IDs
     $orders = DB::table('oms_order_creations')
     ->leftJoin('stl_client', 'oms_order_creations.client_id', '=', 'stl_client.id')
     ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
     ->whereIn('oms_order_creations.id', $orderIds)
+        ->skip($offset)   // Skip records based on the offset
+        ->take($limit)    // Limit the records to 10 per page
     ->select(
         DB::raw('DATE_FORMAT(oms_order_creations.order_date, "%m-%d-%Y") as order_date'),
         'oms_order_creations.order_id as order_id',

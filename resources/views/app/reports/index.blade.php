@@ -278,6 +278,31 @@
     }
 
 
+    /* CSS for Loader Spinner */
+#loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    text-align: center;
+}
+
+.loader {
+    border: 8px solid #f3f3f3; /* Light gray background */
+    border-top: 8px solid #3498db; /* Blue spinner color */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite; /* Infinite spin animation */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
 </style>
 <div class="container-fluid d-flex reports">
     <div class="col-md-2 text-center left-menu">
@@ -766,7 +791,7 @@
                             <th width="8%">Pending</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="text-center">
                         <!-- Data will be populated dynamically -->
                     </tbody>
                 </table>
@@ -800,14 +825,20 @@
                 </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="previousButton" class="btn btn-primary" style="display: none;">Previous</button>
+                <button id="nextButton" class="btn btn-primary" style="display: none;">Next</button>
                 </div>
             </div>
         </div>
     </div>
 
-
-
 </div>
+<!-- Loading spinner (Initially hidden) -->
+<div id="loader" style="display: none;">
+    <div class="loader"></div>
+    <div class="loading-text" style="font-size:14px;font-weight:bold;">Loading...</div>
+</div>
+
 
 <script src="{{asset('./assets/js/jquery.min.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
@@ -2607,6 +2638,8 @@ $('#user_id').on('change', function() {
 });
 
 function daily_completion() {
+    $('#loader').show();  // Display the loader
+
     var fromDate = $('#fromDate_range').val();
     var toDate = $('#toDate_range').val();
     let client_id = $("#client_id_dcf_2").val();
@@ -2663,7 +2696,6 @@ function daily_completion() {
             for (let date in counts) {
                 for (let clientId in counts[date]) {
                     let clientData = counts[date][clientId];
-                    console.log('sd',clientData);
                     let client_code = clientData[Object.keys(clientData)[0]].client_code;
 
                     let rowData = { date: date, client_code: client_code };
@@ -2731,9 +2763,11 @@ function daily_completion() {
                 let orderIds = $(this).data('order-ids');  // Get the order IDs from the clicked link
                 console.log('Order IDs:', orderIds);  // Log them to the console
             });
+            $('#loader').hide();
         },
         error: function(xhr, status, error) {
             console.error("An error occurred: ", error);
+            $('#loader').hide();
         }
     });
 }
@@ -2741,27 +2775,48 @@ function daily_completion() {
 
 
 
+let currentPage = 1; // Start on page 1
+let orderIds = [];    // This should be set dynamically based on the clicked order link
+let tableInstance = null;  // To hold the DataTable instance
+
 $(document).on('click', '.order-link', function () {
     // Get the order IDs from the clicked link's data attribute
-    var orderIds = $(this).data('order-ids');
+    orderIds = $(this).data('order-ids');
+    currentPage = 1; // Reset to first page when a new order link is clicked
 
     // Send AJAX request to fetch the details of the orders
+    fetchOrderDetails(currentPage);
+});
+
+// Function to fetch order details for the current page
+function fetchOrderDetails(page) {
     $.ajax({
         url: "{{ route('fetch_order_details') }}",  // Your route to fetch order details
         type: 'GET',
         data: {
-            order_ids: orderIds  // Pass the order_ids
+            order_ids: orderIds,  // Pass the order_ids
+            page: page            // Pass the current page
         },
         success: function (response) {
             console.log(response);  // Log the response to check the structure
 
             // Check if the response is an array (the expected format for DataTable)
-            if (Array.isArray(response)) {
+            if (!$('#orderDetailsModal').hasClass('show')) {
+                $('#orderDetailsModal').modal('show');
+            }
+
+
+            if (tableInstance) {
+            // Clear existing data and append new rows
+                tableInstance.clear();
+                tableInstance.rows.add(response);  // Add new rows
+                tableInstance.draw();  // Redraw the table
+        } else {
                 // Show the modal first, then initialize the DataTable
                 $('#orderDetailsModal').modal('show').on('shown.bs.modal', function () {
                     // Initialize the modal DataTable with the response data
-                    $('#orderDetailsTable').DataTable({
-                        destroy: true,  // Reset the table when fetching new data
+                if (!$.fn.dataTable.isDataTable('#orderDetailsTable')) {
+                    tableInstance = $('#orderDetailsTable').DataTable({
                         data: response,  // Pass the order details from the server
                         columns: [
                             { data: 'order_date', title: 'Order Date' },
@@ -2769,22 +2824,55 @@ $(document).on('click', '.order-link', function () {
                             { data: 'client_name', title: 'Client' },
                             { data: 'status', title: 'Status' },  // You can replace this with actual status name if needed
                         ],
-                        paging: true,    // Enable pagination for the modal table
+                        paging: false,    // Disable pagination in DataTable, handle it manually
                         searching: true, // Enable search functionality
                         ordering: true,  // Enable column sorting
-                        info: true,      // Show table info
-                        lengthChange: true  // Allow changing the number of rows per page
+                        info: true        // Show table info
                     });
+                }
                 });
-            } else {
-                console.error('Unexpected response format:', response);
             }
+
+
+            // Update the next button state
+            updateNextButtonState(response.length);
         },
         error: function (xhr, status, error) {
             console.error('Error fetching order details:', error);
         }
     });
+}
+
+// Handle the "Next" button click
+$('#nextButton').on('click', function () {
+    currentPage++; // Increment the page number
+    fetchOrderDetails(currentPage);  // Fetch the next page
 });
+
+$('#previousButton').on('click', function () {
+    if (currentPage > 1) {
+        currentPage--; // Decrement the page number
+        fetchOrderDetails(currentPage);  // Fetch the previous page
+    }
+});
+
+// Update the Next button visibility based on the number of records returned
+function updateNextButtonState(records) {
+    // If we got exactly 10 records, show the "Next" button
+    if (records === 10) {
+        $('#nextButton').show();
+    } else {
+        // Hide the "Next" button if there are less than 10 records (last page)
+        $('#nextButton').hide();
+    }
+
+    if (currentPage > 1) {
+        $('#previousButton').show();
+    } else {
+        $('#previousButton').hide();
+    }
+}
+
 
 
     // Handling the modal close action via jQuery
@@ -2793,7 +2881,7 @@ $(document).on('click', '.order-link', function () {
     });
 
     // Optional: Show the modal for demonstration (you can trigger this with a button or event)
-    $('#orderDetailsModal').modal('show');
+    // $('#orderDetailsModal').modal('show');
 
 
 
