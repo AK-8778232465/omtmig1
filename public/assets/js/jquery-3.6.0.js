@@ -1485,7 +1485,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 		}
 
 		// Sort on method existence if only one input has compareDocumentPosition
-		var compare = !a.compareDocumentPosition - !b.compareDocumentPosition;
+		var compare = a.compareDocumentPosition( b );
 		if ( compare ) {
 			return compare;
 		}
