@@ -312,14 +312,9 @@
                                     data-parsley-trigger="focusout" data-parsley-trigger="keyup"
                                     data-parsley-error-message="Status should not be Empty ">
                                     <option selected="" disabled="" value="">Select Status</option>
-                                    @foreach ($statusList as $status)
-                                        @if ($status->id == 1)
-                                            <option value="{{ $status->id }}">{{ $status->status }}</option>
-                                        @endif
-                                    @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-lg-3 mb-3 pb-0">
+                        <div class="form-group col-lg-3 mb-3 pb-0" id = "assign_user_container">
                                 <label class="font-weight-bold">Assign User</label>
                                 <select id="assignee_user" name="assignee_user" type="text"
                                     class="form-control select2dropdown" style="width:100%" autocomplete="off"
@@ -332,7 +327,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-lg-3 mb-3 pb-0">
+                        <div class="form-group col-lg-3 mb-3 pb-0" id = "assign_qa_container">
                                 <label class="font-weight-bold">Assign QA</label>
                                 <select id="assignee_qa" name="assignee_qa" type="text"
                                     class="form-control select2dropdown" style="width:100%" autocomplete="off"
@@ -444,18 +439,11 @@
                             <a class="btn btn-sm btn-info mx-2 mt-1" href="" id="download"><i
                                     class="fas fa-download"></i> Sample Format</a>
 
-                            <button type="submit" class="btn btn-sm btn-primary mt-1" maxlength="100">
-                                <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink" width="13" height="14" x="0" y="0"
-                                    viewBox="0 0 459.904 459.904" style="enable-background:new 0 0 512 512"
-                                    xml:space="preserve" class="">
+                            <button type="submit" class="btn btn-sm btn-primary mt-1" maxlength="100" id="bulk_upload">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="13" height="14" x="0" y="0" viewBox="0 0 459.904 459.904" style="enable-background:new 0 0 512 512" xml:space="preserve" class="">
                                     <g>
-                                        <path
-                                            d="M123.465 168.28h46.543v138.07c0 14.008 11.358 25.352 25.352 25.352h69.2c13.993 0 25.352-11.343 25.352-25.352V168.28h46.527c7.708 0 14.637-4.641 17.601-11.764 2.933-7.094 1.301-15.295-4.145-20.741L243.413 29.28c-7.437-7.422-19.485-7.422-26.938 0L110.011 135.775a19.023 19.023 0 0 0-4.13 20.741c2.962 7.109 9.876 11.764 17.584 11.764z"
-                                            fill="#ffffff" opacity="1" data-original="#ffffff" class=""></path>
-                                        <path
-                                            d="M437.036 220.029c-12.617 0-22.852 10.237-22.852 22.867v95.615c0 28.643-23.317 51.944-51.961 51.944H97.679c-28.644 0-51.945-23.301-51.945-51.944v-95.615c0-12.63-10.251-22.867-22.867-22.867C10.236 220.029 0 230.266 0 242.897v95.615c0 53.859 43.818 97.679 97.679 97.679h264.544c53.861 0 97.681-43.819 97.681-97.679v-95.615c0-12.631-10.237-22.868-22.868-22.868z"
-                                            fill="#ffffff" opacity="1" data-original="#ffffff" class=""></path>
+                                    <path d="M123.465 168.28h46.543v138.07c0 14.008 11.358 25.352 25.352 25.352h69.2c13.993 0 25.352-11.343 25.352-25.352V168.28h46.527c7.708 0 14.637-4.641 17.601-11.764 2.933-7.094 1.301-15.295-4.145-20.741L243.413 29.28c-7.437-7.422-19.485-7.422-26.938 0L110.011 135.775a19.023 19.023 0 0 0-4.13 20.741c2.962 7.109 9.876 11.764 17.584 11.764z" fill="#ffffff" opacity="1" data-original="#ffffff" class=""></path>
+                                    <path d="M437.036 220.029c-12.617 0-22.852 10.237-22.852 22.867v95.615c0 28.643-23.317 51.944-51.961 51.944H97.679c-28.644 0-51.945-23.301-51.945-51.944v-95.615c0-12.63-10.251-22.867-22.867-22.867C10.236 220.029 0 230.266 0 242.897v95.615c0 53.859 43.818 97.679 97.679 97.679h264.544c53.861 0 97.681-43.819 97.681-97.679v-95.615c0-12.631-10.237-22.868-22.868-22.868z" fill="#ffffff" opacity="1" data-original="#ffffff" class=""></path>
                                     </g>
                                 </svg> Upload File
                             </button>
@@ -802,6 +790,12 @@
             event.preventDefault();
             $('.content-loaded').hide();
             $('.frame').removeClass('d-none');
+        const uploadButton = $('#bulk_upload');
+        const spinner = $('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+
+    uploadButton.prop('disabled', true);
+    uploadButton.html(spinner).append(' Uploading...');
+
             if ($('#excelImport').parsley().isValid()) {
                 $.ajax({
                     type: "POST",
@@ -989,6 +983,12 @@
                             console.error('Tier_id is undefined for one of the records.');
                         }
                     });
+
+            if (response.status) {
+                $("#order_status").html('<option value="' + response.status.id + '" selected>' + response.status.status + '</option>');
+            } else {
+                console.error('Status is undefined.');
+            }
                 }
             });
         });
@@ -1027,37 +1027,46 @@
 
 
         $(document).ready(function() {
-            $('#select_client_id').change(function() {
+    $('#process_type_id').change(function() {
                 var selectedOption = $(this).find('option:selected');
                 var clientId = selectedOption.data('client-id');
-                console.log(clientId);
+        var process_type_id = $("#process_type_id").val();
+        console.log(process_type_id);
+
                 // Check if the client_id is 16
-                if (clientId == 16 || clientId == 88 || clientId == 90 || clientId == 92 || clientId == 2 || clientId == 13) {
+        if (process_type_id == 1 || process_type_id == 3 || process_type_id == 5 || process_type_id == 15 || process_type_id == 18) {
                     $('#typist-container').hide();
                     $('#typist-qc-container').hide();
             $('#municipality-container').show();
             $('#tier-container').show();
+            $('#assign_user_container').show();
+            $('#assign_qa_container').show();
+
                 }
 
-        if(clientId == 82){
+        if (process_type_id == 2 || process_type_id == 4 || process_type_id == 6 || process_type_id == 8 || process_type_id == 9 || process_type_id == 16) {
+            $('#assign_user_container').hide();
+            $('#assign_qa_container').hide();
                     $('#municipality-container').hide();
-                    $('#tier-container').hide();
             $('#typist-container').show();
             $('#typist-qc-container').show();
                 }
 
-        if(clientId == 86 || clientId == 84 || clientId == 85 || clientId == 87 || clientId == 89 || clientId == 91){
-                    $('#municipality-container').hide();
-                    $('#tier-container').hide();
+        if (process_type_id == 7 || process_type_id == 12 || process_type_id == 17) {
             $('#typist-container').show();
             $('#typist-qc-container').show();
+            $('#municipality-container').show();
+            $('#tier-container').hide();
+            $('#assign_user_container').show();
+            $('#assign_qa_container').show();
+
                 }
 
 
 
             });
 
-    $('#select_client_id').trigger('change');
+    $('#process_type_id').trigger('change');
 });
 
 $(document).ready(function () {

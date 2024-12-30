@@ -136,6 +136,7 @@ Route::middleware('auth:web')->controller(OrderController::class)->group(functio
     Route::any('/delete_order', 'delete_order')->name('delete_order');
     Route::post('update_order_status', 'update_order_status')->name('update_order_status');
     Route::post('redirectwithfilter', 'redirectwithfilter')->name('redirectwithfilter');
+    Route::any('status_change', 'status_change')->name('status_change');
 
 });
 
@@ -205,16 +206,13 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,VP,Business Head,SPOC,Ad
     Route::any('orderInflow_data', 'orderInflow_data')->name('orderInflow_data');
     Route::any('getUsersByRole', 'getUsersByRole')->name('getUsersByRole');
     Route::any('getUserData', 'getUserData')->name('getUserData');
-
-    Route::any('daily_completion', 'daily_completion')->name('daily_completion');
-
     Route::any('daily_completion', 'daily_completion')->name('daily_completion');
     Route::any('fetch_order_details', 'fetch_order_details')->name('fetch_order_details');
 
 
+
+
 });
-
-
 
 
 Route::get('/test-email', function () {
