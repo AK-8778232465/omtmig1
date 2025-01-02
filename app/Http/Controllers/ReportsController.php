@@ -1637,10 +1637,10 @@ if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
 
 public function fetch_order_details(Request $request)
 {
-    // Get the order IDs from the request
+    $page = $request->input('page', 1);
+    $pageSize = $request->input('length', 10); // Page size for pagination
     $orderIds = $request->input('order_ids');
-    $page = $request->input('page', 1); // Default to the first page
-    $limit = 10; // Number of records per page
+    $searchValue = $request->input('search_value');
 
     // Convert the string of IDs into an array if necessary
     if (is_string($orderIds)) {
@@ -1648,20 +1648,10 @@ public function fetch_order_details(Request $request)
     }
 
     // Ensure that orderIds is an array before running the query
-    if (!is_array($orderIds)) {
-        return response()->json(['error' => 'Invalid order_ids format'], 400);
-    }
-
-    // Calculate the offset based on the current page
-    $offset = ($page - 1) * $limit;
-
-    // Query the oms_order_creations table to get the records matching the order IDs
-    $orders = DB::table('oms_order_creations')
+    $ordersQuery = DB::table('oms_order_creations')
     ->leftJoin('stl_client', 'oms_order_creations.client_id', '=', 'stl_client.id')
     ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
     ->whereIn('oms_order_creations.id', $orderIds)
-        ->skip($offset)   // Skip records based on the offset
-        ->take($limit)    // Limit the records to 10 per page
     ->select(
         DB::raw('DATE_FORMAT(oms_order_creations.order_date, "%m-%d-%Y") as order_date'),
         'oms_order_creations.order_id as order_id',
@@ -1673,12 +1663,31 @@ public function fetch_order_details(Request $request)
                 ELSE oms_status.status
             END as status'
         )
-    )
-    ->get();
+        );
+
+        if (!empty($searchValue)) {
+            $ordersQuery->where(function ($query) use ($searchValue) {
+                $query->where('oms_order_creations.order_id', 'like', '%' . $searchValue . '%')
+                      ->orWhere('stl_client.client_name', 'like', '%' . $searchValue . '%')
+                      ->orWhere('oms_status.status', 'like', '%' . $searchValue . '%');
+            });
+        }
 
 
-    // Return the fetched order details as JSON
-    return response()->json($orders);
+    // Get the total number of records for pagination
+    $totalRecords = $ordersQuery->count();
+
+    if ($request->has('export') && $request->input('export') == true) {
+        $orders = $ordersQuery->get();
+    } else {
+        $orders = $ordersQuery->skip(($page - 1) * $pageSize)->take($pageSize)->get();
+    }
+
+    return response()->json([
+        'orders' => $orders,            // Paginated orders for the current page
+        'recordsTotal' => $totalRecords, // Total number of records
+        'recordsFiltered' => $totalRecords, // Filtered records (same as total in this case)
+    ]);
 }
 
 
