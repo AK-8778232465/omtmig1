@@ -51,6 +51,8 @@ class OrderFormController extends Controller
 
     public function index(Request $request, $orderId = null)
     {
+      
+        $pathInfo = $request->getPathInfo();
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $query = DB::table('oms_order_creations')
@@ -63,6 +65,7 @@ class OrderFormController extends Controller
         ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
         ->leftJoin('oms_users as typist_users', 'oms_order_creations.typist_id', '=', 'typist_users.id')
         ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
+        ->leftJoin('oms_users as tax_user', 'oms_order_creations.tax_user_id', '=', 'tax_user.id')
         ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
         ->leftJoin('stl_process', 'oms_order_creations.process_type_id', '=', 'stl_process.id')
         ->leftJoin('oms_city','oms_order_creations.city_id','=','oms_city.id')
@@ -93,6 +96,7 @@ class OrderFormController extends Controller
             'oms_order_creations.assignee_qa_id',
             'oms_order_creations.typist_id',
             'oms_order_creations.typist_qc_id',
+            'oms_order_creations.tax_user_id',
             'oms_order_creations.tax_bucket',
             'stl_item_description.lob_id as lob_id',
             'stl_lob.name as lob_name',
@@ -106,18 +110,21 @@ class OrderFormController extends Controller
             DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
             DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")") as typist_user'),
             DB::raw('CONCAT(typist_qas.emp_id, " (", typist_qas.username, ")") as typist_qa'),
+            DB::raw('CONCAT(tax_user.emp_id, " (", tax_user.username, ")") as tax_user_name'),
             'stl_item_description.process_name'
         )
         ->where('oms_order_creations.is_active', 1)
         ->where('oms_order_creations.id', $orderId);
 
-    $query->whereIn('oms_order_creations.process_id', $processIds);
+        $query->whereIn('oms_order_creations.process_id', $processIds);
+
             if (
                 isset($request->status) &&
                 in_array($request->status, [1, 2, 3, 4, 5, 13, 14]) &&
                 $request->status != 'All' &&
                 $request->status != 6 &&
-                $request->status != 7
+                $request->status != 7 && 
+                $request->status != 'tax'
             ) {
                 if ($request->status == 1) {
                     if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11, 23, 24])) {
@@ -182,6 +189,7 @@ class OrderFormController extends Controller
 
                 } else {
                     $query->whereNotNull('oms_order_creations.assignee_user_id');
+                    
                 }
             } elseif ($request->status == 6) {
                 if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 23, 24])) {
@@ -195,8 +203,17 @@ class OrderFormController extends Controller
                 } else {
                     $query->whereNull('oms_order_creations.id');
                 }
+
             }
 
+            if (str_ends_with($pathInfo, '/tax')) { // Check if the path ends with "/tax"
+                if (in_array($user->user_type_id, [25])) {
+                    $query->where('oms_order_creations.tax_user_id', $user->id)
+                          ->orWhere('oms_order_creations.tax_bucket', 1);
+                } else {
+                    $query->where('oms_order_creations.tax_bucket', 1);
+                }
+            }
         $orderData = $query->first();
 
         if(!empty($orderData)) {
@@ -627,7 +644,6 @@ class OrderFormController extends Controller
             $getTaxJson = json_decode($getTaxJson, true);
             $inpuTaxJson = json_decode($inpuTaxJson, true);
 
-                // return response()->json($getTaxJson);
             $getTaxBucket = DB::table('oms_order_creations')
                 ->where('id', $orderData->id)
                 ->get();
@@ -660,13 +676,11 @@ class OrderFormController extends Controller
                     $input_json = 'Json Not Available';
                 }
 
-                // return response()->json($getTaxBucket);
-
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions',
                                                         'stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo',
                                                         'sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson','gettaxesDetails','input_json'));
-        } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11, 23, 24])) {
+        } else if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 10, 11, 23, 24, 25])) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo',
                                                         'checklist_conditions_2', 'orderHistory','checklist_conditions','stateList','primarySource','instructionId',
                                                         'clientIdList','userinput','orderstatusInfo','sourcedetails','famsTypingInfo','getjsonDetails','taxType','taxEntity','taxPaymentFrequency','getTaxJson', 'getTaxBucket','orderTaxInfo','getApi','inpuTaxJson', 'gettaxesDetails','input_json'));
@@ -952,7 +966,7 @@ class OrderFormController extends Controller
         {
             $request->validate([
                 'order_id' => 'required|integer',
-                'status' => 'required|integer',
+                'status' => 'required',
             ]);
 
             $user = Auth::user();
@@ -965,6 +979,20 @@ class OrderFormController extends Controller
                 16 => 'typist_id',
                 17 => 'typist_qc_id'
             ];
+
+            if($statusId == "tax" && in_array($user->user_type_id, [25])){
+                $order = DB::table('oms_order_creations')
+                    ->where('id', $orderId)
+                    ->whereNull('tax_user_id')
+                    ->where('tax_bucket', 1)
+                    ->first();
+                if ($order) {
+                    DB::table('oms_order_creations')->where('id', $orderId)->update([
+                        'tax_user_id' => $user->id,
+                    ]);
+                    return response()->json(['message' => 'Order updated successfully.']);
+                }
+            }
 
             // Check for allowed statuses and user types
             if (in_array($statusId, [4, 16, 17]) && in_array($user->user_type_id, [7, 8, 9, 10, 11, 22])) {
@@ -1023,7 +1051,6 @@ private function findOrder($orderId, $statusId, $userId = null)
         ->when($userId, fn($query) => $query->where('assignee_user_id', $userId))
         ->first();
 }
-
 
     public function getaccurateClientId(Request $request){
         $getclientid = $request->client_id;

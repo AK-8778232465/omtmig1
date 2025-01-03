@@ -195,17 +195,32 @@ class OrderController extends Controller
             })
             ->count();
 
-        $tax_bucket_count = OrderCreation::with('process', 'client')
-            ->where('tax_bucket', 1)
-            ->where('is_active', 1)
-            ->whereIn('process_id', $processIds)
-            ->whereHas('process', function ($query) {
-                $query->where('stl_item_description.is_approved', 1);
-            })
-            ->whereHas('client', function ($query) {
-                $query->where('stl_client.is_approved', 1);
-            })
-            ->count();
+            if(in_array($user->user_type_id, [25])){
+                $tax_bucket_count = OrderCreation::with('process', 'client')
+                    ->where('tax_user_id', $user->id)
+                    ->orWhere('tax_bucket', 1)
+                    ->where('is_active', 1)
+                    // ->whereIn('process_id', $processIds)
+                    ->whereHas('process', function ($query) {
+                        $query->where('stl_item_description.is_approved', 1);
+                    })
+                    ->whereHas('client', function ($query) {
+                        $query->where('stl_client.is_approved', 1);
+                    })
+                    ->count();
+            } else {
+                $tax_bucket_count = OrderCreation::with('process', 'client')
+                    ->where('tax_bucket', 1)
+                    ->where('is_active', 1)
+                    ->whereIn('process_id', $processIds)
+                    ->whereHas('process', function ($query) {
+                        $query->where('stl_item_description.is_approved', 1);
+                    })
+                    ->whereHas('client', function ($query) {
+                        $query->where('stl_client.is_approved', 1);
+                    })
+                    ->count();
+            }
 
             if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
                 $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
@@ -410,6 +425,7 @@ class OrderController extends Controller
             ->leftJoin('oms_users as assignee_qas', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qas.id')
             ->leftJoin('oms_users as typist_users', 'oms_order_creations.typist_id', '=', 'typist_users.id')
             ->leftJoin('oms_users as typist_qas', 'oms_order_creations.typist_qc_id', '=', 'typist_qas.id')
+            ->leftJoin('oms_users as tax_user', 'oms_order_creations.tax_user_id', '=', 'tax_user.id')
             ->leftJoin('oms_users as associate_names', 'oms_order_creations.associate_id', '=', 'associate_names.id')
             ->leftJoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
             ->leftJoin('oms_tier','oms_order_creations.tier_id', '=', 'oms_tier.id')
@@ -432,6 +448,7 @@ class OrderController extends Controller
                 'oms_order_creations.assignee_qa_id',
                 'oms_order_creations.typist_id',
                 'oms_order_creations.typist_qc_id',
+                'oms_order_creations.tax_user_id',
                 'oms_order_creations.tax_bucket',
                 'oms_order_creations.associate_id',
                 'stl_lob.name as lob_name',
@@ -445,7 +462,8 @@ class OrderController extends Controller
                 DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")") as assignee_qa'),
                 DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")") as typist_user'),
                 DB::raw('CONCAT(typist_qas.emp_id, " (", typist_qas.username, ")") as typist_qa'),
-                DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name')
+                DB::raw('CONCAT(associate_names.emp_id, " (", associate_names.username, ")") as associate_name'),
+                DB::raw('CONCAT(tax_user.emp_id, " (", tax_user.username, ")") as tax_user_name')
             )
             ->where('oms_order_creations.is_active', 1)
             ->where('stl_item_description.is_approved', 1)
@@ -454,7 +472,6 @@ class OrderController extends Controller
             if ($fromDate) {
                 $query->whereDate('oms_order_creations.order_date', '>=', $fromDate);
             }
-        
             if ($toDate) {
                 $query->whereDate('oms_order_creations.order_date', '<=', $toDate);
             }
@@ -519,11 +536,6 @@ class OrderController extends Controller
                                     })
                                       ->whereNotIn('status_id', [1, 4, 13, 15, 17])
                                       ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15]);
-
-                                    // $statusCountsQuery->where(function ($query) use ($user) {
-                                    //     $query->where('oms_order_creations.typist_id', $user->id);
-                                    // })->whereNotIn('status_id', [1, 13, 4, 15, 17, 20])
-                                    //   ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15]);
                             } else if(in_array($user->user_type_id, [11])){
                                 $query->where('oms_order_creations.status_id', $request->status)
                                 ->where(function ($query) use ($user) {
@@ -1564,9 +1576,16 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         }
     }
     $query->whereIn('oms_order_creations.process_id', $processIds);
-
-    if ($request->status == 'tax'){
-        $query->where('oms_order_creations.tax_bucket', 1);
+    
+    if(in_array($user->user_type_id, [25])){
+        if ($request->status == 'tax'){
+            $query->where('oms_order_creations.tax_user_id', $user->id)
+                ->orWhere('oms_order_creations.tax_bucket', 1);
+        }
+    }else{
+        if ($request->status == 'tax'){
+            $query->where('oms_order_creations.tax_bucket', 1);
+        }
     }
 
     if ($searchType == 1 && !empty($searchInputs)) {

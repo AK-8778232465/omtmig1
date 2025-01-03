@@ -441,6 +441,7 @@
                             @endif
                             <th style="width:7%">Action</th>
                             <th style="width:10%">Coversheet Preparer</th>
+                            <th style="width:10%">Tax User</th>
                             <th style="width:7%">Created Date</th>
 
                         </tr>
@@ -916,6 +917,7 @@ $(document).ready(function() {
                 { "data": "assignee_qa", "name": "assignee_qa" },
                 { "data": "typist_user", "name": "typist_user", "visible": @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Process')) false @else true @endif },
                 { "data": "typist_qa", "name": "typist_qa", "visible": @if(Auth::user()->hasRole('Qcer') || Auth::user()->hasRole('Process/Qcer') || Auth::user()->hasRole('Process')) false @else true @endif },
+
                
 
                 {
@@ -931,6 +933,7 @@ $(document).ready(function() {
                     "orderable": false,
                 },
                 { "data": "associate_name", "name": "associate_name", "visible": true},
+                { "data": "tax_user_name", "name": "tax_user_name", "visible": @if(!(Auth::user()->hasAnyRole(['Tax User', 'Super Admin', 'Business Head', 'PM/TL', 'SPOC', 'AVP', 'Admin', 'VP']))) false @else true @endif },
                 { "data": "created_at", "name": "created_at", "visible": true},
 
             ],
@@ -1775,7 +1778,6 @@ $(document).on('focus', '.status-dropdown', function() {
                 $("#hide_user").show();
                 $("#unassign_user").show();
 
-                console.log($("#assign_qa_ed").val());
                 if ($("#assign_qa_ed").val() != null || $("#assign_qa_ed").val() != undefined) {
                     $("#hide_qa").show();
                     $("#unassign_qcer").show();
