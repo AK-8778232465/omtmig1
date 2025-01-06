@@ -1404,36 +1404,43 @@ private function findOrder($orderId, $statusId, $userId = null)
 
 
     public function storeFile(Request $request)
-        {
+    {
+        
+        $file = $request->file('file');
+        $fileName = $file->getClientOriginalName();
 
-            // Store the file in the 'uploads' directory in the storage path
-            $filePath = $request->file('file')->store('uploads', 'public');
-
-            // Get the file name
-            $fileName = $request->file('file')->getClientOriginalName();
-
-            $file = $request->file('file');
-            $fileName = $file->getClientOriginalName();
-            $pathfileName = uniqid() . '-' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('texAttachments', $pathfileName, 'public');
-            // TaxAttachmentFile::create([
-            //                 'order_id' => $request->input('order_id'),
-            //                 'file_path' => $filePath,
-            //                 'file_name' => $file->getClientOriginalName(),
-            //             ]);
-            OmsAttachmentHistory::create([
-                            'order_id' => $request->input('order_id'),
-                            'updated_by' => Auth::id(),
-                            'action' => 'Uploaded',
-                            'file_path' =>  $filePath,
-                            'file_name' => $fileName,
-                            'is_delete' => 1,
-                            'updated_at' => now(),
-                        ]);
-
-
-            return response()->json(['filePath' => $filePath, 'fileName' => $fileName]);
+        $pathfileName = uniqid() . '-' . $file->getClientOriginalName();
+    
+       
+        $directoryPath = 'texAttachments'; // Directory for storing files
+        $disk = 'public'; // Specify the disk (e.g., 'public', 'local', 's3')
+    
+        // Check if the directory exists, if not, create it
+        if (!Storage::disk($disk)->exists($directoryPath)) {
+            Storage::disk($disk)->makeDirectory($directoryPath);
         }
+    
+        // Store the file with the unique name
+        $filePath = $file->storeAs($directoryPath, $pathfileName, $disk);
+    
+        // Store the file metadata in the OmsAttachmentHistory model
+        OmsAttachmentHistory::create([
+            'order_id' => $request->input('order_id'),
+            'updated_by' => Auth::id(),
+            'action' => 'Uploaded',
+            'file_path' => $filePath,
+            'file_name' => $fileName,
+            'is_delete' => 1,
+            'updated_at' => now(),
+        ]);
+    
+        // Return the file path and name as a JSON response
+        return response()->json([
+            'filePath' => $filePath,
+            'fileName' => $fileName
+        ]);
+    }
+    
 
         public function getFiles(Request $request)
         {
