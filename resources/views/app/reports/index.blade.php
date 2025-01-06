@@ -2976,6 +2976,15 @@ function updatePaginationState(settings) {
     });
 }
 
+    // Handling the modal close action via jQuery (for clicking outside or closing via button)
+$('#orderDetailsModal').on('hide.bs.modal', function () {
+    if (tableInstance) {
+        tableInstance.search('').draw();  // Clear the search input and redraw the table
+        tableInstance.page.len(10).draw();  // Change entries per page to 10 and redraw the table
+    }
+
+    currentPage = 1; // Go to the first page
+});
 
 
     // Handling the modal close action via jQuery
