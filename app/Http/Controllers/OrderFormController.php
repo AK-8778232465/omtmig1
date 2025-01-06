@@ -1415,17 +1415,7 @@ private function findOrder($orderId, $statusId, $userId = null)
             $file = $request->file('file');
             $fileName = $file->getClientOriginalName();
             $pathfileName = uniqid() . '-' . $file->getClientOriginalName();
-            
-            $directoryPath = 'texAttachments'; // The directory you want to create
-            $disk = 'public'; // Specify the disk (e.g., 'public', 'local', 's3')
-            
-            // Create the directory if it doesn't exist
-            if (!Storage::disk($disk)->exists($directoryPath)) {
-                Storage::disk($disk)->makeDirectory($directoryPath);
-            }
-            
-            // Store the file in the newly created directory
-            $filePath = $file->storeAs($directoryPath, $pathfileName, $disk);
+            $filePath = $file->storeAs('texAttachments', $pathfileName, 'public');
             // TaxAttachmentFile::create([
             //                 'order_id' => $request->input('order_id'),
             //                 'file_path' => $filePath,

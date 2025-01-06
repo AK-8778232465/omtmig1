@@ -3687,60 +3687,55 @@ function toggleContainerFields(container, enable) {
     $('#attachmentHistoryTable').on('click', '.view-file', function (e) {
     e.preventDefault();
     
-    // Get the file URL
+    // Get the file URL and file type
     let fileUrl = $(this).data('path');
+    let fileType = fileUrl.split('.').pop().toLowerCase();
     
     // Check if the file URL is valid
     if (!fileUrl) {
-        Swal.fire({ 
-            icon: 'error', 
-            title: 'Invalid URL', 
-            text: 'The file URL is missing or invalid.', 
-            confirmButtonText: 'OK' 
-        });
+        Swal.fire({ icon: 'error', title: 'Invalid URL', text: 'The file URL is missing or invalid.', confirmButtonText: 'OK' });
         return;
     }
     
-    // Get the file type from the URL
-    let fileType = fileUrl.split('.').pop().toLowerCase();
     console.log('File URL:', fileUrl); // Debugging log
-    console.log('File Type:', fileType); // Debugging log
     
     // Handle image files
     if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-        Swal.fire({ 
-            title: 'View Image', 
-            html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, 
-            showCloseButton: true, 
-            confirmButtonText: 'Close', 
-            width: '80%' 
-        });
-    }
-    // Handle PDF files
-    else if (fileType === 'pdf') {
-        Swal.fire({
-            title: "View File",
-            html: `<embed src="${fileUrl}" width="100%" height="500px" type="application/pdf" />`,
-            showCloseButton: true,
-            confirmButtonText: "Close",
-            width: "80%",
-        });
-    }
-    // Handle office files
-    else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-        window.open(fileUrl, '_blank');
-    }
-    // Unsupported file type
-    else {
-        Swal.fire({ 
-            icon: 'error', 
-            title: 'Unsupported File Type', 
-            text: 'This file type is not supported for viewing.', 
-            confirmButtonText: 'OK' 
-        });
-    }
-});
+    Swal.fire({ 
+        title: 'View Image', 
+        html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, 
+        showCloseButton: true, 
+        confirmButtonText: 'Close', 
+        width: '80%' 
+    });
+}
+// Handle PDF files using the data-file-url
+else if (fileType === 'pdf') {
 
+    Swal.fire({
+        title: "View File",
+        html: `<embed src="/storage/${fileUrl}" width="100%" height="500px" type="application/pdf" />`,
+        showCloseButton: true,
+        confirmButtonText: "Close",
+        width: "80%",
+    });
+
+}
+// Handle office files
+else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+    window.open(fileUrl, '_blank');
+}
+// Unsupported file type
+else {
+    Swal.fire({ 
+        icon: 'error', 
+        title: 'Unsupported File Type', 
+        text: 'This file type is not supported for viewing.', 
+        confirmButtonText: 'OK' 
+    });
+}
+
+});
 
 
 
