@@ -663,6 +663,8 @@
                             <th width="12%">Received</th>
                             <th width="12%">Completed</th>
                             <th width="12%">Pending</th>
+                            <th width="12%">Cancelled</th>
+                            <th width="12%">Partially Cancelled</th>
                         </tr>
                     </thead>
                     <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -2446,7 +2448,11 @@ function orderInflow_report() {
             { data: 'carry_forward', name: 'carry_forward' },
             { data: 'received', name: 'received' },
             { data: 'completed', name: 'completed' },
-            { data: 'pending', name: 'pending' }
+            { data: 'pending', name: 'pending' },
+            { data: 'cancelled', name: 'cancelled' },
+            { data: 'partially_cancelled', name: 'partially_cancelled' },
+
+
         ],
         dom: 'lBfrtip',
         buttons:[

@@ -1199,8 +1199,8 @@ public function exportProductionReport(Request $request) {
 }
 
 
-
-public function orderInflow_data(Request $request){
+public function orderInflow_data(Request $request)
+{
 
     $user = Auth::user();
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
@@ -1248,6 +1248,8 @@ public function orderInflow_data(Request $request){
 
         $statusCountsQuery2 = clone $statusCountsQuery;
         $statusCountsQuery3 = clone $statusCountsQuery;
+    $statusCountsQuery4 = clone $statusCountsQuery;
+    $statusCountsQuery5 = clone $statusCountsQuery;
 
 
     // Carry forward count for all clients
@@ -1284,20 +1286,45 @@ public function orderInflow_data(Request $request){
         ->get();
 
     // Pending count for all clients
-    $pendingData = $carry_forward->keyBy('client_id')->map(function ($item) use ($received, $completed) {
+    $cancelled = $statusCountsQuery4->whereIn('process_id', $processIds)
+        ->where('is_active', 1)
+        ->where('status_id', 3)  // Status for cancelled orders
+        ->whereBetween('order_date', [$from_date, $to_date])
+        ->groupBy('client_id')
+        ->selectRaw('client_id, count(*) as cancelled')
+        ->get();
+
+    // Partially Cancelled count for all clients (Excludes from pending)
+    $partially_cancelled = $statusCountsQuery5->whereIn('process_id', $processIds)
+        ->where('is_active', 1)
+        ->where('status_id', 20)  // Status for partially cancelled orders
+        ->whereBetween('order_date', [$from_date, $to_date])
+        ->groupBy('client_id')
+        ->selectRaw('client_id, count(*) as partially_cancelled')
+        ->get();
+
+    // Pending count for all clients (Modified to exclude cancelled and partially cancelled orders from pending calculation)
+    $pendingData = $carry_forward->keyBy('client_id')->map(function ($item) use ($received, $completed, $cancelled, $partially_cancelled) {
         $receivedCount = $received->firstWhere('client_id', $item->client_id);
         $completedCount = $completed->firstWhere('client_id', $item->client_id);
+        $cancelledCount = $cancelled->firstWhere('client_id', $item->client_id);
+        $partiallyCancelledCount = $partially_cancelled->firstWhere('client_id', $item->client_id);
 
         $receivedCount = $receivedCount ? $receivedCount->received : 0;
         $completedCount = $completedCount ? $completedCount->completed : 0;
+        $cancelledCount = $cancelledCount ? $cancelledCount->cancelled : 0;
+        $partiallyCancelledCount = $partiallyCancelledCount ? $partiallyCancelledCount->partially_cancelled : 0;
 
-        $pending = $item->carry_forward + $receivedCount - $completedCount;
+        // Pending count should exclude cancelled and partially cancelled orders
+        $pending = $item->carry_forward + $receivedCount - $completedCount - $cancelledCount - $partiallyCancelledCount;
 
         return [
             'carry_forward' => $item->carry_forward,
             'received' => $receivedCount,
             'completed' => $completedCount,
-            'pending' => max($pending, 0)
+            'pending' => max($pending, 0),  // Only count carry forward, received, and completed for pending
+            'cancelled' => $cancelledCount,  // Include cancelled count separately
+            'partially_cancelled' => $partiallyCancelledCount,  // Include partially cancelled count separately
         ];
     });
 
@@ -1312,6 +1339,8 @@ public function orderInflow_data(Request $request){
             'received' => $counts['received'],
             'completed' => $counts['completed'],
             'pending' => $counts['pending'],
+            'cancelled' => $counts['cancelled'],
+            'partially_cancelled' => $counts['partially_cancelled'],
         ];
     });
     $totalRecords = $pendingData->count();
