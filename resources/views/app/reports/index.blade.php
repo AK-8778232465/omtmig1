@@ -302,10 +302,6 @@
     100% { transform: rotate(360deg); }
 }
 
-#orderDetailsTable_paginate .previous,
-#orderDetailsTable_paginate .next {
-    display: none;
-}
 
 
 </style>
@@ -2932,8 +2928,8 @@ function fetchOrderDetails(page) {
 
 // Handle the "Next" button click
 function updatePaginationState(settings) {
-    // Get the total number of pages
-    const totalPages = settings.fnRecordsDisplay() / settings._iDisplayLength;
+    const totalPages = Math.ceil(settings.fnRecordsDisplay() / settings._iDisplayLength); // Get total pages
+    const currentPage = Math.ceil(settings._iDisplayStart / settings._iDisplayLength) + 1; // Get current page (1-based)
 
     // Loop through all pagination buttons
     $('#orderDetailsTable_paginate .paginate_button').each(function () {
@@ -2949,18 +2945,33 @@ function updatePaginationState(settings) {
 });
 
 // Update the Next button visibility based on the number of records returned
+    const previousButton = $('#orderDetailsTable_previous');
+    const nextButton = $('#orderDetailsTable_next');
+
     if (currentPage === 1) {
-        $('#orderDetailsTable_paginate .paginate_button:first').addClass('active');
+        previousButton.addClass('disabled'); // Disable the 'Previous' button if on the first page
+    } else {
+        previousButton.removeClass('disabled'); // Enable the 'Previous' button
+    }
+
+    if (currentPage === totalPages) {
+        nextButton.addClass('disabled'); // Disable the 'Next' button if on the last page
+    } else {
+        nextButton.removeClass('disabled'); // Enable the 'Next' button
     }
 
     // Handle click event on pagination buttons
-    $('#orderDetailsTable_paginate .paginate_button').on('click', function() {
-        const clickedPage = $(this).text();
+    $('#orderDetailsTable_previous').on('click', function() {
+        if (currentPage > 1) {
+            currentPage -= 1; // Decrease the current page
+            tableInstance.page(currentPage - 1).draw('page'); // Go to the previous page
+        }
+    });
 
-        // Ensure the active page is updated in the currentPage variable
-        if (clickedPage !== 'Next' && clickedPage !== 'Previous') {
-            currentPage = parseInt(clickedPage);
-            // fetchOrderDetails(currentPage);
+    $('#orderDetailsTable_next').on('click', function() {
+        if (currentPage < totalPages) {
+            currentPage += 1; // Increase the current page
+            tableInstance.page(currentPage - 1).draw('page'); // Go to the next page
     }
     });
 }
