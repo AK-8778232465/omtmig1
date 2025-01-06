@@ -97,7 +97,7 @@ class TaxCertPDFController extends Controller
             'order_id' => $orderId,
             'updated_by' => Auth::id(),
             'action' => 'Generated',
-            'file_path' =>  $tempPdfPath,
+            'file_path' =>  "taxcert/{$orderId}/Tax Certificate_{$pdfFields['tax_parcel_id']}.pdf",
            'file_name' => "Tax Certificate_{$pdfFields['tax_parcel_id']}.pdf",
             'updated_at' => now(),
         ]);

@@ -3685,17 +3685,26 @@ function toggleContainerFields(container, enable) {
     });
 
     $('#attachmentHistoryTable').on('click', '.view-file', function (e) {
-    e.preventDefault();
+    
+         // Get the file URL and file type
+    let fileUrl = $(this).data('path'); // Ensure this is relative to storage/public
+    let fileType = fileUrl.split('.').pop().toLowerCase();
 
-    // Get the file URL and file type
-    let fileUrl = $(this).data('path');
-    if (!fileUrl) {
-        Swal.fire({ icon: 'error', title: 'Invalid URL', text: 'The file URL is missing or invalid.', confirmButtonText: 'OK' });
-        return;
+    // Add base URL or fix relative path
+    if (!fileUrl.startsWith('http')) {
+        fileUrl = `${window.location.origin}/storage/${fileUrl}`; // Adjust to your setup
     }
 
-    fileUrl = encodeURI(fileUrl); // Encode URL to handle special characters
-    let fileType = fileUrl.split('.').pop().toLowerCase();
+    // Check if the file URL is valid
+    if (!fileUrl) {
+        Swal.fire({ 
+            icon: 'error', 
+            title: 'Invalid URL', 
+            text: 'The file URL is missing or invalid.', 
+            confirmButtonText: 'OK' 
+        });
+        return;
+    }
 
     console.log('File URL:', fileUrl); // Debugging log
 
