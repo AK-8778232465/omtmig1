@@ -649,9 +649,7 @@
 
 
             </div>
-        </div>
-    </div>
-    <div class="card col-md-10 mt-2 tabledetails" id="orderInflow_report" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
+            <div class="card col-md-10 mt-2 tabledetails" id="orderInflow_report" style="font-size: 12px; overflow-x: auto;">
         <h4 class="text-center mt-3">Order Inflow Report</h4>
         <div class="card-body">
             <div class="p-0">
@@ -676,7 +674,7 @@
 
     {{-- ACM Report --}}
 
-    <div class="card col-md-10 mt-2 tabledetails" id="acm_report" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
+            <div class="card col-md-10 mt-2 tabledetails" id="acm_report" style="font-size: 12px; overflow-x: auto;">
         <h4 class="text-center mt-3">ACM Report</h4>
         <div class="card-body">
             <div class="p-0">
@@ -698,7 +696,7 @@
 
     {{-- Daily completion --}}
 
-    <div class="card col-md-10 mt-2 " id="daily_completion" style="font-size: 12px; margin-left:250px;">
+    <div class="card col-md-10 mt-2 " id="daily_completion" style="font-size: 12px;">
         <h4 class="text-center mt-3">Daily Completion Status</h4>
         <div class="card shadow" style="width: 100%; margin: 20px;">
             <div class="card-body">
@@ -805,6 +803,9 @@
             </div>
         </div>
     </div>
+        </div>
+    </div>
+
 
     <!-- Modal -->
     <!-- Modal to display order details -->
