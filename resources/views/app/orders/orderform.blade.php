@@ -3686,27 +3686,20 @@ function toggleContainerFields(container, enable) {
 
     $('#attachmentHistoryTable').on('click', '.view-file', function (e) {
     e.preventDefault();
-    
-    // Get the file URL
+
+    // Get the file URL and file type
     let fileUrl = $(this).data('path');
-    
-    // Check if the file URL is valid
     if (!fileUrl) {
-        Swal.fire({ 
-            icon: 'error', 
-            title: 'Invalid URL', 
-            text: 'The file URL is missing or invalid.', 
-            confirmButtonText: 'OK' 
-        });
+        Swal.fire({ icon: 'error', title: 'Invalid URL', text: 'The file URL is missing or invalid.', confirmButtonText: 'OK' });
         return;
     }
-    
-    // Get the file type from the URL
+
+    fileUrl = encodeURI(fileUrl); // Encode URL to handle special characters
     let fileType = fileUrl.split('.').pop().toLowerCase();
+
     console.log('File URL:', fileUrl); // Debugging log
-    console.log('File Type:', fileType); // Debugging log
-    
-    // Handle image files
+
+    // View file based on type
     if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
         Swal.fire({ 
             title: 'View Image', 
@@ -3715,23 +3708,17 @@ function toggleContainerFields(container, enable) {
             confirmButtonText: 'Close', 
             width: '80%' 
         });
-    }
-    // Handle PDF files
-    else if (fileType === 'pdf') {
-        Swal.fire({
-            title: "View File",
+    } else if (fileType === 'pdf') {
+        Swal.fire({ 
+            title: 'View File', 
             html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, 
-            showCloseButton: true,
-            confirmButtonText: "Close",
-            width: "80%",
+            showCloseButton: true, 
+            confirmButtonText: 'Close', 
+            width: '80%' 
         });
-    }
-    // Handle office files
-    else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
         window.open(fileUrl, '_blank');
-    }
-    // Unsupported file type
-    else {
+    } else {
         Swal.fire({ 
             icon: 'error', 
             title: 'Unsupported File Type', 
@@ -3740,6 +3727,7 @@ function toggleContainerFields(container, enable) {
         });
     }
 });
+
 
 
 
