@@ -2357,7 +2357,7 @@ function updateSaveButton() {
 }
 
     // Initial call to load files if `order_id` is already set
-    displayFiles();
+    // displayFiles();
     displaycertFiles();
 });
 
