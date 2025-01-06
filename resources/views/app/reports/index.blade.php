@@ -61,7 +61,7 @@
 }
 .report-item.active {
     background-color: #28a745;
-    color: black;
+    color: White;
 }
 
 
@@ -358,10 +358,10 @@
 
 
         <div class="row" id="hidefilter">
-            <div class="col-md-4" style="width: 350px!important;" id="selected_date_range">
+            <div class="col-md-3 mr-2" style="width: 350px!important;" id="selected_date_range">
                 <div class="form-group">
                     <label for="dateFilter" required>Selected received date range:</label>
-                    <select class="form-control" style=" width: 250px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
+                    <select class="form-control" style=" width: 310px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
                         <option value="" >Select Date Range</option>
                         <option value="last_week">Last Week</option>
                         <option value="current_week">current week</option>
@@ -388,7 +388,11 @@
                     <b class="mt-0" id="selectedDate"></b>
                 </div>
             </div>
-            <div class="col-md-2" id="client_filter">
+            <div class="col-md-2 mt-3 pr-2 pt-2 " id="hidefilter_4">
+                 <button type="submit" id="filterButton" class="btn btn-primary in-order">Filter</button>
+            </div>
+            
+            <div class="col-md-2 mr-3" id="client_filter">
                 <div class="form-group">
                     <label for="client">Client</label>
                     <select class="form-control select2-basic-multiple" name="dcf_client_id" id="client_id_dcf">
@@ -400,7 +404,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-2" id="client_filter_2">
+            <div class="col-md-3 mr-3" id="client_filter_2">
                 <div class="form-group">
                     <label for="client">Client</label>
                     <select class="form-control select2-basic-multiple" name="dcf_client_id_2" id="client_id_dcf_2">
@@ -413,7 +417,7 @@
                 </div>
             </div>
 
-            <div class="col-md-2" id="lob_filter">
+            <div class="col-md-2 mr-3" id="lob_filter">
                 <div class="form-group">
                     <label for="lob_id">Lob</label>
                     <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id">
@@ -692,7 +696,7 @@
 
     {{-- Daily completion --}}
 
-    <div class="card col-md-10 mt-2 tabledetails" id="daily_completion" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
+    <div class="card col-md-10 mt-2 " id="daily_completion" style="font-size: 12px; margin-left:250px;">
         <h4 class="text-center mt-3">Daily Completion Status</h4>
         <div class="card shadow" style="width: 100%; margin: 20px;">
             <div class="card-body">
@@ -769,7 +773,7 @@
 
 
         <div class="card-body">
-            <div class="p-0">
+            <div class="p-0 tabledetails">
                 <table id="daily_completion_table" class="table table-striped table-bordered">
                     <thead class="text-center" style="font-size: 11px;">
                         <tr>
@@ -1733,7 +1737,8 @@ $(document).ready(function() {
             $('#client_filter').show();
             $('#lob_filter').show();
             $('#process_filter').show();
-            $('#client_filter_2').hide();
+            $('#client_filter_2').hide();         
+            $('#hidefilter_4').hide();
 
 
         } else if (reportId === 'orderwise-details') {
@@ -1748,7 +1753,8 @@ $(document).ready(function() {
             $('#client_filter').show();
             $('#lob_filter').show();
             $('#process_filter').show();
-            $('#client_filter_2').hide();
+            $('#client_filter_2').hide();            
+            $('#hidefilter_4').hide();
 
 
         } else if (reportId === 'ordercompletion-details') {
@@ -1764,6 +1770,7 @@ $(document).ready(function() {
             $('#lob_filter').show();
             $('#process_filter').show();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
         } else if (reportId === 'orderprogress-details') {
@@ -1779,6 +1786,7 @@ $(document).ready(function() {
             $('#lob_filter').show();
             $('#process_filter').show();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
 
@@ -1796,6 +1804,7 @@ $(document).ready(function() {
             $('#lob_filter').hide();
             $('#process_filter').hide();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
 
@@ -1813,6 +1822,7 @@ $(document).ready(function() {
             $('#lob_filter').show();
             $('#process_filter').show();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
 
@@ -1820,14 +1830,15 @@ $(document).ready(function() {
 		}else if (reportId === 'orderInflow-report') {
             $('#orderInflow_report').show();
             $('#selected_date_range').show();
-            $('#hidefilter_3').show();
+            $('#hidefilter_3').hide();
             $('#client_filter').hide();
             $('#lob_filter').hide();
             $('#process_filter').hide();
             $('#hidefilter_2').hide();
             $('#role_filter').hide();
             $('#user_filter').hide();
-            $('#client_filter_2').hide();
+            $('#client_filter_2').hide();            
+            $('#hidefilter_4').show();
 
 
         }else if (reportId === 'acm-report') {
@@ -1841,6 +1852,7 @@ $(document).ready(function() {
             $('#role_filter').show();
             $('#user_filter').show();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
         }else if (reportId === 'daily-completion') {
@@ -1854,6 +1866,7 @@ $(document).ready(function() {
             $('#role_filter').hide();
             $('#user_filter').hide();
             $('#client_filter_2').show();
+            $('#hidefilter_4').hide();
 
         }
         }

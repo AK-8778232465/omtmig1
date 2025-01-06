@@ -6,7 +6,10 @@
     <title>User Impersonation</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{asset('plugins/select2/select2.min.css')}}" rel="stylesheet" type="text/css" />
+
     <style>
+        
         body {
             display: flex;
             justify-content: center;
@@ -17,6 +20,15 @@
         .dropdown-container {
             text-align: center;
             width: 100%;
+            padding: 100px;
+        }
+        .select2-container--default .select2-results__option {
+            text-align: left;
+            padding-left: 10px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            text-align: left;
+            padding-left: 10px;
         }
     </style>
 </head>
@@ -25,7 +37,7 @@
         <div class="dropdown-container">
             <div class="form-group">
                 <label for="userDropdown" class="font-weight-bold">Select a user:</label>
-                <select id="userDropdown" class="form-control form-control-lg">
+                <select id="userDropdown" class="form-control form-control-lg" >
                     <option value="">Select a user</option>
                     @foreach($userList as $user)
                     <option value="{{ $user->id }}">
@@ -46,8 +58,11 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <!-- Bootstrap JS -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{{asset('plugins/select2/select2.min.js')}}"></script>
+
     <script>
         $(document).ready(function() {
+            $('#userDropdown').select2();
             $('#userDropdown').change(function() {
                 var userId = $(this).val();
                 if (userId) {
