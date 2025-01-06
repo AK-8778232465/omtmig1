@@ -23,9 +23,7 @@ class OmsAttachmentHistory extends Model
         'order_id',
         'file_name',
         'updated_by',
-        'file_path',
         'action',
-        'is_delete',
         'updated_at'
     ];
 

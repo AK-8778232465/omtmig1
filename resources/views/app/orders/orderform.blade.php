@@ -1553,20 +1553,6 @@
                                 </div>
                             </div>
 
-                            <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="fileModalLabel">File Viewer</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <iframe id="fileViewer" src="" style="width: 100%; height: 400px;" frameborder="0"></iframe>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                              <!-- /e history -->
                         </form>
                     </div>
@@ -2209,8 +2195,7 @@ $(document).ready(function () {
                     success: function (response) {
                         console.log("File stored successfully:", response);
                         // Refresh the file list after each successful upload
-                        // displayFiles();
-                        $('#attachmentHistoryTable').DataTable().ajax.reload();
+                        displayFiles();
                     },
                     error: function (xhr, status, error) {
                         console.error("File upload failed:", error);
@@ -3470,12 +3455,12 @@ function updateESTTime() {
 }
 
     // Initially load the files
-    // displayFiles();
+    displayFiles();
 
     // Delete file functionality
     $(document).on('click', '.delete-file', function (e) {
         e.preventDefault();
-        let fileId = $(this).data('id');
+        let fileId = $(this).data('file-id');
         let fileRow = $(this).closest('.row'); // Find the closest row that contains the file
 
         // Show confirmation dialog using Swal
@@ -3491,19 +3476,18 @@ function updateESTTime() {
             if (result.value) {
                
                 $.ajax({
-                    url: "{{ route('delete.attachment') }}",
-                    type: 'POST',
+                    url: "{{ url('deleteFile') }}",
+                    type: 'DELETE',
                     data: {
-                        id: fileId
+                        file_id: fileId
                     },
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function () {
                         Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
-                        // fileRow.remove(); // Remove the file row from the UI
-                        // displayFiles(); // Refresh file list after deletion
-                        $('#attachmentHistoryTable').DataTable().ajax.reload();
+                        fileRow.remove(); // Remove the file row from the UI
+                        displayFiles(); // Refresh file list after deletion
                     },
                     error: function () {
                         Swal.fire('Error!', 'There was a problem deleting the file.', 'error');
@@ -3515,38 +3499,38 @@ function updateESTTime() {
 
 });
 
-// $(document).ready(function() {
+$(document).ready(function() {
     // Initialize DataTable with AJAX data
-//     var table = $('#attachmentHistoryTable').DataTable({
-//         ajax: {
-//             url: "{{ url('attachmentHistoryData') }}",
-//             data: function(d) {
-//                 d.order_id = $("#order_id").val(); // Send `order_id` as a parameter
-//             },
-//             type: 'GET'
-//         },
-//         // Adjusted order column to account for the new serial number column
-//         columns: [
-//             {
-//                 data: null, // Serial number column
-//                 render: function(data, type, row, meta) {
-//                     return meta.row + 1; // Display row number (1-based index)
-//                 },
-//                 orderable: false // Disable sorting on this column
-//             },
-//             { data: 'file_name' },
-//             { data: 'user.username', defaultContent: '' },
-//             { data: 'action' },
-//             {
-//             data: 'updated_at',
+    var table = $('#attachmentHistoryTable').DataTable({
+        ajax: {
+            url: "{{ url('attachmentHistoryData') }}",
+            data: function(d) {
+                d.order_id = $("#order_id").val(); // Send `order_id` as a parameter
+            },
+            type: 'GET'
+        },
+        // Adjusted order column to account for the new serial number column
+        columns: [
+            {
+                data: null, // Serial number column
+                render: function(data, type, row, meta) {
+                    return meta.row + 1; // Display row number (1-based index)
+                },
+                orderable: false // Disable sorting on this column
+            },
+            { data: 'file_name' },
+            { data: 'user.username', defaultContent: '' },
+            { data: 'action' },
+            {
+            data: 'updated_at',
               
-//             }
-//         ],
+            }
+        ],
        
-//         dom: 't', // Only display the table body, no search box or entries dropdown
-//         paging: false // Disable pagination if desired
-//     });
-// });
+        dom: 't', // Only display the table body, no search box or entries dropdown
+        paging: false // Disable pagination if desired
+    });
+});
 
 
 $(document).ready(function() {
@@ -3639,105 +3623,6 @@ function toggleContainerFields(container, enable) {
             input.disabled = !enable; // Enable or disable input fields
         });
     }
-
-    $(document).ready(function() {
-    var orderId = $("#order_id").val();  // Get the order ID dynamically
-
-    // Initialize DataTable
-    $('#attachmentHistoryTable').DataTable({
-        ajax: {
-            url: "{{ url('attachments') }}",  // Modify the URL as per your server configuration
-            type: 'GET', 
-            data: function(d) {
-                d.order_id = orderId;  // Pass the order ID to the server
-            },
-            dataSrc: function(json) {
-                return json.data;  // Ensure the server returns the correct data format
-            }
-        },
-        columns: [
-            { 
-            data: null, // Use `null` to generate serial numbers
-            render: function (data, type, row, meta) {
-                return meta.row + 1; // Generate serial number based on the row index
-            },
-            searchable: false, // Disable search for this column
-            orderable: false // Disable ordering for this column
-        },
-            {
-                data: null,
-                render: function(data, type, row) {
-                    let fileLink = `<a href="#" class="view-file text-primary" data-path="${row.file_path}" style="color: blue;">${row.file_name}</a>`;
-                    
-                    let deleteButton = '';
-                    if (row.is_delete == 1) {
-                        deleteButton = ` <button class="btn btn-sm text-danger delete-file" data-id="${row.id}" title="Delete">
-                                            <i class="fas fa-times"></i>
-                                         </button>`;
-                    }
-                    return fileLink + deleteButton;
-                }
-            },
-            { data: 'user.username', defaultContent: '' },
-            { data: 'action' },
-            { data: 'updated_at' }
-        ]
-    });
-
-    $('#attachmentHistoryTable').on('click', '.view-file', function (e) {
-    e.preventDefault();
-    
-    // Get the file URL and file type
-    let fileUrl = $(this).data('path');
-    let fileType = fileUrl.split('.').pop().toLowerCase();
-    
-    // Check if the file URL is valid
-    if (!fileUrl) {
-        Swal.fire({ icon: 'error', title: 'Invalid URL', text: 'The file URL is missing or invalid.', confirmButtonText: 'OK' });
-        return;
-    }
-    
-    console.log('File URL:', fileUrl); // Debugging log
-    
-    // Handle image files
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-        Swal.fire({ 
-            title: 'View Image', 
-            html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, 
-            showCloseButton: true, 
-            confirmButtonText: 'Close', 
-            width: '80%' 
-        });
-    }
-    // Handle PDF files
-    else if (fileType === 'pdf') {
-        Swal.fire({ 
-            title: 'View File', 
-            html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, 
-            showCloseButton: true, 
-            confirmButtonText: 'Close', 
-            width: '80%' 
-        });
-    }
-    // Handle office files
-    else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-        window.open(fileUrl, '_blank');
-    }
-    // Unsupported file type
-    else {
-        Swal.fire({ 
-            icon: 'error', 
-            title: 'Unsupported File Type', 
-            text: 'This file type is not supported for viewing.', 
-            confirmButtonText: 'OK' 
-        });
-    }
-});
-
-
-
-
-});
 
 </script>
 @endsection

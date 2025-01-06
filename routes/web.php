@@ -164,8 +164,6 @@ Route::middleware('auth:web')->controller(OrderFormController::class)->group(fun
 
 });
 
-Route::get('/attachments', [OrderFormController::class, 'getAttachmentHistory'])->name('get.attachment.history');
-Route::post('/attachments/delete', [OrderFormController::class, 'deleteAttachment'])->name('delete.attachment');
 
 Route::middleware('auth:web','role_or:Super Admin,PM/TL,VP,Business Head,SPOC,Admin,AVP')->controller(OrderCreationController::class)->group(function () {
     Route::any('single_order', 'single_order')->name('single_order');
