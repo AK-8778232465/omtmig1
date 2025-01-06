@@ -465,9 +465,12 @@
                         <input type="text" id="search-input" placeholder="Search..." style="padding: 5px 30px 5px 10px;">
                         <i class="fas fa-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
                     </div>
-                    <div class="d-flex" style="margin-left: auto;">
-                        <i class="fas fa-calendar-minus img-fluid" data-toggle="modal" data-target="#yesterday_dataModal"></i>
-                        <i class="fas fa-calendar-plus img-fluid" data-toggle="modal" data-target="#dataModal"></i>
+
+                    <div class="d-flex" style="margin-left: 5%; justify-content: flex-start;">
+                        <img src="{{ asset('assets/images/yesterday.png') }}" 
+                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#yesterday_dataModal" class="mr-2">
+                        <img src="{{ asset('assets/images/today.png') }} " 
+                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#dataModal" class="mr-2">
                     </div>
                 </div>
 
@@ -859,11 +862,6 @@
                     </div>
                 </div>
             </div>
-            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Process'))
-            <div class="col-xl-4 col-sm-6 col-12">
-
-            </div>
-            @endif
             <!-- Carried Over -->
             <div class="col-xl-4 col-sm-6 col-12"  >
                 <div class="card">

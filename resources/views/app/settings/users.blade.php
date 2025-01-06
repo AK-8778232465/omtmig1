@@ -673,7 +673,9 @@ function assignService(userID) {
     $('#assignServiceModal').modal('show');
     fetchMappingData();
 
-    $('#confirmButton').on('click', function() {
+    $('#confirmButton').off('click').on('click', function() {
+        var $button = $(this);
+        $button.prop('disabled', true); 
         var selectedNodes = $('#jstree').jstree('get_checked'); // Get the IDs of selected nodes
         var selectedIDs = selectedNodes
             .map(function(id) { return parseInt(id, 10); })
@@ -733,7 +735,11 @@ function assignService(userID) {
                             title: 'Error',
                             text: 'An error occurred while updating services. Please try again.',
                 });
-                    }
+                
+                    },
+                    complete: function() {
+                    $button.prop('disabled', false);  
+                }
                 });
             },
             error: function() {
@@ -742,6 +748,7 @@ function assignService(userID) {
                     title: 'Error',
                     text: 'Failed to fetch previously assigned services. Please try again.',
                 });
+                $button.prop('disabled', false);
             }
         });
     });
