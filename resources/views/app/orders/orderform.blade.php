@@ -3720,7 +3720,7 @@ function toggleContainerFields(container, enable) {
     else if (fileType === 'pdf') {
         Swal.fire({
             title: "View File",
-            html: `<embed src="${fileUrl}" width="100%" height="500px" type="application/pdf" />`,
+            html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, 
             showCloseButton: true,
             confirmButtonText: "Close",
             width: "80%",
