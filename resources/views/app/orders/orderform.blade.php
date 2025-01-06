@@ -3701,40 +3701,37 @@ function toggleContainerFields(container, enable) {
     
     // Handle image files
     if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-    Swal.fire({ 
-        title: 'View Image', 
-        html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, 
-        showCloseButton: true, 
-        confirmButtonText: 'Close', 
-        width: '80%' 
-    });
-}
-// Handle PDF files using the data-file-url
-else if (fileType === 'pdf') {
-
-    Swal.fire({
-        title: "View File",
-        html: `<embed src="/storage/${fileUrl}" width="100%" height="500px" type="application/pdf" />`,
-        showCloseButton: true,
-        confirmButtonText: "Close",
-        width: "80%",
-    });
-
-}
-// Handle office files
-else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-    window.open(fileUrl, '_blank');
-}
-// Unsupported file type
-else {
-    Swal.fire({ 
-        icon: 'error', 
-        title: 'Unsupported File Type', 
-        text: 'This file type is not supported for viewing.', 
-        confirmButtonText: 'OK' 
-    });
-}
-
+        Swal.fire({ 
+            title: 'View Image', 
+            html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, 
+            showCloseButton: true, 
+            confirmButtonText: 'Close', 
+            width: '80%' 
+        });
+    }
+    // Handle PDF files
+    else if (fileType === 'pdf') {
+        Swal.fire({ 
+            title: 'View File', 
+            html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, 
+            showCloseButton: true, 
+            confirmButtonText: 'Close', 
+            width: '80%' 
+        });
+    }
+    // Handle office files
+    else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+        window.open(fileUrl, '_blank');
+    }
+    // Unsupported file type
+    else {
+        Swal.fire({ 
+            icon: 'error', 
+            title: 'Unsupported File Type', 
+            text: 'This file type is not supported for viewing.', 
+            confirmButtonText: 'OK' 
+        });
+    }
 });
 
 
