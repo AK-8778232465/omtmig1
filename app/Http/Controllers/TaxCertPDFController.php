@@ -89,6 +89,16 @@ class TaxCertPDFController extends Controller
             return response()->json(['error' => 'Failed to generate PDF'], 500);
         }
 
+        OmsAttachmentHistory::create([
+            'order_id' => $orderId,
+            'updated_by' => Auth::id(),
+            'action' => 'Generated',
+            'file_path' =>  $tempPdfPath,
+           'file_name' => "Tax Certificate_{$pdfFields['tax_parcel_id']}.pdf",
+            'updated_at' => now(),
+        ]);
+
+
         // Merge PDFs (if needed)
         // Example: $gsCommand = ...
 
