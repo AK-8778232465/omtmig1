@@ -2777,6 +2777,12 @@ public function tat_zone_count(Request $request) {
         $statusCountsQuery6 = clone $statusCountsQuery;
 
 //
+        $statusCountsQuery7 = clone $statusCountsQuery;
+        $statusCountsQuery8 = clone $statusCountsQuery;
+        $statusCountsQuery9 = clone $statusCountsQuery;
+        $statusCountsQuery10 = clone $statusCountsQuery;
+
+
 
 
         $carry_forward= $statusCountsQuery->with('process', 'client')
@@ -2810,9 +2816,23 @@ public function tat_zone_count(Request $request) {
 
             $completed = $completed->count();
 
+            $monthly_cancelled = $statusCountsQuery7->with('process', 'client')
+            ->whereIn('process_id', $processIds)
+            ->whereDate('order_date', '>=', $firstDateOfCurrentMonth)
+            ->where('status_id', 3)
+            ->where('is_active', 1);
 
+            $monthly_cancelled = $monthly_cancelled->count();
 
-        $pending = $carry_forward + $received - $completed;
+            $monthly_partially_cancelled = $statusCountsQuery8->with('process', 'client')
+            ->whereIn('process_id', $processIds)
+            ->whereDate('order_date', '>=', $firstDateOfCurrentMonth)
+            ->where('status_id', 20)
+            ->where('is_active', 1);
+
+            $monthly_partially_cancelled = $monthly_partially_cancelled->count();
+
+        $pending = $carry_forward + $received - $completed - $monthly_cancelled - $monthly_partially_cancelled;
 
         if ($pending < 0) {
             $pending = 0;
@@ -2839,13 +2859,6 @@ public function tat_zone_count(Request $request) {
 
         $daily_carry_forward = $pending - $daily_received + $completed_today;
 
-
-
-
-
-
-
-
         $daily_completed = $statusCountsQuery6->with('process', 'client')
         ->whereDate('completion_date', '=', $currentDate)
         ->whereIn('process_id', $processIds)
@@ -2854,7 +2867,25 @@ public function tat_zone_count(Request $request) {
 
         $daily_completed = $daily_completed->count();
 
-        $daily_pending = $daily_carry_forward + $daily_received - $daily_completed;
+
+        $daily_cancelled = $statusCountsQuery9->with('process', 'client')
+        ->whereIn('process_id', $processIds)
+        ->whereDate('order_date', '=', $currentDate)
+        ->where('status_id', 3)
+        ->where('is_active', 1);
+
+        $daily_cancelled = $daily_cancelled->count();
+
+        $daily_partially_cancelled = $statusCountsQuery10->with('process', 'client')
+        ->whereIn('process_id', $processIds)
+        ->whereDate('order_date', '=', $currentDate)
+        ->where('status_id', 20)
+        ->where('is_active', 1);
+
+        $daily_partially_cancelled = $daily_partially_cancelled->count();
+
+
+        $daily_pending = $daily_carry_forward + $daily_received - $daily_completed - $daily_cancelled - $daily_partially_cancelled;
 
         if ($daily_pending < 0) {
             $daily_pending = 0;
@@ -2868,6 +2899,9 @@ public function tat_zone_count(Request $request) {
                     'received' => $received,
                     'completed' => $completed,
                     'pending' => $pending,
+                    'cancelled' => $monthly_cancelled,
+                    'partially_cancelled' => $monthly_partially_cancelled,
+
                 ],
                 [
                     'monthLabel' => 'DAILY',
@@ -2875,6 +2909,9 @@ public function tat_zone_count(Request $request) {
                     'received' => $daily_received,
                     'completed' => $daily_completed,
                     'pending' => $daily_pending,
+                    'cancelled' => $daily_cancelled,
+                    'partially_cancelled' => $daily_partially_cancelled,
+
 
                 ]
             ]

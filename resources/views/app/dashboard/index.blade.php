@@ -176,6 +176,29 @@
     color:rgb(14, 98, 29);
     margin-left:5px;
 }
+.dataTables_scrollBody::-webkit-scrollbar {
+    height: 8px; 
+    background-color: #F5F5F5;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-track {
+    background-color: #F5F5F5;
+    border-radius: 10px;        
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-thumb {
+    background-color: #AAA;   
+    border-radius: 10px;        
+    background-image: -webkit-linear-gradient(0deg, 
+                                              rgba(255, 255, 255, 0.5) 25%,
+                                              transparent 25%,
+                                              transparent 50%,
+                                              rgba(255, 255, 255, 0.5) 50%,
+                                              rgba(255, 255, 255, 0.5) 75%,
+                                              transparent 75%,
+                                              transparent); 
+}
 
     </style>
 {{-- Order Wise --}}
@@ -525,6 +548,9 @@
                             <th width="12%">Received</th>
                             <th width="12%">Completed</th>
                             <th width="12%">Pending</th>
+                            <th width="12%">Cancelled</th>
+                            <th width="12%">Partially Cancelled</th>
+
                         </tr>
                     </thead>
                     <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -2712,14 +2738,18 @@ function carry_over_monthly() {
                         carry_forward: json.data[0].carry_forward,
                         received: json.data[0].received,
                         completed: json.data[0].completed,
-                        pending: json.data[0].pending
+                        pending: json.data[0].pending,
+                        cancelled: json.data[0].cancelled,
+                        partially_cancelled: json.data[0].partially_cancelled,
                     },
                     {
                         monthLabel: "DAILY",
                         carry_forward: json.data[1].carry_forward,
                         received: json.data[1].received,
                         completed: json.data[1].completed,
-                        pending: json.data[1].pending
+                        pending: json.data[1].pending,
+                        cancelled: json.data[1].cancelled,
+                        partially_cancelled: json.data[1].partially_cancelled,
                     }
                 ];
             }
@@ -2729,7 +2759,9 @@ function carry_over_monthly() {
             { data: 'carry_forward', name: 'carry_forward'},
             { data: 'received', name: 'received'},
             { data: 'completed', name: 'completed'},
-            { data: 'pending', name: 'pending'}
+            { data: 'pending', name: 'pending'},
+            { data: 'cancelled', name: 'cancelled'},
+            { data: 'partially_cancelled', name: 'partially_cancelled'},
         ],
         ordering: false
     });

@@ -105,7 +105,29 @@
 .black-text {
     color: black;
 }
+.dataTables_scrollBody::-webkit-scrollbar {
+    height: 8px; 
+    background-color: #F5F5F5;
+}
 
+.dataTables_scrollBody::-webkit-scrollbar-track {
+    background-color: #F5F5F5;
+    border-radius: 10px;        
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-thumb {
+    background-color: #AAA;   
+    border-radius: 10px;        
+    background-image: -webkit-linear-gradient(0deg, 
+                                              rgba(255, 255, 255, 0.5) 25%,
+                                              transparent 25%,
+                                              transparent 50%,
+                                              rgba(255, 255, 255, 0.5) 50%,
+                                              rgba(255, 255, 255, 0.5) 75%,
+                                              transparent 75%,
+                                              transparent); 
+}
 </style>
 
 {{-- Edit Model Order --}}
