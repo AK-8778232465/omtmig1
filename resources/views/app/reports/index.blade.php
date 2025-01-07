@@ -2748,7 +2748,7 @@ function fetchOrderDetails(page) {
                 $('#orderDetailsModal').modal('show');
             }
 
-            $('#orderDetailsModal').on('shown.bs.modal', function () {
+            $('#orderDetailsModal').modal('show').on('shown.bs.modal', function () {
                 // You can perform additional actions here when the modal is fully shown
                 console.log("Order Details Modal is now visible.");
 
