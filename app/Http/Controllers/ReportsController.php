@@ -1333,14 +1333,18 @@ public function orderInflow_data(Request $request)
 
     // Prepare the final response data
     $data = $pendingData->map(function ($counts, $clientId) use ($clientNames) {
+        if (!isset($clientNames[$clientId])) {
+            return null; // Skip the entry if clientId is not found
+        }
+
         return [
             'client_name' => $clientNames[$clientId],
-            'carry_forward' => $counts['carry_forward'],
-            'received' => $counts['received'],
-            'completed' => $counts['completed'],
-            'pending' => $counts['pending'],
-            'cancelled' => $counts['cancelled'],
-            'partially_cancelled' => $counts['partially_cancelled'],
+            'carry_forward' => $counts['carry_forward'] ?? 0,
+            'received' => $counts['received'] ?? 0,
+            'completed' => $counts['completed'] ?? 0,
+            'pending' => $counts['pending'] ?? 0,
+            'cancelled' => $counts['cancelled'] ?? 0,
+            'partially_cancelled' => $counts['partially_cancelled'] ?? 0,
         ];
     });
     $totalRecords = $pendingData->count();
@@ -1610,12 +1614,13 @@ if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
 
         // Track "Pending" count and order IDs (assumed logic: Order Received - Completed)
         $completedCount = $statusCountMap[$dateKey][$clientKey]['Completed']['count'] ?? 0;
+        $cancelledCount = $statusCountMap[$dateKey][$clientKey]['Cancelled']['count'] ?? 0;
         $pendingMap[$dateKey] = [
-            'count' => ($orderReceivedMap[$dateKey]['count'] - $completedCount),
-            'order_ids' => array_diff($orderReceivedMap[$dateKey]['order_ids'], $statusCountMap[$dateKey][$clientKey]['Completed']['order_ids'] ?? []),
+            'count' => ($orderReceivedMap[$dateKey]['count'] - $completedCount - $cancelledCount),
+            'order_ids' => array_diff($orderReceivedMap[$dateKey]['order_ids'], $statusCountMap[$dateKey][$clientKey]['Completed']['order_ids'] ?? [], $statusCountMap[$dateKey][$clientKey]['Cancelled']['order_ids'] ?? []),
         ];
     }
-    $pendingCount = $totalOrders - $summaryCount['Completed'];
+    $pendingCount = $totalOrders - $summaryCount['Completed'] - $summaryCount['Cancelled'];
 
     // Merge "Order Received" and "Pending" into "counts"
     foreach ($orderReceivedMap as $date => $data) {
