@@ -64,6 +64,10 @@
     color: White;
 }
 
+.report-item.active:hover {
+    background-color: #28a745;
+    color: White;
+}
 
 #customfromRange {
     flex-wrap: wrap;
@@ -175,7 +179,7 @@
 #daily_completion_table th:nth-child(2),
 #daily_completion_table td:nth-child(2) {
     position: sticky;
-    left: 7%;  /* Position this column right next to the first column */
+    left: 12%;  /* Position this column right next to the first column */
     background-color: #fff;  /* Match the background color */
     z-index: 1;  /* Ensure it stays below the first column */
     width: 10%;  /* Fix the width of the second column */
@@ -303,6 +307,30 @@
 }
 
 
+.tabledetails::-webkit-scrollbar {
+    height: 8px; 
+    background-color: #F5F5F5;
+}
+
+.tabledetails::-webkit-scrollbar-track {
+    background-color: #F5F5F5;
+    border-radius: 10px;        
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+.tabledetails::-webkit-scrollbar-thumb {
+    background-color: #AAA;   
+    border-radius: 10px;        
+    background-image: -webkit-linear-gradient(0deg, 
+                                              rgba(255, 255, 255, 0.5) 25%,
+                                              transparent 25%,
+                                              transparent 50%,
+                                              rgba(255, 255, 255, 0.5) 50%,
+                                              rgba(255, 255, 255, 0.5) 75%,
+                                              transparent 75%,
+                                              transparent); 
+}
+
 </style>
 <div class="container-fluid d-flex reports">
     <div class="col-md-2 text-center left-menu">
@@ -404,7 +432,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-3 mr-3" id="client_filter_2">
+            <div class="col-md-2 mr-3" id="client_filter_2">
                 <div class="form-group">
                     <label for="client">Client</label>
                     <select class="form-control select2-basic-multiple" name="dcf_client_id_2" id="client_id_dcf_2">
@@ -499,7 +527,7 @@
                     <div class="order-count mb-3" style="font-size: 14px; font-weight: bold;">
                         <span><strong>Total No of Orders:</strong> <span id="order-count-orderWise" style="font-weight: normal;">0</span></span>
                     </div>
-                    <div class="table-responsive">
+                    <div class="tabledetails">
                         <table id="newreports_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
                                 <tr>
@@ -537,7 +565,7 @@
             <h4 class="text-center mt-3">Order completion details</h4>
                 <div class="card-body">
                     <div class="p-0">
-                    <div style="overflow-x: auto;">
+                    <div class="tabledetails">
                         <table id="timetaken_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead class="text-center" style="font-size: 12px;">
                                 <tr>
@@ -606,11 +634,11 @@
                     </div>
                 </div>
             </div>
-            <div class="card col-md-10 mt-2 tabledetails" id="production_report" style="font-size: 12px; overflow-x: auto;">
+  <div class="card col-md-10 mt-2" id="production_report" style="font-size: 12px;">
     <h4 class="text-center mt-3">Production Report</h4>
     <div class="card-body">
         <div class="p-0">
-            <div style="overflow-x:auto;">
+            <div class="tabledetails">
                 <table id="production_datatable" class="table table-bordered" style="border-collapse: collapse; width: 100%; background-color: #f5f5f5;">
                     <thead class="text-center" style="font-size: 12px;">
                         <tr>
@@ -652,7 +680,7 @@
             <div class="card col-md-10 mt-2 tabledetails" id="orderInflow_report" style="font-size: 12px; overflow-x: auto;">
         <h4 class="text-center mt-3">Order Inflow Report</h4>
         <div class="card-body">
-            <div class="p-0">
+            <div class="p-0 tabledetails">
                 <table id="orderInflow_report_table" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead class="text-center" style="font-size: 12px;">
                         <tr>
@@ -775,25 +803,25 @@
         <div class="card-body">
             <div class="p-0 tabledetails">
                 <table id="daily_completion_table" class="table table-striped table-bordered">
-                    <thead class="text-center" style="font-size: 11px;">
+                    <thead class="text-center" style="font-size: 12px;">
                         <tr>
-                            <th width="10%">Date</th>
-                            <th width="10%">Client Code</th>
-                            <th width="10%">Order Received</th>
-                            <th width="10%">Yet to Assign</th>
-                            <th width="8%">WIP</th>
-                            <th width="8%">Coversheet Prep</th>
-                            <th width="8%">Doc purchase</th>
-                            <th width="8%">Clarification</th>
-                            <th width="8%">Ground Abstractor</th>
-                            <th width="8%">Send for QC</th>
-                            <th width="8%">Typing</th>
-                            <th width="8%">Typing QC</th>
-                            <th width="8%">Hold</th>
-                            <th width="8%">Completed</th>
-                            <th width="8%">Partially Cancelled</th>
-                            <th width="8%">Cancelled</th>
-                            <th width="8%">Pending</th>
+                            <th style="white-space: nowrap; width:150px">Date</th>
+                            <th style="white-space: nowrap; width: 150px">Client Code</th>
+                            <th style="white-space: nowrap; width: 150px;">Order Received</th>
+                            <th style="white-space: nowrap; width: 150px;">Yet to Assign</th>
+                            <th style="white-space: nowrap; width: 150px;">WIP</th>
+                            <th style="white-space: nowrap; width: 150px;">Coversheet Prep</th>
+                            <th style="white-space: nowrap; width: 150px;">Doc purchase</th>
+                            <th style="white-space: nowrap; width: 150px;">Clarification</th>
+                            <th style="white-space: nowrap; width: 150px;">Ground Abstractor</th>
+                            <th style="white-space: nowrap; width: 150px;">Send for QC</th>
+                            <th style="white-space: nowrap; width: 150px;">Typing</th>
+                            <th style="white-space: nowrap; width: 150px;">Typing QC</th>
+                            <th style="white-space: nowrap; width: 150px;">Hold</th>
+                            <th style="white-space: nowrap; width: 150px;">Completed</th>
+                            <th style="white-space: nowrap; width: 150px;">Partially Cancelled</th>
+                            <th style="white-space: nowrap; width: 150px;">Cancelled</th>
+                            <th style="white-space: nowrap; width: 150px;">Pending</th>
                         </tr>
                     </thead>
                     <tbody class="text-center">
