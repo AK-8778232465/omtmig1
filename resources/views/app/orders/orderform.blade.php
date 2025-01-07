@@ -503,12 +503,12 @@
                 @endif
                     @if($orderData->client_id == 16)
                         @if(!in_array($orderData->stl_process_id, [2, 4, 6]))
-				@php
+				<!-- @php
                     $segments = explode('/', Request::path());
                     $lastSegment = end($segments);
-                @endphp
+                @endphp -->
 
-            @if($lastSegment != "tax")
+            <!-- @if($lastSegment != "tax") -->
                 @if(!@empty($countyInfo))
                 <input type="hidden" name="instructionId" id="instructionId" value="{{$instructionId}}">
                 <h6 class="font-weight-bold">Source Information :</h6>
@@ -576,7 +576,7 @@
                         </table>
                     </div>
                 </div>
-                @endif
+                <!-- @endif -->
                 @endif
                     @endif
                     @if(in_array($orderData->stl_process_id, [2, 4, 6]))
@@ -604,24 +604,274 @@
                     @endif
                     @if(!in_array($orderData->stl_process_id, [2, 4, 6]))
         <!-- //s -->
-        <div class="container-fluid">
-            <div class="card shadow shadow-md rounded showdow-grey p-4">
-                <div class="row justify-content-start mb-0" style="margin-left: 1px;" id="statusButtons">
-                    <div class="bg-info p-0 text-white" style="text-decoration: none; font-size:0.4rem;">
-                            <button type="button" class="btn btn-inactive" id="showOrderForm" style="padding: 5px 25px; font-size: 0.9rem;">
-                                Order Submission
-                        </button>
-                        <button type="button" class="btn btn-inactive" id="showTaxForm"
-                                    style="padding: 5px 25px; font-size: 0.9rem; position: relative;"
-                                    @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 1)
-                                        data-status="tick"
+                    <!-- Order Submission Form - Hidden by Default -->
+                    <h6 class="font-weight-bold">Order Submission :</h6>
+                    <div class="card shadow shadow-md rounded showdow-grey mb-4">
+                        <div class="card-body">
+                            @if(isset($checklist_conditions) && count($checklist_conditions) > 0)
+                                <div class="font-weight-bold"> Special Checklist :</div>
+                                <div class="row mt-1 mb-4  mx-5 ">
+                                    <div class="col-12 row bg-danger justify-content-center" id="checklist-container"
+                                        style="border-radius:14px;">
+                                        @php $counter = 0; @endphp
+                                        @foreach($checklist_conditions as $checklist_condition)
+                                        <div class="row col-12 {{ $counter > 0 ? '' : 'box' }}"
+                                            style="{{  $counter > 0 ? 'margin-top: -9px; padding-top: 0;' : '' }}">
+                                            <input type="checkbox" class="p-0 checklist-item" name="checks[]"
+                                                id="check_{{ $checklist_condition->id }}"
+                                                value="{{ $checklist_condition->id }}">
+                                            <label class="text-white font-weight-bold text-uppercase px-1"
+                                                style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
+                                            </div>
+                                            @php $counter++; @endphp
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                                <div class="row mt-2 mb-4">
+                                <div class="col-12 card-body ">
+                                    @if(isset($checklist_conditions_2) && count($checklist_conditions_2) > 0)
+                                    <div class="font-weight-bold">Checklist :</div>
+                                    <div class="row mt-1  mx-5 ">
+                                        <div class="col-12  ">
+                                            @php $counter = 0; @endphp
+                                            @foreach($checklist_conditions_2 as $checklist_condition)
+                                                <div class="row col-12 ">
+                                                    <input type="checkbox" class="p-0" name="checks[]"
+                                                        id="check_{{ $checklist_condition->id }}"
+                                                        value="{{ $checklist_condition->id }}">
+                                                    <label
+                                                        class="text-black   px-1">{{ $checklist_condition->check_condition }}</label>
+                                            </div>
+                                                @php $counter++; @endphp
+                                        @endforeach
+                                        </div>
+                                    </div>
+                                    @endif
+                                </div>
+                                <div class="col-lg-4 ">
+                                    <div class="font-weight-bold">Comments :</div>
+                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2"
+                                            id="order_comment" cols="30" rows="4"></textarea>
+                                </div>
+                                <div class="col-lg-5 mx-5 mt-1">
+                                        <div class="row">
+                                        <div class="col-10 mb-2">
+                                                <div class="font-weight-bold mb-1 mt-1"><span
+                                                        style="color:red;">*</span>Primary Source :</div>
+                                                <select id="primary_source" name="primary_source"
+                                                    class="form-control select2dropdown required-field" style="width: 300px;"
+                                                    data-parsley-required="true">
+                                                    <option disabled selected value="">Select Primary Source</option>
+                                                    @foreach($primarySource as $source)
+                                                        <option value="{{ $source->id }}" 
+                                                            {{ isset($countyInfo['PRIMARY']) && $source->source_name == ($countyInfo['PRIMARY']['PRIMARY_SOURCE'] ?? '') ? 'selected' : '' }}>
+                                                            {{ $source->source_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                        </div>
+                                            <div class="col-12 mb-2">
+                                    <div class="font-weight-bold mb-1 mt-1">Status :</div>
+                                        <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
+                                        <!-- <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif> -->
+                                                <?php
+                                                    $isDisabled = Auth::user()->hasRole('Typist') && 
+                                                            Auth::user()->hasRole('Typist/Qcer') && 
+                                                            !isset($orderData->assignee_user);
+                                                ?>
+                                                <select class="form-control" style="width:300px" name="order_status" id="order_status" 
+                                                    <?= $isDisabled ? 'disabled' : '' ?>>
+                                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
+                                                <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
+                                            @endif
+                                            @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
+                                                <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
+                                                <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
+                                            @endif
+                                                <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                                <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
+                                                <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
+                                                <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                                <option value="20" id="status_20"  @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
+                                                <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+
+                                        </select>
+                                    </div>
+                                </div>
+                                    </div>
+                                </div>
+                                    <div class="d-flex justify-content-center my-4">
+                                        <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
+                                            onclick="order_submition({{ $orderData->id }}, 1)" type="submit">Submit
+                                    </button>
+                                    @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
+                                    <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit"
+                                            name="coversheetsubmit" onclick="order_submition({{ $orderData->id }}, 2)"
+                                        type="submit">Coversheet Prep & Submit
+                                    </button>
+                                    @endif
+                        </div>
+                    </div>
+                            <!-- s -->
+                        <div class="card-body">
+                                <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
+                                    style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Comments</th>
+                                        <th>Status</th>
+                                        <th>User</th>
+                                        <th>Date and Time (EST)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if($orderstatusInfo && count($orderstatusInfo) > 0)
+                                        @foreach($orderstatusInfo as $status)
+                                            <tr>
+                                                <td>{{ $status->comment ?? 'N/A' }}</td>
+                                                <td>{{ $status->status }}</td>
+                                                <td>{{ $status->username ?? 'N/A' }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}
+                                            </td>
+                                            </tr>
+                                        @endforeach
                                     @else
-                                        data-status="cross"
-                                    @endif>
-                                TAX
-                        </button>
+                                        <tr>
+                                            <td class="text-center" colspan="4">No status history available for this
+                                                order.</td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                            <!-- e -->
+                        </div>
                     </div>
                 </div>
+                    @endif
+                    @if(in_array($orderData->stl_process_id, [2, 4, 6]))
+                    <h6 class="font-weight-bold">Order Submission :</h6>
+                    <div class="card shadow shadow-md rounded showdow-grey mb-4">
+                        <div class="card-body">
+                                    <div class="row mt-4 mb-4">
+                                <div class="col-lg-4 ">
+                                    <div class="font-weight-bold">Comments :</div>
+                                <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment"
+                                    cols="30" rows="4"></textarea>
+                                </div>
+                                    <div class="col-lg-5 mx-5 mt-1">
+                                        <div class="row">
+                                            <div class="col-10 mb-2">
+                                                <div class="font-weight-bold mb-1 mt-1">Status :</div>
+                                                <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
+                                                <!-- <select style="width:300px"  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif> -->
+                                                    <?php
+                                                        $isDisabled = Auth::user()->hasRole('Typist') && 
+                                                                Auth::user()->hasRole('Typist/Qcer') && 
+                                                                !isset($orderData->assignee_user);
+                                                    ?>
+                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" 
+                                                        <?= $isDisabled ? 'disabled' : '' ?>>
+
+                                                    @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
+                                                        <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                        <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                        <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
+                                                    @endif
+                                                    @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
+                                                        <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
+                                                        <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
+                                                    @endif
+                                                    <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                                    <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
+                                                    <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
+                                                    <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                                    <option value="20" id="status_20" @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
+                                                    <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-center my-4">
+                            <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
+                                onclick="order_submition({{$orderData->id}},1)" type="submit">Submit
+                            </button>
+                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
+                            <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit" name="coversheetsubmit"
+                                onclick="order_submition({{$orderData->id}},2)" type="submit">Coversheet Prep &
+                                Submit
+                            </button>
+                            @endif
+                            </div>
+                        </div>
+                    </div>
+                        <div class="card-body">
+                    <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
+                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Comments</th>
+                                        <th>Status</th>
+                                        <th>User</th>
+                                        <th>Date and Time (EST)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if($orderstatusInfo && count($orderstatusInfo) > 0)
+                                        @foreach($orderstatusInfo as $status)
+                                            <tr>
+                                                <td>{{ $status->comment ?? 'N/A' }}</td>
+                                                <td>{{ $status->status }}</td>
+                                                <td>{{ $status->username ?? 'N/A' }}</td>
+                                                <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td class="text-center" colspan="4">No status history available for this order.</td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+</div>
+</div>
+@endif
+<!-- // -->
+            @if($orderData->client_id == 82)
+
+            @php
+                    $segments = explode('/', Request::path());
+                    $lastSegment = end($segments);
+                @endphp
+            <!-- //s// -->
+            @if(in_array($orderData->stl_process_id, [7]))
+            <div class="container-fluid">
+                <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey p-4">
+                    <div class="row justify-content-start mb-0" style="margin-left: 1px;" id="statusButtons">
+                        <div class="bg-info p-0 text-white" style="text-decoration: none; font-size:0.4rem;">
+                            <button type="button" class="btn btn-inactive" id="showOrderForm" style="padding: 5px 25px; font-size: 0.9rem;">
+                                Order Submission
+                            </button>
+                            <button type="button" class="btn btn-inactive" id="showTaxForm"
+                                        style="padding: 5px 25px; font-size: 0.9rem; position: relative;"
+                                        @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 1)
+                                            data-status="tick"
+                                        @else
+                                            data-status="cross"
+                                        @endif>
+                                    TAX
+                            </button>
+                        </div>
+                    </div>
                 <div class="card p-1" id="hide_card">
                 <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
                     <!-- <div class="card p-0"> -->
@@ -1552,271 +1802,111 @@
                                     </table>
                                 </div>
                             </div>
-
                              <!-- /e history -->
                         </form>
                     </div>
                     <!-- Order Submission Form - Hidden by Default -->
                     <div id="orderForm" class="p-3" style="display:none;">
                         <!-- <h6 class="font-weight-bold">Order Submission :</h6> -->
-                        <h5 style="margin-bottom: 0px; margin-top: 5px;">Order Submission :</h5>
-                        <div class="mb-4">
-                            <div>
-                            @if(isset($checklist_conditions) && count($checklist_conditions) > 0)
-                                <div class="font-weight-bold"> Special Checklist :</div>
-                                <div class="row mt-1 mb-4  mx-5 ">
-                                    <div class="col-12 row bg-danger justify-content-center" id="checklist-container"
-                                        style="border-radius:14px;">
-                                        @php $counter = 0; @endphp
-                                        @foreach($checklist_conditions as $checklist_condition)
-                                        <div class="row col-12 {{ $counter > 0 ? '' : 'box' }}"
-                                            style="{{  $counter > 0 ? 'margin-top: -9px; padding-top: 0;' : '' }}">
-                                            <input type="checkbox" class="p-0 checklist-item" name="checks[]"
-                                                id="check_{{ $checklist_condition->id }}"
-                                                value="{{ $checklist_condition->id }}">
-                                            <label class="text-white font-weight-bold text-uppercase px-1"
-                                                style="font-size: 14px !important;">{{ $checklist_condition->check_condition }}</label>
-                                            </div>
-                                            @php $counter++; @endphp
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-                                <div class="row mt-2 mb-4">
-                                <div class="col-12 card-body ">
-                                    @if(isset($checklist_conditions_2) && count($checklist_conditions_2) > 0)
-                                    <div class="font-weight-bold">Checklist :</div>
-                                    <div class="row mt-1  mx-5 ">
-                                        <div class="col-12  ">
-                                            @php $counter = 0; @endphp
-                                            @foreach($checklist_conditions_2 as $checklist_condition)
-                                                <div class="row col-12 ">
-                                                    <input type="checkbox" class="p-0" name="checks[]"
-                                                        id="check_{{ $checklist_condition->id }}"
-                                                        value="{{ $checklist_condition->id }}">
-                                                    <label
-                                                        class="text-black   px-1">{{ $checklist_condition->check_condition }}</label>
-                                            </div>
-                                                @php $counter++; @endphp
-                                        @endforeach
-                                        </div>
-                                    </div>
-                                    @endif
-                                </div>
-                                <div class="col-lg-4 ">
-                                    <div class="font-weight-bold">Comments :</div>
-                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2"
-                                            id="order_comment" cols="30" rows="4"></textarea>
-                                </div>
-                                <div class="col-lg-5 mx-5 mt-1">
-                                        <div class="row">
-                                        <div class="col-10 mb-2">
-                                                <div class="font-weight-bold mb-1 mt-1"><span
-                                                        style="color:red;">*</span>Primary Source :</div>
-                                                <select id="primary_source" name="primary_source"
-                                                    class="form-control select2dropdown required-field"
-                                                    data-parsley-required="true">
-                                                    <option disabled selected value="">Select Primary Source</option>
-                                                    @foreach($primarySource as $source)
-                                                        <option value="{{ $source->id }}" 
-                                                            {{ isset($countyInfo['PRIMARY']) && $source->source_name == ($countyInfo['PRIMARY']['PRIMARY_SOURCE'] ?? '') ? 'selected' : '' }}>
-                                                            {{ $source->source_name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                        </div>
-                                            <div class="col-12 mb-2">
-                                    <div class="font-weight-bold mb-1 mt-1">Status :</div>
-                                        <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                        <!-- <select style=" "  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif> -->
-                                                <?php
-                                                    $isDisabled = Auth::user()->hasRole('Typist') && 
-                                                            Auth::user()->hasRole('Typist/Qcer') && 
-                                                            !isset($orderData->assignee_user);
-                                                ?>
-                                                <select class="form-control" style="width:300px" name="order_status" id="order_status" 
-                                                    <?= $isDisabled ? 'disabled' : '' ?>>
-                                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
-                                                <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                                <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
-                                            @endif
-                                            @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
-                                                <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
-                                                <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                            @endif
-                                                <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
-                                                <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
-                                                <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                                <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
-                                                <option value="20" id="status_20"  @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
-                                                <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
-
-                                        </select>
-                                    </div>
-                                </div>
-                                    </div>
-                                </div>
-                                @if(is_null($getTaxBucket[0]->tax_bucket))
-                                    <div class="d-flex justify-content-center my-4">
-                                        <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
-                                            onclick="order_submition({{ $orderData->id }}, 1)" type="submit">Submit
-                                    </button>
-                                    @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
-                                    <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit"
-                                            name="coversheetsubmit" onclick="order_submition({{ $orderData->id }}, 2)"
-                                        type="submit">Coversheet Prep & Submit
-                                    </button>
-                                    @endif
-                        </div>
-                                @endif
-                    </div>
-                            <!-- s -->
-                        <div class="card-body">
-                                <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
-                                    style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                <thead>
-                                    <tr>
-                                        <th>Comments</th>
-                                        <th>Status</th>
-                                        <th>User</th>
-                                        <th>Date and Time (EST)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if($orderstatusInfo && count($orderstatusInfo) > 0)
-                                        @foreach($orderstatusInfo as $status)
-                                            <tr>
-                                                <td>{{ $status->comment ?? 'N/A' }}</td>
-                                                <td>{{ $status->status }}</td>
-                                                <td>{{ $status->username ?? 'N/A' }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}
-                                            </td>
-                                            </tr>
-                                        @endforeach
-                                    @else
-                                        <tr>
-                                            <td class="text-center" colspan="4">No status history available for this
-                                                order.</td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
-                            <!-- e -->
-                        </div>
-                    </div>
-                </div>
-                    @endif
-                    @if(in_array($orderData->stl_process_id, [2, 4, 6]))
-                    <h6 class="font-weight-bold">Order Submission :</h6>
-                    <div class="card shadow shadow-md rounded showdow-grey mb-4">
-                        <div class="card-body">
+                            <h6 class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> font-weight-bold">Order Submission :</h6>
+                            <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
+                                <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card-body">
                                     <div class="row mt-4 mb-4">
-                                <div class="col-lg-4 ">
-                                    <div class="font-weight-bold">Comments :</div>
-                                <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment"
-                                    cols="30" rows="4"></textarea>
-                                </div>
-                                    <div class="col-lg-5 mx-5 mt-1">
-                                        <div class="row">
-                                            <div class="col-10 mb-2">
-                                                <div class="font-weight-bold mb-1 mt-1">Status :</div>
-                                                <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
-                                                <!-- <select style="width:300px"  class="form-control" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif> -->
-                                                    <?php
-                                                        $isDisabled = Auth::user()->hasRole('Typist') && 
-                                                                Auth::user()->hasRole('Typist/Qcer') && 
-                                                                !isset($orderData->assignee_user);
-                                                    ?>
-                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" 
-                                                        <?= $isDisabled ? 'disabled' : '' ?>>
-
-                                                    @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
-                                                        <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                        <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                                        <option value="13" id="status_13" @if($orderData->status_id == 13) selected @endif>Coversheet Prep</option>
-                                                    @endif
-                                                    @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
-                                                        <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
-                                                        <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
-                                                    @endif
-                                                    <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
-                                                    <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
-                                                    <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
-                                                    <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
-                                                    <option value="20" id="status_20" @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
-                                                    <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
-                                                </select>
+                                        <div class="col-lg-4 ">
+                                            <div class="font-weight-bold">Comments :</div>
+                                                <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4"></textarea>
+                                        </div>
+                                        <div class="col-lg-4 mx-5 mt-1">
+                                            <div class="row">
+                                                <div class="col-10 mb-2">
+                                                    <div class="col-10 mb-2">
+                                                        <div class="font-weight-bold mb-1 mt-1">Status :</div>
+                                                        <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
+                                                            <!-- <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif> -->
+                                                                    <?php
+                                                                        $isDisabled = Auth::user()->hasRole('Typist') && 
+                                                                                    Auth::user()->hasRole('Typist/Qcer') && 
+                                                                                    !isset($orderData->assignee_user);
+                                                                    ?>
+                                                                    <select class="form-control" style="width:300px" name="order_status" id="order_status" 
+                                                                        <?= $isDisabled ? 'disabled' : '' ?>>
+                                                                    @if(in_array($orderData->client_id, [82]) && !in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
+                                                                        <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
+                                                                        <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
+                                                                    @endif
+                                                                @if(in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 12, 7]))
+                                                                        <option value="16" id="status_16"  @if($orderData->status_id == 16) selected @endif>Typing</option>
+                                                                        <option value="17" id="status_17"  @if($orderData->status_id == 17) selected @endif>Typing QC</option>
+                                                                @endif
+                                                                        <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
+                                                                        <option value="14" id="status_14"  @if($orderData->status_id == 14) selected @endif>Clarification</option>
+                                                                        <option value="18" id="status_18"  @if($orderData->status_id == 18) selected @endif>Ground Abstractor</option>
+                                                                        <option value="2" id="status_2" @if($orderData->status_id == 2) selected @endif>Hold</option>
+                                                                        <option value="5" id="status_5" @if($orderData->status_id == 5) selected @endif>Completed</option>
+                                                                        <option value="20" id="status_20" @if($orderData->status_id == 20) selected @endif>Partially Cancelled</option>
+                                                                        <option value="3" id="status_3" @if($orderData->status_id == 3) selected @endif>Cancelled</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-center my-4">
+                                                        <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
+                                                    </div>
+                                                </div>
                                             </div>
+                                        </div>
+                                        <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card-body">
+                                            <table id="orderstatusdetail_datatable" class="table table-bordered nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Comments</th>
+                                                        <th>Status</th>
+                                                        <th>User</th>
+                                                        <th>Date and Time (EST)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if($orderstatusInfo && count($orderstatusInfo) > 0)
+                                                        @foreach($orderstatusInfo as $status)
+                                                            <tr>
+                                                                <td>{{ $status->comment ?? 'N/A' }}</td>
+                                                                <td>{{ $status->status }}</td>
+                                                                <td>{{ $status->username ?? 'N/A' }}</td>
+                                                                <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @else
+                                                        <tr>
+                                                            <td class="text-center" colspan="4">No status history available for this order.</td>
+                                                        </tr>
+                                                    @endif
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="d-flex justify-content-center my-4">
-                            <button class="btn btn-primary btn-sm mx-2" id="ordersubmit"
-                                onclick="order_submition({{$orderData->id}},1)" type="submit">Submit
-                            </button>
-                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
-                            <button class="btn btn-info btn-sm mx-2" id="coversheetsubmit" name="coversheetsubmit"
-                                onclick="order_submition({{$orderData->id}},2)" type="submit">Coversheet Prep &
-                                Submit
-                            </button>
-                            @endif
-                                </div>
+                            </div>
                         </div>
                     </div>
-                        <div class="card-body">
-                    <table id="orderstatusdetail_datatable" class="table table-bordered nowrap"
-                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                <thead>
-                                    <tr>
-                                        <th>Comments</th>
-                                        <th>Status</th>
-                                        <th>User</th>
-                                        <th>Date and Time (EST)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if($orderstatusInfo && count($orderstatusInfo) > 0)
-                                        @foreach($orderstatusInfo as $status)
-                                            <tr>
-                                                <td>{{ $status->comment ?? 'N/A' }}</td>
-                                                <td>{{ $status->status }}</td>
-                                                <td>{{ $status->username ?? 'N/A' }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($status->created_at)->format('m-d-Y H:i:s') }}</td>
-                                            </tr>
-                                        @endforeach
-                                    @else
-                                        <tr>
-                                            <td class="text-center" colspan="4">No status history available for this order.</td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
-                </div>
+                <!-- </div> --> 
             </div>
-        </div>
-</div>
-</div>
-@endif
-<!-- // -->
-                @if($orderData->client_id == 82)
-                <h6 class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> font-weight-bold">Order Submission :</h6>
-                <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
+            @endif
+        <!-- </div> -->
+             <!-- //end// -->
+                @if(!in_array($orderData->stl_process_id, [7]))
+                    <h6 class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> font-weight-bold">Order Submission :</h6>
+                    <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
                         <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card-body">
                             <div class="row mt-4 mb-4">
                                 <div class="col-lg-4 ">
                                     <div class="font-weight-bold">Comments :</div>
-                                        <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4"></textarea>
+                                    <textarea name="order_comment" style="width: 100%;" class="mx-5 mt-2" id="order_comment" cols="30" rows="4"></textarea>
                                 </div>
                                 <div class="col-lg-4 mx-5 mt-1">
                                     <div class="row">
                                         <div class="col-10 mb-2">
                                             <div class="col-10 mb-2">
                                                 <div class="font-weight-bold mb-1 mt-1">Status :</div>
-                                                <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
+                                                    <input type="hidden" id="current_status_id" name="current_status_id" value="{{ $orderData->status_id }}">
                                                     <!-- <select class="form-control" style="width:300px" name="order_status" id="order_status" @if(!isset($orderData->assignee_user)) disabled @endif> -->
                                                             <?php
                                                                 $isDisabled = Auth::user()->hasRole('Typist') && 
@@ -1825,18 +1915,6 @@
                                                             ?>
                                                             <select class="form-control" style="width:300px" name="order_status" id="order_status" 
                                                                 <?= $isDisabled ? 'disabled' : '' ?>>
-                                                        <!-- @if(!Auth::user()->hasRole('Typist') && !Auth::user()->hasRole('Typist/Qcer') && !Auth::user()->hasRole('Typist/Typist_Qcer'))
-                                                            @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
-                                                                <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                                <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                                            @endif
-                                                                <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
-                                                        @endif -->
-                                                            <!-- @if(in_array($orderData->client_id, [82]) && in_array($orderData->stl_process_id, [7]))
-                                                                <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
-                                                                <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
-                                                                <option value="15" id="status_15"  @if($orderData->status_id == 15) selected @endif>Doc Purchase</option>
-                                                            @endif -->
                                                             @if(in_array($orderData->client_id, [82]) && !in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16]))
                                                                 <option value="1" id="status_1" @if($orderData->status_id == 1) selected @endif>WIP</option>
                                                                 <option value="4" id="status_4" @if($orderData->status_id == 4) selected @endif>Send for QC</option>
@@ -1892,8 +1970,8 @@
                             </div>
                         </div>
                     </div>
-                <!-- // -->
-            </div>
+                </div>
+            @endif
             @endif
             @if(in_array($orderData->client_id, [84, 85, 86, 87, 88, 89, 90, 91, 92, 13, 2, 93, 94, 95, 96, 97, 98, 99, 100]))
             <h6 class="read_value  font-weight-bold">Order Submission :</h6>
@@ -1998,7 +2076,7 @@
                     <button type="button" class="btn btn-warning" data-bs-dismiss="modal" aria-label="Close" onclick="window.location.href='{{ url('orders_status') }}'">Back</button>
                 </div>
             </div>
-    </div>
+        </div>
     </div>
     @endif
 </div>
@@ -2036,812 +2114,10 @@ $(document).ready(function() {
 @if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 7, 12, 15]))
 <script>
 
-let lastSegment = "{{ $lastSegment }}";
-let isTaxFormVisible = false;
-let isOrderFormVisible = false;
-
-function updateHideCardVisibility() {
-    document.getElementById('hide_card').style.display = (isTaxFormVisible || isOrderFormVisible) ? 'block' : 'none';
-}
-
-if (lastSegment === 'tax') {
-        document.getElementById('showOrderForm').disabled = true;
-        document.getElementById('showOrderForm').classList.add('btn-inactive');
-
-    } else {
-        document.getElementById('showOrderForm').disabled = false;
-        document.getElementById('showOrderForm').classList.remove('btn-inactive');
-    }
-
-
-
-document.getElementById('showTaxForm').addEventListener('click', function() {
-    isTaxFormVisible = !isTaxFormVisible;
-    document.getElementById('taxForm').style.display = isTaxFormVisible ? 'block' : 'none';
-
-    this.classList.toggle('btn-active', isTaxFormVisible);
-    this.classList.toggle('btn-inactive', !isTaxFormVisible);
-
-    if (isOrderFormVisible) {
-        isOrderFormVisible = false;
-        document.getElementById('orderForm').style.display = 'none';
-        document.getElementById('showOrderForm').classList.remove('btn-active');
-        document.getElementById('showOrderForm').classList.add('btn-inactive');
-    }
-
-    updateHideCardVisibility();
-});
-
-document.getElementById('showOrderForm').addEventListener('click', function() {
-    isOrderFormVisible = !isOrderFormVisible;
-    document.getElementById('orderForm').style.display = isOrderFormVisible ? 'block' : 'none';
-
-    this.classList.toggle('btn-active', isOrderFormVisible);
-    this.classList.toggle('btn-inactive', !isOrderFormVisible);
-
-    if (isTaxFormVisible) {
-        isTaxFormVisible = false;
-        document.getElementById('taxForm').style.display = 'none';
-        document.getElementById('showTaxForm').classList.remove('btn-active');
-        document.getElementById('showTaxForm').classList.add('btn-inactive');
-    }
-
-    updateHideCardVisibility();
-});
-
-updateHideCardVisibility();
-
-
-    if (lastSegment === 'tax') {
-        document.getElementById('showTaxForm').click();
-    }else{
-        document.getElementById('showOrderForm').click();
-    }
-
-$(document).ready(function() {
-    $("#taxFormValues").on("submit", function(event) {
-        event.preventDefault(); 
-        var formData = $(this).serialize();
-
-        var clickedButton = $(event.originalEvent.submitter);
-
-        // Determine the value of submit_btn based on which button was clicked
-        var submitBtnValue = clickedButton.hasClass('save_btn') ? 0 : 1;
-
-
-        // Append additional data from the specified input fields
-        var taxStatus = $("#tax_status").val();
-        var getData = $("#get_data").val();
-        var searchInput = $("#search_input").val();
-        var parcelValue = $("#parcel").val(); // Get the value of the parcel hidden input
-
-        // Create an object to hold the serialized data and additional fields
-        var additionalData = {
-            tax_status: taxStatus,
-            get_data: getData,
-            search_input: searchInput,
-            parcel: parcelValue,
-            submit_btn: submitBtnValue // Include the parcel value
-        };
-
-        // Convert the additionalData object to a query string
-        var additionalDataString = $.param(additionalData);
-        
-        // Combine the original form data with the additional data
-        var combinedData = formData + '&' + additionalDataString;
-
-        $.ajax({
-            url: "{{ url('taxform_submit') }}",
-            type: "POST",
-            data: combinedData,
-            headers: {
-                'X-CSRF-TOKEN': $('input[name="_token"]').val()
-            },
-            success: function(response) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: response.message,
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                }).then((result) => {
-                    // if (result.value) {
-                    //     window.location.href = "{{ url('/orders_status') }}/tax";
-                    // }
-                     // Check if submit_btn is 1
-                     if (submitBtnValue == 1 && result.value) {
-                        window.location.href = "{{ url('/orders_status') }}/tax";
-                    }
-                });
-            },
-            error: function(error) {        
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Failed to send data. Please try again.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
-            }
-        });
-    });
-});
-
-
-
-$(document).ready(function () {
-    // Trigger file upload on file selection change
-    $("#attachment").on("change", function () {
-        uploadFiles();
-    });
-
-    function uploadFiles() {
-        let orderId = $("#order_id").val();
-        let fileList = $("#attachment")[0].files;
-        
-        if (fileList.length > 0) {
-            for (let i = 0; i < fileList.length; i++) {
-                let formData = new FormData();
-                formData.append('file', fileList[i]);
-                formData.append('order_id', orderId);
-
-                $.ajax({
-                    url: "{{ url('storeFile') }}",
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        console.log("File stored successfully:", response);
-                        // Refresh the file list after each successful upload
-                        displayFiles();
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("File upload failed:", error);
-                    }
-                });
-            }
-        }
-    }
-
-    function displayFiles() {
-        let orderId = $("#order_id").val();
-
-        $.ajax({
-            url: "{{ url('getFiles') }}",
-            type: 'GET',
-            data: { order_id: orderId },
-            success: function (data) {
-                let fileList = $('#fileList');
-                let attachmentsHeader = $('#attachmentsHeader');
-                fileList.empty(); // Clear previous file list
-
-                if (data.length > 0) {
-                    attachmentsHeader.show();
-                    data.forEach(file => {
-                        let fileType = file.name.split('.').pop().toLowerCase();
-                        let filePreview = '';
-
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
-                        } else if (fileType === 'pdf') {
-                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
-                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                            filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
-                        } else {
-                            filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
-                        }
-
-                        fileList.append(`<div class="m-2">${filePreview}</div>`);
-                    });
-
-                    $('.file-link').on('click', function (e) {
-                        e.preventDefault();
-                        let fileUrl = $(this).data('file-url');
-                        let fileType = fileUrl.split('.').pop().toLowerCase();
-
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                            Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
-                        } else if (fileType === 'pdf') {
-                            Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
-                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                            window.open(fileUrl, '_blank');
-                        } else {
-                            Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
-                        }
-                    });
-                } else {
-                    attachmentsHeader.hide(); // Hide header if no files are available
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
-            }
-        });
-    }
-
-
-//     function updateSaveButton() {
-//     let fileList = $('#fileList-cert');
-
-//     if (fileList.children().length > 0) {
-//         $('#generate_cert').text('Generate Certificate');
-//     } else {
-//         $('#generate_cert').text('Update Certificate');
-//     }
-// }
-function updateSaveButton() {
-    let fileList = $('#fileList-cert');
-
-    // Check if there are any children (i.e., files) in the file list
-    if (fileList.children().length > 0) {
-        $('#generate_cert').text('Update Certificate');
-    } else {
-        $('#generate_cert').text('Generate Certificate');
-    }
-}
- 
-    function displaycertFiles() {
-    let orderId = $("#order_id").val();
-
-    $.ajax({
-        url: "{{ url('getCertFiles') }}",
-        type: 'GET',
-        data: { order_id: orderId },
-        success: function (data) {
-            let fileList = $('#fileList-cert');
-            let attachmentsHeader = $('#attachmentsHeader');
-            fileList.empty(); // Clear previous file list
-
-            if (data.length > 0) {
-                attachmentsHeader.show();
-                data.forEach(file => {
-                    let fileType = file.name.split('.').pop().toLowerCase();
-                    let filePreview = '';
-
-                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                        filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
-                    } else if (fileType === 'pdf') {
-                        filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
-                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                        filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
-                    } else {
-                        filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
-                    }
-
-                    fileList.append(`<div class="m-2">${filePreview}</div>`);
-                });
-
-                $('.file-link').on('click', function (e) {
-                    e.preventDefault();
-                    let fileUrl = $(this).data('file-url');
-                    let fileType = fileUrl.split('.').pop().toLowerCase();
-
-                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                        Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
-                    } else if (fileType === 'pdf') {
-                        Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
-                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                        window.open(fileUrl, '_blank');
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
-                    }
-                });
-            } else {
-                attachmentsHeader.hide(); // Hide header if no files are available
-            }
-
-            // Update button text
-            updateSaveButton();
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
-        }
-    });
-}
-
-    // Initial call to load files if `order_id` is already set
-    displayFiles();
-    displaycertFiles();
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    const generateCertButton = document.getElementById('generate_cert');
-    const progressBar = document.getElementById('progress-bar');
-    const progressContainer = document.getElementById('progress-cont');
-
-    if (generateCertButton) {
-        generateCertButton.addEventListener('click', function () {
-            // Show the progress container
-            progressContainer.style.display = 'block';
-
-            // Initialize progress
-            let progress = 0;
-
-            // Simulate progress
-            const interval = setInterval(function () {
-                progress += 10;
-                progressBar.style.width = progress + '%';
-                progressBar.textContent = progress + '%';
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-
-                    // Hide the progress container after a brief delay
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-
-                        // Display SweetAlert2 message after a brief delay
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Generation Completed',
-                            text: 'The certificate has been successfully generated!',
-                            showConfirmButton: false,
-                            timer: 1500 // Auto-close after 1.5 seconds
-                        }).then(() => {
-                            // Reload the page after the alert closes
-                            window.location.reload();
-                        });
-                    }, 1000); // 1-second delay before showing the SweetAlert
-                }
-            }, 300); // Update progress every 300ms
-        });
-    }
-});
-
-
-
-
-$(document).ready(function() {
-    updateSaveButton();
-    // Handle file selection and display clickable file names
-
-
-    // Bind click event to file name text for preview
-    $("#file-list").on("click", ".file-name", function() {
-        var fileName = $(this).data("filename"); // Get the clicked file name
-        var file = getFileByName(fileName);
-
-        if (file) {
-            showFilePreview(file);  // Show the preview in modal if the file exists
-            $("#file-modal").show(); // Display modal
-            $(".sticky-container, .topbar, .modelopenhide").hide(); // Hide other elements
-        }
-    });
-
-    // Close modal without form submission
-    $("#close-modal").on("click", function(event) {
-        event.preventDefault();
-        $("#file-modal").hide();  // Hide modal
-        $(".sticky-container, .topbar, .modelopenhide").show(); // Restore hidden elements
-    });
-
-    // Helper function to retrieve file by name
-    function getFileByName(fileName) {
-        var fileList = $("#attachment")[0].files;
-        for (var i = 0; i < fileList.length; i++) {
-            if (fileList[i].name === fileName) {
-                return fileList[i];
-            }
-        }
-        return null;
-    }
-
-    // Display file preview in modal
-    function showFilePreview(file) {
-        var reader = new FileReader();
-
-        reader.onload = function(e) {
-            var filePreviewContainer = $("#file-preview-container");
-
-            if (file.type.startsWith("image/")) {
-                filePreviewContainer.html(`<img src="${e.target.result}" style="max-width: 100%; height: auto;" />`);
-            } else if (file.type === "application/pdf") {
-                filePreviewContainer.html(`<embed src="${e.target.result}" width="100%" height="400px" />`);
-            } else {
-                filePreviewContainer.html(`<pre>${e.target.result}</pre>`);
-            }
-        };
-
-        reader.readAsDataURL(file);
-    }
-});
-
-// $(document).ready(function() {
-//     // Track the number of merges
-//     var mergeCount = 0;
-
-//     // Handle file selection and display clickable file names with checkboxes
-//     $("#attachment").on("change", function() {
-//         var fileList = $(this)[0].files;
-//         var output = '';
-
-//         // Display file names with checkboxes when two or more files are selected
-//         if (fileList.length >= 2) {
-//             for (var i = 0; i < fileList.length; i++) {
-//                 var fileName = fileList[i].name;
-//                 output += `<div>
-//                     <input type="checkbox" class="file-checkbox" data-filename="${fileName}" /> 
-//                     <span class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</span>
-//                 </div>`;
-//             }
-//             $("#file-list").html(output);
-//             $("#merge-button").show();  // Show the merge button when two or more files are uploaded
-//         } else {
-//             // Only show the file names if less than two files are uploaded
-//             for (var i = 0; i < fileList.length; i++) {
-//                 var fileName = fileList[i].name;
-//                 output += `<div><span class="file-name" data-filename="${fileName}" style="cursor: pointer; color: blue;">${fileName}</span></div>`;
-//             }
-//             $("#file-list").html(output);
-//             $("#merge-button").hide();  // Hide the merge button if less than 2 files are uploaded
-//         }
-
-//         toggleMergeButton(); // Check if the merge button should be displayed based on selected checkboxes
-//     });
-
-//     // Show or hide the Merge button based on selected checkboxes
-//     $(document).on("change", ".file-checkbox", function() {
-//         toggleMergeButton();
-//     });
-
-//     // Function to show or hide the Merge button
-//     function toggleMergeButton() {
-//         var selectedCount = $(".file-checkbox:checked").length;
-//         if (selectedCount >= 2) {
-//             $("#merge-button").show(); // Show the button if two or more files are selected
-//         } else {
-//             $("#merge-button").hide(); // Hide the button if less than 2 files are selected
-//         }
-//     }
-
-//     // Merge button action - prevent form submission and merge files
-//     $("#merge-button").on("click", function(event) {
-//         event.preventDefault(); // Prevent form submission
-
-//         var selectedFiles = [];
-//         $(".file-checkbox:checked").each(function() {
-//             var fileName = $(this).data("filename");
-//             var file = getFileByName(fileName);
-//             if (file) {
-//                 selectedFiles.push(file);
-//             }
-//         });
-
-//         if (selectedFiles.length >= 2) {
-//             // Send the files to the server for merging
-//             var formData = new FormData();
-//             selectedFiles.forEach(function(file) {
-//                 formData.append('files[]', file);
-//             });
-
-//             // Perform the AJAX request to merge the files
-//             $.ajax({ 
-//                 url: "{{ url('mergeFiles') }}",  // Laravel route to handle file merge
-//                 type: 'POST',
-//                 data: formData,
-//                 processData: false,  // Prevent jQuery from processing the data
-//                 contentType: false,  // Prevent jQuery from setting content type
-//                 headers: {
-//                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // CSRF token
-//                 },
-//                 success: function(response) {
-//                     if (response.status === 'success') {
-//                         // Increment merge count
-//                         mergeCount++;
-
-//                         // Generate a dynamic name for the merged file
-//                         var mergedFileName = "merged_file_" + mergeCount;
-                        
-//                         // Display the merged file content in the preview
-//                         showFilePreview(response.mergedFileUrl, mergedFileName);
-//                     } else {
-//                         alert('Error merging files!');
-//                     }
-//                 },
-//                 error: function() {
-//                     alert('Something went wrong!');
-//                 }
-//             });
-//         } else {
-//             alert("Please select at least 2 files to merge.");
-//         }
-//     });
-
-//     // // Helper function to get file by name
-//     // function getFileByName(fileName) {
-//     //     var fileList = $("#attachment")[0].files;
-//     //     for (var i = 0; i < fileList.length; i++) {
-//     //         if (fileList[i].name === fileName) {
-//     //             return fileList[i];
-//     //         }
-//     //     }
-//     //     return null;
-//     // }
-
-//     // // Function to preview the merged file
-//     // function showFilePreview(fileUrl, fileName) {
-//     //     var previewContainer = $("#file-list");
-        
-//     //     // Clear any previous preview
-//     //     previewContainer.html('');
-
-//     //     // Add the merged file preview
-//     //     previewContainer.append(`
-//     //         <a href="${fileUrl}" target="_blank">Download ${fileName}</a>
-//     //     `);
-//     // }
-// });
-
-
-$(document).ready(function() {
-    $("#phone_num").on("input", function() {
-        var input = $(this).val();
-        input = input.replace(/[^0-9x]/g, '');
-
-        if (input.length <= 10) {
-            input = input.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
-        } else {
-            input = input.replace(/(\d{3})(\d{3})(\d{4})(\d+)/, "($1) $2-$3 x$4");
-        }
-        $(this).val(input);
-    });
-});
-
-    window.addEventListener('DOMContentLoaded', function() {
-    var taxStatusValue = document.getElementById('tax_status').value;
-    var fetchButton = document.getElementById('fetchButton');
-    var saveButton = document.getElementById('SaveButton');
-
-    // Check the initial value of tax_status and display the correct button
-    if (taxStatusValue === '') {
-        fetchButton.style.display = 'none';
-        saveButton.style.display = 'none';
-    } else if (taxStatusValue === 'online') {
-        fetchButton.style.display = 'inline-block';
-        saveButton.style.display = 'none';
-    } else if (taxStatusValue === 'offline') {
-        fetchButton.style.display = 'none';
-        saveButton.style.display = 'inline-block';
-    }
-});
-
-
-    document.getElementById('tax_status').addEventListener('change', function() {
-        var fetchButton = document.getElementById('fetchButton');
-    var SaveButton = document.getElementById('SaveButton');
-    
-    // Show Fetch button for 'online', Save button for 'offline'
-        fetchButton.style.display = this.value === 'online' ? 'inline-block' : 'none';
-    SaveButton.style.display = this.value === 'offline' ? 'inline-block' : 'none';
-});
-
-      function validateDecimalInput(event) {
-        const value = event.target.value;
-        // Allow only numbers with optional decimal points and two decimal places
-        if (!/^\d*\.?\d{0,2}$/.test(value)) {
-            event.target.value = value.slice(0, -1); // Remove last character if invalid
-        }
-    }
-
-    // Attach event listeners to each input field
-    const decimalFields = [
-        'land', 'improvement', 'exemption_mortgage', 'exemption_homeowner',
-        'exemption_homestead', 'exemption_additional', 'others', 'total_annual_tax',
-        'net_value','first_amount_id','second_amount_id','third_amount_id','fourth_amount_id'
-    ];
-
-    decimalFields.forEach(id => {
-        document.getElementById(id).addEventListener('input', validateDecimalInput);
-    });
-
-// function onlyOne(checkbox) {
-//     const checkboxes = checkbox.closest('.checkbox-group').querySelectorAll('input[type="checkbox"]');
-//     checkboxes.forEach((cb) => {
-//         if (cb !== checkbox) cb.checked = false;
-//     });
-// }
-
-// function toggleReadonly(checkbox, inputId) {
-//         const inputField = document.getElementById(inputId);
-//         inputField.readOnly = !checkbox.checked;
-//     }
-
-//s
-function toggleReadonly(radioButton, partiallyPaidInputId) {
-    const partiallyPaidInput = document.getElementById(partiallyPaidInputId);
-    
-    // Check if Paid, Due, or Delinquent is selected
-    const isPaidDueDelinquent = 
-        ['paid', 'due', 'delinquent'].includes(radioButton.value);
-    
-    // If Partially Paid is checked, make input editable
-    if (radioButton.value === 'partially_paid') {
-        partiallyPaidInput.removeAttribute('readonly');
-        partiallyPaidInput.focus(); // Optional: automatically focus the input
-    } 
-    // If Paid, Due, or Delinquent is selected, make Partially Paid input readonly and clear its value
-    else if (isPaidDueDelinquent) {
-        partiallyPaidInput.setAttribute('readonly', 'readonly');
-        partiallyPaidInput.value = ''; // Clear the input value
-    }
-}
-
-// Add event listeners to all radio button groups
-document.addEventListener('DOMContentLoaded', function() {
-    const installments = ['first', 'second', 'third', 'fourth'];
-    
-    installments.forEach(installment => {
-        const partiallyPaidRadio = document.getElementById(`${installment}_partially_paid_id`);
-        const partiallyPaidInput = document.getElementById(`${installment}_partially_paid_amount`);
-        
-        // Initial state handling
-        if (partiallyPaidRadio && partiallyPaidInput) {
-            // Determine the correct name for radio buttons
-            const radioName = installment === 'first' ? 'payment_status' : `${installment}_payment_status`;
-            
-            // Check if Partially Paid is initially selected
-            if (partiallyPaidRadio.checked) {
-                partiallyPaidInput.removeAttribute('readonly');
-            } else {
-                partiallyPaidInput.setAttribute('readonly', 'readonly');
-                partiallyPaidInput.value = ''; // Clear the input
-            }
-            
-            // Add change event listeners to all radio buttons in the group
-            const radioGroup = document.getElementsByName(radioName);
-            radioGroup.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    toggleReadonly(this, `${installment}_partially_paid_amount`);
-                });
-            });
-        }
-    });
-});
-
-//e
-
-
-$(function() {
-    $('#SaveButton').on('click', function(e) {
-        e.preventDefault();
-
-        // Collect data from form
-        const taxStatus = $('#tax_status').val();
-        const getData = $('#get_data').val();
-        const searchInput = $('#search_input').val();
-        const orderId = $("#order_id").val();
-
-        // Validate that all fields are filled
-        if (taxStatus && getData && searchInput) {
-            // AJAX request
-            $.ajax({
-                url: '{{ url("moveToTaxStatus") }}',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    orderId: orderId,
-                    tax_status: taxStatus,
-                    get_data: getData,
-                    search_input: searchInput,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    // Display success message with Swal
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: 'Tax Form Moved To Tax Status',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        // Reload the page after closing the success alert
-                        window.location.reload();
-                    });
-                },
-                error: function(xhr, status, error) {
-                    // Display error message with Swal
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: ' Please try again.',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            });
-        } else {
-            // Display warning if fields are missing
-            Swal.fire({
-                icon: 'warning',
-                title: 'Incomplete Data',
-                text: 'Please fill in all fields before saving.',
-                confirmButtonText: 'OK'
-            });
-        }
-    });
-
-    $('#fetchButton').on('click', function (e) {
-    e.preventDefault();
-
-    // Collect data from form
-    const taxStatus = $('#tax_status').val();
-    const getData = $('#get_data').val();
-    const searchInput = $('#search_input').val();
-    const orderId = $('#order_id').val();
-    const loader = $('#mobileToggle'); // Ensure this ID matches the loader element
-
-    // Check if all fields are filled
-    if (taxStatus && getData && searchInput) {
-        loader.show(); // Show the loader before making the AJAX call
-
-        $.ajax({
-            url: '{{ url("submitFtcOrder") }}',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                orderId: orderId,
-                type: getData,
-                tax_status: taxStatus,
-                search_value: searchInput,
-                _token: '{{ csrf_token() }}',
-            },
-            success: function (response) {
-                // Hide the loader on success
-                loader.hide();
-                if(response[0].ftc_status == "Completed!!!Not supported currently!!!"){
-                    Swal.fire({
-                                            icon: 'info',
-                                            text: 'Not supported currently!',
-                                            confirmButtonText: 'OK',
-                                        });
-                } else if(response[0].ftc_status == "Success"){
-                    // Display success message with Swal
-                    Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: 'Order successfully fetched.',
-                                confirmButtonText: 'OK',
-                            }).then(() => {
-                                // Reload the page after closing the success alert
-                                // window.location.reload(); 
-                            window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}/tax';
-                            });
-                }
-            },
-            error: function (xhr, status, error) {
-                // Hide the loader on error
-                loader.hide();
-
-                // Display error message with Swal
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Loading data. Please fetch again.',
-                    confirmButtonText: 'OK',
-                });
-            },
-        });
-    } else {
-        // Display warning if fields are missing
-        Swal.fire({
-            icon: 'warning',
-            title: 'Incomplete Data',
-            text: 'Please fill in all fields before saving.',
-            confirmButtonText: 'OK',
-        });
-    }
-});
-});
-
-function viewjson() {
-    var modal = document.getElementById('json_modal');
-    $(modal).modal('show');
-}
 </script>
 @endif
 
 <script>
-
 $(document).ready(function() {
     $('#order_status').change(function() {
         let status = $(this).val();
@@ -3623,6 +2899,670 @@ function toggleContainerFields(container, enable) {
             input.disabled = !enable; // Enable or disable input fields
         });
     }
+
+
+    //tax
+    let lastSegment = "{{ $lastSegment }}";
+    let isTaxFormVisible = false;
+    let isOrderFormVisible = false;
+
+function updateHideCardVisibility() {
+    document.getElementById('hide_card').style.display = (isTaxFormVisible || isOrderFormVisible) ? 'block' : 'none';
+}
+
+if (lastSegment === 'tax') {
+        document.getElementById('showOrderForm').disabled = true;
+        document.getElementById('showOrderForm').classList.add('btn-inactive');
+
+    } else {
+        document.getElementById('showOrderForm').disabled = false;
+        document.getElementById('showOrderForm').classList.remove('btn-inactive');
+    }
+
+
+document.getElementById('showTaxForm').addEventListener('click', function() {
+    isTaxFormVisible = !isTaxFormVisible;
+    document.getElementById('taxForm').style.display = isTaxFormVisible ? 'block' : 'none';
+
+    this.classList.toggle('btn-active', isTaxFormVisible);
+    this.classList.toggle('btn-inactive', !isTaxFormVisible);
+
+    if (isOrderFormVisible) {
+        isOrderFormVisible = false;
+        document.getElementById('orderForm').style.display = 'none';
+        document.getElementById('showOrderForm').classList.remove('btn-active');
+        document.getElementById('showOrderForm').classList.add('btn-inactive');
+    }
+
+    updateHideCardVisibility();
+});
+
+document.getElementById('showOrderForm').addEventListener('click', function() {
+    isOrderFormVisible = !isOrderFormVisible;
+    document.getElementById('orderForm').style.display = isOrderFormVisible ? 'block' : 'none';
+
+    this.classList.toggle('btn-active', isOrderFormVisible);
+    this.classList.toggle('btn-inactive', !isOrderFormVisible);
+
+    if (isTaxFormVisible) {
+        isTaxFormVisible = false;
+        document.getElementById('taxForm').style.display = 'none';
+        document.getElementById('showTaxForm').classList.remove('btn-active');
+        document.getElementById('showTaxForm').classList.add('btn-inactive');
+    }
+
+    updateHideCardVisibility();
+});
+
+updateHideCardVisibility();
+
+
+    if (lastSegment === 'tax') {
+        document.getElementById('showTaxForm').click();
+    }else{
+        document.getElementById('showOrderForm').click();
+    }
+
+$(document).ready(function() {
+    $("#taxFormValues").on("submit", function(event) {
+        event.preventDefault(); 
+        var formData = $(this).serialize();
+
+        var clickedButton = $(event.originalEvent.submitter);
+
+        // Determine the value of submit_btn based on which button was clicked
+        var submitBtnValue = clickedButton.hasClass('save_btn') ? 0 : 1;
+
+
+        // Append additional data from the specified input fields
+        var taxStatus = $("#tax_status").val();
+        var getData = $("#get_data").val();
+        var searchInput = $("#search_input").val();
+        var parcelValue = $("#parcel").val(); // Get the value of the parcel hidden input
+
+        // Create an object to hold the serialized data and additional fields
+        var additionalData = {
+            tax_status: taxStatus,
+            get_data: getData,
+            search_input: searchInput,
+            parcel: parcelValue,
+            submit_btn: submitBtnValue // Include the parcel value
+        };
+
+        // Convert the additionalData object to a query string
+        var additionalDataString = $.param(additionalData);
+        
+        // Combine the original form data with the additional data
+        var combinedData = formData + '&' + additionalDataString;
+
+        $.ajax({
+            url: "{{ url('taxform_submit') }}",
+            type: "POST",
+            data: combinedData,
+            headers: {
+                'X-CSRF-TOKEN': $('input[name="_token"]').val()
+            },
+            success: function(response) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    // if (result.value) {
+                    //     window.location.href = "{{ url('/orders_status') }}/tax";
+                    // }
+                     // Check if submit_btn is 1
+                     if (submitBtnValue == 1 && result.value) {
+                        window.location.href = "{{ url('/orders_status') }}/tax";
+                    }
+                });
+            },
+            error: function(error) {        
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to send data. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    });
+});
+
+
+
+$(document).ready(function () {
+    // Trigger file upload on file selection change
+    $("#attachment").on("change", function () {
+        uploadFiles();
+    });
+
+    function uploadFiles() {
+        let orderId = $("#order_id").val();
+        let fileList = $("#attachment")[0].files;
+        
+        if (fileList.length > 0) {
+            for (let i = 0; i < fileList.length; i++) {
+                let formData = new FormData();
+                formData.append('file', fileList[i]);
+                formData.append('order_id', orderId);
+
+                $.ajax({
+                    url: "{{ url('storeFile') }}",
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        console.log("File stored successfully:", response);
+                        // Refresh the file list after each successful upload
+                        displayFiles();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("File upload failed:", error);
+                    }
+                });
+            }
+        }
+    }
+
+    function displayFiles() {
+        let orderId = $("#order_id").val();
+
+        $.ajax({
+            url: "{{ url('getFiles') }}",
+            type: 'GET',
+            data: { order_id: orderId },
+            success: function (data) {
+                let fileList = $('#fileList');
+                let attachmentsHeader = $('#attachmentsHeader');
+                fileList.empty(); // Clear previous file list
+
+                if (data.length > 0) {
+                    attachmentsHeader.show();
+                    data.forEach(file => {
+                        let fileType = file.name.split('.').pop().toLowerCase();
+                        let filePreview = '';
+
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                        } else if (fileType === 'pdf') {
+                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                            filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
+                        } else {
+                            filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
+                        }
+
+                        fileList.append(`<div class="m-2">${filePreview}</div>`);
+                    });
+
+                    $('.file-link').on('click', function (e) {
+                        e.preventDefault();
+                        let fileUrl = $(this).data('file-url');
+                        let fileType = fileUrl.split('.').pop().toLowerCase();
+
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                            Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                        } else if (fileType === 'pdf') {
+                            Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                            window.open(fileUrl, '_blank');
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
+                        }
+                    });
+                } else {
+                    attachmentsHeader.hide(); // Hide header if no files are available
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
+            }
+        });
+    }
+
+
+//     function updateSaveButton() {
+//     let fileList = $('#fileList-cert');
+
+//     if (fileList.children().length > 0) {
+//         $('#generate_cert').text('Generate Certificate');
+//     } else {
+//         $('#generate_cert').text('Update Certificate');
+//     }
+// }
+function updateSaveButton() {
+    let fileList = $('#fileList-cert');
+
+    // Check if there are any children (i.e., files) in the file list
+    if (fileList.children().length > 0) {
+        $('#generate_cert').text('Update Certificate');
+    } else {
+        $('#generate_cert').text('Generate Certificate');
+    }
+}
+ 
+    function displaycertFiles() {
+    let orderId = $("#order_id").val();
+
+    $.ajax({
+        url: "{{ url('getCertFiles') }}",
+        type: 'GET',
+        data: { order_id: orderId },
+        success: function (data) {
+            let fileList = $('#fileList-cert');
+            let attachmentsHeader = $('#attachmentsHeader');
+            fileList.empty(); // Clear previous file list
+
+            if (data.length > 0) {
+                attachmentsHeader.show();
+                data.forEach(file => {
+                    let fileType = file.name.split('.').pop().toLowerCase();
+                    let filePreview = '';
+
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                        filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                    } else if (fileType === 'pdf') {
+                        filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                        filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
+                    } else {
+                        filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
+                    }
+
+                    fileList.append(`<div class="m-2">${filePreview}</div>`);
+                });
+
+                $('.file-link').on('click', function (e) {
+                    e.preventDefault();
+                    let fileUrl = $(this).data('file-url');
+                    let fileType = fileUrl.split('.').pop().toLowerCase();
+
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                        Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                    } else if (fileType === 'pdf') {
+                        Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                        window.open(fileUrl, '_blank');
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
+                    }
+                });
+            } else {
+                attachmentsHeader.hide(); // Hide header if no files are available
+            }
+
+            // Update button text
+            updateSaveButton();
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
+        }
+    });
+}
+
+    // Initial call to load files if `order_id` is already set
+    displayFiles();
+    displaycertFiles();
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const generateCertButton = document.getElementById('generate_cert');
+    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-cont');
+
+    if (generateCertButton) {
+        generateCertButton.addEventListener('click', function () {
+            // Show the progress container
+            progressContainer.style.display = 'block';
+
+            // Initialize progress
+            let progress = 0;
+
+            // Simulate progress
+            const interval = setInterval(function () {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+
+                    // Hide the progress container after a brief delay
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+
+                        // Display SweetAlert2 message after a brief delay
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Generation Completed',
+                            text: 'The certificate has been successfully generated!',
+                            showConfirmButton: false,
+                            timer: 1500 // Auto-close after 1.5 seconds
+                        }).then(() => {
+                            // Reload the page after the alert closes
+                            window.location.reload();
+                        });
+                    }, 1000); // 1-second delay before showing the SweetAlert
+                }
+            }, 300); // Update progress every 300ms
+        });
+    }
+});
+
+
+
+
+$(document).ready(function() {
+    updateSaveButton();
+    // Handle file selection and display clickable file names
+
+
+    // Bind click event to file name text for preview
+    $("#file-list").on("click", ".file-name", function() {
+        var fileName = $(this).data("filename"); // Get the clicked file name
+        var file = getFileByName(fileName);
+
+        if (file) {
+            showFilePreview(file);  // Show the preview in modal if the file exists
+            $("#file-modal").show(); // Display modal
+            $(".sticky-container, .topbar, .modelopenhide").hide(); // Hide other elements
+        }
+    });
+
+    // Close modal without form submission
+    $("#close-modal").on("click", function(event) {
+        event.preventDefault();
+        $("#file-modal").hide();  // Hide modal
+        $(".sticky-container, .topbar, .modelopenhide").show(); // Restore hidden elements
+    });
+
+    // Helper function to retrieve file by name
+    function getFileByName(fileName) {
+        var fileList = $("#attachment")[0].files;
+        for (var i = 0; i < fileList.length; i++) {
+            if (fileList[i].name === fileName) {
+                return fileList[i];
+            }
+        }
+        return null;
+    }
+
+    // Display file preview in modal
+    function showFilePreview(file) {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+            var filePreviewContainer = $("#file-preview-container");
+
+            if (file.type.startsWith("image/")) {
+                filePreviewContainer.html(`<img src="${e.target.result}" style="max-width: 100%; height: auto;" />`);
+            } else if (file.type === "application/pdf") {
+                filePreviewContainer.html(`<embed src="${e.target.result}" width="100%" height="400px" />`);
+            } else {
+                filePreviewContainer.html(`<pre>${e.target.result}</pre>`);
+            }
+        };
+
+        reader.readAsDataURL(file);
+    }
+});
+
+$(document).ready(function() {
+    $("#phone_num").on("input", function() {
+        var input = $(this).val();
+        input = input.replace(/[^0-9x]/g, '');
+
+        if (input.length <= 10) {
+            input = input.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+        } else {
+            input = input.replace(/(\d{3})(\d{3})(\d{4})(\d+)/, "($1) $2-$3 x$4");
+        }
+        $(this).val(input);
+    });
+});
+
+    window.addEventListener('DOMContentLoaded', function() {
+    var taxStatusValue = document.getElementById('tax_status').value;
+    var fetchButton = document.getElementById('fetchButton');
+    var saveButton = document.getElementById('SaveButton');
+
+    // Check the initial value of tax_status and display the correct button
+    if (taxStatusValue === '') {
+        fetchButton.style.display = 'none';
+        saveButton.style.display = 'none';
+    } else if (taxStatusValue === 'online') {
+        fetchButton.style.display = 'inline-block';
+        saveButton.style.display = 'none';
+    } else if (taxStatusValue === 'offline') {
+        fetchButton.style.display = 'none';
+        saveButton.style.display = 'inline-block';
+    }
+});
+
+
+    document.getElementById('tax_status').addEventListener('change', function() {
+        var fetchButton = document.getElementById('fetchButton');
+    var SaveButton = document.getElementById('SaveButton');
+    
+    // Show Fetch button for 'online', Save button for 'offline'
+        fetchButton.style.display = this.value === 'online' ? 'inline-block' : 'none';
+    SaveButton.style.display = this.value === 'offline' ? 'inline-block' : 'none';
+});
+
+      function validateDecimalInput(event) {
+        const value = event.target.value;
+        // Allow only numbers with optional decimal points and two decimal places
+        if (!/^\d*\.?\d{0,2}$/.test(value)) {
+            event.target.value = value.slice(0, -1); // Remove last character if invalid
+        }
+    }
+
+    // Attach event listeners to each input field
+    const decimalFields = [
+        'land', 'improvement', 'exemption_mortgage', 'exemption_homeowner',
+        'exemption_homestead', 'exemption_additional', 'others', 'total_annual_tax',
+        'net_value','first_amount_id','second_amount_id','third_amount_id','fourth_amount_id'
+    ];
+
+    decimalFields.forEach(id => {
+        document.getElementById(id).addEventListener('input', validateDecimalInput);
+    });
+
+//s
+function toggleReadonly(radioButton, partiallyPaidInputId) {
+    const partiallyPaidInput = document.getElementById(partiallyPaidInputId);
+    
+    // Check if Paid, Due, or Delinquent is selected
+    const isPaidDueDelinquent = 
+        ['paid', 'due', 'delinquent'].includes(radioButton.value);
+    
+    // If Partially Paid is checked, make input editable
+    if (radioButton.value === 'partially_paid') {
+        partiallyPaidInput.removeAttribute('readonly');
+        partiallyPaidInput.focus(); // Optional: automatically focus the input
+    } 
+    // If Paid, Due, or Delinquent is selected, make Partially Paid input readonly and clear its value
+    else if (isPaidDueDelinquent) {
+        partiallyPaidInput.setAttribute('readonly', 'readonly');
+        partiallyPaidInput.value = ''; // Clear the input value
+    }
+}
+
+// Add event listeners to all radio button groups
+document.addEventListener('DOMContentLoaded', function() {
+    const installments = ['first', 'second', 'third', 'fourth'];
+    
+    installments.forEach(installment => {
+        const partiallyPaidRadio = document.getElementById(`${installment}_partially_paid_id`);
+        const partiallyPaidInput = document.getElementById(`${installment}_partially_paid_amount`);
+        
+        // Initial state handling
+        if (partiallyPaidRadio && partiallyPaidInput) {
+            // Determine the correct name for radio buttons
+            const radioName = installment === 'first' ? 'payment_status' : `${installment}_payment_status`;
+            
+            // Check if Partially Paid is initially selected
+            if (partiallyPaidRadio.checked) {
+                partiallyPaidInput.removeAttribute('readonly');
+            } else {
+                partiallyPaidInput.setAttribute('readonly', 'readonly');
+                partiallyPaidInput.value = ''; // Clear the input
+            }
+            
+            // Add change event listeners to all radio buttons in the group
+            const radioGroup = document.getElementsByName(radioName);
+            radioGroup.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    toggleReadonly(this, `${installment}_partially_paid_amount`);
+                });
+            });
+        }
+    });
+});
+
+//e
+
+
+$(function() {
+    $('#SaveButton').on('click', function(e) {
+        e.preventDefault();
+
+        // Collect data from form
+        const taxStatus = $('#tax_status').val();
+        const getData = $('#get_data').val();
+        const searchInput = $('#search_input').val();
+        const orderId = $("#order_id").val();
+
+        // Validate that all fields are filled
+        if (taxStatus && getData && searchInput) {
+            // AJAX request
+            $.ajax({
+                url: '{{ url("moveToTaxStatus") }}',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    orderId: orderId,
+                    tax_status: taxStatus,
+                    get_data: getData,
+                    search_input: searchInput,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    // Display success message with Swal
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Tax Form Moved To Tax Status',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Reload the page after closing the success alert
+                        window.location.reload();
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // Display error message with Swal
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: ' Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        } else {
+            // Display warning if fields are missing
+            Swal.fire({
+                icon: 'warning',
+                title: 'Incomplete Data',
+                text: 'Please fill in all fields before saving.',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+
+    $('#fetchButton').on('click', function (e) {
+    e.preventDefault();
+
+    // Collect data from form
+    const taxStatus = $('#tax_status').val();
+    const getData = $('#get_data').val();
+    const searchInput = $('#search_input').val();
+    const orderId = $('#order_id').val();
+    const loader = $('#mobileToggle'); // Ensure this ID matches the loader element
+
+    // Check if all fields are filled
+    if (taxStatus && getData && searchInput) {
+        loader.show(); // Show the loader before making the AJAX call
+
+        $.ajax({
+            url: '{{ url("submitFtcOrder") }}',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                orderId: orderId,
+                type: getData,
+                tax_status: taxStatus,
+                search_value: searchInput,
+                _token: '{{ csrf_token() }}',
+            },
+            success: function (response) {
+                // Hide the loader on success
+                loader.hide();
+                if(response[0].ftc_status == "Completed!!!Not supported currently!!!"){
+                    Swal.fire({
+                                            icon: 'info',
+                                            text: 'Not supported currently!',
+                                            confirmButtonText: 'OK',
+                                        });
+                } else if(response[0].ftc_status == "Success"){
+                    // Display success message with Swal
+                    Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Order successfully fetched.',
+                                confirmButtonText: 'OK',
+                            }).then(() => {
+                                // Reload the page after closing the success alert
+                                // window.location.reload(); 
+                            window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}/tax';
+                            });
+                }
+            },
+            error: function (xhr, status, error) {
+                // Hide the loader on error
+                loader.hide();
+
+                // Display error message with Swal
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Loading data. Please fetch again.',
+                    confirmButtonText: 'OK',
+                });
+            },
+        });
+    } else {
+        // Display warning if fields are missing
+        Swal.fire({
+            icon: 'warning',
+            title: 'Incomplete Data',
+            text: 'Please fill in all fields before saving.',
+            confirmButtonText: 'OK',
+        });
+    }
+});
+});
+
+function viewjson() {
+    var modal = document.getElementById('json_modal');
+    $(modal).modal('show');
+}
 
 </script>
 @endsection
