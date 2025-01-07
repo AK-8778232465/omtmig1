@@ -3622,7 +3622,9 @@ function toggleContainerFields(container, enable) {
             { data: 'user.username', defaultContent: '' },
             { data: 'action' },
             { data: 'updated_at' }
-        ]
+        ],
+        dom: 'lrtip', // Hides the search bar ("l" = length dropdown, "r" = processing display, "t" = table, "i" = info display, "p" = pagination)
+        lengthChange: false,
     });
 
     $('#attachmentHistoryTable').on('click', '.view-file', function (e) {
