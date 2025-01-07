@@ -1345,6 +1345,8 @@ public function orderInflow_data(Request $request)
             'cancelled' => $counts['cancelled'] ?? 0,
             'partially_cancelled' => $counts['partially_cancelled'] ?? 0,
         ];
+    })->filter(function ($item, $key) {
+        return !is_null($item) && $key !== '';
     });
     
     $totalRecords = $pendingData->count();
