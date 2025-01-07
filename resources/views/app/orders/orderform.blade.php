@@ -1672,9 +1672,9 @@
                             </div>
 
                             <div style="align-items: start;">
-                                        <b class="mt-2" style="font-weight: bold; margin-right: 10px;">Tax Certificate :</b>
+                                        <!-- <b class="mt-2" style="font-weight: bold; margin-right: 10px;">Tax Certificate :</b>
                                         <div id="fileList-cert" class="col-lg-6 col-md-6 mb-1"></div>
-                                    </div>
+                                    </div> -->
                             <!-- <label for="files" style="font-size: 24px;"><i class="fas fa-paperclip" style="font-size: 24px;"></i> Attach Files:</label> -->
                             <label for="files"><i class="fas fa-paperclip" style="font-size: 24px;"></i></label>
                             <input type="file" id="attachment" name="attachment[]" accept=".pdf, image/*" multiple>
