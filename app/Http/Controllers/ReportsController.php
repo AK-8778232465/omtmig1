@@ -1198,8 +1198,8 @@ public function exportProductionReport(Request $request) {
 }
 
 
-
-public function orderInflow_data(Request $request){
+public function orderInflow_data(Request $request)
+{
 
     $user = Auth::user();
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
@@ -1247,6 +1247,8 @@ public function orderInflow_data(Request $request){
 
         $statusCountsQuery2 = clone $statusCountsQuery;
         $statusCountsQuery3 = clone $statusCountsQuery;
+    $statusCountsQuery4 = clone $statusCountsQuery;
+    $statusCountsQuery5 = clone $statusCountsQuery;
 
 
     // Carry forward count for all clients
@@ -1283,20 +1285,45 @@ public function orderInflow_data(Request $request){
         ->get();
 
     // Pending count for all clients
-    $pendingData = $carry_forward->keyBy('client_id')->map(function ($item) use ($received, $completed) {
+    $cancelled = $statusCountsQuery4->whereIn('process_id', $processIds)
+        ->where('is_active', 1)
+        ->where('status_id', 3)  // Status for cancelled orders
+        ->whereBetween('order_date', [$from_date, $to_date])
+        ->groupBy('client_id')
+        ->selectRaw('client_id, count(*) as cancelled')
+        ->get();
+
+    // Partially Cancelled count for all clients (Excludes from pending)
+    $partially_cancelled = $statusCountsQuery5->whereIn('process_id', $processIds)
+        ->where('is_active', 1)
+        ->where('status_id', 20)  // Status for partially cancelled orders
+        ->whereBetween('order_date', [$from_date, $to_date])
+        ->groupBy('client_id')
+        ->selectRaw('client_id, count(*) as partially_cancelled')
+        ->get();
+
+    // Pending count for all clients (Modified to exclude cancelled and partially cancelled orders from pending calculation)
+    $pendingData = $carry_forward->keyBy('client_id')->map(function ($item) use ($received, $completed, $cancelled, $partially_cancelled) {
         $receivedCount = $received->firstWhere('client_id', $item->client_id);
         $completedCount = $completed->firstWhere('client_id', $item->client_id);
+        $cancelledCount = $cancelled->firstWhere('client_id', $item->client_id);
+        $partiallyCancelledCount = $partially_cancelled->firstWhere('client_id', $item->client_id);
 
         $receivedCount = $receivedCount ? $receivedCount->received : 0;
         $completedCount = $completedCount ? $completedCount->completed : 0;
+        $cancelledCount = $cancelledCount ? $cancelledCount->cancelled : 0;
+        $partiallyCancelledCount = $partiallyCancelledCount ? $partiallyCancelledCount->partially_cancelled : 0;
 
-        $pending = $item->carry_forward + $receivedCount - $completedCount;
+        // Pending count should exclude cancelled and partially cancelled orders
+        $pending = $item->carry_forward + $receivedCount - $completedCount - $cancelledCount - $partiallyCancelledCount;
 
         return [
             'carry_forward' => $item->carry_forward,
             'received' => $receivedCount,
             'completed' => $completedCount,
-            'pending' => max($pending, 0)
+            'pending' => max($pending, 0),  // Only count carry forward, received, and completed for pending
+            'cancelled' => $cancelledCount,  // Include cancelled count separately
+            'partially_cancelled' => $partiallyCancelledCount,  // Include partially cancelled count separately
         ];
     });
 
@@ -1305,19 +1332,16 @@ public function orderInflow_data(Request $request){
 
     // Prepare the final response data
     $data = $pendingData->map(function ($counts, $clientId) use ($clientNames) {
-        // Only process if clientId exists in clientNames
-        if (!isset($clientNames[$clientId])) {
-            return null; // Skip the entry if clientId is not found
-        }
-    
         return [
             'client_name' => $clientNames[$clientId],
-            'carry_forward' => $counts['carry_forward'] ?? 0,
-            'received' => $counts['received'] ?? 0,
-            'completed' => $counts['completed'] ?? 0,
-            'pending' => $counts['pending'] ?? 0,
+            'carry_forward' => $counts['carry_forward'],
+            'received' => $counts['received'],
+            'completed' => $counts['completed'],
+            'pending' => $counts['pending'],
+            'cancelled' => $counts['cancelled'],
+            'partially_cancelled' => $counts['partially_cancelled'],
         ];
-    })->filter();
+    });
     
     $totalRecords = $pendingData->count();
     return response()->json([
@@ -1642,10 +1666,10 @@ if (!empty($process_type_id) && $process_type_id[0] !== 'All') {
 
 public function fetch_order_details(Request $request)
 {
-    // Get the order IDs from the request
+    $page = $request->input('page', 1);
+    $pageSize = $request->input('length', 10); // Page size for pagination
     $orderIds = $request->input('order_ids');
-    $page = $request->input('page', 1); // Default to the first page
-    $limit = 10; // Number of records per page
+    $searchValue = $request->input('search_value');
 
     // Convert the string of IDs into an array if necessary
     if (is_string($orderIds)) {
@@ -1653,20 +1677,10 @@ public function fetch_order_details(Request $request)
     }
 
     // Ensure that orderIds is an array before running the query
-    if (!is_array($orderIds)) {
-        return response()->json(['error' => 'Invalid order_ids format'], 400);
-    }
-
-    // Calculate the offset based on the current page
-    $offset = ($page - 1) * $limit;
-
-    // Query the oms_order_creations table to get the records matching the order IDs
-    $orders = DB::table('oms_order_creations')
+    $ordersQuery = DB::table('oms_order_creations')
     ->leftJoin('stl_client', 'oms_order_creations.client_id', '=', 'stl_client.id')
     ->join('oms_status', 'oms_order_creations.status_id', '=', 'oms_status.id')
     ->whereIn('oms_order_creations.id', $orderIds)
-        ->skip($offset)   // Skip records based on the offset
-        ->take($limit)    // Limit the records to 10 per page
     ->select(
         DB::raw('DATE_FORMAT(oms_order_creations.order_date, "%m-%d-%Y") as order_date'),
         'oms_order_creations.order_id as order_id',
@@ -1678,12 +1692,31 @@ public function fetch_order_details(Request $request)
                     ELSE oms_status.status
             END as status'
     )
-    )
-    ->get();
+        );
 
-    // Format the data to match the desired response
-    // Return the fetched order details as JSON
-    return response()->json($orders);
+        if (!empty($searchValue)) {
+            $ordersQuery->where(function ($query) use ($searchValue) {
+                $query->where('oms_order_creations.order_id', 'like', '%' . $searchValue . '%')
+                      ->orWhere('stl_client.client_name', 'like', '%' . $searchValue . '%')
+                      ->orWhere('oms_status.status', 'like', '%' . $searchValue . '%');
+            });
+        }
+
+
+    // Get the total number of records for pagination
+    $totalRecords = $ordersQuery->count();
+
+    if ($request->has('export') && $request->input('export') == true) {
+        $orders = $ordersQuery->get();
+    } else {
+        $orders = $ordersQuery->skip(($page - 1) * $pageSize)->take($pageSize)->get();
+    }
+
+    return response()->json([
+        'orders' => $orders,            // Paginated orders for the current page
+        'recordsTotal' => $totalRecords, // Total number of records
+        'recordsFiltered' => $totalRecords, // Filtered records (same as total in this case)
+    ]);
     }
 
 

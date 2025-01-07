@@ -54,11 +54,75 @@
             z-index: 999;
         }
         
-        </style>
-        <style>
             .menu.notification {
                 position: relative;
             }
+            .loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensure it appears on top of everything */
+    flex-direction: column; /* Stack loader and text */
+    font-family: Arial, sans-serif;
+}
+
+.loader {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-radius: 50%;
+    border-top: 8px solid #3498db; /* Blue */
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite; /* Spinning animation */
+    margin-bottom: 15px; /* Space between loader and text */
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader-text {
+    font-size: 18px;
+    color: #3498db; /* Matches loader color */
+    font-weight: bold;
+}
+
+        
+      
+::-webkit-scrollbar {
+    height: 8px; 
+    background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #F5F5F5;
+    border-radius: 10px;        
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #AAA;   
+    border-radius: 10px;        
+    background-image: -webkit-linear-gradient(0deg, 
+                                              rgba(255, 255, 255, 0.5) 25%,
+                                              transparent 25%,
+                                              transparent 50%,
+                                              rgba(255, 255, 255, 0.5) 50%,
+                                              rgba(255, 255, 255, 0.5) 75%,
+                                              transparent 75%,
+                                              transparent); 
+}
+
         </style>
 
     </head>

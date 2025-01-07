@@ -61,7 +61,7 @@
 }
 .report-item.active {
     background-color: #28a745;
-    color: black;
+    color: White;
 }
 
 
@@ -358,10 +358,10 @@
 
 
         <div class="row" id="hidefilter">
-            <div class="col-md-4" style="width: 350px!important;" id="selected_date_range">
+            <div class="col-md-3 mr-2" style="width: 350px!important;" id="selected_date_range">
                 <div class="form-group">
                     <label for="dateFilter" required>Selected received date range:</label>
-                    <select class="form-control" style=" width: 250px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
+                    <select class="form-control" style=" width: 310px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
                         <option value="" >Select Date Range</option>
                         <option value="last_week">Last Week</option>
                         <option value="current_week">current week</option>
@@ -388,7 +388,11 @@
                     <b class="mt-0" id="selectedDate"></b>
                 </div>
             </div>
-            <div class="col-md-2" id="client_filter">
+            <div class="col-md-2 mt-3 pr-2 pt-2 " id="hidefilter_4">
+                 <button type="submit" id="filterButton" class="btn btn-primary in-order">Filter</button>
+            </div>
+            
+            <div class="col-md-2 mr-3" id="client_filter">
                 <div class="form-group">
                     <label for="client">Client</label>
                     <select class="form-control select2-basic-multiple" name="dcf_client_id" id="client_id_dcf">
@@ -400,7 +404,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-2" id="client_filter_2">
+            <div class="col-md-3 mr-3" id="client_filter_2">
                 <div class="form-group">
                     <label for="client">Client</label>
                     <select class="form-control select2-basic-multiple" name="dcf_client_id_2" id="client_id_dcf_2">
@@ -413,7 +417,7 @@
                 </div>
             </div>
 
-            <div class="col-md-2" id="lob_filter">
+            <div class="col-md-2 mr-3" id="lob_filter">
                 <div class="form-group">
                     <label for="lob_id">Lob</label>
                     <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id">
@@ -645,9 +649,7 @@
 
 
             </div>
-        </div>
-    </div>
-    <div class="card col-md-10 mt-2 tabledetails" id="orderInflow_report" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
+            <div class="card col-md-10 mt-2 tabledetails" id="orderInflow_report" style="font-size: 12px; overflow-x: auto;">
         <h4 class="text-center mt-3">Order Inflow Report</h4>
         <div class="card-body">
             <div class="p-0">
@@ -659,6 +661,8 @@
                             <th width="12%">Received</th>
                             <th width="12%">Completed</th>
                             <th width="12%">Pending</th>
+                            <th width="12%">Cancelled</th>
+                            <th width="12%">Partially Cancelled</th>
                         </tr>
                     </thead>
                     <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -670,7 +674,7 @@
 
     {{-- ACM Report --}}
 
-    <div class="card col-md-10 mt-2 tabledetails" id="acm_report" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
+            <div class="card col-md-10 mt-2 tabledetails" id="acm_report" style="font-size: 12px; overflow-x: auto;">
         <h4 class="text-center mt-3">ACM Report</h4>
         <div class="card-body">
             <div class="p-0">
@@ -692,7 +696,7 @@
 
     {{-- Daily completion --}}
 
-    <div class="card col-md-10 mt-2 tabledetails" id="daily_completion" style="font-size: 12px; overflow-x: auto; margin-left:250px;">
+    <div class="card col-md-10 mt-2 " id="daily_completion" style="font-size: 12px;">
         <h4 class="text-center mt-3">Daily Completion Status</h4>
         <div class="card shadow" style="width: 100%; margin: 20px;">
             <div class="card-body">
@@ -769,7 +773,7 @@
 
 
         <div class="card-body">
-            <div class="p-0">
+            <div class="p-0 tabledetails">
                 <table id="daily_completion_table" class="table table-striped table-bordered">
                     <thead class="text-center" style="font-size: 11px;">
                         <tr>
@@ -799,6 +803,9 @@
             </div>
         </div>
     </div>
+        </div>
+    </div>
+
 
     <!-- Modal -->
     <!-- Modal to display order details -->
@@ -826,8 +833,6 @@
             </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button id="previousButton" class="btn btn-primary" style="display: none;">Previous</button>
-                <button id="nextButton" class="btn btn-primary" style="display: none;">Next</button>
                 </div>
             </div>
         </div>
@@ -1734,6 +1739,7 @@ $(document).ready(function() {
             $('#lob_filter').show();
             $('#process_filter').show();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
         } else if (reportId === 'orderwise-details') {
@@ -1749,6 +1755,7 @@ $(document).ready(function() {
             $('#lob_filter').show();
             $('#process_filter').show();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
         } else if (reportId === 'ordercompletion-details') {
@@ -1764,6 +1771,7 @@ $(document).ready(function() {
             $('#lob_filter').show();
             $('#process_filter').show();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
         } else if (reportId === 'orderprogress-details') {
@@ -1779,6 +1787,7 @@ $(document).ready(function() {
             $('#lob_filter').show();
             $('#process_filter').show();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
 
@@ -1796,6 +1805,7 @@ $(document).ready(function() {
             $('#lob_filter').hide();
             $('#process_filter').hide();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
 
@@ -1813,6 +1823,7 @@ $(document).ready(function() {
             $('#lob_filter').show();
             $('#process_filter').show();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
 
@@ -1820,7 +1831,7 @@ $(document).ready(function() {
 		}else if (reportId === 'orderInflow-report') {
             $('#orderInflow_report').show();
             $('#selected_date_range').show();
-            $('#hidefilter_3').show();
+            $('#hidefilter_3').hide();
             $('#client_filter').hide();
             $('#lob_filter').hide();
             $('#process_filter').hide();
@@ -1828,6 +1839,7 @@ $(document).ready(function() {
             $('#role_filter').hide();
             $('#user_filter').hide();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').show();
 
 
         }else if (reportId === 'acm-report') {
@@ -1841,6 +1853,7 @@ $(document).ready(function() {
             $('#role_filter').show();
             $('#user_filter').show();
             $('#client_filter_2').hide();
+            $('#hidefilter_4').hide();
 
 
         }else if (reportId === 'daily-completion') {
@@ -1854,6 +1867,7 @@ $(document).ready(function() {
             $('#role_filter').hide();
             $('#user_filter').hide();
             $('#client_filter_2').show();
+            $('#hidefilter_4').hide();
 
         }
         }
@@ -2316,7 +2330,11 @@ function orderInflow_report() {
             { data: 'carry_forward', name: 'carry_forward' },
             { data: 'received', name: 'received' },
             { data: 'completed', name: 'completed' },
-            { data: 'pending', name: 'pending' }
+            { data: 'pending', name: 'pending' },
+            { data: 'cancelled', name: 'cancelled' },
+            { data: 'partially_cancelled', name: 'partially_cancelled' },
+
+
         ],
         dom: 'lBfrtip',
         buttons:[
@@ -2331,42 +2349,6 @@ function orderInflow_report() {
 }
 
 
-
-// Add the Excel export functionality
-$(document).on('click', '#exportModalData', function() {
-    // Define the headers for the Excel sheet
-    var headers = ['Date', 'Order ID', 'Client', 'Status'];
-
-    // Collect data from the modal's order details table
-    var tableData = []; // Start with an empty array, no need to include headers here
-
-    // Group data by date and client_name
-    tableData.push(headers);
-
-        // Increment the count for the corresponding status
-    $('#orderDetailsTable tr').each(function() {
-        var row = [];
-
-        // Add to the "Order Received" count (sum of all statuses for this date/client)
-        if ($(this).find('td').length > 0) {
-            // Collect cell data for each row (skip header row)
-        $(this).find('td').each(function() {
-            row.push($(this).text());
-    });
-        tableData.push(row); // Add each row's data to tableData
-}
-    });
-
-    // Create a worksheet from the table data
-    var ws = XLSX.utils.aoa_to_sheet(tableData);
-
-    // Create a workbook and add the worksheet
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Order Details");
-
-
-    XLSX.writeFile(wb, "Order_Details.xlsx");
-    });
 
 function exportToExcel(data) {
     var exportData = data.map(function (row, index) {
@@ -2637,13 +2619,85 @@ function daily_completion() {
                 ordering: true,
                 info: true,
                 lengthChange: true,
-                autoWidth: false
+                autoWidth: false,
+                dom: 'lBfrtip',  // 'B' adds the buttons section to the table
+                buttons: [
+                    {
+                        extend: 'excel',  // Enable Excel export button
+                        title: 'Daily_Completion_Report',  // Title for the exported Excel file
+                    }
+                ]
             });
 
             // Attach click event to the order-link to capture the order_ids
-            $('#daily_completion_table').on('click', '.order-link', function() {
+// This will be used to store the selected order IDs
+let selectedOrderIds = [];
+
+$(document).on('click', '.order-link', function() {
+    // Capture the order IDs from the clicked row and store them
                 let orderIds = $(this).data('order-ids');  // Get the order IDs from the clicked link
-                console.log('Order IDs:', orderIds);  // Log them to the console
+
+    // If orderIds is a string, split it into an array
+    if (typeof orderIds === 'string') {
+        selectedOrderIds = orderIds.split(','); // Assuming comma-separated order IDs
+    } else {
+        selectedOrderIds = [orderIds]; // In case it's just a single ID
+    }
+});
+
+$(document).on('click', '#exportModalData', function() {
+    if (selectedOrderIds.length === 0) {
+        alert("Please select at least one order to export.");
+        return;
+    }
+
+    // Define the headers for the Excel sheet
+    var headers = ['Date', 'Order ID', 'Client', 'Status'];
+
+    // Perform an AJAX request to get the order details using the selected order IDs
+    $.ajax({
+        url: 'fetch_order_details',  // Adjust the URL accordingly
+        method: 'POST',
+        data: {
+            order_ids: selectedOrderIds.join(','),  // Send the order IDs as a comma-separated string
+            page: 1,          // Current page
+            length: 100,      // Number of records per page
+            search_value: '',
+            export: true,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            var orders = response.orders;
+
+            // Prepare table data array with headers
+            var tableData = [headers];
+
+            // Loop through the orders and push them to tableData
+            orders.forEach(function(order) {
+                var row = [
+                    order.order_date,  // Date
+                    order.order_id,    // Order ID
+                    order.client_name, // Client
+                    order.status       // Status
+                ];
+
+                tableData.push(row); // Add the order's data to the table data
+            });
+
+            // Create a worksheet from the table data
+            var ws = XLSX.utils.aoa_to_sheet(tableData);
+
+            // Create a workbook and add the worksheet
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Order Details");
+
+            // Trigger download of the Excel file
+            XLSX.writeFile(wb, "Order_Details.xlsx");
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching data:", error);
+        }
+    });
             });
             $('#loader').hide();
         },
@@ -2660,6 +2714,7 @@ function daily_completion() {
 let currentPage = 1; // Start on page 1
 let orderIds = [];    // This should be set dynamically based on the clicked order link
 let tableInstance = null;  // To hold the DataTable instance
+let fetchingData = false;  // To prevent multiple AJAX calls while the previous one is still in progress
 
 $(document).on('click', '.order-link', function () {
     // Get the order IDs from the clicked link's data attribute
@@ -2672,6 +2727,11 @@ $(document).on('click', '.order-link', function () {
 
 // Function to fetch order details for the current page
 function fetchOrderDetails(page) {
+    // Prevent multiple AJAX requests if one is already in progress
+    if (fetchingData) return;
+
+    fetchingData = true;  // Set flag to prevent further requests until the current one completes
+
     $.ajax({
         url: "{{ route('fetch_order_details') }}",  // Your route to fetch order details
         type: 'POST',
@@ -2688,74 +2748,144 @@ function fetchOrderDetails(page) {
                 $('#orderDetailsModal').modal('show');
             }
 
+            $('#orderDetailsModal').on('shown.bs.modal', function () {
+                // You can perform additional actions here when the modal is fully shown
+                console.log("Order Details Modal is now visible.");
 
+                // Example: If you need to focus on the first input inside the modal after it's shown:
+                $('#orderDetailsModal input:first').focus();
+            });
+
+            // If DataTable already exists, clear the existing data and update the table
             if (tableInstance) {
             // Clear existing data and append new rows
                 tableInstance.clear();
-                tableInstance.rows.add(response);  // Add new rows
+                tableInstance.rows.add(response.orders);  // Add new rows
                 tableInstance.draw();  // Redraw the table
+
+                // Manually set the current page after loading new data
+                tableInstance.page(currentPage - 1).draw('page');
         } else {
                 // Show the modal first, then initialize the DataTable
-                $('#orderDetailsModal').modal('show').on('shown.bs.modal', function () {
-                    // Initialize the modal DataTable with the response data
-                if (!$.fn.dataTable.isDataTable('#orderDetailsTable')) {
                     tableInstance = $('#orderDetailsTable').DataTable({
-                        data: response,  // Pass the order details from the server
+                    data: response.orders,  // Pass the order details from the server
                         columns: [
                             { data: 'order_date', title: 'Order Date' },
                             { data: 'order_id', title: 'Order ID' },
                             { data: 'client_name', title: 'Client' },
                             { data: 'status', title: 'Status' },  // You can replace this with actual status name if needed
                         ],
-                        paging: false,    // Disable pagination in DataTable, handle it manually
+                    paging: true,     // Enable pagination in DataTable
                         searching: true, // Enable search functionality
                         ordering: true,  // Enable column sorting
-                        info: true        // Show table info
-                    });
+                    info: true,       // Show table info
+                    processing: true, // Show processing indicator
+                    serverSide: true, // Enable server-side processing
+                    pageLength: 10,   // Set default page length
+                    lengthMenu: [10, 25, 50, 100,1000], // Define available page lengths
+                    ajax: {
+                        url: "{{ route('fetch_order_details') }}",
+                        type: "POST",
+                        data: function(d) {
+                            // Add the orderIds, page number, and CSRF token to the AJAX request
+                            d.order_ids = orderIds;
+                            d.page = Math.ceil(d.start / d.length) + 1;
+                            d.search_value = d.search.value;
+                            d._token = '{{ csrf_token() }}';
+                        },
+                        dataSrc: function (json) {
+                            // Check if there are any records, if not hide pagination
+                            if (json.orders.length === 0) {
+                                $('#orderDetailsTable_paginate').hide();  // Hide pagination
+                            } else {
+                                $('#orderDetailsTable_paginate').show();  // Show pagination
+                            }
+                            return json.orders;  // Data to fill in the DataTable
                 }
+                    },
+                    // Callback when DataTable pagination is triggered
+                    drawCallback: function(settings) {
+                        // Ensure the active page is marked correctly in the UI
+                        updatePaginationState(settings);
+                    },
+                    recordsTotal: function(settings) {
+                        return response.recordsTotal; // Pass the total records from the server
+                    },
+                    recordsFiltered: function(settings) {
+                        return response.recordsFiltered; // Pass filtered records from the server
+                    },
                 });
             }
 
 
-            // Update the next button state
-            updateNextButtonState(response.length);
+            fetchingData = false;
         },
         error: function (xhr, status, error) {
             console.error('Error fetching order details:', error);
+            fetchingData = false;  // Reset flag in case of an error
         }
     });
 }
 
 // Handle the "Next" button click
-$('#nextButton').on('click', function () {
-    currentPage++; // Increment the page number
-    fetchOrderDetails(currentPage);  // Fetch the next page
-});
+function updatePaginationState(settings) {
+    const totalPages = Math.ceil(settings.fnRecordsDisplay() / settings._iDisplayLength); // Get total pages
+    const currentPage = Math.ceil(settings._iDisplayStart / settings._iDisplayLength) + 1; // Get current page (1-based)
 
-$('#previousButton').on('click', function () {
-    if (currentPage > 1) {
-        currentPage--; // Decrement the page number
-        fetchOrderDetails(currentPage);  // Fetch the previous page
+    // Loop through all pagination buttons
+    $('#orderDetailsTable_paginate .paginate_button').each(function () {
+        const pageNum = parseInt($(this).text());
+
+        // Remove 'active' class from all pagination buttons
+        $(this).removeClass('active');
+
+        // Add 'active' class to the button of the current page
+        if (pageNum === currentPage) {
+            $(this).addClass('active');
     }
 });
 
 // Update the Next button visibility based on the number of records returned
-function updateNextButtonState(records) {
-    // If we got exactly 10 records, show the "Next" button
-    if (records === 10) {
-        $('#nextButton').show();
+    const previousButton = $('#orderDetailsTable_previous');
+    const nextButton = $('#orderDetailsTable_next');
+
+    if (currentPage === 1) {
+        previousButton.addClass('disabled'); // Disable the 'Previous' button if on the first page
     } else {
-        // Hide the "Next" button if there are less than 10 records (last page)
-        $('#nextButton').hide();
+        previousButton.removeClass('disabled'); // Enable the 'Previous' button
     }
 
-    if (currentPage > 1) {
-        $('#previousButton').show();
+    if (currentPage === totalPages) {
+        nextButton.addClass('disabled'); // Disable the 'Next' button if on the last page
     } else {
-        $('#previousButton').hide();
+        nextButton.removeClass('disabled'); // Enable the 'Next' button
     }
+
+    // Handle click event on pagination buttons
+    $('#orderDetailsTable_previous').on('click', function() {
+    if (currentPage > 1) {
+            currentPage -= 1; // Decrease the current page
+            tableInstance.page(currentPage - 1).draw('page'); // Go to the previous page
+        }
+    });
+
+    $('#orderDetailsTable_next').on('click', function() {
+        if (currentPage < totalPages) {
+            currentPage += 1; // Increase the current page
+            tableInstance.page(currentPage - 1).draw('page'); // Go to the next page
+    }
+    });
+    }
+
+    // Handling the modal close action via jQuery (for clicking outside or closing via button)
+$('#orderDetailsModal').on('hide.bs.modal', function () {
+    if (tableInstance) {
+        tableInstance.search('').draw();  // Clear the search input and redraw the table
+        tableInstance.page.len(10).draw();  // Change entries per page to 10 and redraw the table
 }
 
+    currentPage = 1; // Go to the first page
+});
 
 
     // Handling the modal close action via jQuery
