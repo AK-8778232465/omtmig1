@@ -1404,34 +1404,43 @@ private function findOrder($orderId, $statusId, $userId = null)
 
 
     public function storeFile(Request $request)
-        {
+    {
+        
+        $file = $request->file('file');
+        $fileName = $file->getClientOriginalName();
 
-            // Store the file in the 'uploads' directory in the storage path
-            $filePath = $request->file('file')->store('uploads', 'public');
-
-            // Get the file name
-            $fileName = $request->file('file')->getClientOriginalName();
-
-            $file = $request->file('file');
-            $fileName = $file->getClientOriginalName();
-            $pathfileName = uniqid() . '-' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('texAttachments', $pathfileName, 'public');
-            TaxAttachmentFile::create([
-                            'order_id' => $request->input('order_id'),
-                            'file_path' => $filePath,
-                            'file_name' => $file->getClientOriginalName(),
-                        ]);
-            OmsAttachmentHistory::create([
-                            'order_id' => $request->input('order_id'),
-                            'updated_by' => Auth::id(),
-                            'action' => 'Uploaded',
-                            'file_name' => $fileName,
-                            'updated_at' => now(),
-                        ]);
-
-
-            return response()->json(['filePath' => $filePath, 'fileName' => $fileName]);
+        $pathfileName = uniqid() . '-' . $file->getClientOriginalName();
+    
+       
+        $directoryPath = 'texAttachments'; // Directory for storing files
+        $disk = 'public'; // Specify the disk (e.g., 'public', 'local', 's3')
+    
+        // Check if the directory exists, if not, create it
+        if (!Storage::disk($disk)->exists($directoryPath)) {
+            Storage::disk($disk)->makeDirectory($directoryPath);
         }
+    
+        // Store the file with the unique name
+        $filePath = $file->storeAs($directoryPath, $pathfileName, $disk);
+    
+        // Store the file metadata in the OmsAttachmentHistory model
+        OmsAttachmentHistory::create([
+            'order_id' => $request->input('order_id'),
+            'updated_by' => Auth::id(),
+            'action' => 'Uploaded',
+            'file_path' => $filePath,
+            'file_name' => $fileName,
+            'is_delete' => 1,
+            'updated_at' => now(),
+        ]);
+    
+        // Return the file path and name as a JSON response
+        return response()->json([
+            'filePath' => $filePath,
+            'fileName' => $fileName
+        ]);
+    }
+    
 
         public function getFiles(Request $request)
         {
@@ -1541,7 +1550,7 @@ private function findOrder($orderId, $statusId, $userId = null)
             public function attachmentHistoryData(Request $request)
             {
                 
-                        $query = OmsAttachmentHistory::select('id', 'order_id', 'file_name', 'updated_by', 'action', DB::raw("DATE_FORMAT(updated_at, '%m/%d/%Y') as updated_at"))
+                        $query = OmsAttachmentHistory::select('id', 'order_id', 'file_name', 'updated_by', 'file_path','action', DB::raw("DATE_FORMAT(updated_at, '%m/%d/%Y') as updated_at"))
                         ->with('user:id,username') // Include only `id` and `username` from `stl_user`
                         ->orderByDesc('updated_at'); // Order by `updated_at` in descending order
 
@@ -1660,7 +1669,52 @@ private function findOrder($orderId, $statusId, $userId = null)
                 }
             }
             
+ // Fetch attachment history data
+ public function getAttachmentHistory(Request $request)
+ {
 
+    $query = OmsAttachmentHistory::select('id', 'order_id', 'file_name', 'updated_by', 'file_path', 'is_delete','action', DB::raw("DATE_FORMAT(updated_at, '%m/%d/%Y %H:%i:%s') as updated_at"))
+    ->with('user:id,username') 
+    ->orderByDesc('updated_at'); 
+   $order_id = $request->order_id;
+
+    $query->where('order_id', $order_id);
+    $data = $query->get();
+return response()->json(['data' => $data]);
+ }
+
+ // Delete file
+ public function deleteAttachment(Request $request)
+ {
+     $attachment = OmsAttachmentHistory::find($request->id);
+
+     if (!$attachment || $attachment->is_delete != 1) {
+         return response()->json(['success' => false, 'message' => 'File cannot be deleted.'], 403);
+     }
+
+     // Delete file from storage
+     if (Storage::exists($attachment->file_path)) {
+         Storage::delete($attachment->file_path);
+     }
+     OmsAttachmentHistory::create([
+        'order_id' => $attachment->order_id,
+        'updated_by' => Auth::id(),
+        'action' => 'Deleted',
+        'file_name' => $attachment->file_name,
+        'updated_at' => now(),
+    ]);
+
+    //  $attachment->delete();
+     DB::table('oms_attachment_history')
+     ->where('id', $request->id)
+     ->update([
+         'file_path' => null ,
+         'is_delete' => null,
+     ]);
+
+
+     return response()->json(['success' => true, 'message' => 'File deleted successfully.']);
+ }
             
 
 

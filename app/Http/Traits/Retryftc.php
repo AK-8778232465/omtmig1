@@ -148,6 +148,7 @@ trait Retryftc
                     'updated_by' => auth()->id(),
                     'action' => 'Fetched',
                     'file_name' => $file['file_name'],
+                    'file_path' => $filePath,
                     'updated_at' => now(),
                 ];
 

@@ -9,6 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use App\Models\OmsAttachmentHistory;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class TaxCertPDFController extends Controller
 {
@@ -88,6 +92,16 @@ class TaxCertPDFController extends Controller
             Log::error("PDFtk Error: " . $pdf->getError());
             return response()->json(['error' => 'Failed to generate PDF'], 500);
         }
+
+        OmsAttachmentHistory::create([
+            'order_id' => $orderId,
+            'updated_by' => Auth::id(),
+            'action' => 'Generated',
+            'file_path' =>  "taxcert/{$orderId}/Tax Certificate_{$pdfFields['tax_parcel_id']}.pdf",
+           'file_name' => "Tax Certificate_{$pdfFields['tax_parcel_id']}.pdf",
+            'updated_at' => now(),
+        ]);
+
 
         // Merge PDFs (if needed)
         // Example: $gsCommand = ...

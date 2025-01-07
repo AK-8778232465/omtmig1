@@ -1802,6 +1802,21 @@
                                     </table>
                                 </div>
                             </div>
+
+                            <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="fileModalLabel">File Viewer</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <iframe id="fileViewer" src="" style="width: 100%; height: 400px;" frameborder="0"></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                              <!-- /e history -->
                         </form>
                     </div>
@@ -2111,9 +2126,674 @@ $(document).ready(function() {
 </script>
 @endif
 
-@if(!in_array($orderData->stl_process_id, [2, 4, 6, 8, 9, 16, 7, 12, 15]))
+@if(in_array($orderData->stl_process_id, [7]))
 <script>
 
+let lastSegment = "{{ $lastSegment }}";
+let isTaxFormVisible = false;
+let isOrderFormVisible = false;
+
+function updateHideCardVisibility() {
+    document.getElementById('hide_card').style.display = (isTaxFormVisible || isOrderFormVisible) ? 'block' : 'none';
+}
+
+if (lastSegment === 'tax') {
+        document.getElementById('showOrderForm').disabled = true;
+        document.getElementById('showOrderForm').classList.add('btn-inactive');
+
+    } else {
+        document.getElementById('showOrderForm').disabled = false;
+        document.getElementById('showOrderForm').classList.remove('btn-inactive');
+    }
+
+
+
+document.getElementById('showTaxForm').addEventListener('click', function() {
+    isTaxFormVisible = !isTaxFormVisible;
+    document.getElementById('taxForm').style.display = isTaxFormVisible ? 'block' : 'none';
+
+    this.classList.toggle('btn-active', isTaxFormVisible);
+    this.classList.toggle('btn-inactive', !isTaxFormVisible);
+
+    if (isOrderFormVisible) {
+        isOrderFormVisible = false;
+        document.getElementById('orderForm').style.display = 'none';
+        document.getElementById('showOrderForm').classList.remove('btn-active');
+        document.getElementById('showOrderForm').classList.add('btn-inactive');
+    }
+
+    updateHideCardVisibility();
+});
+
+document.getElementById('showOrderForm').addEventListener('click', function() {
+    isOrderFormVisible = !isOrderFormVisible;
+    document.getElementById('orderForm').style.display = isOrderFormVisible ? 'block' : 'none';
+
+    this.classList.toggle('btn-active', isOrderFormVisible);
+    this.classList.toggle('btn-inactive', !isOrderFormVisible);
+
+    if (isTaxFormVisible) {
+        isTaxFormVisible = false;
+        document.getElementById('taxForm').style.display = 'none';
+        document.getElementById('showTaxForm').classList.remove('btn-active');
+        document.getElementById('showTaxForm').classList.add('btn-inactive');
+    }
+
+    updateHideCardVisibility();
+});
+
+updateHideCardVisibility();
+
+
+    if (lastSegment === 'tax') {
+        document.getElementById('showTaxForm').click();
+    }else{
+        document.getElementById('showOrderForm').click();
+    }
+
+$(document).ready(function() {
+    $("#taxFormValues").on("submit", function(event) {
+        event.preventDefault(); 
+        var formData = $(this).serialize();
+
+        var clickedButton = $(event.originalEvent.submitter);
+
+        // Determine the value of submit_btn based on which button was clicked
+        var submitBtnValue = clickedButton.hasClass('save_btn') ? 0 : 1;
+
+
+        // Append additional data from the specified input fields
+        var taxStatus = $("#tax_status").val();
+        var getData = $("#get_data").val();
+        var searchInput = $("#search_input").val();
+        var parcelValue = $("#parcel").val(); // Get the value of the parcel hidden input
+
+        // Create an object to hold the serialized data and additional fields
+        var additionalData = {
+            tax_status: taxStatus,
+            get_data: getData,
+            search_input: searchInput,
+            parcel: parcelValue,
+            submit_btn: submitBtnValue // Include the parcel value
+        };
+
+        // Convert the additionalData object to a query string
+        var additionalDataString = $.param(additionalData);
+        
+        // Combine the original form data with the additional data
+        var combinedData = formData + '&' + additionalDataString;
+
+        $.ajax({
+            url: "{{ url('taxform_submit') }}",
+            type: "POST",
+            data: combinedData,
+            headers: {
+                'X-CSRF-TOKEN': $('input[name="_token"]').val()
+            },
+            success: function(response) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    // if (result.value) {
+                    //     window.location.href = "{{ url('/orders_status') }}/tax";
+                    // }
+                     // Check if submit_btn is 1
+                     if (submitBtnValue == 1 && result.value) {
+                        window.location.href = "{{ url('/orders_status') }}/tax";
+                    }
+                });
+            },
+            error: function(error) {        
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to send data. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    });
+});
+
+
+
+$(document).ready(function () {
+    // Trigger file upload on file selection change
+    $("#attachment").on("change", function () {
+        uploadFiles();
+    });
+
+    function uploadFiles() {
+        let orderId = $("#order_id").val();
+        let fileList = $("#attachment")[0].files;
+        
+        if (fileList.length > 0) {
+            for (let i = 0; i < fileList.length; i++) {
+                let formData = new FormData();
+                formData.append('file', fileList[i]);
+                formData.append('order_id', orderId);
+
+                $.ajax({
+                    url: "{{ url('storeFile') }}",
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        console.log("File stored successfully:", response);
+                        // Refresh the file list after each successful upload
+                        // displayFiles();
+                        $('#attachmentHistoryTable').DataTable().ajax.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("File upload failed:", error);
+                    }
+                });
+            }
+        }
+    }
+
+    function displayFiles() {
+        let orderId = $("#order_id").val();
+
+        $.ajax({
+            url: "{{ url('getFiles') }}",
+            type: 'GET',
+            data: { order_id: orderId },
+            success: function (data) {
+                let fileList = $('#fileList');
+                let attachmentsHeader = $('#attachmentsHeader');
+                fileList.empty(); // Clear previous file list
+
+                if (data.length > 0) {
+                    attachmentsHeader.show();
+                    data.forEach(file => {
+                        let fileType = file.name.split('.').pop().toLowerCase();
+                        let filePreview = '';
+
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                        } else if (fileType === 'pdf') {
+                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                            filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
+                        } else {
+                            filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
+                        }
+
+                        fileList.append(`<div class="m-2">${filePreview}</div>`);
+                    });
+
+                    $('.file-link').on('click', function (e) {
+                        e.preventDefault();
+                        let fileUrl = $(this).data('file-url');
+                        let fileType = fileUrl.split('.').pop().toLowerCase();
+
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                            Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                        } else if (fileType === 'pdf') {
+                            Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                            window.open(fileUrl, '_blank');
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
+                        }
+                    });
+                } else {
+                    attachmentsHeader.hide(); // Hide header if no files are available
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
+            }
+        });
+    }
+
+function updateSaveButton() {
+    let fileList = $('#fileList-cert');
+
+    // Check if there are any children (i.e., files) in the file list
+    if (fileList.children().length > 0) {
+        $('#generate_cert').text('Update Certificate');
+    } else {
+        $('#generate_cert').text('Generate Certificate');
+    }
+}
+ 
+    function displaycertFiles() {
+    let orderId = $("#order_id").val();
+
+    $.ajax({
+        url: "{{ url('getCertFiles') }}",
+        type: 'GET',
+        data: { order_id: orderId },
+        success: function (data) {
+            let fileList = $('#fileList-cert');
+            let attachmentsHeader = $('#attachmentsHeader');
+            fileList.empty(); // Clear previous file list
+
+            if (data.length > 0) {
+                attachmentsHeader.show();
+                data.forEach(file => {
+                    let fileType = file.name.split('.').pop().toLowerCase();
+                    let filePreview = '';
+
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                        filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                    } else if (fileType === 'pdf') {
+                        filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
+                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                        filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
+                    } else {
+                        filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
+                    }
+
+                    fileList.append(`<div class="m-2">${filePreview}</div>`);
+                });
+
+                $('.file-link').on('click', function (e) {
+                    e.preventDefault();
+                    let fileUrl = $(this).data('file-url');
+                    let fileType = fileUrl.split('.').pop().toLowerCase();
+
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                        Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                    } else if (fileType === 'pdf') {
+                        Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
+                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+                        window.open(fileUrl, '_blank');
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
+                    }
+                });
+            } else {
+                attachmentsHeader.hide(); // Hide header if no files are available
+            }
+
+            // Update button text
+            updateSaveButton();
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
+        }
+    });
+}
+
+    // Initial call to load files if `order_id` is already set
+    // displayFiles();
+    displaycertFiles();
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const generateCertButton = document.getElementById('generate_cert');
+    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-cont');
+
+    if (generateCertButton) {
+        generateCertButton.addEventListener('click', function () {
+            // Show the progress container
+            progressContainer.style.display = 'block';
+
+            // Initialize progress
+            let progress = 0;
+
+            // Simulate progress
+            const interval = setInterval(function () {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+
+                    // Hide the progress container after a brief delay
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+
+                        // Display SweetAlert2 message after a brief delay
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Generation Completed',
+                            text: 'The certificate has been successfully generated!',
+                            showConfirmButton: false,
+                            timer: 1500 // Auto-close after 1.5 seconds
+                        }).then(() => {
+                            // Reload the page after the alert closes
+                            window.location.reload();
+                        });
+                    }, 1000); // 1-second delay before showing the SweetAlert
+                }
+            }, 300); // Update progress every 300ms
+        });
+    }
+});
+
+
+
+
+$(document).ready(function() {
+    updateSaveButton();
+    // Handle file selection and display clickable file names
+
+
+    // Bind click event to file name text for preview
+    $("#file-list").on("click", ".file-name", function() {
+        var fileName = $(this).data("filename"); // Get the clicked file name
+        var file = getFileByName(fileName);
+
+        if (file) {
+            showFilePreview(file);  // Show the preview in modal if the file exists
+            $("#file-modal").show(); // Display modal
+            $(".sticky-container, .topbar, .modelopenhide").hide(); // Hide other elements
+        }
+    });
+
+    // Close modal without form submission
+    $("#close-modal").on("click", function(event) {
+        event.preventDefault();
+        $("#file-modal").hide();  // Hide modal
+        $(".sticky-container, .topbar, .modelopenhide").show(); // Restore hidden elements
+    });
+
+    // Helper function to retrieve file by name
+    function getFileByName(fileName) {
+        var fileList = $("#attachment")[0].files;
+        for (var i = 0; i < fileList.length; i++) {
+            if (fileList[i].name === fileName) {
+                return fileList[i];
+            }
+        }
+        return null;
+    }
+
+    // Display file preview in modal
+    function showFilePreview(file) {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+            var filePreviewContainer = $("#file-preview-container");
+
+            if (file.type.startsWith("image/")) {
+                filePreviewContainer.html(`<img src="${e.target.result}" style="max-width: 100%; height: auto;" />`);
+            } else if (file.type === "application/pdf") {
+                filePreviewContainer.html(`<embed src="${e.target.result}" width="100%" height="400px" />`);
+            } else {
+                filePreviewContainer.html(`<pre>${e.target.result}</pre>`);
+            }
+        };
+
+        reader.readAsDataURL(file);
+    }
+});
+
+$(document).ready(function() {
+    $("#phone_num").on("input", function() {
+        var input = $(this).val();
+        input = input.replace(/[^0-9x]/g, '');
+
+        if (input.length <= 10) {
+            input = input.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+        } else {
+            input = input.replace(/(\d{3})(\d{3})(\d{4})(\d+)/, "($1) $2-$3 x$4");
+        }
+        $(this).val(input);
+    });
+});
+
+    window.addEventListener('DOMContentLoaded', function() {
+    var taxStatusValue = document.getElementById('tax_status').value;
+    var fetchButton = document.getElementById('fetchButton');
+    var saveButton = document.getElementById('SaveButton');
+
+    // Check the initial value of tax_status and display the correct button
+    if (taxStatusValue === '') {
+        fetchButton.style.display = 'none';
+        saveButton.style.display = 'none';
+    } else if (taxStatusValue === 'online') {
+        fetchButton.style.display = 'inline-block';
+        saveButton.style.display = 'none';
+    } else if (taxStatusValue === 'offline') {
+        fetchButton.style.display = 'none';
+        saveButton.style.display = 'inline-block';
+    }
+});
+
+
+    document.getElementById('tax_status').addEventListener('change', function() {
+        var fetchButton = document.getElementById('fetchButton');
+    var SaveButton = document.getElementById('SaveButton');
+    
+    // Show Fetch button for 'online', Save button for 'offline'
+        fetchButton.style.display = this.value === 'online' ? 'inline-block' : 'none';
+    SaveButton.style.display = this.value === 'offline' ? 'inline-block' : 'none';
+});
+
+      function validateDecimalInput(event) {
+        const value = event.target.value;
+        // Allow only numbers with optional decimal points and two decimal places
+        if (!/^\d*\.?\d{0,2}$/.test(value)) {
+            event.target.value = value.slice(0, -1); // Remove last character if invalid
+        }
+    }
+
+    // Attach event listeners to each input field
+    const decimalFields = [
+        'land', 'improvement', 'exemption_mortgage', 'exemption_homeowner',
+        'exemption_homestead', 'exemption_additional', 'others', 'total_annual_tax',
+        'net_value','first_amount_id','second_amount_id','third_amount_id','fourth_amount_id'
+    ];
+
+    decimalFields.forEach(id => {
+        document.getElementById(id).addEventListener('input', validateDecimalInput);
+    });
+
+// function onlyOne(checkbox) {
+//     const checkboxes = checkbox.closest('.checkbox-group').querySelectorAll('input[type="checkbox"]');
+//     checkboxes.forEach((cb) => {
+//         if (cb !== checkbox) cb.checked = false;
+//     });
+// }
+
+// function toggleReadonly(checkbox, inputId) {
+//         const inputField = document.getElementById(inputId);
+//         inputField.readOnly = !checkbox.checked;
+//     }
+
+//s
+function toggleReadonly(radioButton, partiallyPaidInputId) {
+    const partiallyPaidInput = document.getElementById(partiallyPaidInputId);
+    
+    // Check if Paid, Due, or Delinquent is selected
+    const isPaidDueDelinquent = 
+        ['paid', 'due', 'delinquent'].includes(radioButton.value);
+    
+    // If Partially Paid is checked, make input editable
+    if (radioButton.value === 'partially_paid') {
+        partiallyPaidInput.removeAttribute('readonly');
+        partiallyPaidInput.focus(); // Optional: automatically focus the input
+    } 
+    // If Paid, Due, or Delinquent is selected, make Partially Paid input readonly and clear its value
+    else if (isPaidDueDelinquent) {
+        partiallyPaidInput.setAttribute('readonly', 'readonly');
+        partiallyPaidInput.value = ''; // Clear the input value
+    }
+}
+
+// Add event listeners to all radio button groups
+document.addEventListener('DOMContentLoaded', function() {
+    const installments = ['first', 'second', 'third', 'fourth'];
+    
+    installments.forEach(installment => {
+        const partiallyPaidRadio = document.getElementById(`${installment}_partially_paid_id`);
+        const partiallyPaidInput = document.getElementById(`${installment}_partially_paid_amount`);
+        
+        // Initial state handling
+        if (partiallyPaidRadio && partiallyPaidInput) {
+            // Determine the correct name for radio buttons
+            const radioName = installment === 'first' ? 'payment_status' : `${installment}_payment_status`;
+            
+            // Check if Partially Paid is initially selected
+            if (partiallyPaidRadio.checked) {
+                partiallyPaidInput.removeAttribute('readonly');
+            } else {
+                partiallyPaidInput.setAttribute('readonly', 'readonly');
+                partiallyPaidInput.value = ''; // Clear the input
+            }
+            
+            // Add change event listeners to all radio buttons in the group
+            const radioGroup = document.getElementsByName(radioName);
+            radioGroup.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    toggleReadonly(this, `${installment}_partially_paid_amount`);
+                });
+            });
+        }
+    });
+});
+
+//e
+
+
+$(function() {
+    $('#SaveButton').on('click', function(e) {
+        e.preventDefault();
+
+        // Collect data from form
+        const taxStatus = $('#tax_status').val();
+        const getData = $('#get_data').val();
+        const searchInput = $('#search_input').val();
+        const orderId = $("#order_id").val();
+
+        // Validate that all fields are filled
+        if (taxStatus && getData && searchInput) {
+            // AJAX request
+            $.ajax({
+                url: '{{ url("moveToTaxStatus") }}',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    orderId: orderId,
+                    tax_status: taxStatus,
+                    get_data: getData,
+                    search_input: searchInput,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    // Display success message with Swal
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Tax Form Moved To Tax Status',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Reload the page after closing the success alert
+                        window.location.reload();
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // Display error message with Swal
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: ' Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        } else {
+            // Display warning if fields are missing
+            Swal.fire({
+                icon: 'warning',
+                title: 'Incomplete Data',
+                text: 'Please fill in all fields before saving.',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+
+    $('#fetchButton').on('click', function (e) {
+    e.preventDefault();
+
+    // Collect data from form
+    const taxStatus = $('#tax_status').val();
+    const getData = $('#get_data').val();
+    const searchInput = $('#search_input').val();
+    const orderId = $('#order_id').val();
+    const loader = $('#mobileToggle'); // Ensure this ID matches the loader element
+
+    // Check if all fields are filled
+    if (taxStatus && getData && searchInput) {
+        loader.show(); // Show the loader before making the AJAX call
+
+        $.ajax({
+            url: '{{ url("submitFtcOrder") }}',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                orderId: orderId,
+                type: getData,
+                tax_status: taxStatus,
+                search_value: searchInput,
+                _token: '{{ csrf_token() }}',
+            },
+            success: function (response) {
+                // Hide the loader on success
+                loader.hide();
+                if(response[0].ftc_status == "Completed!!!Not supported currently!!!"){
+                    Swal.fire({
+                                            icon: 'info',
+                                            text: 'Not supported currently!',
+                                            confirmButtonText: 'OK',
+                                        });
+                } else if(response[0].ftc_status == "Success"){
+                    // Display success message with Swal
+                    Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Order successfully fetched.',
+                                confirmButtonText: 'OK',
+                            }).then(() => {
+                                // Reload the page after closing the success alert
+                                // window.location.reload(); 
+                            window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}/tax';
+                            });
+                }
+            },
+            error: function (xhr, status, error) {
+                // Hide the loader on error
+                loader.hide();
+
+                // Display error message with Swal
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Loading data. Please fetch again.',
+                    confirmButtonText: 'OK',
+                });
+            },
+        });
+    } else {
+        // Display warning if fields are missing
+        Swal.fire({
+            icon: 'warning',
+            title: 'Incomplete Data',
+            text: 'Please fill in all fields before saving.',
+            confirmButtonText: 'OK',
+        });
+    }
+});
+});
+
+function viewjson() {
+    var modal = document.getElementById('json_modal');
+    $(modal).modal('show');
+}
 </script>
 @endif
 
@@ -2731,12 +3411,12 @@ function updateESTTime() {
 }
 
     // Initially load the files
-    displayFiles();
+    // displayFiles();
 
     // Delete file functionality
     $(document).on('click', '.delete-file', function (e) {
         e.preventDefault();
-        let fileId = $(this).data('file-id');
+        let fileId = $(this).data('id');
         let fileRow = $(this).closest('.row'); // Find the closest row that contains the file
 
         // Show confirmation dialog using Swal
@@ -2752,18 +3432,19 @@ function updateESTTime() {
             if (result.value) {
                
                 $.ajax({
-                    url: "{{ url('deleteFile') }}",
-                    type: 'DELETE',
+                    url: "{{ route('delete.attachment') }}",
+                    type: 'POST',
                     data: {
-                        file_id: fileId
+                        id: fileId
                     },
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function () {
                         Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
-                        fileRow.remove(); // Remove the file row from the UI
-                        displayFiles(); // Refresh file list after deletion
+                        // fileRow.remove(); // Remove the file row from the UI
+                        // displayFiles(); // Refresh file list after deletion
+                        $('#attachmentHistoryTable').DataTable().ajax.reload();
                     },
                     error: function () {
                         Swal.fire('Error!', 'There was a problem deleting the file.', 'error');
@@ -2775,38 +3456,38 @@ function updateESTTime() {
 
 });
 
-$(document).ready(function() {
+// $(document).ready(function() {
     // Initialize DataTable with AJAX data
-    var table = $('#attachmentHistoryTable').DataTable({
-        ajax: {
-            url: "{{ url('attachmentHistoryData') }}",
-            data: function(d) {
-                d.order_id = $("#order_id").val(); // Send `order_id` as a parameter
-            },
-            type: 'GET'
-        },
-        // Adjusted order column to account for the new serial number column
-        columns: [
-            {
-                data: null, // Serial number column
-                render: function(data, type, row, meta) {
-                    return meta.row + 1; // Display row number (1-based index)
-                },
-                orderable: false // Disable sorting on this column
-            },
-            { data: 'file_name' },
-            { data: 'user.username', defaultContent: '' },
-            { data: 'action' },
-            {
-            data: 'updated_at',
+//     var table = $('#attachmentHistoryTable').DataTable({
+//         ajax: {
+//             url: "{{ url('attachmentHistoryData') }}",
+//             data: function(d) {
+//                 d.order_id = $("#order_id").val(); // Send `order_id` as a parameter
+//             },
+//             type: 'GET'
+//         },
+//         // Adjusted order column to account for the new serial number column
+//         columns: [
+//             {
+//                 data: null, // Serial number column
+//                 render: function(data, type, row, meta) {
+//                     return meta.row + 1; // Display row number (1-based index)
+//                 },
+//                 orderable: false // Disable sorting on this column
+//             },
+//             { data: 'file_name' },
+//             { data: 'user.username', defaultContent: '' },
+//             { data: 'action' },
+//             {
+//             data: 'updated_at',
               
-            }
-        ],
+//             }
+//         ],
        
-        dom: 't', // Only display the table body, no search box or entries dropdown
-        paging: false // Disable pagination if desired
-    });
-});
+//         dom: 't', // Only display the table body, no search box or entries dropdown
+//         paging: false // Disable pagination if desired
+//     });
+// });
 
 
 $(document).ready(function() {
@@ -2900,669 +3581,109 @@ function toggleContainerFields(container, enable) {
         });
     }
 
+    $(document).ready(function() {
+    var orderId = $("#order_id").val();  // Get the order ID dynamically
 
-    //tax
-    let lastSegment = "{{ $lastSegment }}";
-    let isTaxFormVisible = false;
-    let isOrderFormVisible = false;
-
-function updateHideCardVisibility() {
-    document.getElementById('hide_card').style.display = (isTaxFormVisible || isOrderFormVisible) ? 'block' : 'none';
-}
-
-if (lastSegment === 'tax') {
-        document.getElementById('showOrderForm').disabled = true;
-        document.getElementById('showOrderForm').classList.add('btn-inactive');
-
-    } else {
-        document.getElementById('showOrderForm').disabled = false;
-        document.getElementById('showOrderForm').classList.remove('btn-inactive');
-    }
-
-
-document.getElementById('showTaxForm').addEventListener('click', function() {
-    isTaxFormVisible = !isTaxFormVisible;
-    document.getElementById('taxForm').style.display = isTaxFormVisible ? 'block' : 'none';
-
-    this.classList.toggle('btn-active', isTaxFormVisible);
-    this.classList.toggle('btn-inactive', !isTaxFormVisible);
-
-    if (isOrderFormVisible) {
-        isOrderFormVisible = false;
-        document.getElementById('orderForm').style.display = 'none';
-        document.getElementById('showOrderForm').classList.remove('btn-active');
-        document.getElementById('showOrderForm').classList.add('btn-inactive');
-    }
-
-    updateHideCardVisibility();
-});
-
-document.getElementById('showOrderForm').addEventListener('click', function() {
-    isOrderFormVisible = !isOrderFormVisible;
-    document.getElementById('orderForm').style.display = isOrderFormVisible ? 'block' : 'none';
-
-    this.classList.toggle('btn-active', isOrderFormVisible);
-    this.classList.toggle('btn-inactive', !isOrderFormVisible);
-
-    if (isTaxFormVisible) {
-        isTaxFormVisible = false;
-        document.getElementById('taxForm').style.display = 'none';
-        document.getElementById('showTaxForm').classList.remove('btn-active');
-        document.getElementById('showTaxForm').classList.add('btn-inactive');
-    }
-
-    updateHideCardVisibility();
-});
-
-updateHideCardVisibility();
-
-
-    if (lastSegment === 'tax') {
-        document.getElementById('showTaxForm').click();
-    }else{
-        document.getElementById('showOrderForm').click();
-    }
-
-$(document).ready(function() {
-    $("#taxFormValues").on("submit", function(event) {
-        event.preventDefault(); 
-        var formData = $(this).serialize();
-
-        var clickedButton = $(event.originalEvent.submitter);
-
-        // Determine the value of submit_btn based on which button was clicked
-        var submitBtnValue = clickedButton.hasClass('save_btn') ? 0 : 1;
-
-
-        // Append additional data from the specified input fields
-        var taxStatus = $("#tax_status").val();
-        var getData = $("#get_data").val();
-        var searchInput = $("#search_input").val();
-        var parcelValue = $("#parcel").val(); // Get the value of the parcel hidden input
-
-        // Create an object to hold the serialized data and additional fields
-        var additionalData = {
-            tax_status: taxStatus,
-            get_data: getData,
-            search_input: searchInput,
-            parcel: parcelValue,
-            submit_btn: submitBtnValue // Include the parcel value
-        };
-
-        // Convert the additionalData object to a query string
-        var additionalDataString = $.param(additionalData);
-        
-        // Combine the original form data with the additional data
-        var combinedData = formData + '&' + additionalDataString;
-
-        $.ajax({
-            url: "{{ url('taxform_submit') }}",
-            type: "POST",
-            data: combinedData,
-            headers: {
-                'X-CSRF-TOKEN': $('input[name="_token"]').val()
+    // Initialize DataTable
+    $('#attachmentHistoryTable').DataTable({
+        ajax: {
+            url: "{{ url('attachments') }}",  // Modify the URL as per your server configuration
+            type: 'GET', 
+            data: function(d) {
+                d.order_id = orderId;  // Pass the order ID to the server
             },
-            success: function(response) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: response.message,
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                }).then((result) => {
-                    // if (result.value) {
-                    //     window.location.href = "{{ url('/orders_status') }}/tax";
-                    // }
-                     // Check if submit_btn is 1
-                     if (submitBtnValue == 1 && result.value) {
-                        window.location.href = "{{ url('/orders_status') }}/tax";
-                    }
-                });
-            },
-            error: function(error) {        
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Failed to send data. Please try again.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
+            dataSrc: function(json) {
+                return json.data;  // Ensure the server returns the correct data format
             }
-        });
-    });
-});
-
-
-
-$(document).ready(function () {
-    // Trigger file upload on file selection change
-    $("#attachment").on("change", function () {
-        uploadFiles();
-    });
-
-    function uploadFiles() {
-        let orderId = $("#order_id").val();
-        let fileList = $("#attachment")[0].files;
-        
-        if (fileList.length > 0) {
-            for (let i = 0; i < fileList.length; i++) {
-                let formData = new FormData();
-                formData.append('file', fileList[i]);
-                formData.append('order_id', orderId);
-
-                $.ajax({
-                    url: "{{ url('storeFile') }}",
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        console.log("File stored successfully:", response);
-                        // Refresh the file list after each successful upload
-                        displayFiles();
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("File upload failed:", error);
-                    }
-                });
-            }
-        }
-    }
-
-    function displayFiles() {
-        let orderId = $("#order_id").val();
-
-        $.ajax({
-            url: "{{ url('getFiles') }}",
-            type: 'GET',
-            data: { order_id: orderId },
-            success: function (data) {
-                let fileList = $('#fileList');
-                let attachmentsHeader = $('#attachmentsHeader');
-                fileList.empty(); // Clear previous file list
-
-                if (data.length > 0) {
-                    attachmentsHeader.show();
-                    data.forEach(file => {
-                        let fileType = file.name.split('.').pop().toLowerCase();
-                        let filePreview = '';
-
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
-                        } else if (fileType === 'pdf') {
-                            filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
-                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                            filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
-                        } else {
-                            filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
-                        }
-
-                        fileList.append(`<div class="m-2">${filePreview}</div>`);
-                    });
-
-                    $('.file-link').on('click', function (e) {
-                        e.preventDefault();
-                        let fileUrl = $(this).data('file-url');
-                        let fileType = fileUrl.split('.').pop().toLowerCase();
-
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                            Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
-                        } else if (fileType === 'pdf') {
-                            Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
-                        } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                            window.open(fileUrl, '_blank');
-                        } else {
-                            Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
-                        }
-                    });
-                } else {
-                    attachmentsHeader.hide(); // Hide header if no files are available
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
-            }
-        });
-    }
-
-
-//     function updateSaveButton() {
-//     let fileList = $('#fileList-cert');
-
-//     if (fileList.children().length > 0) {
-//         $('#generate_cert').text('Generate Certificate');
-//     } else {
-//         $('#generate_cert').text('Update Certificate');
-//     }
-// }
-function updateSaveButton() {
-    let fileList = $('#fileList-cert');
-
-    // Check if there are any children (i.e., files) in the file list
-    if (fileList.children().length > 0) {
-        $('#generate_cert').text('Update Certificate');
-    } else {
-        $('#generate_cert').text('Generate Certificate');
-    }
-}
- 
-    function displaycertFiles() {
-    let orderId = $("#order_id").val();
-
-    $.ajax({
-        url: "{{ url('getCertFiles') }}",
-        type: 'GET',
-        data: { order_id: orderId },
-        success: function (data) {
-            let fileList = $('#fileList-cert');
-            let attachmentsHeader = $('#attachmentsHeader');
-            fileList.empty(); // Clear previous file list
-
-            if (data.length > 0) {
-                attachmentsHeader.show();
-                data.forEach(file => {
-                    let fileType = file.name.split('.').pop().toLowerCase();
-                    let filePreview = '';
-
-                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                        filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
-                    } else if (fileType === 'pdf') {
-                        filePreview = `<p><a href="#" class="file-link" data-file-url="${file.path}">${file.name}</a></p>`;
-                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                        filePreview = `<p><a href="${file.path}" download="${file.name}">${file.name}</a></p>`;
-                    } else {
-                        filePreview = `<p>${file.name} <span class="badge bg-secondary">Unknown file type</span></p>`;
-                    }
-
-                    fileList.append(`<div class="m-2">${filePreview}</div>`);
-                });
-
-                $('.file-link').on('click', function (e) {
-                    e.preventDefault();
-                    let fileUrl = $(this).data('file-url');
-                    let fileType = fileUrl.split('.').pop().toLowerCase();
-
-                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-                        Swal.fire({ title: 'View Image', html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
-                    } else if (fileType === 'pdf') {
-                        Swal.fire({ title: 'View File', html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, showCloseButton: true, confirmButtonText: 'Close', width: '80%' });
-                    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
-                        window.open(fileUrl, '_blank');
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Unsupported File Type', text: 'This file type is not supported for viewing.', confirmButtonText: 'OK' });
-                    }
-                });
-            } else {
-                attachmentsHeader.hide(); // Hide header if no files are available
-            }
-
-            // Update button text
-            updateSaveButton();
         },
-        error: function (jqXHR, textStatus, errorThrown) {
-            Swal.fire({ icon: 'error', title: 'Oops...', text: 'An error occurred while retrieving the files.', confirmButtonText: 'OK' });
-        }
-    });
-}
-
-    // Initial call to load files if `order_id` is already set
-    displayFiles();
-    displaycertFiles();
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    const generateCertButton = document.getElementById('generate_cert');
-    const progressBar = document.getElementById('progress-bar');
-    const progressContainer = document.getElementById('progress-cont');
-
-    if (generateCertButton) {
-        generateCertButton.addEventListener('click', function () {
-            // Show the progress container
-            progressContainer.style.display = 'block';
-
-            // Initialize progress
-            let progress = 0;
-
-            // Simulate progress
-            const interval = setInterval(function () {
-                progress += 10;
-                progressBar.style.width = progress + '%';
-                progressBar.textContent = progress + '%';
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-
-                    // Hide the progress container after a brief delay
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-
-                        // Display SweetAlert2 message after a brief delay
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Generation Completed',
-                            text: 'The certificate has been successfully generated!',
-                            showConfirmButton: false,
-                            timer: 1500 // Auto-close after 1.5 seconds
-                        }).then(() => {
-                            // Reload the page after the alert closes
-                            window.location.reload();
-                        });
-                    }, 1000); // 1-second delay before showing the SweetAlert
+        columns: [
+            { 
+            data: null, // Use `null` to generate serial numbers
+            render: function (data, type, row, meta) {
+                return meta.row + 1; // Generate serial number based on the row index
+            },
+            searchable: false, // Disable search for this column
+            orderable: false // Disable ordering for this column
+        },
+            {
+                data: null,
+                render: function(data, type, row) {
+                    let fileLink = `<a href="#" class="view-file text-primary" data-path="${row.file_path}" style="color: blue;">${row.file_name}</a>`;
+                    
+                    let deleteButton = '';
+                    if (row.is_delete == 1) {
+                        deleteButton = ` <button class="btn btn-sm text-danger delete-file" data-id="${row.id}" title="Delete">
+                                            <i class="fas fa-times"></i>
+                                         </button>`;
+                    }
+                    return fileLink + deleteButton;
                 }
-            }, 300); // Update progress every 300ms
+            },
+            { data: 'user.username', defaultContent: '' },
+            { data: 'action' },
+            { data: 'updated_at' }
+        ]
+    });
+
+    $('#attachmentHistoryTable').on('click', '.view-file', function (e) {
+    
+         // Get the file URL and file type
+    let fileUrl = $(this).data('path'); // Ensure this is relative to storage/public
+    let fileType = fileUrl.split('.').pop().toLowerCase();
+
+    // Add base URL or fix relative path
+    if (!fileUrl.startsWith('http')) {
+        fileUrl = `${window.location.origin}/storage/${fileUrl}`; // Adjust to your setup
+    }
+
+    // Check if the file URL is valid
+    if (!fileUrl) {
+        Swal.fire({ 
+            icon: 'error', 
+            title: 'Invalid URL', 
+            text: 'The file URL is missing or invalid.', 
+            confirmButtonText: 'OK' 
         });
-    }
-});
-
-
-
-
-$(document).ready(function() {
-    updateSaveButton();
-    // Handle file selection and display clickable file names
-
-
-    // Bind click event to file name text for preview
-    $("#file-list").on("click", ".file-name", function() {
-        var fileName = $(this).data("filename"); // Get the clicked file name
-        var file = getFileByName(fileName);
-
-        if (file) {
-            showFilePreview(file);  // Show the preview in modal if the file exists
-            $("#file-modal").show(); // Display modal
-            $(".sticky-container, .topbar, .modelopenhide").hide(); // Hide other elements
-        }
-    });
-
-    // Close modal without form submission
-    $("#close-modal").on("click", function(event) {
-        event.preventDefault();
-        $("#file-modal").hide();  // Hide modal
-        $(".sticky-container, .topbar, .modelopenhide").show(); // Restore hidden elements
-    });
-
-    // Helper function to retrieve file by name
-    function getFileByName(fileName) {
-        var fileList = $("#attachment")[0].files;
-        for (var i = 0; i < fileList.length; i++) {
-            if (fileList[i].name === fileName) {
-                return fileList[i];
-            }
-        }
-        return null;
+        return;
     }
 
-    // Display file preview in modal
-    function showFilePreview(file) {
-        var reader = new FileReader();
+    console.log('File URL:', fileUrl); // Debugging log
 
-        reader.onload = function(e) {
-            var filePreviewContainer = $("#file-preview-container");
-
-            if (file.type.startsWith("image/")) {
-                filePreviewContainer.html(`<img src="${e.target.result}" style="max-width: 100%; height: auto;" />`);
-            } else if (file.type === "application/pdf") {
-                filePreviewContainer.html(`<embed src="${e.target.result}" width="100%" height="400px" />`);
-            } else {
-                filePreviewContainer.html(`<pre>${e.target.result}</pre>`);
-            }
-        };
-
-        reader.readAsDataURL(file);
-    }
-});
-
-$(document).ready(function() {
-    $("#phone_num").on("input", function() {
-        var input = $(this).val();
-        input = input.replace(/[^0-9x]/g, '');
-
-        if (input.length <= 10) {
-            input = input.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
-        } else {
-            input = input.replace(/(\d{3})(\d{3})(\d{4})(\d+)/, "($1) $2-$3 x$4");
-        }
-        $(this).val(input);
-    });
-});
-
-    window.addEventListener('DOMContentLoaded', function() {
-    var taxStatusValue = document.getElementById('tax_status').value;
-    var fetchButton = document.getElementById('fetchButton');
-    var saveButton = document.getElementById('SaveButton');
-
-    // Check the initial value of tax_status and display the correct button
-    if (taxStatusValue === '') {
-        fetchButton.style.display = 'none';
-        saveButton.style.display = 'none';
-    } else if (taxStatusValue === 'online') {
-        fetchButton.style.display = 'inline-block';
-        saveButton.style.display = 'none';
-    } else if (taxStatusValue === 'offline') {
-        fetchButton.style.display = 'none';
-        saveButton.style.display = 'inline-block';
-    }
-});
-
-
-    document.getElementById('tax_status').addEventListener('change', function() {
-        var fetchButton = document.getElementById('fetchButton');
-    var SaveButton = document.getElementById('SaveButton');
-    
-    // Show Fetch button for 'online', Save button for 'offline'
-        fetchButton.style.display = this.value === 'online' ? 'inline-block' : 'none';
-    SaveButton.style.display = this.value === 'offline' ? 'inline-block' : 'none';
-});
-
-      function validateDecimalInput(event) {
-        const value = event.target.value;
-        // Allow only numbers with optional decimal points and two decimal places
-        if (!/^\d*\.?\d{0,2}$/.test(value)) {
-            event.target.value = value.slice(0, -1); // Remove last character if invalid
-        }
-    }
-
-    // Attach event listeners to each input field
-    const decimalFields = [
-        'land', 'improvement', 'exemption_mortgage', 'exemption_homeowner',
-        'exemption_homestead', 'exemption_additional', 'others', 'total_annual_tax',
-        'net_value','first_amount_id','second_amount_id','third_amount_id','fourth_amount_id'
-    ];
-
-    decimalFields.forEach(id => {
-        document.getElementById(id).addEventListener('input', validateDecimalInput);
-    });
-
-//s
-function toggleReadonly(radioButton, partiallyPaidInputId) {
-    const partiallyPaidInput = document.getElementById(partiallyPaidInputId);
-    
-    // Check if Paid, Due, or Delinquent is selected
-    const isPaidDueDelinquent = 
-        ['paid', 'due', 'delinquent'].includes(radioButton.value);
-    
-    // If Partially Paid is checked, make input editable
-    if (radioButton.value === 'partially_paid') {
-        partiallyPaidInput.removeAttribute('readonly');
-        partiallyPaidInput.focus(); // Optional: automatically focus the input
-    } 
-    // If Paid, Due, or Delinquent is selected, make Partially Paid input readonly and clear its value
-    else if (isPaidDueDelinquent) {
-        partiallyPaidInput.setAttribute('readonly', 'readonly');
-        partiallyPaidInput.value = ''; // Clear the input value
-    }
-}
-
-// Add event listeners to all radio button groups
-document.addEventListener('DOMContentLoaded', function() {
-    const installments = ['first', 'second', 'third', 'fourth'];
-    
-    installments.forEach(installment => {
-        const partiallyPaidRadio = document.getElementById(`${installment}_partially_paid_id`);
-        const partiallyPaidInput = document.getElementById(`${installment}_partially_paid_amount`);
-        
-        // Initial state handling
-        if (partiallyPaidRadio && partiallyPaidInput) {
-            // Determine the correct name for radio buttons
-            const radioName = installment === 'first' ? 'payment_status' : `${installment}_payment_status`;
-            
-            // Check if Partially Paid is initially selected
-            if (partiallyPaidRadio.checked) {
-                partiallyPaidInput.removeAttribute('readonly');
-            } else {
-                partiallyPaidInput.setAttribute('readonly', 'readonly');
-                partiallyPaidInput.value = ''; // Clear the input
-            }
-            
-            // Add change event listeners to all radio buttons in the group
-            const radioGroup = document.getElementsByName(radioName);
-            radioGroup.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    toggleReadonly(this, `${installment}_partially_paid_amount`);
-                });
-            });
-        }
-    });
-});
-
-//e
-
-
-$(function() {
-    $('#SaveButton').on('click', function(e) {
-        e.preventDefault();
-
-        // Collect data from form
-        const taxStatus = $('#tax_status').val();
-        const getData = $('#get_data').val();
-        const searchInput = $('#search_input').val();
-        const orderId = $("#order_id").val();
-
-        // Validate that all fields are filled
-        if (taxStatus && getData && searchInput) {
-            // AJAX request
-            $.ajax({
-                url: '{{ url("moveToTaxStatus") }}',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    orderId: orderId,
-                    tax_status: taxStatus,
-                    get_data: getData,
-                    search_input: searchInput,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    // Display success message with Swal
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: 'Tax Form Moved To Tax Status',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        // Reload the page after closing the success alert
-                        window.location.reload();
-                    });
-                },
-                error: function(xhr, status, error) {
-                    // Display error message with Swal
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: ' Please try again.',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            });
-        } else {
-            // Display warning if fields are missing
-            Swal.fire({
-                icon: 'warning',
-                title: 'Incomplete Data',
-                text: 'Please fill in all fields before saving.',
-                confirmButtonText: 'OK'
-            });
-        }
-    });
-
-    $('#fetchButton').on('click', function (e) {
-    e.preventDefault();
-
-    // Collect data from form
-    const taxStatus = $('#tax_status').val();
-    const getData = $('#get_data').val();
-    const searchInput = $('#search_input').val();
-    const orderId = $('#order_id').val();
-    const loader = $('#mobileToggle'); // Ensure this ID matches the loader element
-
-    // Check if all fields are filled
-    if (taxStatus && getData && searchInput) {
-        loader.show(); // Show the loader before making the AJAX call
-
-        $.ajax({
-            url: '{{ url("submitFtcOrder") }}',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                orderId: orderId,
-                type: getData,
-                tax_status: taxStatus,
-                search_value: searchInput,
-                _token: '{{ csrf_token() }}',
-            },
-            success: function (response) {
-                // Hide the loader on success
-                loader.hide();
-                if(response[0].ftc_status == "Completed!!!Not supported currently!!!"){
-                    Swal.fire({
-                                            icon: 'info',
-                                            text: 'Not supported currently!',
-                                            confirmButtonText: 'OK',
-                                        });
-                } else if(response[0].ftc_status == "Success"){
-                    // Display success message with Swal
-                    Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: 'Order successfully fetched.',
-                                confirmButtonText: 'OK',
-                            }).then(() => {
-                                // Reload the page after closing the success alert
-                                // window.location.reload(); 
-                            window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}/tax';
-                            });
-                }
-            },
-            error: function (xhr, status, error) {
-                // Hide the loader on error
-                loader.hide();
-
-                // Display error message with Swal
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Loading data. Please fetch again.',
-                    confirmButtonText: 'OK',
-                });
-            },
+    // View file based on type
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+        Swal.fire({ 
+            title: 'View Image', 
+            html: `<img src="${fileUrl}" style="width:100%; height:auto;" />`, 
+            showCloseButton: true, 
+            confirmButtonText: 'Close', 
+            width: '80%' 
         });
+    } else if (fileType === 'pdf') {
+        Swal.fire({ 
+            title: 'View File', 
+            html: `<iframe src="${fileUrl}" style="width:100%; height:500px;" frameborder="0"></iframe>`, 
+            showCloseButton: true, 
+            confirmButtonText: 'Close', 
+            width: '80%' 
+        });
+    } else if (['doc', 'docx', 'xls', 'xlsx', 'eml'].includes(fileType)) {
+        window.open(fileUrl, '_blank');
     } else {
-        // Display warning if fields are missing
-        Swal.fire({
-            icon: 'warning',
-            title: 'Incomplete Data',
-            text: 'Please fill in all fields before saving.',
-            confirmButtonText: 'OK',
+        Swal.fire({ 
+            icon: 'error', 
+            title: 'Unsupported File Type', 
+            text: 'This file type is not supported for viewing.', 
+            confirmButtonText: 'OK' 
         });
     }
 });
-});
 
-function viewjson() {
-    var modal = document.getElementById('json_modal');
-    $(modal).modal('show');
-}
+
+
+
+
+
+});
 
 </script>
 @endsection
