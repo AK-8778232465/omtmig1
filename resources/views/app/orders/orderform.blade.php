@@ -1866,11 +1866,9 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    @if(isset($gettaxesDetails) && $gettaxesDetails->submit_btn == 1)
                                                         <div class="d-flex justify-content-center my-4">
                                                             <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
                                                         </div>
-                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
