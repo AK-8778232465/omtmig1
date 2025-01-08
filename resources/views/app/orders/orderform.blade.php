@@ -855,7 +855,7 @@
             <!-- //s// -->
             @if(in_array($orderData->stl_process_id, [7]))
             <div class="container-fluid">
-                <div class="card shadow shadow-md rounded showdow-grey p-4">
+                <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey p-4">
                     <div class="row justify-content-start mb-0" style="margin-left: 1px;" id="statusButtons">
                         <div class="bg-info p-0 text-white" style="text-decoration: none; font-size:0.4rem;">
                             <button type="button" class="btn btn-inactive" id="showOrderForm" style="padding: 5px 25px; font-size: 0.9rem;">
@@ -1747,12 +1747,10 @@
                                     <textarea class="form-control" id="exampleFormControlTextarea1" name="exampleFormControlTextarea1" rows="3"
                                     placeholder="Enter Notes">{{ $getjsonDetails[0]['exampleFormControlTextarea1'] ?? '' }}</textarea>
                                 </div>
-                                @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 0)
                                 <div class="row" style="margin-top:20px;">
                                     <div class="col-md-12 text-center modelopenhide">
                                     <button type="submit" class="btn btn-primary submit_btn" style="width: 100px;">SUBMIT</button>
                                 </div>
-                                @endif
                         </div>
                             <!-- /s history -->
                             <div class="card-body mt-3 d-flex justify-content-between">
@@ -1822,14 +1820,12 @@
                              <!-- /e history -->
                         </form>
                     </div>
-                </div>
-
                     <!-- Order Submission Form - Hidden by Default -->
                     <div id="orderForm" class="p-3" style="display:none;">
                         <!-- <h6 class="font-weight-bold">Order Submission :</h6> -->
-                            <h6 class=" font-weight-bold">Order Submission :</h6>
-                            <div class="card shadow shadow-md rounded showdow-grey mb-4">
-                                <div class="card-body">
+                            <h6 class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> font-weight-bold">Order Submission :</h6>
+                            <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card shadow shadow-md rounded showdow-grey mb-4">
+                                <div class="read_value <?php echo (is_null($readValue) && $orderData->status_id == 1) ? 'd-none' : ''; ?> card-body">
                                     <div class="row mt-4 mb-4">
                                         <div class="col-lg-4 ">
                                             <div class="font-weight-bold">Comments :</div>
@@ -1867,11 +1863,9 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    @if(is_null($getTaxBucket[0]->tax_bucket))
-                                                        <div class="d-flex justify-content-center my-4">
-                                                            <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
-                                                        </div>
-                                                    @endif
+                                                    <div class="d-flex justify-content-center my-4">
+                                                        <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -2766,7 +2760,7 @@ $(function() {
                                 confirmButtonText: 'OK',
                             }).then(() => {
                                 // Reload the page after closing the success alert
-                            // window.location.reload(); 
+                                // window.location.reload(); 
                             window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}/tax';
                             });
                 }
