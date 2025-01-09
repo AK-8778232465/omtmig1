@@ -2767,7 +2767,7 @@ $(function() {
                             }).then(() => {
                                 // Reload the page after closing the success alert
                             // window.location.reload(); 
-                            window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}/tax';
+                            window.location.href = '{{ url('orderform/') }}/{{ $orderData->id }}';
                             });
                 }
             },
