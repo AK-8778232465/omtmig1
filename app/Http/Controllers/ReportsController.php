@@ -1204,8 +1204,8 @@ public function orderInflow_data(Request $request)
     $user = Auth::user();
     $processIds = $this->getProcessIdsBasedOnUserRole($user);
 
-    $currentDate = Carbon::now();
-    $firstDateOfCurrentMonth = Carbon::now()->startOfMonth();
+    $currentDate = \Carbon\Carbon::now()->setTime(0, 0, 0);
+    $firstDateOfCurrentMonth = \Carbon\Carbon::now()->startOfMonth()->setHour(12)->setMinute(0)->setSecond(0);
 
     $selectedDateFilter = $request->input('selectedDateFilter');
 
@@ -1235,6 +1235,7 @@ public function orderInflow_data(Request $request)
         }
     }
 
+    $to_date = \Carbon\Carbon::parse($to_date)->endOfDay();
 
     $statusCountsQuery = OrderCreation::query()->with('process', 'client')
         ->whereHas('process', function ($query) {
@@ -1245,115 +1246,109 @@ public function orderInflow_data(Request $request)
 
         });
 
-        $statusCountsQuery2 = clone $statusCountsQuery;
-        $statusCountsQuery3 = clone $statusCountsQuery;
-    $statusCountsQuery4 = clone $statusCountsQuery;
-    $statusCountsQuery5 = clone $statusCountsQuery;
-
-
     // Carry forward count for all clients
-    $carry_forward = $statusCountsQuery->whereIn('process_id', $processIds)
+    $carry_forward = OrderCreation::whereIn('process_id', $processIds)
         ->where('is_active', 1)
         ->where('status_id', '!=', 3)
+        ->where('status_id', '!=', 5)  // Exclude completed
         ->whereDate('order_date', '<', $from_date)
+        ->get()
         ->groupBy('client_id')
-        ->selectRaw('client_id, count(*) as carry_forward')
-        ->get();
-
+        ->map(function ($orders) {
+            return $orders->count();
+        });
 
 
 
 
     // Received count for all clients
-    $received = $statusCountsQuery2->whereIn('process_id', $processIds)
+    $received = OrderCreation::whereIn('process_id', $processIds)
         ->where('is_active', 1)
         ->whereBetween('order_date', [$from_date, $to_date])
+        ->get()
         ->groupBy('client_id')
-        ->selectRaw('client_id, count(*) as received')
-        ->get();
-
+        ->map(function ($orders) {
+            return $orders->count();
+        });
 
 
     // Completed count for all clients
-    $completed = $statusCountsQuery3->whereIn('process_id', $processIds)
+    $completed = OrderCreation::whereIn('process_id', $processIds)
         ->where('status_id', 5)
         ->where('is_active', 1)
         ->whereDate('completion_date', '>=', $from_date)
         ->whereDate('completion_date', '<=', $to_date)
+        ->get()
         ->groupBy('client_id')
-        ->selectRaw('client_id, count(*) as completed')
-        ->get();
+        ->map(function ($orders) {
+            return $orders->count();
+        });
 
     // Pending count for all clients
-    $cancelled = $statusCountsQuery4->whereIn('process_id', $processIds)
+    $cancelled = OrderCreation::whereIn('process_id', $processIds)
         ->where('is_active', 1)
         ->where('status_id', 3)  // Status for cancelled orders
         ->whereBetween('order_date', [$from_date, $to_date])
+        ->get()
         ->groupBy('client_id')
-        ->selectRaw('client_id, count(*) as cancelled')
-        ->get();
+        ->map(function ($orders) {
+            return $orders->count();
+        });
 
     // Partially Cancelled count for all clients (Excludes from pending)
-    $partially_cancelled = $statusCountsQuery5->whereIn('process_id', $processIds)
+    $partially_cancelled = OrderCreation::whereIn('process_id', $processIds)
         ->where('is_active', 1)
         ->where('status_id', 20)  // Status for partially cancelled orders
         ->whereBetween('order_date', [$from_date, $to_date])
+        ->get()
         ->groupBy('client_id')
-        ->selectRaw('client_id, count(*) as partially_cancelled')
-        ->get();
+        ->map(function ($orders) {
+            return $orders->count();
+        });
+
+    // Prepare the response data
+    $response = [];
+
+    // Collect all client ids from the queries
+    $clientIds = collect(array_merge($carry_forward->keys()->toArray(), $received->keys()->toArray(), $completed->keys()->toArray(), $cancelled->keys()->toArray(), $partially_cancelled->keys()->toArray()))->unique();
+
+    // Get client details (client_name)
+    $clientNames = \DB::table('stl_client')->whereIn('id', $clientIds)->pluck('client_name', 'id');
 
     // Pending count for all clients (Modified to exclude cancelled and partially cancelled orders from pending calculation)
-    $pendingData = $carry_forward->keyBy('client_id')->map(function ($item) use ($received, $completed, $cancelled, $partially_cancelled) {
-        $receivedCount = $received->firstWhere('client_id', $item->client_id);
-        $completedCount = $completed->firstWhere('client_id', $item->client_id);
-        $cancelledCount = $cancelled->firstWhere('client_id', $item->client_id);
-        $partiallyCancelledCount = $partially_cancelled->firstWhere('client_id', $item->client_id);
+    $totalRecords = $clientIds->count();
 
-        $receivedCount = $receivedCount ? $receivedCount->received : 0;
-        $completedCount = $completedCount ? $completedCount->completed : 0;
-        $cancelledCount = $cancelledCount ? $cancelledCount->cancelled : 0;
-        $partiallyCancelledCount = $partiallyCancelledCount ? $partiallyCancelledCount->partially_cancelled : 0;
+    // Pagination: take only the required records for the current page
+    $start = $request->input('start', 0); // Starting record
+    $length = $request->input('length', 10); // Number of records per page
+
+    $clientIds = $clientIds->slice($start, $length);
+
+    foreach ($clientIds as $clientId) {
+        $carryForwardCount = $carry_forward->get($clientId, 0);
+        $receivedCount = $received->get($clientId, 0);
+        $completedCount = $completed->get($clientId, 0);
+        $cancelledCount = $cancelled->get($clientId, 0);
+        $partiallyCancelledCount = $partially_cancelled->get($clientId, 0);
 
         // Pending count should exclude cancelled and partially cancelled orders
-        $pending = $item->carry_forward + $receivedCount - $completedCount - $cancelledCount - $partiallyCancelledCount;
+        $pendingCount = $carryForwardCount + $receivedCount - $completedCount - $cancelledCount - $partiallyCancelledCount;
 
-        return [
-            'carry_forward' => $item->carry_forward,
+        $response[] = [
+            'client_name' => $clientNames[$clientId] ?? 'N/A',  // Use client_name instead of client_id
+            'carry_forward' => $carryForwardCount,
             'received' => $receivedCount,
             'completed' => $completedCount,
-            'pending' => max($pending, 0),  // Only count carry forward, received, and completed for pending
             'cancelled' => $cancelledCount,  // Include cancelled count separately
             'partially_cancelled' => $partiallyCancelledCount,  // Include partially cancelled count separately
+            'pending' => $pendingCount,
         ];
-    });
-
-    // Retrieve client names
-    $clientNames = Client::whereIn('id', $carry_forward->pluck('client_id'))->pluck('client_name', 'id');
-
-    // Prepare the final response data
-    $data = $pendingData->map(function ($counts, $clientId) use ($clientNames) {
-        if (!isset($clientNames[$clientId])) {
-            return null; // Skip the entry if clientId is not found
         }
 
-        return [
-            'client_name' => $clientNames[$clientId],
-            'carry_forward' => $counts['carry_forward'] ?? 0,
-            'received' => $counts['received'] ?? 0,
-            'completed' => $counts['completed'] ?? 0,
-            'pending' => $counts['pending'] ?? 0,
-            'cancelled' => $counts['cancelled'] ?? 0,
-            'partially_cancelled' => $counts['partially_cancelled'] ?? 0,
-        ];
-    })->filter(function ($item, $key) {
-        return !is_null($item) && $key !== '';
-    });
-    
-    $totalRecords = $pendingData->count();
     return response()->json([
         'recordsTotal' => $totalRecords,
         'recordsFiltered' => $totalRecords,
-        'data' => $data
+        'data' => $response
     ]);
 }
 
