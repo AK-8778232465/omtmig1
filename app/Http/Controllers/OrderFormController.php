@@ -676,6 +676,8 @@ class OrderFormController extends Controller
                     $input_json = 'Json Not Available';
                 }
 
+                // return response()->json($orderData);
+
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions',
                                                         'stateList','primarySource','instructionId','clientIdList','userinput','orderstatusInfo',
@@ -1564,7 +1566,6 @@ private function findOrder($orderId, $statusId, $userId = null)
 
             public function submitFtcOrder(Request $request)
             {
-
                 $type = $request->type;
                 $orderId = $request->orderId;
                 $search_value = $request->search_value;
@@ -1573,7 +1574,7 @@ private function findOrder($orderId, $statusId, $userId = null)
 
                     $jsondata = json_encode([
                         'tax_status' => $request->tax_status,
-                        'type' => $request->type,
+                        'get_data' => $request->type,
                         'search_input' => $request->search_value,
                     ]);
         
@@ -1584,7 +1585,6 @@ private function findOrder($orderId, $statusId, $userId = null)
                             // 'tax_bucket' => 1,
                             'api_data' => $request->search_value
                         ]);
-        
                 }
             
                 // Retrieve order data from the database
@@ -1715,7 +1715,29 @@ return response()->json(['data' => $data]);
 
      return response()->json(['success' => true, 'message' => 'File deleted successfully.']);
  }
-            
+
+ 
+ public function updateCounty(Request $request)
+ {
+     $request->validate([
+         'getclient' => 'required|integer',
+         'county_id' => 'required|integer',
+         'order_id' => 'required_if:getclient,82|integer',
+     ]);
+ 
+     if ($request->getclient == 82) {
+         $updated = DB::table('oms_order_creations')
+             ->where('id', $request->order_id)
+             ->update(['county_id' => $request->county_id]);
+ 
+         return response()->json([
+             'message' => $updated ? 'County updated successfully.' : 'Order not found or no changes made.'
+         ], $updated ? 200 : 404);
+     }
+ 
+     return response()->json(['message' => 'Invalid client ID.'], 400);
+ }
+ 
 
 
             

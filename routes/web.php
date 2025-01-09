@@ -162,6 +162,8 @@ Route::middleware('auth:web')->controller(OrderFormController::class)->group(fun
     Route::any('submitFtcOrder', 'submitFtcOrder')->name('submitFtcOrder');
     Route::get('fetchFtcOrder/{id?}', 'fetchFtcOrder')->name('fetchFtcOrder');
 
+    Route::any('updateCounty', 'updateCounty')->name('updateCounty');//?? 
+
 });
 Route::get('/attachments', [OrderFormController::class, 'getAttachmentHistory'])->name('get.attachment.history');
 Route::post('/attachments/delete', [OrderFormController::class, 'deleteAttachment'])->name('delete.attachment');
@@ -189,7 +191,6 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,VP,Business Head,SPOC,Ad
     Route::any('/getproduct', 'getproduct')->name('getproduct');//??
 
     Route::post('getCities', 'getCities')->name('getCities');
-
 
 });
 

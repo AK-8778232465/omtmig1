@@ -900,10 +900,10 @@
                                     <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
                                     <select class="form-control" name="get_data" id="get_data" disabled>
                                         <option value="">Select Source</option>
-                                        <option value="1" {{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '1' ? 'selected' : '' }}>APN</option>
+                                        <option value="1" {{ isset($inpuTaxJson['get_data']) && $inpuTaxJson['get_data'] == '1' ? 'selected' : '' }}>APN</option>
                                         <?php if ((isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' 
                                                     && isset($getTaxJson['Status']) && $getTaxJson['Status'] == 'Automated')): ?>
-                                            <option value="0" {{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '0' ? 'selected' : '' }}>Address</option>
+                                            <option value="0" {{ isset($inpuTaxJson['get_data']) && $inpuTaxJson['get_data'] == '0' ? 'selected' : '' }}>Address</option>
                                         <?php endif; ?>
                                     </select>
                                 </div>
@@ -928,14 +928,14 @@
                                 <label for="get_data" class="mr-2 font-weight-bold">Select:</label>
                                 <select class="form-control" name="get_data" id="get_data" >
                                     <option value="">Select Source</option>
-                                    <option value="1" {{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '1' ? 'selected' : '' }}>APN</option>
+                                    <option value="1" {{ isset($inpuTaxJson['get_data']) && $inpuTaxJson['get_data'] == '1' ? 'selected' : '' }}>APN</option>
                                     <?php if ((isset($getTaxJson['addressSearch']) && $getTaxJson['addressSearch'] == 'Yes' 
                                                     && isset($getTaxJson['Status']) && $getTaxJson['Status'] == 'Automated')): ?>
-                                            <option value="0" {{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '0' ? 'selected' : '' }}>Address</option>
+                                            <option value="0" {{ isset($inpuTaxJson['get_data']) && $inpuTaxJson['get_data'] == '0' ? 'selected' : '' }}>Address</option>
                                         <?php endif; ?>                                </select>
                             </div>
                             <div class="col-4 d-flex align-items-center">
-                           <input class="form-control" id="search_input" name="search_input" type="text"  placeholder="{{ isset($inpuTaxJson['type']) && $inpuTaxJson['type'] == '2' ? 'Enter Street Address' : 'Enter APN' }}" value="{{$getApi->api_data ?? '' }}">
+                           <input class="form-control" id="search_input" name="search_input" type="text"  placeholder="{{ isset($inpuTaxJson['get_data']) && $inpuTaxJson['get_data'] == '2' ? 'Enter Street Address' : 'Enter APN' }}" value="{{$getApi->api_data ?? '' }}">
                             </div>
                             <div class="col-md-1 align-items-center" style="margin-top: 1.2rem;">
                                 <input type="hidden" id="order_id" value="{{ $orderData->id ?? '' }}">
@@ -1748,10 +1748,11 @@
                                     placeholder="Enter Notes">{{ $getjsonDetails[0]['exampleFormControlTextarea1'] ?? '' }}</textarea>
                                 </div>
                                 <div class="row" style="margin-top:20px;">
-                                @if(isset($gettaxesDetails) && $gettaxesDetails->submit_btn == 0)
-                                    <div class="col-md-12 text-center modelopenhide">
-                                        <button type="submit" class="btn btn-primary submit_btn" style="width: 100px;">SUBMIT</button>
-                                    </div>
+                                @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 1)
+                                @else
+                                <div class="col-md-12 text-center modelopenhide">
+                                    <button type="submit" class="btn btn-primary submit_btn" style="width: 100px;">SUBMIT</button>
+                                </div>
                                 @endif
                         </div>
                             <!-- /s history -->
@@ -1866,9 +1867,11 @@
                                                             </select>
                                                         </div>
                                                     </div>
+                                                    @if(isset($gettaxesDetails) && $gettaxesDetails->submit_btn == 1)
                                                         <div class="d-flex justify-content-center my-4">
                                                             <button class="btn btn-primary btn-sm mx-2" id="ordersubmit" onclick="order_submition({{$orderData->id}},1)" type="submit">Submit</button>
                                                         </div>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -3065,35 +3068,110 @@ function order_submition(orderId, type) {
 }
 
 
+    // $('#property_state').on('change', function () {
+    //     var state_id = $("#property_state").val();
+    //     $("#property_county").html('');
+    //     $.ajax({
+    //         url: "{{url('getCounty')}}",
+    //         type: "POST",
+    //         data: {
+    //             state_id: state_id,
+    //             _token: '{{csrf_token()}}'
+    //         },
+    //         dataType: 'json',
+    //         success: function (result) {
+    //             $('#property_county').html('<option value="">Select County</option>');
+    //             $.each(result.county, function (key, value) {
+    //                 $("#property_county").append('<option value="' + value
+    //                     .id + '">' + value.county_name + '</option>');
+    //             });
+    //         }
+    //     });
+    //     $('#primary_source').removeClass('required-field');
+    //     changeState = true;
+    //     $('#ordersubmit').click();
+    // });
+
     $('#property_state').on('change', function () {
-        var state_id = $("#property_state").val();
-        $("#property_county").html('');
-        $.ajax({
-            url: "{{url('getCounty')}}",
-            type: "POST",
-            data: {
-                state_id: state_id,
-                _token: '{{csrf_token()}}'
-            },
-            dataType: 'json',
-            success: function (result) {
-                $('#property_county').html('<option value="">Select County</option>');
-                $.each(result.county, function (key, value) {
-                    $("#property_county").append('<option value="' + value
-                        .id + '">' + value.county_name + '</option>');
-                });
-            }
-        });
-        $('#primary_source').removeClass('required-field');
-        changeState = true;
-        $('#ordersubmit').click();
+    var state_id = $("#property_state").val();
+    var getID = {{ $orderData->client_id ?? 'null' }};
+    var order_id = null;
+    var getclient = null;
+    if (getID == 82) {
+        order_id = $("#order_id").val();
+        getclient = getID;
+    }
+
+    $("#property_county").html('');
+
+    // AJAX request
+    $.ajax({
+        url: "{{ url('getCounty') }}",
+        type: "POST",
+        data: {
+            state_id: state_id,
+            order_id: order_id,
+            getclient: getclient,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (result) {
+            $('#property_county').html('<option value="">Select County</option>');
+            $.each(result.county, function (key, value) {
+                $("#property_county").append('<option value="' + value.id + '">' + value.county_name + '</option>');
+            });
+            location.reload();
+        }
     });
 
+    $('#primary_source').removeClass('required-field');
+    changeState = true;
+    if (getID != 82) {
+    $('#ordersubmit').click();
+    }
+});
+
+
+    // $('#property_county').on('change', function () {
+    //     $('#primary_source').removeClass('required-field');
+    //     changeCounty = true;
+    //     $('#ordersubmit').click();
+    // });
+
     $('#property_county').on('change', function () {
-        $('#primary_source').removeClass('required-field');
-        changeCounty = true;
-        $('#ordersubmit').click();
+    var county_id = $("#property_county").val();
+    var getID = {{ $orderData->client_id ?? 'null' }};
+    var order_id = null;
+    var getclient = null;
+    if (getID == 82) {
+        order_id = $("#order_id").val();
+        getclient = getID;
+    }
+    $.ajax({
+        url: "{{ url('updateCounty') }}",
+        type: "POST",
+        data: {
+            county_id: county_id,
+            order_id: order_id,
+            getclient: getclient,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            $('#primary_source').removeClass('required-field');
+            changeCounty = true;
+
+            if (getID != 82) {
+                $('#ordersubmit').click();
+            }
+            location.reload();
+        },
+        error: function (xhr, status, error) {
+            console.error("AJAX Error:", error);
+        }
     });
+});
+
 
     $(document).ready(function() {
         function updateSubmitButtonVisibility() {

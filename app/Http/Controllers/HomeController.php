@@ -99,7 +99,14 @@ class HomeController extends Controller
     public function getCounty(Request $request)
     {
         $getCounty['county'] = County::select('id', 'stateId', 'county_name')->where('stateId', $request->state_id)->get();
-
+        if ($request->getclient == 82) {
+            $orderID = $request->order_id; 
+            DB::table('oms_order_creations')
+                ->where('id', $orderID)
+                ->update([
+                    'state_id' => $request->state_id, 
+                ]);
+        }
         return response()->json($getCounty);
     }
 
