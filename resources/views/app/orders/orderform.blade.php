@@ -1748,11 +1748,11 @@
                                     placeholder="Enter Notes">{{ $getjsonDetails[0]['exampleFormControlTextarea1'] ?? '' }}</textarea>
                                 </div>
                                 <div class="row" style="margin-top:20px;">
-                                @if(isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 1)
+                                @if((isset($getjsonDetails[0]['order_id']) && $getjsonDetails[0]['order_id'] != null && isset($gettaxesDetails->submit_btn) && $gettaxesDetails->submit_btn == 1) && !Auth::user()->hasRole('Tax User'))
                                 @else
-                                <div class="col-md-12 text-center modelopenhide">
-                                    <button type="submit" class="btn btn-primary submit_btn" style="width: 100px;">SUBMIT</button>
-                                </div>
+                                    <div class="col-md-12 text-center modelopenhide">
+                                        <button type="submit" class="btn btn-primary submit_btn" style="width: 100px;">SUBMIT</button>
+                                    </div>
                                 @endif
                         </div>
                             <!-- /s history -->

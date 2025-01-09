@@ -196,11 +196,27 @@ class OrderController extends Controller
             ->count();
 
             if(in_array($user->user_type_id, [25])){
-                $tax_bucket_count = OrderCreation::with('process', 'client')
-                    ->where('tax_user_id', $user->id)
-                    ->orWhere('tax_bucket', 1)
-                    ->where('is_active', 1)
-                    // ->whereIn('process_id', $processIds)
+                // $tax_bucket_count = OrderCreation::with('process', 'client')
+                //     ->where('tax_user_id', $user->id)
+                //     ->orWhere('tax_bucket', 1)
+                //     ->where('is_active', 1)
+                //     // ->whereIn('process_id', $processIds)
+                //     ->whereHas('process', function ($query) {
+                //         $query->where('stl_item_description.is_approved', 1);
+                //     })
+                //     ->whereHas('client', function ($query) {
+                //         $query->where('stl_client.is_approved', 1);
+                //     })
+                //     ->count();
+
+                $tax_bucket_count = OrderCreation::with(['process', 'client'])
+                    ->where(function ($query) use ($user) {
+                        $query->where('tax_user_id', $user->id)
+                            ->orWhereNull('tax_user_id');
+                    })
+                    ->whereHas('process', function ($query) {
+                        $query->where('tax_bucket', 1);
+                    })
                     ->whereHas('process', function ($query) {
                         $query->where('stl_item_description.is_approved', 1);
                     })
@@ -208,6 +224,7 @@ class OrderController extends Controller
                         $query->where('stl_client.is_approved', 1);
                     })
                     ->count();
+
             } else {
                 $tax_bucket_count = OrderCreation::with('process', 'client')
                     ->where('tax_bucket', 1)
@@ -1575,16 +1592,20 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             $query->where('oms_order_creations.status_id', '!=', 1);
         }
     }
-    $query->whereIn('oms_order_creations.process_id', $processIds);
     
         if ($request->status == 'tax'){
-            if(in_array($user->user_type_id, [25])){
-            $query->where('oms_order_creations.tax_user_id', $user->id)
-                ->orWhere('oms_order_creations.tax_bucket', 1);
+            if (in_array($user->user_type_id, [25])) {
+                $query->where(function($query) use ($user) {
+                    $query->where('oms_order_creations.tax_user_id', $user->id)
+                          ->orWhereNull('oms_order_creations.tax_user_id');
+                })->where('oms_order_creations.tax_bucket', 1);
             }else{
-                $query->where('oms_order_creations.tax_bucket', 1);
+                 $query->where('oms_order_creations.tax_bucket', 1);
             }
         }
+
+        $query->whereIn('oms_order_creations.process_id', $processIds);
+
 
     if ($searchType == 1 && !empty($searchInputs)) {
 
