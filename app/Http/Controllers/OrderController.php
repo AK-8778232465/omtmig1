@@ -1577,16 +1577,14 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
     }
     $query->whereIn('oms_order_creations.process_id', $processIds);
     
-    if(in_array($user->user_type_id, [25])){
         if ($request->status == 'tax'){
+            if(in_array($user->user_type_id, [25])){
             $query->where('oms_order_creations.tax_user_id', $user->id)
                 ->orWhere('oms_order_creations.tax_bucket', 1);
+            }else{
+                $query->where('oms_order_creations.tax_bucket', 1);
+            }
         }
-    }else{
-        if ($request->status == 'tax'){
-            $query->where('oms_order_creations.tax_bucket', 1);
-        }
-    }
 
     if ($searchType == 1 && !empty($searchInputs)) {
 
@@ -2287,7 +2285,6 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         $orderId = $request->input('orders');
         $validatedData = $request->validate([
             'type_id' => 'required',
-          
             'orders' => 'required',
         ]);
 
