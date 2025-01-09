@@ -306,18 +306,18 @@
     100% { transform: rotate(360deg); }
 }
 
-   
+.dataTables_scrollBody::-webkit-scrollbar,   
 .tabledetails::-webkit-scrollbar {
     height: 8px; 
     background-color: #F5F5F5;
 }
-
+.dataTables_scrollBody::-webkit-scrollbar-track,
 .tabledetails::-webkit-scrollbar-track {
     background-color: #F5F5F5;
     border-radius: 10px;        
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 }
-
+.dataTables_scrollBody::-webkit-scrollbar-thumb,
 .tabledetails::-webkit-scrollbar-thumb {
     background-color: #AAA;   
     border-radius: 10px;        
@@ -2442,33 +2442,25 @@ function production_report() {
 function orderInflow_report() {
     var fromDate = $('#fromDate_range').val();
     var toDate = $('#toDate_range').val();
+    var selectedDateFilter = $('#selectedDateFilter').val();
+
     $('#orderInflow_report_table').DataTable({
         destroy: true,
         processing: true,
         serverSide: true,
         searching: true,
+    pageLength: 10,
         ajax: {
             url: "{{ route('orderInflow_data') }}",
             type: 'POST',
             data: {
+            fromDate_range: fromDate,
                 toDate_range: toDate,
-                fromDate_range: fromDate,
                 selectedDateFilter: selectedDateFilter, // Send the selected date
                 _token: '{{ csrf_token() }}'
             },
             dataSrc: function(json) {
-                console.log("Backend Response:", json);
-
-                if (json.data && typeof json.data === 'object') {
-                    return Object.values(json.data);
-                } else {
-                    console.error('Data is not in expected format');
-                    return [];
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Error loading data: ', error);
-                alert('Failed to load data. Please try again.');
+            return json.data;
             }
         },
         columns: [
@@ -2478,7 +2470,7 @@ function orderInflow_report() {
             { data: 'completed', name: 'completed' },
             { data: 'pending', name: 'pending' },
             { data: 'cancelled', name: 'cancelled' },
-            { data: 'partially_cancelled', name: 'partially_cancelled' },
+        { data: 'partially_cancelled', name: 'partially_cancelled' }
 
 
         ],
@@ -2486,11 +2478,10 @@ function orderInflow_report() {
         buttons:[
                     {
                         extend: 'excel',
-                        title: 'Order_Inflow Report',  // Set the title for the exported Excel file
+                title: 'OrderInflow Report'  // Set the title for the Excel file
                     }
                 ],
-        lengthMenu: [10, 25, 50, 75, 100],
-        order: [[0, 'asc']] // Order by client name
+    order: [[0, 'asc']],
     });
 }
 

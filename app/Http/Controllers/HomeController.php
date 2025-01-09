@@ -2760,10 +2760,11 @@ public function tat_zone_count(Request $request) {
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
 
 
-        $currentDate = Carbon::now();
+        $currentDate = \Carbon\Carbon::now()->setTime(0, 0, 0);
+
+        $firstDateOfCurrentMonth = Carbon::now()->startOfMonth()->toDateTimeString();
 
 
-        $firstDateOfCurrentMonth = Carbon::now()->startOfMonth();
 
         $statusCountsQuery = OrderCreation::query()->with('process', 'client')
         ->whereHas('process', function ($query) {
@@ -2796,6 +2797,7 @@ public function tat_zone_count(Request $request) {
             ->whereIn('process_id', $processIds)
             ->where('is_active', 1)
             ->where('status_id', '!=', 3)
+            ->where('status_id', '!=', 5)
             ->whereDate('order_date', '<', $firstDateOfCurrentMonth);
 
         $carry_forward = $carry_forward->count();
@@ -2805,18 +2807,13 @@ public function tat_zone_count(Request $request) {
 
 
             $received = $statusCountsQuery2->with('process', 'client')
-                ->whereIn('process_id', $processIds)
                 ->where('is_active', 1)
-                ->whereDate('order_date', '>=', $firstDateOfCurrentMonth);
-
-            $received = $received->count();
-
-
+                ->whereDate('order_date', '>=', $firstDateOfCurrentMonth)
+                ->count();
 
 
             $completed = $statusCountsQuery3->with('process', 'client')
             ->whereDate('completion_date', '>=', $firstDateOfCurrentMonth)
-            ->whereDate('completion_date', '<=', $currentDate)
             ->whereIn('process_id', $processIds)
             ->where('status_id', 5)
             ->where('is_active', 1);
@@ -2851,7 +2848,7 @@ public function tat_zone_count(Request $request) {
         $daily_received = $statusCountsQuery5->with('process', 'client')
         ->whereIn('process_id', $processIds)
             ->where('is_active', 1)
-            ->whereDate('order_date', '=', $currentDate);
+            ->whereDate('order_date', '>=', $currentDate);
 
         $daily_received = $daily_received->count();
 
@@ -2860,14 +2857,14 @@ public function tat_zone_count(Request $request) {
             ->whereIn('process_id', $processIds)
             ->where('is_active', 1)
             ->where('status_id', '!=', 3)
-                            ->whereDate('completion_date', '=', $currentDate);
+            ->whereDate('completion_date', '>=', $currentDate);
 
          $completed_today  = $completed_today->count();
 
-        $daily_carry_forward = $pending - $daily_received + $completed_today;
+
 
         $daily_completed = $statusCountsQuery6->with('process', 'client')
-        ->whereDate('completion_date', '=', $currentDate)
+        ->whereDate('completion_date', '>=', $currentDate)
         ->whereIn('process_id', $processIds)
         ->where('status_id', 5)
         ->where('is_active', 1);
@@ -2877,7 +2874,7 @@ public function tat_zone_count(Request $request) {
 
         $daily_cancelled = $statusCountsQuery9->with('process', 'client')
         ->whereIn('process_id', $processIds)
-        ->whereDate('order_date', '=', $currentDate)
+        ->whereDate('order_date', '>=', $currentDate)
         ->where('status_id', 3)
         ->where('is_active', 1);
 
@@ -2885,11 +2882,14 @@ public function tat_zone_count(Request $request) {
 
         $daily_partially_cancelled = $statusCountsQuery10->with('process', 'client')
         ->whereIn('process_id', $processIds)
-        ->whereDate('order_date', '=', $currentDate)
+        ->whereDate('order_date', '>=', $currentDate)
         ->where('status_id', 20)
         ->where('is_active', 1);
 
         $daily_partially_cancelled = $daily_partially_cancelled->count();
+
+        $daily_carry_forward = $pending - $daily_received + $completed_today + $daily_cancelled + $daily_partially_cancelled;
+
 
 
         $daily_pending = $daily_carry_forward + $daily_received - $daily_completed - $daily_cancelled - $daily_partially_cancelled;

@@ -551,9 +551,9 @@
                             <th width="12%">Carry Forward</th>
                             <th width="12%">Received</th>
                             <th width="12%">Completed</th>
-                            <th width="12%">Pending</th>
                             <th width="12%">Cancelled</th>
                             <th width="12%">Partially Cancelled</th>
+                            <th width="12%">Pending</th>
 
                         </tr>
                     </thead>
@@ -2738,18 +2738,19 @@ function carry_over_monthly() {
                         carry_forward: json.data[0].carry_forward,
                         received: json.data[0].received,
                         completed: json.data[0].completed,
-                        pending: json.data[0].pending,
                         cancelled: json.data[0].cancelled,
                         partially_cancelled: json.data[0].partially_cancelled,
+                        pending: json.data[0].pending,
                     },
                     {
                         monthLabel: "DAILY",
                         carry_forward: json.data[1].carry_forward,
                         received: json.data[1].received,
                         completed: json.data[1].completed,
-                        pending: json.data[1].pending,
                         cancelled: json.data[1].cancelled,
                         partially_cancelled: json.data[1].partially_cancelled,
+                        pending: json.data[1].pending,
+
                     }
                 ];
             }
@@ -2759,9 +2760,10 @@ function carry_over_monthly() {
             { data: 'carry_forward', name: 'carry_forward'},
             { data: 'received', name: 'received'},
             { data: 'completed', name: 'completed'},
-            { data: 'pending', name: 'pending'},
             { data: 'cancelled', name: 'cancelled'},
             { data: 'partially_cancelled', name: 'partially_cancelled'},
+            { data: 'pending', name: 'pending'},
+
         ],
         ordering: false
     });
