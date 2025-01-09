@@ -1212,9 +1212,6 @@ public function orderInflow_data(Request $request)
 
     $fromDateRange = $request->input('fromDate_range');
     $toDateRange = $request->input('toDate_range');
-    
-    $searchValue = $request->input('search.value');
-    $draw = $request->input('draw');
 
     $from_date = null;
     $to_date = null;
@@ -1250,11 +1247,6 @@ public function orderInflow_data(Request $request)
 
         });
 
-        if (!empty($searchValue)) {
-            $statusCountsQuery = $statusCountsQuery->whereHas('client', function ($query) use ($searchValue) {
-                $query->where('client_name', 'like', '%' . $searchValue . '%');
-            });
-        }
     // Carry forward count for all clients
     $carry_forward = OrderCreation::whereIn('process_id', $processIds)
         ->where('is_active', 1)
@@ -1355,7 +1347,6 @@ public function orderInflow_data(Request $request)
         }
 
     return response()->json([
-        'draw' => intval($draw),
         'recordsTotal' => $totalRecords,
         'recordsFiltered' => $totalRecords,
         'data' => $response
