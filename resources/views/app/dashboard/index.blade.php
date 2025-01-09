@@ -488,9 +488,12 @@
                         <input type="text" id="search-input" placeholder="Search..." style="padding: 5px 30px 5px 10px;">
                         <i class="fas fa-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
                     </div>
-                    <div class="d-flex" style="margin-left: auto;">
-                        <i class="fas fa-calendar-minus img-fluid" data-toggle="modal" data-target="#yesterday_dataModal"></i>
-                        <i class="fas fa-calendar-plus img-fluid" data-toggle="modal" data-target="#dataModal"></i>
+
+                    <div class="d-flex" style="margin-left: 5%; justify-content: flex-start;">
+                        <img src="{{ asset('assets/images/yesterday.png') }}" 
+                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#yesterday_dataModal" class="mr-2" title="Yesterday">
+                        <img src="{{ asset('assets/images/today.png') }} " 
+                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#dataModal" class="mr-2" title="Today">
                     </div>
                 </div>
 
@@ -547,9 +550,9 @@
                             <th width="12%">Carry Forward</th>
                             <th width="12%">Received</th>
                             <th width="12%">Completed</th>
-                            <th width="12%">Pending</th>
                             <th width="12%">Cancelled</th>
                             <th width="12%">Partially Cancelled</th>
+                            <th width="12%">Pending</th>
 
                         </tr>
                     </thead>
@@ -882,11 +885,6 @@
                     </div>
                 </div>
             </div>
-            @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Process'))
-            <div class="col-xl-4 col-sm-6 col-12">
-
-            </div>
-            @endif
             <!-- Carried Over -->
             <div class="col-xl-4 col-sm-6 col-12"  >
                 <div class="card">
@@ -2738,18 +2736,19 @@ function carry_over_monthly() {
                         carry_forward: json.data[0].carry_forward,
                         received: json.data[0].received,
                         completed: json.data[0].completed,
-                        pending: json.data[0].pending,
                         cancelled: json.data[0].cancelled,
                         partially_cancelled: json.data[0].partially_cancelled,
+                        pending: json.data[0].pending,
                     },
                     {
                         monthLabel: "DAILY",
                         carry_forward: json.data[1].carry_forward,
                         received: json.data[1].received,
                         completed: json.data[1].completed,
-                        pending: json.data[1].pending,
                         cancelled: json.data[1].cancelled,
                         partially_cancelled: json.data[1].partially_cancelled,
+                        pending: json.data[1].pending,
+
                     }
                 ];
             }
@@ -2759,9 +2758,10 @@ function carry_over_monthly() {
             { data: 'carry_forward', name: 'carry_forward'},
             { data: 'received', name: 'received'},
             { data: 'completed', name: 'completed'},
-            { data: 'pending', name: 'pending'},
             { data: 'cancelled', name: 'cancelled'},
             { data: 'partially_cancelled', name: 'partially_cancelled'},
+            { data: 'pending', name: 'pending'},
+
         ],
         ordering: false
     });
