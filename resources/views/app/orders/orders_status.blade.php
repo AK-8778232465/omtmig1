@@ -2230,28 +2230,15 @@ $('#deleteBtn').click(function (event) {
         var elementId = $(this).attr('id');
         let order_id = elementId.split('_')[2];
         let user_id = "{!! Auth::id() !!}";
-        // let qcer_id = "{!! Auth::id() !!}";
-        // let typist_id = "{!! Auth::id() !!}";
-        // let typist_qc_id = "{!! Auth::id() !!}";
-        // let cover_prep_id = "{!! Auth::id() !!}";
-
-        let qcer_id = null;
-        let typist_id = null;
-        let typist_qc_id = null;
-        let cover_prep_id = null;
 
         let orders = [order_id];
         $.ajax({
             type: "POST",
-            url: "{{ route('assignment_update') }}",
+            url: "{{ route('self_user_assign') }}",
             data: {
                 type_id: status,
                 orders: orders,
                 user_id: user_id,
-                qcer_id: qcer_id,
-                typist_id: typist_id,
-                typist_qc_id: typist_qc_id,
-                cover_prep_id: cover_prep_id,
                 _token: '{{csrf_token()}}'
             },
             success: function (response) {
