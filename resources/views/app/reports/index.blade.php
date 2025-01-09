@@ -306,18 +306,18 @@
     100% { transform: rotate(360deg); }
 }
 
-   
+.dataTables_scrollBody::-webkit-scrollbar,   
 .tabledetails::-webkit-scrollbar {
     height: 8px; 
     background-color: #F5F5F5;
 }
-
+.dataTables_scrollBody::-webkit-scrollbar-track,
 .tabledetails::-webkit-scrollbar-track {
     background-color: #F5F5F5;
     border-radius: 10px;        
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 }
-
+.dataTables_scrollBody::-webkit-scrollbar-thumb,
 .tabledetails::-webkit-scrollbar-thumb {
     background-color: #AAA;   
     border-radius: 10px;        
