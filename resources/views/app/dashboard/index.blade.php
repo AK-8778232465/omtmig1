@@ -492,9 +492,9 @@
 
                     <div class="d-flex" style="margin-left: 5%; justify-content: flex-start;">
                         <img src="{{ asset('assets/images/yesterday.png') }}" 
-                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#yesterday_dataModal" class="mr-2">
+                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#yesterday_dataModal" class="mr-2" title="Yesterday">
                         <img src="{{ asset('assets/images/today.png') }} " 
-                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#dataModal" class="mr-2">
+                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#dataModal" class="mr-2" title="Today">
                     </div>
                 </div>
 
