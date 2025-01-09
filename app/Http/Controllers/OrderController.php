@@ -2787,30 +2787,6 @@ public function status_change(Request $request)
         return response()->json(['success' => false, 'message' => 'Failed to update status.']);
     }
 }
- 
-public function self_user_assign(Request $request)
-{
-    // Validate input
-    $validatedData = $request->validate([
-        'type_id' => 'required',
-        'orders' => 'required',
-    ]);
-
-    // Update the order's assignee
-    $orderId = $request->input('orders');
-    $updateResult = DB::table('oms_order_creations')
-        ->where('id', $orderId)
-        ->update([
-            'assignee_user_id' => auth()->id(), // Assuming self-assignment
-        ]);
-
-    // Check update result and return appropriate response
-    if ($updateResult) {
-        return response()->json(['message' => 'Order assigned successfully.'], 200);
-    } else {
-        return response()->json(['message' => 'Failed to assign order.'], 400);
-    }
-}
 
 
 }

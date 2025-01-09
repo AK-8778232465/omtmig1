@@ -137,7 +137,6 @@ Route::middleware('auth:web')->controller(OrderController::class)->group(functio
     Route::post('update_order_status', 'update_order_status')->name('update_order_status');
     Route::post('redirectwithfilter', 'redirectwithfilter')->name('redirectwithfilter');
     Route::any('status_change', 'status_change')->name('status_change');
-    Route::any('self_user_assign', 'self_user_assign')->name('self_user_assign');
 
 });
 
