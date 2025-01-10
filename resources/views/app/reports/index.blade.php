@@ -2453,16 +2453,11 @@ function orderInflow_report() {
         ajax: {
             url: "{{ route('orderInflow_data') }}",
             type: 'POST',
-        data: function (d) {
-                return {
+            data: {
             fromDate_range: fromDate,
                 toDate_range: toDate,
                 selectedDateFilter: selectedDateFilter, // Send the selected date
-                search_value: d.search.value,
-                start: d.start,
-                length: d.length,
                 _token: '{{ csrf_token() }}'
-                };
             },
             dataSrc: function(json) {
             return json.data;
