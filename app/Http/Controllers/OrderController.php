@@ -2156,7 +2156,7 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
             //                ($order->status_id == 4 && $user->user_type_id == 8 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == null)) {
             //     $disabled = '';
             //     $makedisable = '';
-            } elseif ($order->status_id == 4 && $user->user_type_id == 8){
+            } elseif ($order->status_id == 4 && $user->user_type_id == 8 && ($order->assignee_qa_id == Auth::id() || $order->assignee_qa_id === null))    {
                     $disabled = '';
                     $makedisable = '';
             }elseif (($order->status_id == 14)){
@@ -2235,8 +2235,10 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 //             ($order->status_id == 4 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == Auth::id()) || 
                 //             ($order->status_id == 4 && $order->assignee_user_id == Auth::id() && $order->assignee_qa_id == null)) {
                 //     $orderId = $order->id ?? '';
-                } elseif ($order->status_id == 4){
-                         $orderId = $order->id ?? '';
+                } elseif ($order->status_id == 4 && $user->user_type_id == 8 && ($order->assignee_qa_id == Auth::id() || $order->assignee_qa_id === null)){
+                            $orderId = $order->id ?? '';
+                // } elseif ($order->status_id == 4){
+                //          $orderId = $order->id ?? '';
                 } elseif (($order->status_id == 13 && $order->associate_id != null) ||($order->status_id == 13 && $order->associate_id == null)
                 ) {
                         $orderId = $order->id ?? '';
