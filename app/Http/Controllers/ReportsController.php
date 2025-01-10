@@ -310,6 +310,8 @@ private function getProcessIdsBasedOnUserRole($user)
             ->leftJoin('oms_users as assignee_user', 'oms_order_creations.assignee_user_id', '=', 'assignee_user.id')
             ->leftJoin('oms_users as status_update_qc', 'oms_order_creations.updated_qc', '=', 'status_update_qc.id')
             ->leftJoin('oms_users as assignee_qcer', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qcer.id')
+            ->leftJoin('oms_users as typist', 'oms_order_creations.typist_id', '=', 'typist.id')
+            ->leftJoin('oms_users as typist_qc', 'oms_order_creations.typist_qc_id', '=', 'typist_qc.id')
             ->leftJoin('oms_tier', 'oms_order_creations.tier_id', '=', 'oms_tier.id')
 
             ->leftJoin('county_instructions', function($join) {
@@ -343,6 +345,13 @@ private function getProcessIdsBasedOnUserRole($user)
                 'assignee_user.username as EmpName',
                 'assignee_qcer.emp_id as qcer_EmpId',
                 'assignee_qcer.username as qcer_EmpName',
+
+                'typist.emp_id as typist_EmpId',
+                'typist.username as typist_EmpName',
+
+                'typist_qc.emp_id as typist_qc_EmpId',
+                'typist_qc.username as typist_qc_EmpName',
+
                 'status_update_qc.emp_id as qc_EmpId',
                 'status_update_qc.username as qa_user',
                 'oms_order_creations.qc_comment as qc_comment',
@@ -352,7 +361,17 @@ private function getProcessIdsBasedOnUserRole($user)
                 'stl_lob.name as lob_name',
                 'stl_process.name as process_name',
             )
-            ->whereNotNull('oms_order_creations.assignee_user_id')
+            // ->whereNotNull('oms_order_creations.assignee_user_id')
+            ->where(function($query) {
+                $query->where(function($subQuery) {
+                    $subQuery->whereNull('oms_order_creations.typist_id')
+                             ->whereNotNull('oms_order_creations.assignee_user_id');
+                })
+                ->orWhere(function($subQuery) {
+                    $subQuery->whereNull('oms_order_creations.assignee_user_id')
+                             ->whereNotNull('oms_order_creations.typist_id');
+                });
+            })
             ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
             ->whereDate('oms_order_creations.order_date', '<=', $toDate)
             ->whereIn('oms_order_creations.process_id', $processIds)
@@ -400,6 +419,10 @@ private function getProcessIdsBasedOnUserRole($user)
                 'qa_user' => $item->qcer_EmpName,
                 'qc_EmpId' => $item->qcer_EmpId,
                 'qc_comment' => $item->qc_comment,
+                'typist_emp_id' => $item->typist_EmpId,
+                'typist_emp_name' => $item->typist_EmpName,
+                'typist_qc_emp_id' => $item->typist_qc_EmpId,
+                'typist_qc_emp_name' => $item->typist_qc_EmpName,
                 'status_updated_time' => $item->status_updated_time
                 
             ];
