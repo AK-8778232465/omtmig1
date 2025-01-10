@@ -1212,6 +1212,8 @@ public function orderInflow_data(Request $request)
 
     $fromDateRange = $request->input('fromDate_range');
     $toDateRange = $request->input('toDate_range');
+    $searchValue = $request->input('search_value');
+
 
     $from_date = null;
     $to_date = null;
@@ -1316,14 +1318,15 @@ public function orderInflow_data(Request $request)
     // Get client details (client_name)
     $clientNames = \DB::table('stl_client')->whereIn('id', $clientIds)->pluck('client_name', 'id');
 
+    if (!empty($searchValue)) {
+        $clientNames = $clientNames->filter(function ($clientName) use ($searchValue) {
+            return stripos($clientName, $searchValue) !== false; 
+        });
+        $clientIds = $clientNames->keys(); // Update client ids to match the filtered names
+    }
+
     // Total records
     $totalRecords = $clientIds->count();
-
-    // Pagination: take only the required records for the current page
-    $start = $request->input('start', 0); // Starting record
-    $length = $request->input('length', 10); // Number of records per page
-
-    $clientIds = $clientIds->slice($start, $length);
 
     foreach ($clientIds as $clientId) {
         $carryForwardCount = $carry_forward->get($clientId, 0);
