@@ -310,6 +310,8 @@ private function getProcessIdsBasedOnUserRole($user)
             ->leftJoin('oms_users as assignee_user', 'oms_order_creations.assignee_user_id', '=', 'assignee_user.id')
             ->leftJoin('oms_users as status_update_qc', 'oms_order_creations.updated_qc', '=', 'status_update_qc.id')
             ->leftJoin('oms_users as assignee_qcer', 'oms_order_creations.assignee_qa_id', '=', 'assignee_qcer.id')
+            ->leftJoin('oms_users as typist', 'oms_order_creations.typist_id', '=', 'typist.id')
+            ->leftJoin('oms_users as typist_qc', 'oms_order_creations.typist_qc_id', '=', 'typist_qc.id')
             ->leftJoin('oms_tier', 'oms_order_creations.tier_id', '=', 'oms_tier.id')
 
             ->leftJoin('county_instructions', function($join) {
@@ -343,6 +345,13 @@ private function getProcessIdsBasedOnUserRole($user)
                 'assignee_user.username as EmpName',
                 'assignee_qcer.emp_id as qcer_EmpId',
                 'assignee_qcer.username as qcer_EmpName',
+
+                'typist.emp_id as typist_EmpId',
+                'typist.username as typist_EmpName',
+
+                'typist_qc.emp_id as typist_qc_EmpId',
+                'typist_qc.username as typist_qc_EmpName',
+
                 'status_update_qc.emp_id as qc_EmpId',
                 'status_update_qc.username as qa_user',
                 'oms_order_creations.qc_comment as qc_comment',
@@ -352,7 +361,17 @@ private function getProcessIdsBasedOnUserRole($user)
                 'stl_lob.name as lob_name',
                 'stl_process.name as process_name',
             )
-            ->whereNotNull('oms_order_creations.assignee_user_id')
+            // ->whereNotNull('oms_order_creations.assignee_user_id')
+            ->where(function($query) {
+                $query->where(function($subQuery) {
+                    $subQuery->whereNull('oms_order_creations.typist_id')
+                             ->whereNotNull('oms_order_creations.assignee_user_id');
+                })
+                ->orWhere(function($subQuery) {
+                    $subQuery->whereNull('oms_order_creations.assignee_user_id')
+                             ->whereNotNull('oms_order_creations.typist_id');
+                });
+            })
             ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
             ->whereDate('oms_order_creations.order_date', '<=', $toDate)
             ->whereIn('oms_order_creations.process_id', $processIds)
@@ -400,6 +419,10 @@ private function getProcessIdsBasedOnUserRole($user)
                 'qa_user' => $item->qcer_EmpName,
                 'qc_EmpId' => $item->qcer_EmpId,
                 'qc_comment' => $item->qc_comment,
+                'typist_emp_id' => $item->typist_EmpId,
+                'typist_emp_name' => $item->typist_EmpName,
+                'typist_qc_emp_id' => $item->typist_qc_EmpId,
+                'typist_qc_emp_name' => $item->typist_qc_EmpName,
                 'status_updated_time' => $item->status_updated_time
                 
             ];
@@ -1199,59 +1222,15 @@ public function exportProductionReport(Request $request) {
 }
 
 
-public function orderInflow_data(Request $request)
+
+private function getOrderInflowCounts($processIds, $from_date, $to_date)
 {
-
-    $user = Auth::user();
-    $processIds = $this->getProcessIdsBasedOnUserRole($user);
-
-    $currentDate = \Carbon\Carbon::now()->setTime(0, 0, 0);
-    $firstDateOfCurrentMonth = \Carbon\Carbon::now()->startOfMonth()->setHour(12)->setMinute(0)->setSecond(0);
-
-    $selectedDateFilter = $request->input('selectedDateFilter');
-
-    $fromDateRange = $request->input('fromDate_range');
-    $toDateRange = $request->input('toDate_range');
-
-    $from_date = null;
-    $to_date = null;
-
-    if ($fromDateRange && $toDateRange) {
-        $from_date = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
-        $to_date = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
-    } else {
-        $datePattern = '/(\d{2}-\d{2}-\d{4})/';
-        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
-            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
-            $fromDateText = trim($fromDateText);
-            $toDateText = trim($toDateText);
-            preg_match($datePattern, $fromDateText, $fromDateMatches);
-            preg_match($datePattern, $toDateText, $toDateMatches);
-            $from_date = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
-            $to_date = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
-        } else {
-            preg_match($datePattern, $selectedDateFilter, $dateMatches);
-            $from_date = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
-            $to_date = $from_date;
-        }
-    }
-
-    $to_date = \Carbon\Carbon::parse($to_date)->endOfDay();
-
-    $statusCountsQuery = OrderCreation::query()->with('process', 'client')
-        ->whereHas('process', function ($query) {
-            $query->where('stl_item_description.is_approved', 1);
-        })
-        ->whereHas('client', function ($query) {
-            $query->where('stl_client.is_approved', 1);
-
-        });
-
     // Carry forward count for all clients
     $carry_forward = OrderCreation::whereIn('process_id', $processIds)
         ->where('is_active', 1)
         ->where('status_id', '!=', 3)
         ->where('status_id', '!=', 5)  // Exclude completed
+        ->where('status_id', '!=', 20)  // Exclude completed
         ->whereDate('order_date', '<', $from_date)
         ->get()
         ->groupBy('client_id')
@@ -1307,14 +1286,67 @@ public function orderInflow_data(Request $request)
             return $orders->count();
         });
 
+    return compact('carry_forward', 'received', 'completed', 'cancelled', 'partially_cancelled');
+}
+
+public function orderInflow_data(Request $request)
+{
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+    $selectedDateFilter = $request->input('selectedDateFilter');
+    $fromDateRange = $request->input('fromDate_range');
+    $toDateRange = $request->input('toDate_range');
+    $searchValue = $request->input('search_value');
+
+    $from_date = null;
+    $to_date = null;
+
+    // Handle date range inputs
+    if ($fromDateRange && $toDateRange) {
+        $from_date = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $to_date = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/'; // mm-dd-yyyy pattern
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $from_date = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $to_date = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $from_date = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $to_date = $from_date;
+        }
+    }
+
+    $to_date = \Carbon\Carbon::parse($to_date)->endOfDay();
+
+    // Get the order inflow counts using the helper function
+    $orderCounts = $this->getOrderInflowCounts($processIds, $from_date, $to_date);
+
     // Prepare the response data
     $response = [];
-
-    // Collect all client ids from the queries
-    $clientIds = collect(array_merge($carry_forward->keys()->toArray(), $received->keys()->toArray(), $completed->keys()->toArray(), $cancelled->keys()->toArray(), $partially_cancelled->keys()->toArray()))->unique();
+    $clientIds = collect(array_merge(
+        $orderCounts['carry_forward']->keys()->toArray(),
+        $orderCounts['received']->keys()->toArray(),
+        $orderCounts['completed']->keys()->toArray(),
+        $orderCounts['cancelled']->keys()->toArray(),
+        $orderCounts['partially_cancelled']->keys()->toArray()
+    ))->unique();
 
     // Get client details (client_name)
     $clientNames = \DB::table('stl_client')->whereIn('id', $clientIds)->pluck('client_name', 'id');
+
+    if (!empty($searchValue)) {
+        $clientNames = $clientNames->filter(function ($clientName) use ($searchValue) {
+            return stripos($clientName, $searchValue) !== false; // Case-insensitive search
+        });
+        $clientIds = $clientNames->keys(); // Update client ids to match the filtered names
+    }
 
     // Total records
     $totalRecords = $clientIds->count();
@@ -1322,15 +1354,96 @@ public function orderInflow_data(Request $request)
     // Pagination: take only the required records for the current page
     $start = $request->input('start', 0); // Starting record
     $length = $request->input('length', 10); // Number of records per page
-
     $clientIds = $clientIds->slice($start, $length);
 
     foreach ($clientIds as $clientId) {
-        $carryForwardCount = $carry_forward->get($clientId, 0);
-        $receivedCount = $received->get($clientId, 0);
-        $completedCount = $completed->get($clientId, 0);
-        $cancelledCount = $cancelled->get($clientId, 0);
-        $partiallyCancelledCount = $partially_cancelled->get($clientId, 0);
+        $carryForwardCount = $orderCounts['carry_forward']->get($clientId, 0);
+        $receivedCount = $orderCounts['received']->get($clientId, 0);
+        $completedCount = $orderCounts['completed']->get($clientId, 0);
+        $cancelledCount = $orderCounts['cancelled']->get($clientId, 0);
+        $partiallyCancelledCount = $orderCounts['partially_cancelled']->get($clientId, 0);
+
+        // Calculate pending count
+        $pendingCount = $carryForwardCount + $receivedCount - $completedCount - $cancelledCount - $partiallyCancelledCount;
+
+        $response[] = [
+            'client_name' => $clientNames[$clientId] ?? 'N/A',  // Use client_name instead of client_id
+            'carry_forward' => $carryForwardCount,
+            'received' => $receivedCount,
+            'completed' => $completedCount,
+            'cancelled' => $cancelledCount,
+            'partially_cancelled' => $partiallyCancelledCount,
+            'pending' => $pendingCount,
+        ];
+    }
+
+    return response()->json([
+        'recordsTotal' => $totalRecords,
+        'recordsFiltered' => $totalRecords,
+        'data' => $response
+    ]);
+}
+
+public function orderInflow_export(Request $request)
+{
+    $user = Auth::user();
+    $processIds = $this->getProcessIdsBasedOnUserRole($user);
+
+    $selectedDateFilter = $request->input('selectedDateFilter');
+    $fromDateRange = $request->input('fromDate_range');
+    $toDateRange = $request->input('toDate_range');
+
+    $from_date = null;
+    $to_date = null;
+
+    // Handle date range inputs
+    if ($fromDateRange && $toDateRange) {
+        $from_date = Carbon::createFromFormat('Y-m-d', $fromDateRange)->toDateString();
+        $to_date = Carbon::createFromFormat('Y-m-d', $toDateRange)->toDateString();
+    } else {
+        $datePattern = '/(\d{2}-\d{2}-\d{4})/'; // mm-dd-yyyy pattern
+        if (!empty($selectedDateFilter) && strpos($selectedDateFilter, 'to') !== false) {
+            list($fromDateText, $toDateText) = explode('to', $selectedDateFilter);
+            $fromDateText = trim($fromDateText);
+            $toDateText = trim($toDateText);
+            preg_match($datePattern, $fromDateText, $fromDateMatches);
+            preg_match($datePattern, $toDateText, $toDateMatches);
+            $from_date = isset($fromDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $fromDateMatches[1])->toDateString() : null;
+            $to_date = isset($toDateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $toDateMatches[1])->toDateString() : null;
+        } else {
+            preg_match($datePattern, $selectedDateFilter, $dateMatches);
+            $from_date = isset($dateMatches[1]) ? Carbon::createFromFormat('m-d-Y', $dateMatches[1])->toDateString() : null;
+            $to_date = $from_date;
+        }
+    }
+
+    $to_date = \Carbon\Carbon::parse($to_date)->endOfDay();
+
+    // Get the order inflow counts using the helper function
+    $orderCounts = $this->getOrderInflowCounts($processIds, $from_date, $to_date);
+
+    // Prepare the response data
+    $response = [];
+    $clientIds = collect(array_merge(
+        $orderCounts['carry_forward']->keys()->toArray(),
+        $orderCounts['received']->keys()->toArray(),
+        $orderCounts['completed']->keys()->toArray(),
+        $orderCounts['cancelled']->keys()->toArray(),
+        $orderCounts['partially_cancelled']->keys()->toArray()
+    ))->unique();
+
+    // Get client details (client_name)
+    $clientNames = \DB::table('stl_client')->whereIn('id', $clientIds)->pluck('client_name', 'id');
+
+    // Total records
+    $totalRecords = $clientIds->count();
+
+    foreach ($clientIds as $clientId) {
+        $carryForwardCount = $orderCounts['carry_forward']->get($clientId, 0);
+        $receivedCount = $orderCounts['received']->get($clientId, 0);
+        $completedCount = $orderCounts['completed']->get($clientId, 0);
+        $cancelledCount = $orderCounts['cancelled']->get($clientId, 0);
+        $partiallyCancelledCount = $orderCounts['partially_cancelled']->get($clientId, 0);
 
         // Pending count should exclude cancelled and partially cancelled orders
         $pendingCount = $carryForwardCount + $receivedCount - $completedCount - $cancelledCount - $partiallyCancelledCount;

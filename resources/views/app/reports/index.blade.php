@@ -551,6 +551,11 @@
                                     <th width="5%">QA Emp Id</th>
                                     <th width="6%">QA Emp Name</th>
                                     <th width="11%">QA Comments</th>
+                                    <th width="11%">Typist Id</th>
+                                    <th width="11%">Typist Name</th>
+                                    <th width="11%">Typist_QC Id</th>
+                                    <th width="11%">Typist_QC Name</th>
+
                                 </tr>
                             </thead>
                             <tbody class="text-center" style="font-size: 12px;"></tbody>
@@ -1278,6 +1283,11 @@ function orderWise() {
             {data: 'qc_EmpId', name: 'qc_EmpId'},
             {data: 'qa_user', name: 'qa_user'},
             {data: 'qc_comment', name: 'qc_comment'},
+            { data: 'typist_emp_id', name: 'typist_emp_id' },
+            { data: 'typist_emp_name', name: 'typist_emp_name' },
+
+            { data: 'typist_qc_emp_id', name: 'typist_qc_emp_id' },
+            { data: 'typist_qc_emp_name', name: 'typist_qc_emp_name' },
             
 
 
@@ -1307,7 +1317,7 @@ function orderWise() {
                             var data = response.data;
 
                             // Define headers with the "Received EST" column next to "Order Date"
-                            var headers = ["S.No", "Process", "Order Date", "Received EST", "Completion Date", "Order ID", "Client Name", "LOB", "Process", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source", "Process Type", "Tier", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments"];
+                            var headers = ["S.No", "Process", "Order Date", "Received EST", "Completion Date", "Order ID", "Client Name", "LOB", "Process", "Short Code", "County Name", "Date of Movement", "Status", "Status Comment", "Primary Source", "Process Type", "Tier", "User Emp Id", "User Emp Name", "QA Emp Id", "QA Emp Name", "QA Comments", "Typist Id", "Typist Name", "Typist_QC Id", "Typist_QC Name"];
 
                             // Add the "Received EST" column (next to "Order Date") with only the date (no time)
                             var exportData = data.map((row, index) => [
@@ -1333,6 +1343,11 @@ function orderWise() {
                                 row.qc_EmpId,
                                 row.qa_user,
                                 row.qc_comment,
+                                row.typist_emp_id,
+                                row.typist_emp_name,
+                                row.typist_qc_emp_id,
+                                row.typist_qc_emp_name,
+
 
 
                             ]);
@@ -2453,11 +2468,16 @@ function orderInflow_report() {
         ajax: {
             url: "{{ route('orderInflow_data') }}",
             type: 'POST',
-            data: {
+        data: function (d) {
+                return {
             fromDate_range: fromDate,
                 toDate_range: toDate,
                 selectedDateFilter: selectedDateFilter, // Send the selected date
+                search_value: d.search.value,
+                start: d.start,
+                length: d.length,
                 _token: '{{ csrf_token() }}'
+                };
             },
             dataSrc: function(json) {
             return json.data;
@@ -2478,7 +2498,50 @@ function orderInflow_report() {
         buttons:[
                     {
                         extend: 'excel',
-                title: 'OrderInflow Report'  // Set the title for the Excel file
+                action: function (e, dt, button, config) {
+                $('#loader').show();
+            $.ajax({
+                url: "{{ route('orderInflow_export') }}",
+                type: 'POST',
+                data: {
+                    fromDate_range: fromDate,
+                    toDate_range: toDate,
+                    selectedDateFilter: selectedDateFilter,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    var data = response.data;
+
+                    // Define headers with the "Received EST" column next to "Order Date"
+                    var headers = ["S.No", "Client Name", "Carry Forward", "Received", "Completed", "Pending", "Cancelled"];
+
+                    // Map the response data into a format suitable for export
+                    var exportData = data.map((row, index) => [
+                        index + 1,              // Serial number (S.No)
+                        row.client_name,        // Client Name
+                        row.carry_forward,      // Carry Forward
+                        row.received,           // Received
+                        row.completed,          // Completed
+                        row.pending,            // Pending
+                        row.cancelled           // Cancelled
+                    ]);
+
+                    // Create a new workbook
+                    var wb = XLSX.utils.book_new();
+
+                    // Convert the data into a worksheet and append it to the workbook
+                    var ws = XLSX.utils.aoa_to_sheet([headers].concat(exportData));
+
+                    // Append the worksheet to the workbook
+                    XLSX.utils.book_append_sheet(wb, ws, "Order Data");
+
+                    // Generate and download the Excel file
+                    XLSX.writeFile(wb, "Order_Inflow.xlsx");
+                    $('#loader').hide();
+                }
+            });
+
+            }
                     }
                 ],
     order: [[0, 'asc']],
