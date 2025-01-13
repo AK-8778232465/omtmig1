@@ -166,8 +166,9 @@
 
                     </div>
                     <nav class="navbar-custom float-right d-flex">
-                    <div style="display: flex; justify-content: center; align-items: center; ">
-                        <select name="role_selector" id="role_selector" class="form-control col-12" style="text-align: center; text-align-last: center;">
+                    <div style="display: flex; justify-content: center; align-items: center; width: 200px;">
+                        <select name="role_selector" id="role_selector" class="form-control select2dropdown col-12" style="text-align: center; text-align-last: center; width: 200px; font-size: 13px !important;">
+                        <option value="">Select Role</option>
                             @foreach($roleList as $role)
                                 @if($role->user_type_id == Auth::user()->user_type_id)
                                     <option value="{{ $role->user_type_id }}" selected>{{ $role->usertype }}</option>
