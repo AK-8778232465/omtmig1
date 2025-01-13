@@ -508,7 +508,6 @@
                     $lastSegment = end($segments);
                 @endphp -->
 
-            <!-- @if($lastSegment != "tax") -->
                 @if(!@empty($countyInfo))
                 <input type="hidden" name="instructionId" id="instructionId" value="{{$instructionId}}">
                 <h6 class="font-weight-bold">Source Information :</h6>
@@ -576,7 +575,6 @@
                         </table>
                     </div>
                 </div>
-                <!-- @endif -->
                 @endif
                     @endif
                     @if(in_array($orderData->stl_process_id, [2, 4, 6]))
@@ -2926,7 +2924,7 @@ function order_submition(orderId, type) {
         var check_box_id = $("#check_box_id").val();
         var orderComment = $("#order_comment").val();
         var orderStatus = $("#order_status").val();
-    var currentStatusId = $("#current_status_id").val();
+        var currentStatusId = $("#current_status_id").val();
         var tierId = $("#tier_id").val();
         var productId = $("#process_id").val();
         var propertystate = $("#property_state").val();

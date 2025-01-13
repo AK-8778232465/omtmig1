@@ -283,7 +283,6 @@ class OrderFormController extends Controller
                 }
                     
                 $countyInfo = mergeWithDefaults($countyDetail, $commonDetail);
-                    
             }
                     
             if(!empty($countyData->checklist_array)) {
@@ -676,7 +675,6 @@ class OrderFormController extends Controller
                     $input_json = 'Json Not Available';
                 }
 
-                // return response()->json($orderData);
 
             if(in_array($user->user_type_id, [6,7,8]) && (Auth::id() == $orderData->assignee_user_id || Auth::id() == $orderData->assignee_qa_id)) {
             return view('app.orders.orderform', compact('orderData','vendorequirements', 'lobList','countyList','cityList','tierList','productList','countyInfo', 'checklist_conditions_2', 'orderHistory','checklist_conditions',
