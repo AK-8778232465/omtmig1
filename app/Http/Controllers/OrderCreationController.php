@@ -16,6 +16,7 @@ use App\Models\Product;
 use App\Models\Tier;
 use App\Models\Lob;
 use App\Models\Client;
+use App\Models\OmsUserProfile;
 use Carbon\Carbon;
 use DataTables;
 use DB;
@@ -529,4 +530,97 @@ public function unassign_qcer(Request $request)
             dd($e);
         }
     }
+
+
+
+    public function get_assignee_user(Request $request)
+    {
+        $user = Auth::id();
+        $client_id = $request->input('select_client_id');
+        $process_type_id = $request->input('process_type_id');
+        $lob_id = $request->input('lob_id');
+
+        $assignee_user = DB::table('oms_user_profiles')
+            ->leftJoin('oms_users', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id')
+            ->where('oms_user_profiles.client_id', $client_id)
+            ->where('oms_user_profiles.lob_id', $lob_id)
+            ->where('oms_user_profiles.process_id', $process_type_id)
+            ->whereIn('oms_user_profiles.user_type_id', [6,8])
+            ->select('oms_user_profiles.*', 'oms_users.username')
+            ->get();
+
+        return response()->json([
+            'assignee_user' => $assignee_user,
+        ]);
+    }
+
+    public function get_assignee_qc(Request $request)
+    {
+        $user = Auth::id();
+        $client_id = $request->input('select_client_id');
+        $process_type_id = $request->input('process_type_id');
+        $lob_id = $request->input('lob_id');
+
+        $assignee_qcer = DB::table('oms_user_profiles')
+            ->leftJoin('oms_users', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id')
+            ->where('oms_user_profiles.client_id', $client_id)
+            ->where('oms_user_profiles.lob_id', $lob_id)
+            ->where('oms_user_profiles.process_id', $process_type_id)
+            ->whereIn('oms_user_profiles.user_type_id', [7,8])
+            ->select('oms_user_profiles.*', 'oms_users.username')
+            ->get();
+
+
+        return response()->json([
+            'assignee_qcer' => $assignee_qcer,
+        ]);
+    }
+
+
+    public function get_typists(Request $request)
+    {
+        $user = Auth::id();
+        $client_id = $request->input('select_client_id');
+        $process_type_id = $request->input('process_type_id');
+        $lob_id = $request->input('lob_id');
+
+        $assignee_typist = DB::table('oms_user_profiles')
+            ->leftJoin('oms_users', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id')
+            ->where('oms_user_profiles.client_id', $client_id)
+            ->where('oms_user_profiles.lob_id', $lob_id)
+            ->where('oms_user_profiles.process_id', $process_type_id)
+            ->whereIn('oms_user_profiles.user_type_id', [10,22])
+            ->select('oms_user_profiles.*', 'oms_users.username')
+            ->get();
+
+
+        return response()->json([
+            'assignee_typist' => $assignee_typist,
+        ]);
+    }
+
+
+    public function get_typists_qc(Request $request)
+    {
+        $user = Auth::id();
+        $client_id = $request->input('select_client_id');
+        $process_type_id = $request->input('process_type_id');
+        $lob_id = $request->input('lob_id');
+
+        $assignee_typist_qc = DB::table('oms_user_profiles')
+            ->leftJoin('oms_users', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id')
+            ->where('oms_user_profiles.client_id', $client_id)
+            ->where('oms_user_profiles.lob_id', $lob_id)
+            ->where('oms_user_profiles.process_id', $process_type_id)
+            ->whereIn('oms_user_profiles.user_type_id', [11,22])
+            ->select('oms_user_profiles.*', 'oms_users.username')
+            ->get();
+
+
+        return response()->json([
+            'assignee_typist_qc' => $assignee_typist_qc,
+        ]);
+    }
+
+
 }

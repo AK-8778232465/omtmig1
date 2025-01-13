@@ -16,7 +16,7 @@ use App\Models\Tier;
 use App\Models\User;
 use App\Models\stlprocess;
 use App\Models\Client;
-
+use App\Models\OmsUserProfile;
 use Carbon\Carbon;
 use DB;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -305,31 +305,76 @@ if (!$Status) {
         $assignee_user = isset($row['Emp ID-Order Assigned']) ? trim($row['Emp ID-Order Assigned']) : null;
 
         if ($assignee_user) {
-            $assignee_user = User::where('emp_id', $assignee_user)->whereIn('user_type_id', [6,8,9])->first();
+            $assignee_user = OmsUserProfile::leftJoin('oms_users', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id')
+            ->where('oms_users.emp_id', '=', $assignee_user)
+            ->where('oms_user_profiles.client_id', '=', $client_id->id)
+            ->where('oms_user_profiles.lob_id', '=', $lob->id)
+            ->where('oms_user_profiles.process_id', '=', $stl_process->id)
+            ->whereIn('oms_user_profiles.user_type_id', [6, 8])
+            ->first();
+            if ($assignee_user) {
+                $assignee_user = $assignee_user;
+            }else{
+                $data['comments'] = 'Emp Id user not matched with database records';
+                OrderTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
         }
 
         $assignee_qa = isset($row['Assignee_QA']) ? trim($row['Assignee_QA']) : null;
+        if($assignee_qa){
+            $assignee_qa = OmsUserProfile::leftJoin('oms_users', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id')
+            ->where('oms_users.emp_id', '=', $assignee_qa)
+            ->where('oms_user_profiles.client_id', '=', $client_id->id)
+            ->where('oms_user_profiles.lob_id', '=', $lob->id)
+            ->where('oms_user_profiles.process_id', '=', $stl_process->id)
+            ->whereIn('oms_user_profiles.user_type_id', [7, 8])
+            ->first();
+            if ($assignee_qa) {
+                $assignee_qa = $assignee_qa;
+            }else{
+                $data['comments'] = 'Emp Id qc not matched with database records';
+                OrderTemp::insert($data);
+                ++$this->unsuccess_rows;
+                return null;
+            }
 
-        if ($assignee_qa) {
-            $assignee_qa = User::where('emp_id', $assignee_qa)->whereIn('user_type_id', [7,8])->first();
         }
 
-        if(isset($row['Typist QC'])){
-    $TypistQC = trim($row['Typist QC']);
-    $TypistQC = User::where('emp_id', $TypistQC)->first();
-    if (!$TypistQC) {
-        $data['comments'] = 'Typist QC not matched with database records';
+        $TypistQC = isset($row['Typist QC']) ? trim($row['Typist QC']) : null;
+        if($TypistQC){
+            $TypistQC = OmsUserProfile::leftJoin('oms_users', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id')
+            ->where('oms_users.emp_id', '=', $TypistQC)
+            ->where('oms_user_profiles.client_id', '=', $client_id->id)
+            ->where('oms_user_profiles.lob_id', '=', $lob->id)
+            ->where('oms_user_profiles.process_id', '=', $stl_process->id)
+            ->whereIn('oms_user_profiles.user_type_id', [11, 22])
+            ->first();
+            if ($TypistQC) {
+                $TypistQC = $TypistQC;
+            }else{
+                $data['comments'] = 'Typist QC Emp Id not matched with database records';
         OrderTemp::insert($data);
         ++$this->unsuccess_rows;
         return null;
     }
         }
 
-        if(isset($row['Typist'])){
-    $Typist = trim($row['Typist']);
-    $Typist = User::where('emp_id', $Typist)->first();
-    if (!$Typist) {
-        $data['comments'] = 'Typist not matched with database records';
+        $Typist = isset($row['Typist']) ? trim($row['Typist']) : null;
+
+        if($Typist){
+        $Typist = OmsUserProfile::leftJoin('oms_users', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id')
+                ->where('oms_users.emp_id', '=', $Typist)
+                ->where('oms_user_profiles.client_id', '=', $client_id->id)
+                ->where('oms_user_profiles.lob_id', '=', $lob->id)
+                ->where('oms_user_profiles.process_id', '=', $stl_process->id)
+                ->whereIn('oms_user_profiles.user_type_id', [10, 22])
+                ->first();
+                if ($Typist) {
+                    $Typist = $Typist;
+                }else{
+                    $data['comments'] = 'Typist Emp Id not matched with database records';
         OrderTemp::insert($data);
         ++$this->unsuccess_rows;
         return null;
