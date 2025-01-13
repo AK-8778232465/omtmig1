@@ -98,4 +98,9 @@ class User extends Authenticatable
         }
     }
 
+    public function omsUserProfile()
+        {
+            return $this->hasOne(OmsUserProfile::class, 'oms_user_id', 'oms_user_id');
+        }
+
 }

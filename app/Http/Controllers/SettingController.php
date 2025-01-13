@@ -24,6 +24,7 @@ use App\Models\State;
 use App\Models\Status;
 use App\Models\SupportingDocs;
 use App\Models\User;
+use App\Models\OmsUserProfile;
 use App\Models\UserType;
 use App\Models\CountyInstructionAudit;
 use App\Models\CountyInstructionTemp;
@@ -87,17 +88,17 @@ class SettingController extends Controller
                     'roles.name as roles', 
                     'oms_users.is_active'
                 )
-                ->leftJoin('oms_users as reporting_user', 'oms_users.reporting_to', '=', 'reporting_user.id')
-                ->leftJoin('roles as roles', 'oms_users.user_type_id', '=', 'roles.id')
+                ->leftJoin('oms_user_profiles', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id') // Join oms_user_profiles table
+                ->leftJoin('oms_users as reporting_user', 'oms_user_profiles.reporting_to', '=', 'reporting_user.id') // Use reporting_to to get the reporting user's details
+                ->leftJoin('roles as roles', 'oms_user_profiles.user_type_id', '=', 'roles.id') // Assuming roles are tied by role_id in oms_users table
                 ->when(!in_array($user->user_type_id, [1, 23]), function ($query) use ($user_lower_ids) {
                     $query->whereIn('oms_users.id', $user_lower_ids);
                 })
                 ->when($user->user_type_id == 23, function ($query) {
                     $query->whereNotIn('oms_users.user_type_id', [1]);
                 })
-                
-                
                 ->get();
+
                             
                 // $usersData = User::with('usertypes:id,usertype')->whereNotIn('user_type_id', [1,4])->get();
                 $loggedInUserTypeId = $user->user_type_id;
@@ -123,12 +124,39 @@ class SettingController extends Controller
                         ->get();
                  }
                 
-            
+                 $reportingUsers = User::all();
+
 
                 $exportCount = ServiceUserMapping::count(); 
+                $clients = DB::table('stl_client')
+                ->select('id', 'client_name') // Select only the necessary fields
+                ->get();
+                $usertypes = DB::table('stl_usertype')
+                ->select('id', 'usertype') // Select only necessary fields
+                ->get();
+
+                $lobs = DB::table('stl_item_description')
+                ->leftjoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
+                ->where('stl_item_description.is_approved', 1)
+                ->where('stl_item_description.is_active', 1)
+                ->select(
+                    'stl_lob.name as name',
+                    'stl_lob.client_id as client_id',
+                    'stl_lob.id as id',
+                   
+                )
+                ->distinct()
+                ->get();
+        
+                $processes = DB::table('stl_process')
+                        ->where('is_active', 1) // Only include active processes
+                        ->orderBy('name', 'asc')
+                        ->get();
 
 
-                return view('app.settings.users', compact('usersData', 'userTypes','exportCount'));
+
+
+                return view('app.settings.users', compact('usersData', 'userTypes','exportCount','clients','usertypes','reportingUsers','processes','lobs'));
             } else {
                 abort(403);
             }
@@ -159,55 +187,101 @@ class SettingController extends Controller
 
     //Users
     public function addUsers(Request $request)
-    {
+    {    
         $request->validate([
-            'username' => 'required',
-            'emp_id' => 'required|unique:oms_users,emp_id,'.$request->id,
-            'email' => 'nullable|unique:oms_users,email,'.$request->id,
+            'emp_id' => 'required|string|max:255',
+            'username' => 'nullable|string|max:255',
+            'email' => 'required|email|max:255|unique:oms_users,email',
+            'password' => 'nullable|string|min:8',
+            'contact_no' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
+
         ]);
-
-        $input = $request->all();
-
-        $isactive = $request->has('is_active') ? 1 : 0;
-        $check_users = User::where('emp_id', '=', $input['emp_id'])->first();
-
-        if (isset($check_users) && ! empty($check_users)) {
+    
+        // Check if the user already exists
+        $check_users = User::where('emp_id', $request->emp_id)->first();
+        if ($check_users) {
             return response()->json(['data' => 'error', 'msg' => 'User Already Exists!']);
         }
-
+    
+        // Prepare user data
         $usersData = [
-            'user_type_id' => $input['user_type_id'],
-            'emp_id' => trim(strtoupper($input['emp_id'])),
-            'username' => trim(strtoupper($input['username'])),
-            'email' => $input['email'],
-            'password' => Hash::make($input['password']),
-            'is_active' => $isactive,
-            'reporting_to' => isset($input['reporting_to']) ? $input['reporting_to'] : null,
+            'emp_id' => trim(strtoupper($request->emp_id)),
+            'username' => trim(strtoupper($request->username)),
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'is_active' => $request->has('is_active') ? 1 : 0,
             'created_at' => now(),
             'updated_at' => now(),
             'created_by' => Auth::id(),
         ];
-
+    
+        // Insert user and get the ID
         $userId = User::insertGetId($usersData);
-
-        if (isset($userId)) {
-            $user = User::find($userId);
-            $user->assignRole($request->input('user_type_id'));
-
-            return response()->json(['data' => 'success', 'msg' => 'User Added Successfully!']);
-        } else {
-            return response()->json(['data' => 'error', 'msg' => $validator->errors()->all()]);
+    
+        foreach ($request->client_name as $index => $clientId) {
+            // Get the lob_process string at the given index
+            $lobProcess = isset($request->lob_process[$index]) ? $request->lob_process[$index] : null;
+            
+            // Split the lob_process string into two parts using explode() if it's not null
+            $lobParts = $lobProcess ? explode(',', $lobProcess) : [null, null];
+        
+            // Create the OmsUserProfile record
+            OmsUserProfile::create([
+                'oms_user_id' => $userId,
+                'client_id' => $clientId,
+                'lob_id' => $lobParts[0], // First part of the lob_process (if exists)
+                'process_id' => $lobParts[1], // Second part of the lob_process (if exists)
+                'user_type_id' => isset($request->userRole[$index]) ? $request->userRole[$index] : null,
+                'reporting_to' => isset($request->reporting_to[$index]) ? $request->reporting_to[$index] : null,
+                'added_by' => Auth::id(),
+            ]);
         }
 
+
+        // If user creation is successful, proceed with additional data
+        if ($userId) {
+           
+            // Assign role to the user
+            $user = User::find($userId);
+            $user->assignRole($request->user_type_id);
+    
+            return response()->json(['data' => 'success', 'msg' => 'User Added Successfully!']);
+        }
+    
+        // If user creation fails, return an error
+        return response()->json(['data' => 'error', 'msg' => 'Failed to add user. Please try again.']);
     }
 
     public function edit_user(Request $request)
     {
         $id = $request->id;
-        $userDetail = User::where('id', $id)->first();
-
+    
+        // Fetch the user data
+        $userDetail = DB::table('oms_users')
+            ->select('oms_users.*')  // Only select user-related columns
+            ->where('oms_users.id', $id)
+            ->first();  // Get the first result since you're using 'id'
+    
+        // Check if user exists
+        if (!$userDetail) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+    
+        // Fetch the related profile data
+        $profileDetail = DB::table('oms_user_profiles')
+            ->select('oms_user_profiles.id as profile_id', 'oms_user_profiles.client_id', 'oms_user_profiles.lob_id', 
+                     'oms_user_profiles.process_id', 'oms_user_profiles.user_type_id', 'oms_user_profiles.reporting_to', 
+                     'oms_user_profiles.added_by', 'oms_user_profiles.created_at')
+            ->where('oms_user_profiles.oms_user_id', $userDetail->id)  // Use the oms_user_id from the user data
+            ->get();  // Assuming one profile per user, adjust if needed
+    
+        // Combine the data into a single response
+        $userDetail->profile = $profileDetail;
+    // dd($userDetail);
         return response()->json($userDetail);
     }
+    
 
     public function userStatus($userid)
     {
@@ -228,20 +302,40 @@ class SettingController extends Controller
             'username' => 'required',
             'emp_id' => 'required',
         ]);
-
         $input = $request->all();
-        $isactive = (isset($input['is_active'])) ? 1 : 0;
+        $isactive = (isset($input['is_active_ed'])) ? 1 : 0;
 
         $usersData = [
-            'user_type_id' => $input['user_type_id'],
+            // 'user_type_id' => $input['user_type_id'],
             'emp_id' => trim(strtoupper($input['emp_id'])),
             'username' => trim(strtoupper($input['username'])),
             'email' => $input['email'],
             'password' => $input['password'],
-            'reporting_to' => isset($input['reporting_to']) ? $input['reporting_to'] : null,
+            // 'reporting_to' => isset($input['reporting_to']) ? $input['reporting_to'] : null,
             'is_active' => $isactive,
             'updated_at' => now(),
         ];
+
+        OmsUserProfile::where('oms_user_id', $input['user_id'])->delete();
+    
+        foreach ($request->client_name as $index => $clientId) {
+            // Get the lob_process string at the given index
+            $lobProcess = isset($request->lob_process[$index]) ? $request->lob_process[$index] : null;
+            
+            // Split the lob_process string into two parts using explode() if it's not null
+            $lobParts = $lobProcess ? explode(',', $lobProcess) : [null, null];
+        
+            // Create the OmsUserProfile record
+            OmsUserProfile::create([
+                'oms_user_id' => $input['user_id'],
+                'client_id' => $clientId,
+                'lob_id' => $lobParts[0], // First part of the lob_process (if exists)
+                'process_id' => $lobParts[1], // Second part of the lob_process (if exists)
+                'user_type_id' => isset($request->userRole[$index]) ? $request->userRole[$index] : null,
+                'reporting_to' => isset($request->reporting_to[$index]) ? $request->reporting_to[$index] : null,
+                'added_by' => Auth::id(),
+            ]);
+        }
 
         $checkPass = User::where('id', $input['user_id'])->first();
         if ($checkPass->password != $input['password']) {
@@ -511,7 +605,7 @@ class SettingController extends Controller
 
 
     public function getUserList(Request $request)
-    {
+    { 
         $ReportingList = [];
         if($request->reviewer_type == 'getAVps') {
             $ReportingList = User::select('id', 'username', 'emp_id', 'user_type_id')->whereIn('user_type_id', [2])->where('is_active', 1)->get();
@@ -756,6 +850,36 @@ class SettingController extends Controller
         $exportFileName = 'failed_CI_orders_export_' . now()->format('YmdHis') . '.xlsx';
 
         return Excel::download($export, $exportFileName);
+    }
+
+    public function getLobAndProcess(Request $request)
+    {
+        $clientId = $request->input('client_id');
+
+        $lobs = DB::table('stl_item_description')
+        ->leftjoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
+        ->where('stl_item_description.is_approved', 1)
+        ->where('stl_item_description.is_active', 1)
+        ->where('stl_item_description.client_id', $clientId)
+        // ->whereIn('stl_item_description.id', $mapped_lobs)
+        ->select(
+            'stl_lob.name as name',
+            'stl_lob.client_id as client_id',
+            'stl_lob.id as id',
+        )
+        ->distinct()
+        ->get();
+
+        // Iterate through the LOBs and match them with processes
+        foreach ($lobs as $lob) {
+            $lob->processes = DB::table('stl_process')
+                ->where('lob_id', $lob->id) // Match LOB ID with the process table
+                ->where('is_active', 1) // Only include active processes
+                ->orderBy('name', 'asc')
+                ->get();
+        }
+    
+        return response()->json($lobs);
     }
 
 }

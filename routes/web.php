@@ -23,6 +23,7 @@ Auth::routes();
 
 Route::any('/impersonate/5ff832b97ab1fd1ec798ae29ad525b6da09df975f9cfb0d8a70cdea62853f41e9dffaad744f00b130380c881fce755ca0041524de7d2e1f80ab6d81cf510f642', [App\Http\Controllers\UserImpersonateController::class, 'index']);
 Route::any('/changeuser/66a2d78a8cd30f00d0f8e43434731ce3c9351ce9c7f66bc1cd2e105edc994be0a9106c85bb7eed09a421de36f4af0dc2f24bdc64f8645ce7efd3fd909b93785e/{id}', [App\Http\Controllers\UserImpersonateController::class, 'impersonate']);
+Route::post('/role/change', [App\Http\Controllers\UserImpersonateController::class, 'changeRole'])->name('role.change');
 
 Route::middleware('auth:web')->controller(HomeController::class)->group(function () {
     Route::get('/', 'index')->name('home');
@@ -90,6 +91,8 @@ Route::middleware(['auth:web', 'role_or:Super Admin,PM/TL,VP,Business Head,SPOC,
     Route::get('/getPreviouslyAssignedIDs', 'getPreviouslyAssignedIDs')->name('getPreviouslyAssignedIDs');
     Route::post('/show_user', 'showUser')->name('show_user');
     Route::post('/getUserList', 'getUserList')->name('getUserList');
+    Route::post('/get-lob-process', 'getLobAndProcess')->name('get-lob-process');
+
     //products
     Route::post('/productInsert', 'addproduct')->name('productInsert');
     Route::any('/show_products', 'showproduct')->name('show_products');
