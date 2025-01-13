@@ -196,6 +196,15 @@ Route::middleware('auth:web','role_or:Super Admin,PM/TL,VP,Business Head,SPOC,Ad
 
     Route::post('getCities', 'getCities')->name('getCities');
 
+    Route::post('get_assignee_user', 'get_assignee_user')->name('get_assignee_user');
+    Route::post('get_assignee_qc', 'get_assignee_qc')->name('get_assignee_qc');
+    Route::post('get_typists', 'get_typists')->name('get_typists');
+    Route::post('get_typists_qc', 'get_typists_qc')->name('get_typists_qc');
+
+
+
+
+
 });
 
 

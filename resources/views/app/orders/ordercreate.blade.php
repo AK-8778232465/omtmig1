@@ -274,18 +274,18 @@
                             <label class="font-weight-bold">Assign User</label>
                             <select id="assignee_user" name="assignee_user" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected disabled value="">Select Assignee</option>
-                                @foreach ($processors as $processor)
+                                {{-- @foreach ($processors as $processor)
                                     <option value="{{ $processor->id }}">{{ $processor->emp_id. " (" .$processor->username. ")"  }}</option>
-                                @endforeach
+                                @endforeach --}}
                             </select>
                         </div>
                         <div class="form-group col-lg-3 mb-3 pb-0" id = "assign_qa_container">
                             <label class="font-weight-bold">Assign QA</label>
                             <select id="assignee_qa" name="assignee_qa" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Enter Status"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select QA</option>
-                                @foreach ($qcers as $qcer)
+                                {{-- @foreach ($qcers as $qcer)
                                     <option value="{{ $qcer->id }}">{{ $qcer->emp_id. " (" .$qcer->username. ")"  }}</option>
-                                @endforeach
+                                @endforeach --}}
                             </select>
                         </div>
                         <div class="form-group col-lg-3 mb-3 pb-0" id= "tier-container">
@@ -304,9 +304,9 @@
                             <label class="font-weight-bold">Typist</label>
                             <select id="typist_id" name="typist_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Typist</option>
-                                @foreach ($typists as $typist)
+                                {{-- @foreach ($typists as $typist)
                                 <option value="{{ $typist->id }}">{{ $typist->emp_id. " (" .$typist->username. ")"  }}</option>
-                                @endforeach
+                                @endforeach --}}
                             </select>
                         </div>
 
@@ -314,9 +314,9 @@
                             <label class="font-weight-bold">Typist QC</label>
                             <select id="typist_qc_id" name="typist_qc_id" type="text" class="form-control select2dropdown" style="width:100%" autocomplete="off" placeholder="Select Typist QC"  data-parsley-trigger="focusout" data-parsley-trigger="keyup">
                                 <option selected="" disabled="" value="">Select Typist QC</option>
-                                @foreach ($typist_qcs as $typist_qc)
+                                {{-- @foreach ($typist_qcs as $typist_qc)
                                 <option value="{{ $typist_qc->id }}">{{ $typist_qc->emp_id. " (" .$typist_qc->username. ")"  }}</option>
-                                @endforeach
+                                @endforeach --}}
                             </select>
                         </div>
                         {{-- 4th end --}}
@@ -874,6 +874,182 @@ $('#lob_id').on('change', function () {
 
             $.each(response, function (key, value) {
                 $("#process_type_id").append('<option value="' + value.id + '">' + value.name + '</option>');
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching process types: ", status, error);
+        }
+    });
+});
+
+
+
+// $('#process_code').on('change', function () {
+//     var select_client_id = $("#select_client_id").val();
+//     var process_type_id = $("#process_type_id").val();
+
+//     $.ajax({
+//         url: "{{ url('get_assignee_user') }}",
+//         type: "POST",
+//         data: {
+//             select_client_id: select_client_id,
+//             process_type_id: process_type_id,
+//             _token: '{{ csrf_token() }}'
+//         },
+//         dataType: 'json',
+//         success: function (response) {
+//             $('#assignee_user').html('<option value="">Select Assignee</option>');
+
+//             // Ensure you access response.assignee_users if the returned data is inside this key
+//             $.each(response.assignee_users, function (key, value) {
+//                 $("#assignee_user").append('<option value="' + value.oms_user_id + '">' + value.username + '</option>');
+//             });
+//         },
+//         error: function (xhr, status, error) {
+//             console.error("Error fetching process types: ", status, error);
+//         }
+//     });
+// });
+
+
+
+// $('#process_code').on('change', function () {
+//     var select_client_id = $("#select_client_id").val();
+//     var process_type_id = $("#process_type_id").val();
+
+//     $.ajax({
+//         url: "{{ url('get_assignee_qc') }}",
+//         type: "POST",
+//         data: {
+//             select_client_id: select_client_id,
+//             process_type_id: process_type_id,
+//             _token: '{{ csrf_token() }}'
+//         },
+//         dataType: 'json',
+//         success: function (response) {
+//             $('#assignee_qa').html('<option value="">Select QA</option>');
+
+//             // Ensure you access response.assignee_users if the returned data is inside this key
+//             $.each(response.assignee_qcer, function (key, value) {
+//                 $("#assignee_qa").append('<option value="' + value.oms_user_id + '">' + value.username + '</option>');
+//             });
+//         },
+//         error: function (xhr, status, error) {
+//             console.error("Error fetching process types: ", status, error);
+//         }
+//     });
+// });
+
+
+$('#process_code').on('change', function () {
+    var select_client_id = $("#select_client_id").val();
+    var process_type_id = $("#process_type_id").val();
+    var lob_id = $("#lob_id").val();
+
+    $.ajax({
+        url: "{{ url('get_assignee_user') }}",
+        type: "POST",
+        data: {
+            select_client_id: select_client_id,
+            process_type_id: process_type_id,
+            lob_id: lob_id,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            $('#assignee_user').html('<option value="">Select Assignee</option>');
+
+            // Ensure you're using the correct key from the response
+            $.each(response.assignee_user, function (key, value) {
+                $("#assignee_user").append('<option value="' + value.oms_user_id + '">' + value.username + '</option>');
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching process types: ", status, error);
+        }
+    });
+});
+
+$('#process_code').on('change', function () {
+    var select_client_id = $("#select_client_id").val();
+    var process_type_id = $("#process_type_id").val();
+    var lob_id = $("#lob_id").val();
+
+    $.ajax({
+        url: "{{ url('get_assignee_qc') }}",
+        type: "POST",
+        data: {
+            select_client_id: select_client_id,
+            process_type_id: process_type_id,
+            lob_id: lob_id,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            $('#assignee_qa').html('<option value="">Select QA</option>');
+
+            // Correctly access the key for 'assignee_qcer'
+            $.each(response.assignee_qcer, function (key, value) {
+                $("#assignee_qa").append('<option value="' + value.oms_user_id + '">' + value.username + '</option>');
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching process types: ", status, error);
+        }
+    });
+});
+
+
+$('#process_code').on('change', function () {
+    var select_client_id = $("#select_client_id").val();
+    var process_type_id = $("#process_type_id").val();
+    var lob_id = $("#lob_id").val();
+
+    $.ajax({
+        url: "{{ url('get_typists') }}",
+        type: "POST",
+        data: {
+            select_client_id: select_client_id,
+            process_type_id: process_type_id,
+            lob_id: lob_id,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            $('#typist_id').html('<option value="">Select Typist</option>');
+
+            // Correctly access the key for 'assignee_qcer'
+            $.each(response.assignee_typist, function (key, value) {
+                $("#typist_id").append('<option value="' + value.oms_user_id + '">' + value.username + '</option>');
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching process types: ", status, error);
+        }
+    });
+});
+
+$('#process_code').on('change', function () {
+    var select_client_id = $("#select_client_id").val();
+    var process_type_id = $("#process_type_id").val();
+    var lob_id = $("#lob_id").val();
+
+    $.ajax({
+        url: "{{ url('get_typists_qc') }}",
+        type: "POST",
+        data: {
+            select_client_id: select_client_id,
+            process_type_id: process_type_id,
+            lob_id: lob_id,
+            _token: '{{ csrf_token() }}'
+        },
+        dataType: 'json',
+        success: function (response) {
+            $('#typist_qc_id').html('<option value="">Select Typist QC</option>');
+
+            // Correctly access the key for 'assignee_qcer'
+            $.each(response.assignee_typist_qc, function (key, value) {
+                $("#typist_qc_id").append('<option value="' + value.oms_user_id + '">' + value.username + '</option>');
             });
         },
         error: function (xhr, status, error) {
