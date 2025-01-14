@@ -2246,7 +2246,11 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 else {
                     $orderId = '';
                 }
-            } else {
+            }
+            else if ($order->status_id == 1 && $order->assignee_user_id == null){
+                $orderId =  '';
+            }
+            else {
                 $orderId = $order->id ?? '';
             }
 
