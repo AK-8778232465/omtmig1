@@ -397,6 +397,8 @@
                                 @if(!Auth::user()->hasRole('Qcer'))
                                 <option value="11" id="search_qa">QA</option>
                                 @endif
+                                <option value="12" id="search_County">Typist</option>
+                                <option value="13" id="search_County">Typist QC</option>
                             </select>
                         </div>
             
