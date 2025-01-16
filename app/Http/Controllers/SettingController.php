@@ -198,13 +198,12 @@ class SettingController extends Controller
             'is_active' => 'nullable|boolean',
 
         ]);
-    // dd($request->emp_id);
+
         // Check if the user already exists
         $check_users = User::where('emp_id', $request->emp_id)->first();
         if ($check_users) {
             return response()->json(['data' => 'error', 'msg' => 'User Already Exists!']);
         }
-    
         // Prepare user data
         $usersData = [
             'emp_id' => trim(strtoupper($request->emp_id)),
@@ -215,6 +214,7 @@ class SettingController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
             'created_by' => Auth::id(),
+            'is_multirole' => $request->has('is_multirole') ? 1 : 0,
         ];
 
        // Conditionally add additional fields if provided
@@ -315,7 +315,8 @@ class SettingController extends Controller
         ]);
         $input = $request->all();
         $isactive = (isset($input['is_active_ed'])) ? 1 : 0;
-
+        $is_multirole = (isset($input['is_edit_multierole'])) ? 1 : 0;
+        
         $usersData = [
             // 'user_type_id' => $input['user_type_id'],
             'emp_id' => trim(strtoupper($input['emp_id'])),
@@ -324,29 +325,47 @@ class SettingController extends Controller
             'password' => $input['password'],
             // 'reporting_to' => isset($input['reporting_to']) ? $input['reporting_to'] : null,
             'is_active' => $isactive,
+            'is_multirole' => $is_multirole,
             'updated_at' => now(),
         ];
 
+            // Conditionally add additional fields if provided
+            if ($is_multirole != 1) {
+                // Add fields if $is_multirole is not equal to 1
+                $usersData = array_merge($usersData, [
+                    'user_type_id' => $input['user_type_id'],
+                    'reporting_to' => isset($input['reporting_to']) ? $input['reporting_to'] : null,
+                ]);
+            } else {
+                // Update fields to null if $is_multirole is equal to 1
+                $usersData['user_type_id'] = null;
+                $usersData['reporting_to'] = null;
+            }
+
         OmsUserProfile::where('oms_user_id', $input['user_id'])->delete();
-    
-        foreach ($request->client_name as $index => $clientId) {
-            // Get the lob_process string at the given index
-            $lobProcess = isset($request->lob_process[$index]) ? $request->lob_process[$index] : null;
+        if($is_multirole == 1) {
+
+            foreach ($request->client_name as $index => $clientId) {
+                // Get the lob_process string at the given index
+                $lobProcess = isset($request->lob_process[$index]) ? $request->lob_process[$index] : null;
+                
+                // Split the lob_process string into two parts using explode() if it's not null
+                $lobParts = $lobProcess ? explode(',', $lobProcess) : [null, null];
             
-            // Split the lob_process string into two parts using explode() if it's not null
-            $lobParts = $lobProcess ? explode(',', $lobProcess) : [null, null];
-        
-            // Create the OmsUserProfile record
-            OmsUserProfile::create([
-                'oms_user_id' => $input['user_id'],
-                'client_id' => $clientId,
-                'lob_id' => $lobParts[0], // First part of the lob_process (if exists)
-                'process_id' => $lobParts[1], // Second part of the lob_process (if exists)
-                'user_type_id' => isset($request->userRole[$index]) ? $request->userRole[$index] : null,
-                'reporting_to' => isset($request->reporting_to[$index]) ? $request->reporting_to[$index] : null,
-                'added_by' => Auth::id(),
-            ]);
+                // Create the OmsUserProfile record
+                OmsUserProfile::create([
+                    'oms_user_id' => $input['user_id'],
+                    'client_id' => $clientId,
+                    'lob_id' => $lobParts[0], // First part of the lob_process (if exists)
+                    'process_id' => $lobParts[1], // Second part of the lob_process (if exists)
+                    'user_type_id' => isset($request->userRole[$index]) ? $request->userRole[$index] : null,
+                    'reporting_to' => isset($request->reporting_to[$index]) ? $request->reporting_to[$index] : null,
+                    'added_by' => Auth::id(),
+                ]);
+            }
+
         }
+       
 
         $checkPass = User::where('id', $input['user_id'])->first();
         if ($checkPass->password != $input['password']) {

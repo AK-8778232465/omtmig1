@@ -199,7 +199,7 @@
             </div>
             <div class="col-lg-3 ml-1  align-items-center d-flex" >
                 <div class="">
-                    <input type="checkbox" class="mx-1" value="1" id="can_assign_role" name="can_assign_role" />
+                    <input type="checkbox" class="mx-1" value="1" id="is_multirole" name="is_multirole" />
                     <label for="can_assign_role">Assign Multiple Role</label>
                 </div>
             </div>
@@ -235,7 +235,7 @@
                         </div>
                         <div class="col-lg-3">
                             <label class="mt-2">LOB & Process</label>
-                            <select id="lob_process_0" name="lob_process[]" class="form-control lob-process" data-index="0" disabled>
+                            <select id="lob_process_0" name="lob_process[]" class="form-control lob-process" data-index="0" >
                                 <option value="">Select LOB & Process</option>
                             </select>
                         </div>
@@ -270,7 +270,7 @@
   
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-danger" id="close_modal" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" id="close_modals" data-dismiss="modal">Close</button>
         <button type="submit" class="btn btn-primary" onclick="usersVal(event);">Create</button>
     </div>
 </form>
@@ -322,14 +322,14 @@
                             </div>
                             <div class="col-lg-3">
                                 <div class="mt-3">
-                                    <input type="checkbox" class="mx-1" value="1" id="edit_assign_role" name="edit_assign_role" />
+                                    <input type="checkbox" class="mx-1" value="1" id="is_edit_multierole" name="is_edit_multierole" />
                                     <label for="can_assign_order"> Assign Multiple Role?</label>
                                 </div>
                             </div>
                             <div class="col-lg-3 " id="user_role_div_ed">
 								<label for="example-email-input" class="col-form-label"> User Role <span class="text-danger"> * </span></label>
-                                <Select required class="form-control select_role" name="user_type_id" id="user_type_id_ed">
-                                    <option selected disabled value="">Select Role</option>
+                                <Select  class="form-control select_role" name="user_type_id" id="user_type_id_ed">
+                                    <option selected  value="">Select Role</option>
                                         @forelse($userTypes as $userType)
                                         <option value="{{$userType->id}}"> {{$userType->usertype}}</option>
                                         @empty
@@ -349,7 +349,7 @@
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" id="close_modal" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" id="close_modals" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Update</button>
                     </div>
                 </form>
@@ -518,6 +518,7 @@
     }
 
     $('#updateuserfrm').on('submit', function(event){
+
 		event.preventDefault();
         $('#department_ed').prop('disabled', false);
 		if($('#updateuserfrm').parsley().isValid()){
@@ -1173,7 +1174,7 @@ function addNewSubcategory() {
         <div class=" row">
             <div class="col-lg-3">
                 <label class="mt-2">Client:</label>
-                <select class="form-control client-select" name="client_name[]" id="client_${index}" data-index="${index}" required>
+                <select class="form-control client-select" name="client_name[]" id="client_${index}" data-index="${index}" >
                     ${clientOptions}
                 </select>
             </div>
@@ -1277,6 +1278,7 @@ $(document).ready(function () {
                 $("#email_ed").val(res['email']);
                 $("#contact_no_ed").val(res['contact_no']);
                 $("#password_ed").val(res['password']);
+                $("#user_type_id_ed").val(res['user_type_id']);
 
                 // Handle the "is_active" checkbox
                 if (res['is_active'] == 1) {
@@ -1285,8 +1287,70 @@ $(document).ready(function () {
                     $("#is_active_ed").prop('checked', false);
                 }
 
+                if (res['is_multirole'] == 1) {
+                    $("#is_edit_multierole").prop('checked', true);
+                    var userRoleDiv = document.getElementById('user_role_div_ed');
+                    var userRoleMulti = document.getElementById('edit_existing_subcategories');
+                    // var userDiv = document.getElementById('user_div');
+                    var roleDiv = document.getElementById('edit_reporting_to');
+                    userRoleDiv.style.display = 'none';  
+                    userRoleMulti.style.display = 'block';  
+                    roleDiv.style.display = 'none';  
+                } else {
+                    $("#is_edit_multierole").prop('checked', false);
+                }
+
                 // Handle the profiles and dynamically add them to the modal
                 populateEditSubcategories(res.profile);
+
+                let role = res['user_type_id'];
+                let reporting_users;
+                if(role == 1) {
+                    $('#edit_reporting_to').hide();
+                } else if (role == 3) {
+                    $('#edit_reporting_to').show();
+                    reporting_users = 'getAVps';
+                } else if (role == 5) {
+                    $('#edit_reporting_to').show();
+                    reporting_users = 'getBussinessHeads';
+                } else if (role == 9) {
+                    $('#edit_reporting_to').show();
+                    reporting_users = 'getPM_TL';
+                }else if (role == 6 || role == 7 || role == 8  || role == 10 || role == 11 || role == 22 ) {
+                    $('#edit_reporting_to').show();
+                    reporting_users = 'getSOPC';
+                }else if (role == 2 ) {
+                    $('#edit_reporting_to').show();
+                    reporting_users = 'getVps';
+                    console.log(reporting_users);
+                }else if (role == 24 ) {
+                    $('#edit_reporting_to').show();
+                    // reporting_users = 'getAdmin';
+                }
+                $.ajax({
+                    url: "{{ route('getUserList') }}",
+                    type: "POST",
+                    data: {
+                        reviewer_type: reporting_users,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(html) {
+                        $('#reporting_to_ed').html(html);
+                        let reporting_to = res['reporting_to'];
+                        if (reporting_to && $.isNumeric(reporting_to)) {
+                            $("#reporting_to_ed").val(res['reporting_to']);
+                            
+                            $('#edit_reporting_to').show();
+                        } else {
+                            $('#edit_reporting_to').hide();
+                        }
+                        console.log(reporting_to)
+                    },
+                    error: function(error) {
+                        // Handle error if needed
+                    }
+                });
+
 
                 // Show the modal
                 $("#userEditModal").modal('show');
@@ -1333,7 +1397,7 @@ $('#edit_existing_subcategories').on('change', '.edit_user_role', function () {
     var role = $this.val(); // Get the selected value from the current row's userRole dropdown
     var reporting_users = null;
 
-    // Clear the reporting_to dropdown before populating
+   // Clear the reporting_to dropdown before populating
     $(`#edit_reporting_to_${index}`).html('<option value="" disabled selected>Select a Reporting User</option>');
 
     // Determine the type of reporting users based on the selected role
@@ -1428,7 +1492,7 @@ function populateEditSubcategories(profiles) {
                 <div class="row ">
                     <div class="col-lg-3">
                         <label class="mt-2">Client:</label>
-                        <select class="form-control edit_client" name="client_name[]" id="edit_client_${index}" data-index="${index}" required>
+                        <select class="form-control edit_client" name="client_name[]" id="edit_client_${index}" data-index="${index}" >
                             ${clientOptions}
                         </select>
                     </div>
@@ -1452,7 +1516,10 @@ function populateEditSubcategories(profiles) {
                         </select>
                     </div>
                     <div class="d-flex justify-content-center align-items-center mt-4 col-lg-1">
-                        <button id="add_new_row_btn" type="button" class="btn btn-success btn-sm text-white">+</button>
+                          ${index === 0 ? 
+                    `<button id="add_new_row_btn" type="button" class="btn btn-success btn-sm text-white">+</button>` : 
+                    `<button type="button" class="btn btn-danger remove-row btn-sm text-white " data-index="${index}">-</button>`
+                }
                     </div>
                 </div>
             </div>
@@ -1492,7 +1559,7 @@ function populateEditSubcategories(profiles) {
             <div class=" row">
                 <div class="col-lg-3">
                     <label class="mt-2">Client:</label>
-                    <select class="form-control edit_client" name="client_name[]" id="edit_client_${newIndex}" data-index="${newIndex}" required>
+                    <select class="form-control edit_client" name="client_name[]" id="edit_client_${newIndex}" data-index="${newIndex}" >
                         ${clientOptions}
                     </select>
                 </div>
@@ -1552,7 +1619,7 @@ function populateEditSubcategories(profiles) {
 
 </script>
 <script>
-    document.getElementById('can_assign_role').addEventListener('change', function() {
+    document.getElementById('is_multirole').addEventListener('change', function() {
         var userRoleDiv = document.getElementById('user_role_div');
         var userRoleMulti = document.getElementById('multipleRole');
         var userDiv = document.getElementById('user_div');
@@ -1572,7 +1639,7 @@ function populateEditSubcategories(profiles) {
         }
     });
 
-    document.getElementById('edit_assign_role').addEventListener('change', function() {
+    document.getElementById('is_edit_multierole').addEventListener('change', function() {
         var userRoleDiv = document.getElementById('user_role_div_ed');
         var userRoleMulti = document.getElementById('edit_existing_subcategories');
         // var userDiv = document.getElementById('user_div');
@@ -1582,14 +1649,20 @@ function populateEditSubcategories(profiles) {
             userRoleDiv.style.display = 'none';  
             userRoleMulti.style.display = 'block';  
             roleDiv.style.display = 'none';  
-            userDiv.classList.add('mt-3', 'mb-3');
+            // userDiv.classList.add('mt-3', 'mb-3');
         } else {
             userRoleDiv.style.display = 'block';  
             userRoleMulti.style.display = 'none';  
             $('#edit_reporting_to').hide(); 
-            userDiv.classList.remove('mt-3', 'mb-3');
+            // userDiv.classList.remove('mt-3', 'mb-3');
             roleDiv.style.display = 'block'; 
         }
     });
+    document.getElementById('close_modals').addEventListener('click', function(event) {
+  // Prevent the default modal dismissal behavior
+  event.preventDefault();
+  // Reload the page
+  location.reload();
+});
 </script>
 @endsection
