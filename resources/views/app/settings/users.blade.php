@@ -1062,7 +1062,7 @@ function assignService(userID) {
                                 if (lob.processes && Array.isArray(lob.processes)) {
                                     lob.processes.forEach(function (process) {
                                         // Add options in the format `${lob.name} (${process.name})`
-                                        $('#lob-process').append(`<option value="${process.id}">${lob.name} (${process.name})</option>`);
+                                        $('#lob-process').append(`<option value="${lob.id},${process.id}">${lob.name} (${process.name})</option>`);
                                     });
                                 }
                             });

@@ -109,15 +109,22 @@
     </div>
         <div id="overlay"></div>
         <div class="topbar">
-            <div id="snow"></div>
+            <div id="snow"></div>   
             @if (Auth::guard('web')->check())
                 <div class="topbar-inner">
-    @php
-    $roleList = null;
-    $roleList = \DB::table('oms_user_profiles')->select('oms_user_profiles.user_type_id', 'stl_usertype.usertype')
-        ->leftJoin('stl_usertype', 'stl_usertype.id', '=', 'oms_user_profiles.user_type_id')
-        ->where('oms_user_id', Auth::id())->distinct()->get();
-    @endphp
+
+            @php
+            $roleList = null;
+            $roleList = \DB::table('oms_user_profiles')->select('oms_user_profiles.user_type_id', 'stl_usertype.usertype')
+                ->leftJoin('stl_usertype', 'stl_usertype.id', '=', 'oms_user_profiles.user_type_id')
+                ->where('oms_user_id', Auth::id())->distinct()->get();
+
+            $firstUser = null;
+            $firstUser = \DB::table('oms_users')->select('is_multirole')
+                ->where('id', Auth::id())
+                ->distinct()
+                ->first();
+            @endphp
 
                     <div class="navbar-custom-menu " style="margin-left: .5rem !important">
                         <div id="navigation">
@@ -166,18 +173,20 @@
 
                     </div>
                     <nav class="navbar-custom float-right d-flex">
-                    <div style="display: flex; justify-content: center; align-items: center; width: 200px;">
-                        <select name="role_selector" id="role_selector" class="form-control select2dropdown col-12" style="text-align: center; text-align-last: center; width: 200px; font-size: 13px !important;">
-                        <option value="">Select Role</option>
-                            @foreach($roleList as $role)
-                                @if($role->user_type_id == Auth::user()->user_type_id)
-                                    <option value="{{ $role->user_type_id }}" selected>{{ $role->usertype }}</option>
-                                @else
-                                    <option value="{{ $role->user_type_id }}">{{ $role->usertype }}</option>
-                                @endif
-                            @endforeach
-                        </select>
-                    </div>
+                   @if ($firstUser && $firstUser->is_multirole === 1) 
+                        <div style="display: flex; justify-content: center; align-items: center; width: 200px;">
+                            <select name="role_selector" id="role_selector" class="form-control select2dropdown col-12" style="text-align: center; text-align-last: center; width: 200px; font-size: 13px !important;">
+                            <option value="">Select Role</option>
+                                @foreach($roleList as $role)
+                                    @if($role->user_type_id == Auth::user()->user_type_id)
+                                        <option value="{{ $role->user_type_id }}" selected>{{ $role->usertype }}</option>
+                                    @else
+                                        <option value="{{ $role->user_type_id }}">{{ $role->usertype }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
                         <ul class="list-unstyled topbar-nav mb-0">
                             <li class="dropdown">
                                 <a class="nav-link dropdown-toggle waves-effect waves-light nav-user" data-toggle="dropdown" href="#" role="button"
