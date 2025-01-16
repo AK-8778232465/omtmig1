@@ -1611,7 +1611,33 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
         });
     }
     if ($searchType == 11 && !empty($searchInputs)) {
-        $query->where('assignee_qas.username', 'like', '%' . $searchInputs . '%');
+        preg_match('/\((.*?)\)/', $searchInputs, $matches);
+        $contentInsideParentheses = $matches[1] ?? $searchInputs;
+
+        $query->where(function($q) use ($contentInsideParentheses) {
+            $q->where('assignee_qas.username', 'like', '%' . $contentInsideParentheses . '%')
+              ->orWhere(DB::raw('CONCAT(assignee_qas.emp_id, " (", assignee_qas.username, ")")'), 'like', '%' . $contentInsideParentheses . '%');
+        });
+    }
+
+    if ($searchType == 12 && !empty($searchInputs)) {
+        preg_match('/\((.*?)\)/', $searchInputs, $matches);
+        $contentInsideParentheses = $matches[1] ?? $searchInputs;
+
+        $query->where(function($q) use ($contentInsideParentheses) {
+            $q->where('typist_users.username', 'like', '%' . $contentInsideParentheses . '%')
+              ->orWhere(DB::raw('CONCAT(typist_users.emp_id, " (", typist_users.username, ")")'), 'like', '%' . $contentInsideParentheses . '%');
+        });
+    }
+
+    if ($searchType == 13 && !empty($searchInputs)) {
+        preg_match('/\((.*?)\)/', $searchInputs, $matches);
+        $contentInsideParentheses = $matches[1] ?? $searchInputs;
+
+        $query->where(function($q) use ($contentInsideParentheses) {
+            $q->where('typist_qas.username', 'like', '%' . $contentInsideParentheses . '%')
+              ->orWhere(DB::raw('CONCAT(typist_qas.emp_id, " (", typist_qas.username, ")")'), 'like', '%' . $contentInsideParentheses . '%');
+        });
     }
 
 
@@ -2196,7 +2222,11 @@ if (isset($request->sessionfilter) && $request->sessionfilter == 'true') {
                 else {
                     $orderId = '';
                 }
-            } else {
+            }
+            else if ($order->status_id == 1 && $order->assignee_user_id == null){
+                $orderId =  '';
+            }
+            else {
                 $orderId = $order->id ?? '';
             }
 

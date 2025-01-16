@@ -398,6 +398,8 @@
                                 @if(!Auth::user()->hasRole('Qcer'))
                                 <option value="11" id="search_qa">QA</option>
                                 @endif
+                                <option value="12" id="search_typist">Typist</option>
+                                <option value="13" id="search_typist_qc">Typist QC</option>
                             </select>
                         </div>
             
@@ -1132,7 +1134,11 @@ $(document).ready(function() {
             datatable.column(15).visible(false);
         }
         @endif
-
+        if(status == 6){
+            $('#status_change_div').hide();
+        }else{
+            $('#status_change_div').show();
+        }
 
         if(status == 13){
             $('.status-dropdown').prop('disabled', false);
