@@ -363,14 +363,8 @@ private function getProcessIdsBasedOnUserRole($user)
             )
             // ->whereNotNull('oms_order_creations.assignee_user_id')
             ->where(function($query) {
-                $query->where(function($subQuery) {
-                    $subQuery->whereNull('oms_order_creations.typist_id')
-                             ->whereNotNull('oms_order_creations.assignee_user_id');
-                })
-                ->orWhere(function($subQuery) {
-                    $subQuery->whereNull('oms_order_creations.assignee_user_id')
-                             ->whereNotNull('oms_order_creations.typist_id');
-                });
+                $query->whereNotNull('oms_order_creations.assignee_user_id')
+                      ->orWhereNotNull('oms_order_creations.assignee_qa_id');
             })
             ->whereDate('oms_order_creations.order_date', '>=', $fromDate)
             ->whereDate('oms_order_creations.order_date', '<=', $toDate)

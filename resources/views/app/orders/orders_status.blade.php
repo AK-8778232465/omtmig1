@@ -1138,7 +1138,11 @@ $(document).ready(function() {
             datatable.column(15).visible(false);
         }
         @endif
-
+        if(status == 6){
+            $('#status_change_div').hide();
+        }else{
+            $('#status_change_div').show();
+        }
 
         if(status == 13){
             $('.status-dropdown').prop('disabled', false);
