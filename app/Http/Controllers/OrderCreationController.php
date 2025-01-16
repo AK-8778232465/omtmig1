@@ -121,14 +121,14 @@ public function getlobid(Request $request){
  
         $user = User::where('id', Auth::id())->first();
        
-        $processIds = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
+        // $processIds = DB::table('oms_user_service_mapping')->where('user_id', $user->id)->where('is_active', 1)->pluck('service_id')->toArray();
    
  
         $processtype = DB::table('stl_item_description')
         ->leftjoin('stl_process', 'stl_process.id', '=', 'stl_item_description.process_id')
         ->leftjoin('stl_client', 'stl_client.id', '=', 'stl_item_description.client_id')
             ->select('stl_process.id', 'stl_process.name')
-            ->whereIn('stl_item_description.id', $processIds)
+            // ->whereIn('stl_item_description.id', $processIds)
             ->where('stl_process.lob_id', $lob)
             ->where('stl_item_description.lob_id', $lob)
             ->where('stl_item_description.client_id', $client)

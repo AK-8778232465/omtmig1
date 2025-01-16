@@ -186,27 +186,44 @@
                 <span class="errorspannewpassinput1"></span>
             </div>
         </div>
-        <div class="row mt-1">
-            <div class="col-lg-3">
-                <br>
-                <div class="mt-3">
+        <div class="row " id="user_div">
+            <div class="col-lg-3 row ml-1  align-items-center d-flex justify-space-between " >
+                <div class="" >
                     <input type="checkbox" class="mx-1" value="1" id="is_active" name="is_active" />
                     <label for="is_active">Is Active?</label>
                 </div>
-            </div>
-            <div class="col-lg-3">
-                <br>
-                <div class="mt-3">
+                <div class=" p-2">
                     <input type="checkbox" class="mx-1" value="1" id="can_assign_order" name="can_assign_order" />
                     <label for="can_assign_order">Can Assign Order?</label>
                 </div>
             </div>
+            <div class="col-lg-3 ml-1  align-items-center d-flex" >
+                <div class="">
+                    <input type="checkbox" class="mx-1" value="1" id="can_assign_role" name="can_assign_role" />
+                    <label for="can_assign_role">Assign Multiple Role</label>
+                </div>
+            </div>
+            <div class="col-lg-3" id="user_role_div">
+                <label for="example-email-input" class="col-form-label"> User Role <span class="text-danger"> * </span></label>
+                <select  class="form-control select_role" name="user_type_id" id="user_type_id">
+                    <option selected disabled value="">Select Role</option>
+                    @forelse($userTypes as $userType)
+                        <option value="{{$userType->id}}"> {{$userType->usertype}}</option>
+                    @empty
+                    @endforelse
+                </select>
+            </div>
+            <div class="col-lg-3" id="add_reporting_to">
+                <label for="example-contact-input" class="col-form-label">Reporting To <span class="text-danger"> * </span></label>
+                <Select class="form-control select_role" name="reportingto" id="reportingto">
+                </Select>
+            </div>
         </div>
-        <div class="container">
+        <div class="row " id="multipleRole" style="display: none;">
             <div id="existing_subcategories">
                 <input type="hidden" name="subcat_id[]" value="" id="">
-                <div class="row mt-1" id="subcategory_row_0">
-                    <div class="col-lg-11 row">
+                <div class=" mt-1 " id="subcategory_row_0">
+                    <div class="d-flex ">
                         <div class="col-lg-3">
                             <label class="mt-2">Client</label>
                             <select name="client_name[]" id="client_0" class="form-control client-select" data-index="0">
@@ -231,24 +248,29 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-lg-3">                            
-                            <label class="mt-2">Reporting to</label>                                
-                            <select class="form-control reporting-to" name="reporting_to[]" id="reporting_to_0">
-                                <option value="">Select User Role first</option>
-                            </select>               
+                        <div class="col-lg-3 row" >  
+                            <div class="col-lg-11 ">
+                                <label class="mt-2">Reporting to</label>                                  
+                                <select class="form-control reporting-to" name="reporting_to[]" id="reporting_to_0">
+                                    <option value="">Select User Role first</option>
+                                </select>
+                            </div>                          
+                            <div class="d-flex justify-content-center align-items-center mt-4 col-lg-1" >
+                                <button type="button" class="btn btn-success btn-sm text-white add-row">+</button>
+                            </div>
+
                         </div>
                     </div>
-                    <div class="col-lg-1 d-flex justify-item-center align-items-center mt-4">
-                        <button type="button" class="btn btn-success btn-sm text-white pb-0 pt-0 pr-2 pl-2 add-row">+</button>
+                    <div class=" d-flex justify-item-center align-items-center mt-4">
                     </div>                
                 </div>
             </div>
         </div>
-            <div id="new_subcategory"></div>
+            <div id="new_subcategory" ></div>
   
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" id="close_modal" data-dismiss="modal">Close</button>
         <button type="submit" class="btn btn-primary" onclick="usersVal(event);">Create</button>
     </div>
 </form>
@@ -288,29 +310,46 @@
                             </div>
                         </div>
                         <div class="row mt-1">
-                            <div class="col-lg-3">
-                                <br>
+                            <div class="col-lg-3 row ml-1  align-items-center d-flex justify-space-between " >
                                 <div class="mt-3">
                                     <input type="checkbox" class="mx-1" value="1" id="is_active_ed" name="is_active_ed" />
                                     <label for="is_active">Is Active?</label>
                                 </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <br>
                                 <div class="mt-3">
                                     <input type="checkbox" class="mx-1" value="1" id="can_assign_order" name="can_assign_order" />
                                     <label for="can_assign_order">Can Assign Order?</label>
                                 </div>
                             </div>
+                            <div class="col-lg-3">
+                                <div class="mt-3">
+                                    <input type="checkbox" class="mx-1" value="1" id="edit_assign_role" name="edit_assign_role" />
+                                    <label for="can_assign_order"> Assign Multiple Role?</label>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 " id="user_role_div_ed">
+								<label for="example-email-input" class="col-form-label"> User Role <span class="text-danger"> * </span></label>
+                                <Select required class="form-control select_role" name="user_type_id" id="user_type_id_ed">
+                                    <option selected disabled value="">Select Role</option>
+                                        @forelse($userTypes as $userType)
+                                        <option value="{{$userType->id}}"> {{$userType->usertype}}</option>
+                                        @empty
+                                    @endforelse
+                                </Select>
+							</div>
+                            <div class="col-lg-3 " id="edit_reporting_to">
+                                <label for="example-email-input" class="col-form-label"> Reporting To <span class="text-danger"> * </span></label>
+                                <Select class="form-control select_role" name="reporting_to" id="reporting_to_ed"> </Select>
+                            </div>
+
                         </div>
-                        <!-- Profile (subcategories) -->
-                        <div id="edit_existing_subcategories">
-                            <!-- Existing subcategories will be dynamically populated here -->
+                        
+                        <div id="edit_existing_subcategories"  style="display: none;">
+                            
                         </div>
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" id="close_modal" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Update</button>
                     </div>
                 </form>
@@ -422,58 +461,58 @@
             window.location.href = "/users";
         }
         function usersVal(event) {
-    event.preventDefault(); // Prevent the default form submission
-
-    // Validate the form using Parsley.js
-    if ($("#usersForm").parsley().validate()) {
-        // If the form is valid, proceed with the AJAX request
-        $.ajax({
-            type: "POST",
-            cache: false,
-            async: false,
-            url: "{{ url('/usersInsert') }}",
-            data: new FormData($("#usersForm")[0]),
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                if (response.msg === "User Already Exists!") {
+        event.preventDefault(); // Prevent the default form submission
+    
+        // Validate the form using Parsley.js
+        if ($("#usersForm").parsley().validate()) {
+            // If the form is valid, proceed with the AJAX request
+            $.ajax({
+                type: "POST",
+                cache: false,
+                async: false,
+                url: "{{ url('/usersInsert') }}",
+                data: new FormData($("#usersForm")[0]),
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.msg === "User Already Exists!") {
+                        new PNotify({
+                            title: 'Error',
+                            text: response.msg,
+                            type: 'error'
+                        });
+                    } else if (response.msg === "Only Image Allowed!") {
+                        new PNotify({
+                            title: 'Error',
+                            text: response.msg,
+                            type: 'error'
+                        });
+                    } else if (response.msg === "User Added Successfully!") {
+                        new PNotify({
+                            title: 'Success',
+                            text: response.msg,
+                            type: 'success'
+                        });
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    }
+                },
+                error: function (response) {
+                    var err = "";
+                    $.each(response.responseJSON.errors, function (field_name, error) {
+                        err += error + "<br>";
+                    });
                     new PNotify({
                         title: 'Error',
-                        text: response.msg,
-                        type: 'error'
+                        text: err,
+                        type: 'error',
+                        delay: 1000
                     });
-                } else if (response.msg === "Only Image Allowed!") {
-                    new PNotify({
-                        title: 'Error',
-                        text: response.msg,
-                        type: 'error'
-                    });
-                } else if (response.msg === "User Added Successfully!") {
-                    new PNotify({
-                        title: 'Success',
-                        text: response.msg,
-                        type: 'success'
-                    });
-                    setTimeout(function () {
-                        location.reload();
-                    }, 1000);
                 }
-            },
-            error: function (response) {
-                var err = "";
-                $.each(response.responseJSON.errors, function (field_name, error) {
-                    err += error + "<br>";
-                });
-                new PNotify({
-                    title: 'Error',
-                    text: err,
-                    type: 'error',
-                    delay: 1000
-                });
-            }
-        });
+            });
+        }
     }
-}
     function usersStatus(value) {
         window.location.href = '/usersStatus/' + value;
     }
@@ -727,7 +766,7 @@ function assignService(userID) {
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(html) {
-                    $('#reporting_to').html(html);
+                    $('#reportingto').html(html);
                 },
                 error: function(error) {
                     // Handle error if needed
@@ -1001,32 +1040,50 @@ function assignService(userID) {
 
 <script>
     $(document).ready(function () {
-            $('#client').on('change', function () {
-                const clientId = $(this).val();
-                if (clientId) {
-                    $.ajax({
-                        url: "{{ route('get-lob-process') }}",
-                        method: 'POST',
-                        data: {
-                            client_id: clientId,
-                            _token: "{{ csrf_token() }}"
-                        },
-                        success: function (response) {
-                            $('#lob-process').html('<option value="">Select LOB & Process</option>');
-                            response.forEach(function (lob) {
-                                lob.processes.forEach(function (process) {
-                                    // Add options in the format `${lob.name} (${process.name})`
-                                    $('#lob-process').append(`<option value="${process.id}">${lob.name} (${process.name})</option>`);
-                                });
+        $('#client').on('change', function () {
+            const clientId = $(this).val();
+            if (clientId) {
+                $.ajax({
+                    url: "{{ route('get-lob-process') }}",
+                    method: 'POST',
+                    data: {
+                        client_id: clientId,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (response) {
+                        $('#lob-process').html('<option value="">Select LOB & Process</option>'); // Reset LOB & Process dropdown
+                        console.log(response); // Log the response to check its structure
+
+                        // Make sure response is an array
+                        if (Array.isArray(response)) {
+                            response.forEach(function (lob) { // Correctly iterate over each lob object
+                                // Check if processes are available in this lob object
+                                if (lob.processes && Array.isArray(lob.processes)) {
+                                    lob.processes.forEach(function (process) {
+                                        // Add options in the format `${lob.name} (${process.name})`
+                                        $('#lob-process').append(`<option value="${process.id}">${lob.name} (${process.name})</option>`);
+                                    });
+                                }
                             });
+
+                            // Enable the LOB & Process dropdown after adding options
                             $('#lob-process').prop('disabled', false);
+                        } else {
+                            console.error('Unexpected response format:', response);
+                            $('#lob-process').prop('disabled', true);
                         }
-                    });
-                } else {
-                    $('#lob-process').html('<option value="">Select LOB & Process</option>').prop('disabled', true);
-                }
-            });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('AJAX error:', error);
+                        $('#lob-process').prop('disabled', true);
+                    }
+                });
+            } else {
+                // Reset the dropdown if no client is selected
+                $('#lob-process').html('<option value="">Select LOB & Process</option>').prop('disabled', true);
+            }
         });
+    });
 </script>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
@@ -1112,8 +1169,8 @@ function addNewSubcategory() {
 
     // Append a new subcategory row to the container
     $('#new_subcategory').append(`
-    <div class="row mt-1" id="subcategory_row_${index}">
-        <div class="col-lg-11 row">
+    <div class=" mt-1" id="subcategory_row_${index}">
+        <div class=" row">
             <div class="col-lg-3">
                 <label class="mt-2">Client:</label>
                 <select class="form-control client-select" name="client_name[]" id="client_${index}" data-index="${index}" required>
@@ -1132,16 +1189,19 @@ function addNewSubcategory() {
                     ${userRoleOptions}
                 </select>
             </div>
-            <div class="col-lg-3">                
-                <label class="mt-2">Reporting to:</label>                
+            <div class="col-lg-3 d-flex">
+                <div class="col-lg-11 ">                
+                    <label class="mt-2">Reporting to:</label>                
                     <select class="form-control reporting-to" name="reporting_to[]" id="reporting_to_${index}">
-                        <option value="" disabled selected>Select a Reporting User</option>
+                        <option value="" disabled selected>Select User Role first</option>
                     </select>
+                </div>
+                <div class=" d-flex justify-content-center align-items-center mt-4 col-lg-1" >
+                    <button type="button" class="btn btn-danger btn-sm text-white remove-row " data-index="${index}">-</button>
+                </div>
             </div>
         </div>
-        <div class="col-lg-1 d-flex justify-item-center align-items-center mt-4">
-            <button type="button" class="btn btn-danger btn-sm text-white remove-row pb-0 pt-0 pr-2 pl-2 m-1" data-index="${index}">-</button>
-        </div>
+       
     </div>
     `);
 }
@@ -1172,7 +1232,7 @@ function addNewSubcategory() {
                         lobProcessDropdown.html('<option value="">Select LOB & Process</option>');
                         response.forEach(function (lob) {
                             lob.processes.forEach(function (process) {
-                                lobProcessDropdown.append(`<option value="${process.id},${lob.id}">${lob.name} (${process.name})</option>`);
+                                lobProcessDropdown.append(`<option value="${lob.id},${process.id}">${lob.name} (${process.name})</option>`);
                             });
                         });
                         lobProcessDropdown.prop('disabled', false);
@@ -1251,7 +1311,7 @@ $(document).ready(function () {
                         lobProcessDropdown.html('<option value="">Select LOB & Process</option>');
                         response.forEach(function (lob) {
                             lob.processes.forEach(function (process) {
-                                lobProcessDropdown.append(`<option value="${process.id},${lob.id}">${lob.name} (${process.name})</option>`);
+                                lobProcessDropdown.append(`<option value="${lob.id},${process.id}">${lob.name} (${process.name})</option>`);
                             });
                         });
                         lobProcessDropdown.prop('disabled', false);
@@ -1342,7 +1402,8 @@ function populateEditSubcategories(profiles) {
             // Assuming you have an array `processes` and `lob` is an array of lobs
             lobs.forEach(lob => {
                 processes.forEach(process => {
-                    lopProcessOption += `<option value="${process.id},${lob.id}" 
+                    console.log(lob.id, profile.process_id);
+                    lopProcessOption += `<option value="${lob.id},${process.id}" 
                         ${lob.id === profile.lob_id && process.id === profile.process_id ? 'selected' : ''}>
                         ${lob.name} (${process.name})
                     </option>`;
@@ -1363,8 +1424,8 @@ function populateEditSubcategories(profiles) {
 
             // Append the profile data to the modal
             $('#edit_existing_subcategories').append(`
-            <div class="row mt-1" id="edit_subcategory_row_${index}">
-                <div class="col-lg-11 row">
+            <div class=" mt-1" id="edit_subcategory_row_${index}">
+                <div class="row ">
                     <div class="col-lg-3">
                         <label class="mt-2">Client:</label>
                         <select class="form-control edit_client" name="client_name[]" id="edit_client_${index}" data-index="${index}" required>
@@ -1373,26 +1434,26 @@ function populateEditSubcategories(profiles) {
                     </div>
                     <div class="col-lg-3">
                         <label class="mt-2">LOB & Process:</label>
-                        <select id="edit_lob_process_${index}" name="lob_process[]" class="form-control" data-index="${index}">
+                        <select id="edit_lob_process_${index}" name="lob_process[]" class="form-control" data-index="${index}" disabled>
                             ${lopProcessOption}
                         </select>
                     </div>
                     <div class="col-lg-3">
                         <label class="mt-2">User Role:</label>
-                        <select class="form-control edit_user_role" name="userRole[]" id="edit_user_role_${index}" data-index="${index}">
+                        <select class="form-control edit_user_role" name="userRole[]" id="edit_user_role_${index}" data-index="${index}" >
                             ${userRoleOptions}
                         </select>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-3 row">
+                    <div class="col-lg-11">
                         <label class="mt-2">Reporting to:</label>
-                        <select class="form-control" name="reporting_to[]" id="edit_reporting_to_${index}" data-index="${index}">
+                        <select class="form-control" name="reporting_to[]" id="edit_reporting_to_${index}" data-index="${index}"disabled>
                             ${reportingOptions}
                         </select>
                     </div>
-                </div>
-                <div class="col-lg-1 d-flex justify-item-center align-items-center mt-4">
-                    <button type="button" class="btn btn-danger remove-row pb-0 pt-0 pr-2 pl-2 m-1" data-index="${index}">-</button>
-                    <button id="add_new_row_btn" type="button" class="btn btn-success pb-0 pt-0 pr-2 pl-2 m-1">+</button>
+                    <div class="d-flex justify-content-center align-items-center mt-4 col-lg-1">
+                        <button id="add_new_row_btn" type="button" class="btn btn-success btn-sm text-white">+</button>
+                    </div>
                 </div>
             </div>
             `);
@@ -1427,8 +1488,8 @@ function populateEditSubcategories(profiles) {
 
         // Append a new empty row with the "+" and "-" buttons
         $('#edit_existing_subcategories').append(`
-            <div class="row mt-1" id="edit_subcategory_row_${newIndex}">
-            <div class="col-lg-11 row">
+            <div class=" mt-1" id="edit_subcategory_row_${newIndex}">
+            <div class=" row">
                 <div class="col-lg-3">
                     <label class="mt-2">Client:</label>
                     <select class="form-control edit_client" name="client_name[]" id="edit_client_${newIndex}" data-index="${newIndex}" required>
@@ -1437,7 +1498,7 @@ function populateEditSubcategories(profiles) {
                 </div>
                 <div class="col-lg-3">
                     <label class="mt-2">LOB & Process:</label>
-                    <select id="edit_lob_process_${newIndex}" name="lob_process[]" class="form-control" data-index="${newIndex}">
+                    <select id="edit_lob_process_${newIndex}" name="lob_process[]" class="form-control" data-index="${newIndex}" >
                         ${lopProcessOption}
                     </select>
                 </div>
@@ -1447,21 +1508,26 @@ function populateEditSubcategories(profiles) {
                         ${userRoleOptions}
                     </select>
                 </div>
-                <div class="col-lg-3 ">
+                <div class="col-lg-3 row">
+                <div class="col-lg-11">
                     <label class="mt-2">Reporting to:</label>
-                    <select class="form-control" name="reporting_to[]" id="edit_reporting_to_${newIndex}" data-index="${newIndex}">
+                    <select class="form-control" name="reporting_to[]" id="edit_reporting_to_${newIndex}" data-index="${newIndex}" >
                         ${reportingOptions}
                     </select>
                 </div>
-            </div>
-                <div class="col-lg-1 d-flex justify-item-center align-items-center mt-4">
-                    <button type="button" class="btn btn-danger remove-row pb-0 pt-0 pr-2 pl-2 m-1" data-index="${newIndex}">-</button>
-                    <button id="add_new_row_btn" type="button" class="btn btn-success pb-0 pt-0 pr-2 pl-2 m-1">+</button>
+                <div class="d-flex justify-content-center align-items-center mt-4 col-lg-1">
+                   
+                     ${newIndex === 0 ? 
+                    `<button id="add_new_row_btn" type="button" class="btn btn-success btn-sm text-white">+</button>` : 
+                    `<button type="button" class="btn btn-danger remove-row btn-sm text-white " data-index="${newIndex}">-</button>`
+                }
                 </div>
-
+            </div>
             </div>
         `);
-
+        if (newIndex > 0) {
+    $(`#edit_subcategory_row_${newIndex}`).find('#add_new_row_btn').hide();
+}
         // // Append the add button to the last row after the new row is added
         // $('#edit_existing_subcategories').append(`
         //     <div class="row mt-1">
@@ -1484,5 +1550,46 @@ function populateEditSubcategories(profiles) {
 
 });
 
+</script>
+<script>
+    document.getElementById('can_assign_role').addEventListener('change', function() {
+        var userRoleDiv = document.getElementById('user_role_div');
+        var userRoleMulti = document.getElementById('multipleRole');
+        var userDiv = document.getElementById('user_div');
+        var roleDiv = document.getElementById('new_subcategory');
+      
+        if (this.checked) {
+            userRoleDiv.style.display = 'none';  
+            userRoleMulti.style.display = 'block';  
+            roleDiv.style.display = 'block';  
+            userDiv.classList.add('mt-3', 'mb-3');
+        } else {
+            userRoleDiv.style.display = 'block';  
+            userRoleMulti.style.display = 'none';  
+            $('#add_reporting_to').hide(); 
+            userDiv.classList.remove('mt-3', 'mb-3');
+            roleDiv.style.display = 'none'; 
+        }
+    });
+
+    document.getElementById('edit_assign_role').addEventListener('change', function() {
+        var userRoleDiv = document.getElementById('user_role_div_ed');
+        var userRoleMulti = document.getElementById('edit_existing_subcategories');
+        // var userDiv = document.getElementById('user_div');
+        var roleDiv = document.getElementById('edit_reporting_to');
+      
+        if (this.checked) {
+            userRoleDiv.style.display = 'none';  
+            userRoleMulti.style.display = 'block';  
+            roleDiv.style.display = 'none';  
+            userDiv.classList.add('mt-3', 'mb-3');
+        } else {
+            userRoleDiv.style.display = 'block';  
+            userRoleMulti.style.display = 'none';  
+            $('#edit_reporting_to').hide(); 
+            userDiv.classList.remove('mt-3', 'mb-3');
+            roleDiv.style.display = 'block'; 
+        }
+    });
 </script>
 @endsection

@@ -187,7 +187,8 @@ class SettingController extends Controller
 
     //Users
     public function addUsers(Request $request)
-    {    
+    {  
+   
         $request->validate([
             'emp_id' => 'required|string|max:255',
             'username' => 'nullable|string|max:255',
@@ -197,7 +198,7 @@ class SettingController extends Controller
             'is_active' => 'nullable|boolean',
 
         ]);
-    
+    // dd($request->emp_id);
         // Check if the user already exists
         $check_users = User::where('emp_id', $request->emp_id)->first();
         if ($check_users) {
@@ -215,28 +216,38 @@ class SettingController extends Controller
             'updated_at' => now(),
             'created_by' => Auth::id(),
         ];
-    
+
+       // Conditionally add additional fields if provided
+            if (!empty($request->user_type_id) && !empty($request->reportingto)) {
+                $usersData = array_merge($usersData, [
+                    'user_type_id' => $request->user_type_id,
+                    'reporting_to' => $request->reportingto,
+                ]);
+            }
+
         // Insert user and get the ID
         $userId = User::insertGetId($usersData);
     
-        foreach ($request->client_name as $index => $clientId) {
-            // Get the lob_process string at the given index
-            $lobProcess = isset($request->lob_process[$index]) ? $request->lob_process[$index] : null;
-            
-            // Split the lob_process string into two parts using explode() if it's not null
-            $lobParts = $lobProcess ? explode(',', $lobProcess) : [null, null];
-        
-            // Create the OmsUserProfile record
-            OmsUserProfile::create([
-                'oms_user_id' => $userId,
-                'client_id' => $clientId,
-                'lob_id' => $lobParts[0], // First part of the lob_process (if exists)
-                'process_id' => $lobParts[1], // Second part of the lob_process (if exists)
-                'user_type_id' => isset($request->userRole[$index]) ? $request->userRole[$index] : null,
-                'reporting_to' => isset($request->reporting_to[$index]) ? $request->reporting_to[$index] : null,
-                'added_by' => Auth::id(),
-            ]);
+        if(!empty($request->client_name)) {
+            foreach ($request->client_name as $index => $clientId) {
+                
+                $lobProcess = isset($request->lob_process[$index]) ? $request->lob_process[$index] : null;
+                
+                $lobParts = $lobProcess ? explode(',', $lobProcess) : [null, null];
+                // Create the OmsUserProfile record
+                OmsUserProfile::create([
+                    'oms_user_id' => $userId,
+                    'client_id' => $clientId,
+                    'lob_id' => $lobParts[0], // First part of the lob_process (if exists)
+                    'process_id' => $lobParts[1], // Second part of the lob_process (if exists)
+                    'user_type_id' => isset($request->userRole[$index]) ? $request->userRole[$index] : null,
+                    'reporting_to' => isset($request->reporting_to[$index]) ? $request->reporting_to[$index] : null,
+                    'added_by' => Auth::id(),
+                ]);
+            }
         }
+
+       
 
 
         // If user creation is successful, proceed with additional data
@@ -854,32 +865,50 @@ class SettingController extends Controller
 
     public function getLobAndProcess(Request $request)
     {
-        $clientId = $request->input('client_id');
-
+        $client = $request->input('client_id');
+    
         $lobs = DB::table('stl_item_description')
         ->leftjoin('stl_lob', 'stl_item_description.lob_id', '=', 'stl_lob.id')
         ->where('stl_item_description.is_approved', 1)
         ->where('stl_item_description.is_active', 1)
-        ->where('stl_item_description.client_id', $clientId)
+        ->where('stl_item_description.client_id', $client)
         // ->whereIn('stl_item_description.id', $mapped_lobs)
         ->select(
             'stl_lob.name as name',
             'stl_lob.client_id as client_id',
             'stl_lob.id as id',
+           
         )
         ->distinct()
         ->get();
-
-        // Iterate through the LOBs and match them with processes
+    
+        // Iterate through the LOBs and fetch related processes
         foreach ($lobs as $lob) {
-            $lob->processes = DB::table('stl_process')
-                ->where('lob_id', $lob->id) // Match LOB ID with the process table
-                ->where('is_active', 1) // Only include active processes
-                ->orderBy('name', 'asc')
-                ->get();
+            // $processes = DB::table('stl_process')
+            //     ->where('lob_id', $lob->id)
+            //     ->where('is_active', 1)
+            //     ->orderBy('name', 'asc')
+            //     ->get();
+            
+                $processtype = DB::table('stl_item_description')
+                ->leftjoin('stl_process', 'stl_process.id', '=', 'stl_item_description.process_id')
+                ->leftjoin('stl_client', 'stl_client.id', '=', 'stl_item_description.client_id')
+                    ->select('stl_process.id', 'stl_process.name')
+                    // ->whereIn('stl_item_description.id', $processIds)
+                    ->where('stl_process.lob_id', $lob->id)
+                    ->where('stl_item_description.lob_id', $lob->id)
+                    ->where('stl_item_description.client_id', $client)
+                    ->groupBy('stl_process.id')
+                    ->get();
+
+
+
+
+            $lob->processes = $processtype;
         }
     
-        return response()->json($lobs);
+        // Convert to array and return as JSON response
+        return response()->json($lobs->values()->toArray()); // Convert to array
     }
 
 }

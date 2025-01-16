@@ -113,6 +113,7 @@
                                 <th>User Name</th>
                                 <th>Role</th>
                                 <th>Email</th>
+                                <th>Created Date</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -123,8 +124,9 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $users->emp_id }}</td>
                                 <td>{{ $users->username }}</td>
-                                <td>{{ isset($users->usertypes->usertype) ? $users->usertypes->usertype : ""}}</td>
+                                <td>{{ isset($users->roles) ? $users->roles : ""}}</td>
                                 <td>{{ $users->email}}</td>
+                                <td>{{ $users->created_date}}</td>
                                 <td class="text-center">
                                     <div class="custom-control custom-switch">
                                         <input type="checkbox"  class="custom-control-input" id="customSwitch{{ $users->id }}"  value="{{ $users->id }}" onclick="userStatus(this.value)" @if($users->is_active==1) checked @endif>
@@ -132,7 +134,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    @role('Super Admin|Business Head')
+                                    @role('Super Admin|Business Head|SPOC|PM/TL|VP|Admin|AVP')
                                     <a href="#"><span class="edit_user ml-2"  data-id="{{ $users->id }}">
                                         <img class="menuicon tbl_editbtn" src="{{asset('assets/images/edit.svg')}}" >&nbsp;
                                     </span></a>
@@ -153,81 +155,108 @@
 </div>
 {{-- AddingUsers --}}
 <div class="modal fade" id="myModal">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add user</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="post" id="usersForm" name="usersForm"  data-parsley-validate>
-                @csrf
-                <input  name="user_id" value="" id="ed_user_id" type="hidden"  />
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-lg-4">
-                            <label for="example-email-input" class="col-form-label"> User Role <span class="text-danger"> * </span></label>
-                            <Select required class="form-control select_role" name="user_type_id" id="user_type_id">
-                                <option selected disabled value="">Select Role</option>
-                                @forelse($userTypes as $userType)
-                                    <option value="{{$userType->id}}"> {{$userType->usertype}}</option>
-                                @empty
-                                @endforelse
-                            </Select>
+            <form method="post" id="usersForm" name="usersForm" data-parsley-validate>
+    @csrf
+    <input name="user_id" value="" id="ed_user_id" type="hidden" />
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-lg-3">
+                <label for="emp_id" class="col-form-label">Emp ID <span class="text-danger"> * </span></label>
+                <input required name="emp_id" value="" id="emp_id" type="text" class="form-control" placeholder="Enter Emp ID" />
+            </div>
+            <div class="col-lg-3">
+                <label for="username" class="col-form-label">User Name</label>
+                <input autocomplete="off" value="" name="username" id="username" type="text" class="form-control" placeholder="Enter User Name" />
+            </div>
+            <div class="col-lg-3">
+                <label for="email" class="col-form-label">Email <span class="text-danger"> * </span></label>
+                <input autocomplete="off" required value="" name="email" id="email" type="email" class="form-control" placeholder="Enter Email" data-parsley-type="email" data-parsley-trigger="keyup" />
+            </div>
+            <div class="col-lg-3">
+                <label for="password" class="col-form-label">Password</label>
+                <input id="password" name="password" type="text" class="form-control" autocomplete="off" placeholder="Enter Password" data-parsley-minlength="8" data-parsley-uppercase="1" data-parsley-lowercase="1" data-parsley-number="1" data-parsley-special="1" />
+                <span class="errorspannewpassinput1"></span>
+            </div>
+        </div>
+        <div class="row mt-1">
+            <div class="col-lg-3">
+                <br>
+                <div class="mt-3">
+                    <input type="checkbox" class="mx-1" value="1" id="is_active" name="is_active" />
+                    <label for="is_active">Is Active?</label>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <br>
+                <div class="mt-3">
+                    <input type="checkbox" class="mx-1" value="1" id="can_assign_order" name="can_assign_order" />
+                    <label for="can_assign_order">Can Assign Order?</label>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div id="existing_subcategories">
+                <input type="hidden" name="subcat_id[]" value="" id="">
+                <div class="row mt-1" id="subcategory_row_0">
+                    <div class="col-lg-11 row">
+                        <div class="col-lg-3">
+                            <label class="mt-2">Client</label>
+                            <select name="client_name[]" id="client_0" class="form-control client-select" data-index="0">
+                                <option value="" selected disabled>Select a Client</option>
+                                @foreach ($clients as $client)
+                                    <option value="{{ $client->id }}">{{ $client->client_name }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="col-lg-4">
-                            <label for="example-firstname-input" class="col-form-label">Emp ID <span class="text-danger"> * </span></label>
-                            <input required name="emp_id" value="" id="emp_id" type="text" class="form-control" placeholder="Enter Emp ID" />
+                        <div class="col-lg-3">
+                            <label class="mt-2">LOB & Process</label>
+                            <select id="lob_process_0" name="lob_process[]" class="form-control lob-process" data-index="0" disabled>
+                                <option value="">Select LOB & Process</option>
+                            </select>
                         </div>
-                        <div class="col-lg-4">
-                            <label for="example-firstname-input" class="col-form-label">User Name</label>
-                            <input autocomplete="off"  value="" name="username" id="username" type="text" class="form-control" placeholder="Enter User Name" />
+                        <div class="col-lg-3">
+                            <label class="mt-2">User Role</label>
+                            <select name="userRole[]" id="user_role_0" class="form-control userRole" data-index="0">
+                                <option value="" selected disabled>Select a User Role</option>
+                                @foreach ($userTypes as $usertype)
+                                    <option value="{{ $usertype->id }}">{{ $usertype->usertype }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-lg-3">                            
+                            <label class="mt-2">Reporting to</label>                                
+                            <select class="form-control reporting-to" name="reporting_to[]" id="reporting_to_0">
+                                <option value="">Select User Role first</option>
+                            </select>               
                         </div>
                     </div>
-                    <div class="row mt-1">
-                        <div class="col-lg-4">
-                            <label for="example-email-input" class="col-form-label">Email <span class="text-danger"> * </span></label>
-                            <input autocomplete="off" required value="" name="email" id="email" type="email" class="form-control" placeholder="Enter Email" data-parsley-type="email" data-parsley-trigger="keyup" placeholder="Enter a valid e-mail"/>
-                        </div>
-                        <div class="col-lg-4">
-                            <label for="example-email-input" class="col-form-label"> Password </label>
-
-                            <input id="password" name="password" type="text" class="form-control" autocomplete="off" 	placeholder="Enter Password"   data-parsley-minlength="8"
-                            data-parsley-errors-container=".errorspannewpassinput1"
-                            data-parsley-required-message="Please enter your new password."
-                            data-parsley-uppercase="1"
-                            data-parsley-lowercase="1"
-                            data-parsley-number="1"
-                            data-parsley-special="1"
-                            >
-                            <span class="errorspannewpassinput1" ></span>
-                        </div>
-                        <div class="col-lg-4" id="add_reporting_to">
-                            <label for="example-contact-input" class="col-form-label">Reporting To <span class="text-danger"> * </span></label>
-                            <Select class="form-control select_role" name="reporting_to" id="reporting_to">
-
-                            </Select>
-                        </div>
-                        <div class="col-lg-2">
-                            <br>
-                            <div class="mt-3">
-                                <input type="checkbox" class="mx-1"  value="1" id="is_active" name="is_active" />
-                                <label for="" class="">Is Active ?</label>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="col-lg-1 d-flex justify-item-center align-items-center mt-4">
+                        <button type="button" class="btn btn-success btn-sm text-white pb-0 pt-0 pr-2 pl-2 add-row">+</button>
+                    </div>                
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary" onclick="usersVal();">Create</button>
-                </div>
-            </form>
+            </div>
+        </div>
+            <div id="new_subcategory"></div>
+  
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary" onclick="usersVal(event);">Create</button>
+    </div>
+</form>
         </div>
     </div>
   </div>
     <div class="modal fade" id="userEditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-		<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-dialog modal-xl" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="exampleModalLabel">Edit user</h5>
@@ -235,67 +264,56 @@
 					<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
-				<form method="post" id="updateuserfrm" name="updateuserfrm"  data-parsley-validate>
-					@csrf
-                    <input  name="user_id" value="" id="user_id_ed" type="hidden"  />
-					<div class="modal-body">
-						<div class="row">
-							<div class="col-lg-4">
-								<label for="example-email-input" class="col-form-label"> User Role <span class="text-danger"> * </span></label>
-                                <Select required class="form-control select_role" name="user_type_id" id="user_type_id_ed">
-                                    <option selected disabled value="">Select Role</option>
-                                        @forelse($userTypes as $userType)
-                                        <option value="{{$userType->id}}"> {{$userType->usertype}}</option>
-                                        @empty
-                                    @endforelse
-                                </Select>
-							</div>
-							<div class="col-lg-4">
-								<label for="example-firstname-input" class="col-form-label">Emp ID <span class="text-danger"> * </span></label>
-								<input required name="emp_id" value="" id="emp_id_ed" type="text" class="form-control"  placeholder="Enter Emp ID" />
-							</div>
-							<div class="col-lg-4">
-								<label for="example-firstname-input" class="col-form-label">User Name</label>
-								<input autocomplete="off"  value="" name="username" id="username_ed" type="text" class="form-control" placeholder="Enter User Name" />
-							</div>
-						</div>
-						<div class="row mt-1">
-                            <div class="col-lg-4">
-                                <label for="example-email-input" class="col-form-label">Email <span class="text-danger"> * </span></label>
-                                <input autocomplete="off" required value="" name="email" id="email_ed" type="email" class="form-control" placeholder="Enter Email" data-parsley-type="email" data-parsley-trigger="keyup" placeholder="Enter a valid e-mail"/>
+				<form method="post" id="updateuserfrm" name="updateuserfrm" data-parsley-validate>
+                    @csrf
+                    <input name="user_id" value="" id="user_id_ed" type="hidden" />
+                    <div class="modal-body">
+                        <!-- Basic User Info -->
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <label for="emp_id_ed" class="col-form-label">Emp ID <span class="text-danger">*</span></label>
+                                <input required name="emp_id" value="" id="emp_id_ed" type="text" class="form-control" placeholder="Enter Emp ID" />
                             </div>
-							<div class="col-lg-4">
-								<label for="example-email-input" class="col-form-label"> Password </label>
-
-								<input id="password_ed" name="password" type="password" class="form-control" autocomplete="off" 	placeholder="Enter Password"   data-parsley-minlength="8"
-								data-parsley-errors-container=".errorspannewpassinput1"
-								data-parsley-required-message="Please enter your new password."
-								data-parsley-uppercase="1"
-								data-parsley-lowercase="1"
-								data-parsley-number="1"
-								data-parsley-special="1"
-								>
-								<span class="errorspannewpassinput1" ></span>
-							</div>
-                            <div class="col-lg-4" id="edit_reporting_to">
-                            <label for="example-email-input" class="col-form-label"> Reporting To <span class="text-danger"> * </span></label>
-                            <Select class="form-control select_role" name="reporting_to" id="reporting_to_ed">
-                            </Select>
+                            <div class="col-lg-3">
+                                <label for="username_ed" class="col-form-label">User Name</label>
+                                <input autocomplete="off" value="" name="username" id="username_ed" type="text" class="form-control" placeholder="Enter User Name" />
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="email_ed" class="col-form-label">Email <span class="text-danger">*</span></label>
+                                <input autocomplete="off" required value="" name="email" id="email_ed" type="email" class="form-control" placeholder="Enter Email" />
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="password_ed" class="col-form-label">Password</label>
+                                <input id="password_ed" name="password" type="password" class="form-control" autocomplete="off" placeholder="Enter Password" />
+                            </div>
                         </div>
-                            <div class="col-lg-2">
+                        <div class="row mt-1">
+                            <div class="col-lg-3">
                                 <br>
                                 <div class="mt-3">
-                                    <input type="checkbox" class="mx-1"  value="1" id="is_active_ed" name="is_active" />
-                                    <label for="" class="">Is Active ?</label>
+                                    <input type="checkbox" class="mx-1" value="1" id="is_active_ed" name="is_active_ed" />
+                                    <label for="is_active">Is Active?</label>
                                 </div>
                             </div>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-						<button type="submit" class="btn btn-primary">Update</button>
-					</div>
-				</form>
+                            <div class="col-lg-3">
+                                <br>
+                                <div class="mt-3">
+                                    <input type="checkbox" class="mx-1" value="1" id="can_assign_order" name="can_assign_order" />
+                                    <label for="can_assign_order">Can Assign Order?</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Profile (subcategories) -->
+                        <div id="edit_existing_subcategories">
+                            <!-- Existing subcategories will be dynamically populated here -->
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
 			</div>
 		</div>
 	</div>
@@ -388,71 +406,74 @@
                 @role('Business Head')
                 $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
                 @endrole
+                @role('VP')
+                $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
+                @endrole
+                @role('AVP')
+                $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
+                @endrole
+                @role('Admin')
+                $("div.toolbar").html('<button id="addUsers" type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#myModal"><img class="menuicon" src="{{asset("assets/images/add.svg")}}">&nbsp;Add User</button>');
+                @endrole
             }
             });
         });
         function getUsers(){
             window.location.href = "/users";
         }
-        function usersVal(){
-            if ($("#usersForm").parsley()) {
+        function usersVal(event) {
+    event.preventDefault(); // Prevent the default form submission
 
-                if ($("#usersForm").parsley().validate()) {
-                    event.preventDefault();
-                    if ($("#usersForm").parsley().isValid()) {
-                        $.ajax({
-                        type: "POST",
-                        cache:false,
-                        async: false,
-                        url: "{{ url('/usersInsert') }}",
-                        data: new FormData($("#usersForm")[0]),
-                        processData: false,
-                        contentType: false,
-                        success: function(response) {
-                            if(response.msg=="User Already Exists!"){
-
-                                new PNotify({
-                                title: 'Error',
-                                text:  response.msg,
-                                type: 'error'
-                                });
-                                return false;
-                            } else if(response.msg=="Only Image Allowed!"){
-
-                                new PNotify({
-                                title: 'Error',
-                                text:  response.msg,
-                                type: 'error'
-                                });
-                                return false;
-                            }else if(response.msg=="User Added Successfully!"){
-
-                                new PNotify({
-                                title: 'Success',
-                                text:  response.msg,
-                                type: 'success'
-                                });
-                                setTimeout(function(){  location.reload(); }, 1000);
-                            }
-                        },
-                        error:function(response) {
-
-                            var err = "";
-                            $.each(response.responseJSON.errors,function(field_name,error){
-                                err = err+error;
-                            });
-                            new PNotify({
-                                title: 'Error',
-                                text:err,
-                                type: 'error',
-                                delay: 1000
-                            });
-                        }
-                        });
-                    }
+    // Validate the form using Parsley.js
+    if ($("#usersForm").parsley().validate()) {
+        // If the form is valid, proceed with the AJAX request
+        $.ajax({
+            type: "POST",
+            cache: false,
+            async: false,
+            url: "{{ url('/usersInsert') }}",
+            data: new FormData($("#usersForm")[0]),
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.msg === "User Already Exists!") {
+                    new PNotify({
+                        title: 'Error',
+                        text: response.msg,
+                        type: 'error'
+                    });
+                } else if (response.msg === "Only Image Allowed!") {
+                    new PNotify({
+                        title: 'Error',
+                        text: response.msg,
+                        type: 'error'
+                    });
+                } else if (response.msg === "User Added Successfully!") {
+                    new PNotify({
+                        title: 'Success',
+                        text: response.msg,
+                        type: 'success'
+                    });
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
                 }
+            },
+            error: function (response) {
+                var err = "";
+                $.each(response.responseJSON.errors, function (field_name, error) {
+                    err += error + "<br>";
+                });
+                new PNotify({
+                    title: 'Error',
+                    text: err,
+                    type: 'error',
+                    delay: 1000
+                });
             }
-        }
+        });
+    }
+}
     function usersStatus(value) {
         window.location.href = '/usersStatus/' + value;
     }
@@ -491,76 +512,7 @@
 		}
 	});
 
-    // Edit users
-    $('#datatable').on('click','.edit_user',function () {
-		var id = $(this).data('id');
-		var url = '{{ route("edit_user") }}';
-		$.ajax({
-			type: "post",
-			url: url,
-			data: { id:id , _token: '{{csrf_token()}}'},
-			success: function(response)
-			{
-				var res = response;
-
-                $("#user_id_ed").val(res['id']);
-				$("#username_ed").val(res['username']);
-				$("#emp_id_ed").val(res['emp_id']);
-				$("#email_ed").val(res['email']);
-                $("#contact_no_ed").val(res['contact_no']);
-                $("#password_ed").val(res['password']);
-				$("#user_type_id_ed").val(res['user_type_id']);
-
-
-				if(res['is_active'] == 1) {
-					$( "#is_active_ed" ).attr('checked', 'checked');
-				} else {
-					$("#is_active_ed").removeAttr('checked', 'checked');
-				}
-
-                let role = res['user_type_id'];
-                let reporting_users;
-                if(role == 1 || role == 2) {
-                    $('#edit_reporting_to').hide();
-                } else if (role == 3) {
-                    $('#edit_reporting_to').show();
-                    reporting_users = 'getVps';
-                } else if (role == 5) {
-                    $('#edit_reporting_to').show();
-                    reporting_users = 'getBussinessHeads';
-                } else if (role == 9) {
-                    $('#edit_reporting_to').show();
-                    reporting_users = 'getPM_TL';
-                }else if (role == 6 || role == 7 || role == 8) {
-                    $('#edit_reporting_to').show();
-                    reporting_users = 'getSOPC';
-                }
-                $.ajax({
-                    url: "{{ route('getUserList') }}",
-                    type: "POST",
-                    data: {
-                        reviewer_type: reporting_users,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(html) {
-                        $('#reporting_to_ed').html(html);
-                        let reporting_to = res['reporting_to'];
-                        if (reporting_to && $.isNumeric(reporting_to)) {
-                            $("#reporting_to_ed").val(res['reporting_to']);
-                            $('#edit_reporting_to').show();
-                        } else {
-                            $('#edit_reporting_to').hide();
-                        }
-                    },
-                    error: function(error) {
-                        // Handle error if needed
-                    }
-                });
-
-				$("#userEditModal").modal('show');
-			}
-		});
-	});
+   
 
 
 
@@ -694,6 +646,12 @@ function assignService(userID) {
                         },
                     success: function(response) {
                         if (response.data === 'success') {
+                        new PNotify({
+                            title: 'Success',
+                            text: 'Product Updated Successfully',
+                            type: 'success',
+                            delay: 1000
+                        });
                             fetchMappingData();
                         } else {
                             Swal.fire({
@@ -736,11 +694,11 @@ function assignService(userID) {
     $(document).on('change', '#user_type_id', function() {
         let role = $(this).val();
         let reporting_users;
-        if(role == 1 || role == 2) {
+        if(role == 1 ) {
             $('#add_reporting_to').hide();
-        } else if (role == 3) {
+        } else if (role == 3 ) {
             $('#add_reporting_to').show();
-            reporting_users = 'getVps';
+            reporting_users = 'getAVps';
         } else if (role == 5) {
             $('#add_reporting_to').show();
             reporting_users = 'getBussinessHeads';
@@ -748,9 +706,17 @@ function assignService(userID) {
             $('#add_reporting_to').show();
             reporting_users = 'getPM_TL';
         }
-        else if (role ==  6 || role == 7 || role == 8 ) {
+        else if (role ==  6 || role == 7 || role == 8 || role == 10 ||role == 11 || role == 22  ) {
             $('#add_reporting_to').show();
             reporting_users = 'getSOPC';
+        }else if (role == 2 ) {
+            $('#add_reporting_to').show();
+            reporting_users = 'getVps';
+        }else if (role == 24 ) {
+            $('#add_reporting_to').hide();
+           
+        }else if (role == 23) {
+            $('#add_reporting_to').hide();
         }
 
             $.ajax({
@@ -773,17 +739,27 @@ function assignService(userID) {
     $(document).on('change', '#user_type_id_ed', function() {
         let role = $(this).val();
         let reporting_users;
-        if(role == 1 || role == 2) {
+        if(role == 1 ) {
             $('#edit_reporting_to').hide();
         } else if (role == 3) {
             $('#edit_reporting_to').show();
-            reporting_users = 'getVps';
+            reporting_users = 'getAVps';
         } else if (role == 5) {
             $('#edit_reporting_to').show();
             reporting_users = 'getBussinessHeads';
         } else if (role == 9) {
-            $('#edit_reporting_to').show();
+            $('#edit_reporting_to').show(); 
             reporting_users = 'getPM_TL';
+        }else if (role == 2 ) {
+            $('#edit_reporting_to').show();
+            reporting_users = 'getVps';
+        }else if (role ==  6 || role == 7 || role == 8 || role == 10 ||role == 11 || role == 22  ) {
+            $('#edit_reporting_to').show();
+            reporting_users = 'getSOPC';
+        }else if (role == 24 ) {
+            $('#edit_reporting_to').hide();
+        }else if (role == 23 ) {
+            $('#edit_reporting_to').hide();
         }
 
             $.ajax({
@@ -849,9 +825,664 @@ function assignService(userID) {
         });
 </script>
 
+<!-- <script>
+  // Cache for storing reporting users by role
+  var reportingCache = {};
+
+  // Listen for role change using event delegation
+  $('#new_subcategory').on('change', '.userRole', function() {
+    var $this = $(this);  // Reference to the userRole dropdown in the current row
+    var index = $this.data('index');  // Get the index of the current row
+    var role = $this.val();  // Get the selected value from the current row's userRole dropdown
+    var reporting_users = null;
+
+    // Clear the reporting_to dropdown before populating
+    $(`#reporting_to_${index}`).html('<option value="" disabled selected>Select a Reporting User</option>');
+
+    if (role == 1) {
+        // No reporting users for this role, just clear the field
+        return;
+    } else if (role == 3) {
+        reporting_users = 'getAVps';
+    } else if (role == 5) {
+        reporting_users = 'getBussinessHeads';
+    } else if (role == 9) {
+        reporting_users = 'getPM_TL';
+    } else if (role == 6 || role == 7 || role == 8 || role == 10 || role == 11 || role == 22) {
+        reporting_users = 'getSOPC';
+    } else if (role == 2) {
+        reporting_users = 'getVps';
+    }
+
+    // Check if data for this role is already cached
+    if (reporting_users && reportingCache[reporting_users]) {
+        // Use cached reporting users
+        $(`#reporting_to_${index}`).html(reportingCache[reporting_users]);
+    } else if (reporting_users) {
+        // Fetch reporting users for the subcategory if not cached
+        $.ajax({
+            url: "{{ route('getUserList') }}",
+            type: "POST",
+            data: {
+                reviewer_type: reporting_users,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(html) {
+                // Cache the fetched reporting users for future use
+                reportingCache[reporting_users] = html;
+                $(`#reporting_to_${index}`).html(html); // Populate the reporting_to dropdown for the current row
+            },
+            error: function(error) {
+                console.log(error); // Handle error if needed
+            }
+        });
+    }
+  });
+
+
+  // Cache for storing reporting users by role
+  var reportingCache = {};
+
+  // Listen for role change using event delegation
+  $('#new_subcategory').on('change', '.userRole', function() {
+    var $this = $(this);  // Reference to the userRole dropdown in the current row
+    var index = $this.data('index');  // Get the index of the current row
+    var role = $this.val();  // Get the selected value from the current row's userRole dropdown
+    var reporting_users = null;
+
+    // Clear the reporting_to dropdown before populating
+    $(`#reporting_to_${index}`).html('<option value="" disabled selected>Select a Reporting User</option>');
+
+    if (role == 1) {
+        // No reporting users for this role, just clear the field
+        return;
+    } else if (role == 3) {
+        reporting_users = 'getAVps';
+    } else if (role == 5) {
+        reporting_users = 'getBussinessHeads';
+    } else if (role == 9) {
+        reporting_users = 'getPM_TL';
+    } else if (role == 6 || role == 7 || role == 8 || role == 10 || role == 11 || role == 22) {
+        reporting_users = 'getSOPC';
+    } else if (role == 2) {
+        reporting_users = 'getVps';
+    }
+
+    // Check if data for this role is already cached
+    if (reporting_users && reportingCache[reporting_users]) {
+        // Use cached reporting users
+        $(`#reporting_to_${index}`).html(reportingCache[reporting_users]);
+    } else if (reporting_users) {
+        // Fetch reporting users for the subcategory if not cached
+        $.ajax({
+            url: "{{ route('getUserList') }}",
+            type: "POST",
+            data: {
+                reviewer_type: reporting_users,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(html) {
+                // Cache the fetched reporting users for future use
+                reportingCache[reporting_users] = html;
+                $(`#reporting_to_${index}`).html(html); // Populate the reporting_to dropdown for the current row
+            },
+            error: function(error) {
+                console.log(error); // Handle error if needed
+            }
+        });
+    }
+  });
+
+  function addnewsubcategory() {
+    var clients = @json($clients);
+    var userTypes = @json($userTypes);
+
+    // Calculate the next index based on the number of rows in the container
+    var index = $('#new_subcategory .row').length;
+
+    // Generate options for Clients and User Roles
+    var clientOptions = '<option value="" disabled selected>Select a Client</option>';
+    clients.forEach(client => {
+        clientOptions += `<option value="${client.id}">${client.client_name}</option>`;
+    });
+
+    var userRoleOptions = '<option value="" disabled selected>Select a User Role</option>';
+    userTypes.forEach(userType => {
+        userRoleOptions += `<option value="${userType.id}">${userType.usertype}</option>`;
+    });
+
+    // Generate the Reporting To dropdown for the subcategory (initially empty)
+    var reportingToOptions = '<option value="" disabled selected>Select User Role first</option>';
+
+    // Append new subcategory to the container
+    $('#new_subcategory').append(`
+        <div class="row mt-1" id="addedsubcategory_${index}">
+            <div class="col-lg-3">
+                <label class="mt-2">Client:</label>
+                <select class="form-control" name="client_name[]" id="subcategoryname_${index}" required>
+                    ${clientOptions}
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label class="mt-2">LOB & Process:</label>
+               <select id="lob-process" name="lob-process" class="form-control">
+                            <option value="">Select LOB & Process</option>
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label class="mt-2">User Role:</label>
+                <select class="form-control userRole" name="userRole[]" id="subcategorydesc_${index}" data-index="${index}">
+                    ${userRoleOptions}
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <div class="row">
+                    <label class="mt-2">Reporting to:</label>
+                    <div class="col-lg-12 d-flex justify-content-between">
+                        <select class="form-control select_role" name="reporting_to[]" id="reporting_to_${index}">
+                            ${reportingToOptions}
+                        </select>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-success btn-sm text-white pb-0 pt-0 m-1 pr-2 pl-2 addnewsubcategory"
+                                    onclick="addnewsubcategory()">+</button>
+                            <button type="button" onclick="removesubcategory(${index})" class="btn btn-danger m-1 ml-0 btn-sm pb-0 pt-0 pr-2 pl-2" id="delsubcategory_${index}">-</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+  }
+  
+  function removesubcategory(index) {
+      $('#addedsubcategory_' + index).remove();
+  }
+</script> -->
+
+<script>
+    $(document).ready(function () {
+            $('#client').on('change', function () {
+                const clientId = $(this).val();
+                if (clientId) {
+                    $.ajax({
+                        url: "{{ route('get-lob-process') }}",
+                        method: 'POST',
+                        data: {
+                            client_id: clientId,
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function (response) {
+                            $('#lob-process').html('<option value="">Select LOB & Process</option>');
+                            response.forEach(function (lob) {
+                                lob.processes.forEach(function (process) {
+                                    // Add options in the format `${lob.name} (${process.name})`
+                                    $('#lob-process').append(`<option value="${process.id}">${lob.name} (${process.name})</option>`);
+                                });
+                            });
+                            $('#lob-process').prop('disabled', false);
+                        }
+                    });
+                } else {
+                    $('#lob-process').html('<option value="">Select LOB & Process</option>').prop('disabled', true);
+                }
+            });
+        });
+</script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
     <!-- jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <!-- jsTree JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+
+    <script>
+    // Cache for storing reporting users by role
+var reportingCache = {};
+
+// Listen for role change using event delegation
+// Use a common parent container to handle both existing and dynamically added rows
+$('#existing_subcategories, #new_subcategory').on('change', '.userRole', function () {
+    var $this = $(this); // Reference to the userRole dropdown in the current row
+    var index = $this.data('index'); // Get the index of the current row
+    var role = $this.val(); // Get the selected value from the current row's userRole dropdown
+    var reporting_users = null;
+
+    // Clear the reporting_to dropdown before populating
+    $(`#reporting_to_${index}`).html('<option value="" disabled selected>Select a Reporting User</option>');
+
+    // Determine the type of reporting users based on the selected role
+    if (role == 1) {
+        // No reporting users for this role, just clear the field
+        return;
+    } else if (role == 3) {
+        reporting_users = 'getAVps';
+    } else if (role == 5) {
+        reporting_users = 'getBussinessHeads';
+    } else if (role == 9) {
+        reporting_users = 'getPM_TL';
+    } else if (role == 6 || role == 7 || role == 8 || role == 10 || role == 11 || role == 22) {
+        reporting_users = 'getSOPC';
+    } else if (role == 2) {
+        reporting_users = 'getVps';
+    }
+
+    // Check if data for this role is already cached
+    if (reporting_users && reportingCache[reporting_users]) {
+        // Use cached reporting users
+        $(`#reporting_to_${index}`).html(reportingCache[reporting_users]);
+    } else if (reporting_users) {
+        // Fetch reporting users for the subcategory if not cached
+        $.ajax({
+            url: "{{ route('getUserList') }}",
+            type: "POST",
+            data: {
+                reviewer_type: reporting_users,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (html) {
+                // Cache the fetched reporting users for future use
+                reportingCache[reporting_users] = html;
+                $(`#reporting_to_${index}`).html(html); // Populate the reporting_to dropdown for the current row
+            },
+            error: function (error) {
+                console.error("Error fetching reporting users:", error); // Handle error if needed
+            }
+        });
+    }
+});
+
+// Function to add a new subcategory row
+function addNewSubcategory() {
+    var clients = @json($clients);
+    var userTypes = @json($userTypes);
+
+    // Calculate the next index based on the number of rows in the container
+    var index = $('#existing_subcategories .row').length + $('#new_subcategory .row').length;
+
+    // Generate options for Clients and User Roles
+    var clientOptions = '<option value="" disabled selected>Select a Client</option>';
+    clients.forEach(client => {
+        clientOptions += `<option value="${client.id}">${client.client_name}</option>`;
+    });
+
+    var userRoleOptions = '<option value="" disabled selected>Select a User Role</option>';
+    userTypes.forEach(userType => {
+        userRoleOptions += `<option value="${userType.id}">${userType.usertype}</option>`;
+    });
+
+    // Append a new subcategory row to the container
+    $('#new_subcategory').append(`
+    <div class="row mt-1" id="subcategory_row_${index}">
+        <div class="col-lg-11 row">
+            <div class="col-lg-3">
+                <label class="mt-2">Client:</label>
+                <select class="form-control client-select" name="client_name[]" id="client_${index}" data-index="${index}" required>
+                    ${clientOptions}
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label class="mt-2">LOB & Process:</label>
+                <select id="lob_process_${index}" name="lob_process[]" class="form-control lob-process" data-index="${index}" disabled>
+                    <option value="">Select LOB & Process</option>
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label class="mt-2">User Role:</label>
+                <select class="form-control userRole" name="userRole[]" id="user_role_${index}" data-index="${index}">
+                    ${userRoleOptions}
+                </select>
+            </div>
+            <div class="col-lg-3">                
+                <label class="mt-2">Reporting to:</label>                
+                    <select class="form-control reporting-to" name="reporting_to[]" id="reporting_to_${index}">
+                        <option value="" disabled selected>Select a Reporting User</option>
+                    </select>
+            </div>
+        </div>
+        <div class="col-lg-1 d-flex justify-item-center align-items-center mt-4">
+            <button type="button" class="btn btn-danger btn-sm text-white remove-row pb-0 pt-0 pr-2 pl-2 m-1" data-index="${index}">-</button>
+        </div>
+    </div>
+    `);
+}
+
+
+
+    // Function to remove a subcategory row
+    function removeSubcategory(index) {
+        $('#subcategory_row_' + index).remove();
+    }
+
+    $(document).ready(function () {
+        // Handle client change to populate LOB & Process dropdown
+        $(document).on('change', '.client-select', function () {
+            const clientId = $(this).val();
+            const index = $(this).data('index');
+            const lobProcessDropdown = $(`#lob_process_${index}`);
+
+            if (clientId) {
+                $.ajax({
+                    url: "{{ route('get-lob-process') }}",
+                    method: 'POST',
+                    data: {
+                        client_id: clientId,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (response) {
+                        lobProcessDropdown.html('<option value="">Select LOB & Process</option>');
+                        response.forEach(function (lob) {
+                            lob.processes.forEach(function (process) {
+                                lobProcessDropdown.append(`<option value="${process.id},${lob.id}">${lob.name} (${process.name})</option>`);
+                            });
+                        });
+                        lobProcessDropdown.prop('disabled', false);
+                    }
+                });
+            } else {
+                lobProcessDropdown.html('<option value="">Select LOB & Process</option>').prop('disabled', true);
+            }
+        });
+
+        // Handle "+" button click to add a new row
+        $(document).on('click', '.add-row', function () {
+            addNewSubcategory();
+        });
+
+        // Handle "-" button click to remove a row
+        $(document).on('click', '.remove-row', function () {
+            const index = $(this).data('index');
+            removeSubcategory(index);
+        });
+    });
+
+// EDIT
+
+$(document).ready(function () {
+    // When the Edit button is clicked
+    $('#datatable').on('click', '.edit_user', function () {
+        var id = $(this).data('id');  // Get the user ID
+        // console.log(id);
+        var url = '{{ route("edit_user") }}';  // Route to fetch user data
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: { id: id, _token: '{{csrf_token()}}' },
+            success: function(response) {
+                var res = response;  // Response from the backend
+
+                // Pre-fill the fields in the modal
+                $("#user_id_ed").val(res['id']);
+                $("#username_ed").val(res['username']);
+                $("#emp_id_ed").val(res['emp_id']);
+                $("#email_ed").val(res['email']);
+                $("#contact_no_ed").val(res['contact_no']);
+                $("#password_ed").val(res['password']);
+
+                // Handle the "is_active" checkbox
+                if (res['is_active'] == 1) {
+                    $("#is_active_ed").prop('checked', true);
+                } else {
+                    $("#is_active_ed").prop('checked', false);
+                }
+
+                // Handle the profiles and dynamically add them to the modal
+                populateEditSubcategories(res.profile);
+
+                // Show the modal
+                $("#userEditModal").modal('show');
+            }
+        });
+    });
+
+    $(document).on('change', '.edit_client', function () {
+            const clientId = $(this).val();
+            const index = $(this).data('index');
+            const lobProcessDropdown = $(`#edit_lob_process_${index}`);
+
+            if (clientId) {
+                $.ajax({
+                    url: "{{ route('get-lob-process') }}",
+                    method: 'POST',
+                    data: {
+                        client_id: clientId,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (response) {
+                        lobProcessDropdown.html('<option value="">Select LOB & Process</option>');
+                        response.forEach(function (lob) {
+                            lob.processes.forEach(function (process) {
+                                lobProcessDropdown.append(`<option value="${process.id},${lob.id}">${lob.name} (${process.name})</option>`);
+                            });
+                        });
+                        lobProcessDropdown.prop('disabled', false);
+                    }
+                });
+            } else {
+                lobProcessDropdown.html('<option value="">Select LOB & Process</option>').prop('disabled', true);
+            }
+        });
+
+
+        var ediReporting = {};
+
+// Listen for role change using event delegation
+// Use a common parent container to handle both existing and dynamically added rows
+$('#edit_existing_subcategories').on('change', '.edit_user_role', function () {
+    var $this = $(this); // Reference to the userRole dropdown in the current row
+    var index = $this.data('index'); // Get the index of the current row
+    var role = $this.val(); // Get the selected value from the current row's userRole dropdown
+    var reporting_users = null;
+
+    // Clear the reporting_to dropdown before populating
+    $(`#edit_reporting_to_${index}`).html('<option value="" disabled selected>Select a Reporting User</option>');
+
+    // Determine the type of reporting users based on the selected role
+    if (role == 1) {
+        // No reporting users for this role, just clear the field
+        return;
+    } else if (role == 3) {
+        reporting_users = 'getAVps';
+    } else if (role == 5) {
+        reporting_users = 'getBussinessHeads';
+    } else if (role == 9) {
+        reporting_users = 'getPM_TL';
+    } else if (role == 6 || role == 7 || role == 8 || role == 10 || role == 11 || role == 22) {
+        reporting_users = 'getSOPC';
+    } else if (role == 2) {
+        reporting_users = 'getVps';
+    }
+
+    // Check if data for this role is already cached
+    if (reporting_users && ediReporting[reporting_users]) {
+        // Use cached reporting users
+        $(`#edit_reporting_to_${index}`).html(ediReporting[reporting_users]);
+    } else if (reporting_users) {
+        // Fetch reporting users for the subcategory if not cached
+        $.ajax({
+            url: "{{ route('getUserList') }}",
+            type: "POST",
+            data: {
+                reviewer_type: reporting_users,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (html) {
+                // Cache the fetched reporting users for future use
+                ediReporting[reporting_users] = html;
+                $(`#edit_reporting_to_${index}`).html(html); // Populate the reporting_to dropdown for the current row
+            },
+            error: function (error) {
+                console.error("Error fetching reporting users:", error); // Handle error if needed
+            }
+        });
+    }
+});
+
+function populateEditSubcategories(profiles) {
+    const clients = @json($clients);  // List of clients from your server
+    const userTypes = @json($userTypes);  // List of user types from your server
+    const reportingUsers = @json($reportingUsers);  // Reporting users (if available)
+    const lobs = @json($lobs);
+    const processes = @json($processes);
+
+    $('#edit_existing_subcategories').html('');  // Clear existing subcategories
+
+    // If profiles is null or empty, add a single empty row
+    if (!profiles || profiles.length === 0) {
+        addNewSubcategoryRow();
+    } else {
+        profiles.forEach((profile, index) => {
+            // Generate client options
+            let clientOptions = '<option value="" disabled>Select a Client</option>';
+            clients.forEach(client => {
+                clientOptions += `<option value="${client.id}" ${client.id === profile.client_id ? 'selected' : ''}>${client.client_name}</option>`;
+            });
+
+            let lopProcessOption = '<option value="" disabled>Select a Client</option>';
+
+            // Assuming you have an array `processes` and `lob` is an array of lobs
+            lobs.forEach(lob => {
+                processes.forEach(process => {
+                    lopProcessOption += `<option value="${process.id},${lob.id}" 
+                        ${lob.id === profile.lob_id && process.id === profile.process_id ? 'selected' : ''}>
+                        ${lob.name} (${process.name})
+                    </option>`;
+                });
+            });
+
+            // Generate user role options
+            let userRoleOptions = '<option value="" disabled>Select a User Role</option>';
+            userTypes.forEach(userType => {
+                userRoleOptions += `<option value="${userType.id}" ${userType.id === profile.user_type_id ? 'selected' : ''}>${userType.usertype}</option>`;
+            });
+
+            // Generate reporting-to options
+            let reportingOptions = '<option value="" disabled selected>Select Reporting User</option>';
+            reportingUsers.forEach(reportingUser => {
+                reportingOptions += `<option value="${reportingUser.id}" ${reportingUser.id === profile.reporting_to ? 'selected' : ''}>${reportingUser.username}</option>`;
+            });
+
+            // Append the profile data to the modal
+            $('#edit_existing_subcategories').append(`
+            <div class="row mt-1" id="edit_subcategory_row_${index}">
+                <div class="col-lg-11 row">
+                    <div class="col-lg-3">
+                        <label class="mt-2">Client:</label>
+                        <select class="form-control edit_client" name="client_name[]" id="edit_client_${index}" data-index="${index}" required>
+                            ${clientOptions}
+                        </select>
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="mt-2">LOB & Process:</label>
+                        <select id="edit_lob_process_${index}" name="lob_process[]" class="form-control" data-index="${index}">
+                            ${lopProcessOption}
+                        </select>
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="mt-2">User Role:</label>
+                        <select class="form-control edit_user_role" name="userRole[]" id="edit_user_role_${index}" data-index="${index}">
+                            ${userRoleOptions}
+                        </select>
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="mt-2">Reporting to:</label>
+                        <select class="form-control" name="reporting_to[]" id="edit_reporting_to_${index}" data-index="${index}">
+                            ${reportingOptions}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-1 d-flex justify-item-center align-items-center mt-4">
+                    <button type="button" class="btn btn-danger remove-row pb-0 pt-0 pr-2 pl-2 m-1" data-index="${index}">-</button>
+                    <button id="add_new_row_btn" type="button" class="btn btn-success pb-0 pt-0 pr-2 pl-2 m-1">+</button>
+                </div>
+            </div>
+            `);
+        });
+    }
+
+    // Function to add a new row
+    function addNewSubcategoryRow() {
+        const newIndex = $('#edit_existing_subcategories .row').length;
+
+        let clientOptions = '<option value="" >Select a Client</option>';
+        clients.forEach(client => {
+            clientOptions += `<option value="${client.id}">${client.client_name}</option>`;
+        });
+
+        let lopProcessOption = '<option value="" >Select a Client</option>';
+        // lobs.forEach(lob => {
+        //     processes.forEach(process => {
+        //         lopProcessOption += `<option value="${process.id},${lob.id}">${lob.name} (${process.name})</option>`;
+        //     });
+        // });
+
+        let userRoleOptions = '<option value="">Select a User Role</option>';
+        userTypes.forEach(userType => {
+            userRoleOptions += `<option value="${userType.id}">${userType.usertype}</option>`;
+        });
+
+        let reportingOptions = '<option value="" disabled selected>Select Reporting User</option>';
+        reportingUsers.forEach(reportingUser => {
+            reportingOptions += `<option value="${reportingUser.id}">${reportingUser.username}</option>`;
+        });
+
+        // Append a new empty row with the "+" and "-" buttons
+        $('#edit_existing_subcategories').append(`
+            <div class="row mt-1" id="edit_subcategory_row_${newIndex}">
+            <div class="col-lg-11 row">
+                <div class="col-lg-3">
+                    <label class="mt-2">Client:</label>
+                    <select class="form-control edit_client" name="client_name[]" id="edit_client_${newIndex}" data-index="${newIndex}" required>
+                        ${clientOptions}
+                    </select>
+                </div>
+                <div class="col-lg-3">
+                    <label class="mt-2">LOB & Process:</label>
+                    <select id="edit_lob_process_${newIndex}" name="lob_process[]" class="form-control" data-index="${newIndex}">
+                        ${lopProcessOption}
+                    </select>
+                </div>
+                <div class="col-lg-3">
+                    <label class="mt-2">User Role:</label>
+                    <select class="form-control edit_user_role" name="userRole[]" id="edit_user_role_${newIndex}" data-index="${newIndex}">
+                        ${userRoleOptions}
+                    </select>
+                </div>
+                <div class="col-lg-3 ">
+                    <label class="mt-2">Reporting to:</label>
+                    <select class="form-control" name="reporting_to[]" id="edit_reporting_to_${newIndex}" data-index="${newIndex}">
+                        ${reportingOptions}
+                    </select>
+                </div>
+            </div>
+                <div class="col-lg-1 d-flex justify-item-center align-items-center mt-4">
+                    <button type="button" class="btn btn-danger remove-row pb-0 pt-0 pr-2 pl-2 m-1" data-index="${newIndex}">-</button>
+                    <button id="add_new_row_btn" type="button" class="btn btn-success pb-0 pt-0 pr-2 pl-2 m-1">+</button>
+                </div>
+
+            </div>
+        `);
+
+        // // Append the add button to the last row after the new row is added
+        // $('#edit_existing_subcategories').append(`
+        //     <div class="row mt-1">
+                
+        //     </div>
+        // `);
+    }
+
+    // Event listener for adding a new row
+    $(document).on('click', '#add_new_row_btn', function() {
+        addNewSubcategoryRow();
+    });
+
+    // Event listener for removing a row
+    $(document).on('click', '.remove-row', function() {
+        const rowIndex = $(this).data('index');
+        $(`#edit_subcategory_row_${rowIndex}`).remove();
+    });
+}
+
+});
+
+</script>
 @endsection
