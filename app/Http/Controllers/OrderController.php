@@ -32,8 +32,9 @@ class OrderController extends Controller
     }
 
 
-    public function getStatusCount()
+    public function getStatusCount(Request $request)
     {
+        $StatusID = $request->status_ID;
         $user = Auth::user();
         $processIds = $this->getProcessIdsBasedOnUserRole($user);
         $statusCountsQuery = OrderCreation::query();
@@ -75,27 +76,22 @@ class OrderController extends Controller
                     })->whereNotIn('status_id', [1, 4, 13, 15, 16])
                       ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15]);
                 }elseif ($user->user_type_id == 22) {
-                    $statusCountsQuery->where(function ($subQuery) use ($user) {
-                            $subQuery->where('typist_id', $user->id)
-                                    ->orWhere('typist_qc_id', $user->id)
-                                    ->orWhereNull('typist_id')
-                                    ->orWhereNull('typist_qc_id');
+                        $statusCountsQuery->where(function ($subQuery) use ($user) {
+                            $subQuery->where('oms_order_creations.typist_id', $user->id)
+                                    ->orWhere('oms_order_creations.typist_qc_id', $user->id);
                         })
                         ->whereNotIn('oms_order_creations.status_id', [1, 4, 13, 15])
                         ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15]);
-
                 }                
             }
 
-// return response()->json($statusCountsQuery->where('oms_order_creations.status_id', 20)->count());
+            $TypingstatusCountsQuery = clone $statusCountsQuery;
+            $TypingQcstatusCountsQuery = clone $statusCountsQuery;            
 
         $statusCounts = $statusCountsQuery->groupBy('status_id')
             ->selectRaw('count(*) as count, status_id')
             ->where('is_active', 1)
             ->pluck('count', 'status_id');
-            // dd($statusCounts);
-            // return response()->json($statusCounts);
-
         $yetToAssignUser = OrderCreation::with('process', 'client')
             ->where('assignee_user_id', null)
             ->where('status_id', 1)
@@ -142,7 +138,7 @@ class OrderController extends Controller
                     $query->where('stl_client.is_approved', 1);
                 })
                 ->count();
-        } 
+        }
         if (!in_array($user->user_type_id, [10])) {
             $yetToAssignTypistQaValue = OrderCreation::with('process', 'client')
                 ->where('typist_qc_id', null)
@@ -158,7 +154,6 @@ class OrderController extends Controller
                 ->count();
         }
     }
-
             $yetToAssignCounts = [
                 'yetToAssignQa' => isset($yetToAssignQaValue) ? $yetToAssignQaValue : 0,
                 'yetToAssignTypist' => isset($yetToAssignTypistValue) ? $yetToAssignTypistValue : 0,
@@ -196,18 +191,6 @@ class OrderController extends Controller
             ->count();
 
             if(in_array($user->user_type_id, [25])){
-                // $tax_bucket_count = OrderCreation::with('process', 'client')
-                //     ->where('tax_user_id', $user->id)
-                //     ->orWhere('tax_bucket', 1)
-                //     ->where('is_active', 1)
-                //     // ->whereIn('process_id', $processIds)
-                //     ->whereHas('process', function ($query) {
-                //         $query->where('stl_item_description.is_approved', 1);
-                //     })
-                //     ->whereHas('client', function ($query) {
-                //         $query->where('stl_client.is_approved', 1);
-                //     })
-                //     ->count();
 
                 $tax_bucket_count = OrderCreation::with(['process', 'client'])
                     ->where(function ($query) use ($user) {
@@ -239,6 +222,23 @@ class OrderController extends Controller
                     ->count();
             }
 
+            if($user->user_type_id == 22){
+                $typing_statusCountsQuery = $TypingstatusCountsQuery
+                    ->where('oms_order_creations.typist_id', $user->id)
+                    ->where('oms_order_creations.status_id', 16)
+                    ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15])
+                    ->count();
+                $statusCounts[16] = $typing_statusCountsQuery;
+
+                $typingQc_statusCountsQuery = $TypingQcstatusCountsQuery
+                    ->where('oms_order_creations.typist_qc_id', $user->id)
+                    ->where('oms_order_creations.status_id', 17)
+                    ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15])
+                    ->count();
+                $statusCounts[17] = $typingQc_statusCountsQuery;
+
+            }
+
             if (in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
                 $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
                 $statusCounts[4] = (!empty($statusCounts[4]) ? $statusCounts[4] : 0) - $yetToAssignQaValue;
@@ -253,22 +253,9 @@ class OrderController extends Controller
              else {
                 $statusCounts[6] = in_array($user->user_type_id, [6, 8]) ? $yetToAssignUser : 0;
                 
-                // if(in_array($user->user_type_id, [8])){
-                //     // $statusCounts[1] = (!empty($statusCounts[1]) ? $statusCounts[1] : 0) - $yetToAssignUser;
-                // }
                 if (!empty($statusCounts[4])) {
                     if (!in_array($user->user_type_id, [6, 7, 10, 11, 22])) {
                         $statusCounts[4] -= $yetToAssignQaValue;
-                    }
-                }
-
-                if (in_array($user->user_type_id, [22])) {
-
-                    if (!empty($statusCounts[16])) {
-                        $statusCounts[16] -= $yetToAssignTypistValue;
-                    }
-                    if (!empty($statusCounts[17])) {
-                        $statusCounts[17] -= $yetToAssignTypistQaValue;
                     }
                 }
                 
@@ -391,6 +378,8 @@ class OrderController extends Controller
             'yetToAssignCounts' => $yetToAssignCounts
         ]);
 }
+
+
 
     public function getOrderData(Request $request)
     {
@@ -520,7 +509,6 @@ class OrderController extends Controller
                                 $query->where('oms_order_creations.status_id', $request->status)
                                             ->where(function ($query) use ($user) {
                                                 $query->where('oms_order_creations.assignee_user_id', $user->id);
-                                                        // ->orWhereNull('oms_order_creations.assignee_user_id');
                                             });
 
                             } elseif(in_array($user->user_type_id, [7])) {
@@ -602,9 +590,7 @@ class OrderController extends Controller
                             $query->where('oms_order_creations.status_id', $request->status)
                                 ->where(function ($subQuery) use ($user) {
                                     $subQuery->where('typist_id', $user->id)
-                                            ->orWhere('typist_qc_id', $user->id)
-                                            ->orWhereNull('typist_id')
-                                            ->orWhereNull('typist_qc_id');
+                                            ->orWhereNull('typist_id');
                                 })
                                 ->whereNotIn('oms_order_creations.status_id', [1, 4, 13, 15])
                                 ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15]);
@@ -632,9 +618,7 @@ class OrderController extends Controller
                          else if (in_array($user->user_type_id, [22])) {
                             $query->where('oms_order_creations.status_id', $request->status)
                                 ->where(function ($subQuery) use ($user) {
-                                    $subQuery->where('typist_id', $user->id)
-                                            ->orWhere('typist_qc_id', $user->id)
-                                            ->orWhereNull('typist_id')
+                                    $subQuery->orWhere('typist_qc_id', $user->id)
                                             ->orWhereNull('typist_qc_id');
                                 })
                                 ->whereNotIn('oms_order_creations.status_id', [1, 4, 13, 15])
@@ -647,7 +631,6 @@ class OrderController extends Controller
             }
             else {
                     if(in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
-                        // $query->where('oms_order_creations.status_id', $request->status)->whereNotNull('oms_order_creations.assignee_user_id');
                         $query->where(function ($query) {
                             $query->whereNotNull('oms_order_creations.assignee_user_id')
                                   ->orWhere(function ($query) {
@@ -663,11 +646,6 @@ class OrderController extends Controller
                         $query->where('oms_order_creations.status_id', $request->status)->Where('oms_order_creations.assignee_qa_id', $user->id);
                     }
                     elseif(in_array($user->user_type_id, [8]) && $request->status != 13) {
-                        // $query->where('oms_order_creations.status_id', $request->status)
-                        // ->where(function ($optionalquery) use($user) {
-                        //     $optionalquery->where('oms_order_creations.assignee_user_id', $user->id)
-                        //         ->orWhere('oms_order_creations.assignee_qa_id', $user->id);
-                        // });
                         $query->where('oms_order_creations.status_id', $request->status)
                         ->where(function ($optionalquery) use ($user) {
                             $optionalquery->where(function ($subQuery) use ($user) {
@@ -692,22 +670,14 @@ class OrderController extends Controller
                             $optionalquery->where('oms_order_creations.typist_qc_id', $user->id);
                         });
                     } elseif(in_array($user->user_type_id, [22]) && $request->status != 13) {
-                        // $query->where('oms_order_creations.status_id', $request->status)
-                        // ->where(function ($optionalquery) use($user) {
-                        //     $optionalquery->where('oms_order_creations.typist_id', $user->id)
-                        //         ->orWhere('oms_order_creations.typist_qc_id', $user->id);
-                        // });
 
                         $query->where('oms_order_creations.status_id', $request->status)
                             ->where(function ($subQuery) use ($user) {
                             $subQuery->where('typist_id', $user->id)
-                                    ->orWhere('typist_qc_id', $user->id)
-                                    ->orWhereNull('typist_id')
-                                    ->orWhereNull('typist_qc_id');
+                                    ->orWhere('typist_qc_id', $user->id);
                         })
                         ->whereNotIn('oms_order_creations.status_id', [1, 4, 13, 15])
                         ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15]);
-
                     }
                     else{
                         if($request->status != 13){
@@ -767,15 +737,34 @@ class OrderController extends Controller
                     ->whereNotIn('status_id', [1, 4, 13, 15, 16])
                     ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15]);
                     
-                }elseif(in_array($user->user_type_id, [22])) {
+                }elseif (in_array($user->user_type_id, [22])) {
                     $query->where(function ($subQuery) use ($user) {
-                            $subQuery->where('typist_id', $user->id)
-                                    ->orWhere('typist_qc_id', $user->id)
-                                    ->orWhereNull('typist_id')
-                                    ->orWhereNull('typist_qc_id');
+                        // Query 1: For both typist and typist QC
+                        $subQuery->where(function ($subSubQuery) use ($user) {
+                            $subSubQuery->where('typist_id', $user->id)
+                                        ->orWhere('typist_qc_id', $user->id);
                         })
-                        ->whereNotIn('oms_order_creations.status_id', [1, 4, 13, 15])
-                        ->whereNotIn('oms_order_creations.process_type_id', [1, 3, 5, 15]);
+                        ->whereNotIn('status_id', [1, 4, 13, 15, 16, 17])
+                        ->whereNotIn('process_type_id', [1, 3, 5, 15])
+                        ->orWhere(function ($subSubQuery) use ($user) {
+                            // Query 2: For typist or when typist_id is NULL
+                            $subSubQuery->where(function ($subSubSubQuery) use ($user) {
+                                $subSubSubQuery->where('typist_id', $user->id)
+                                               ->orWhereNull('typist_id');
+                            })
+                            ->where('status_id', 16)
+                            ->whereNotIn('process_type_id', [1, 3, 5, 15]);
+                        })
+                        ->orWhere(function ($subSubQuery) use ($user) {
+                            // Query 3: For typist QC or when typist_qc_id is NULL
+                            $subSubQuery->where(function ($subSubSubQuery) use ($user) {
+                                $subSubSubQuery->where('typist_qc_id', $user->id)
+                                               ->orWhereNull('typist_qc_id');
+                            })
+                            ->where('status_id', 17)
+                            ->whereNotIn('process_type_id', [1, 3, 5, 15]);
+                        });
+                    });
                 }
                 else {
                     $query->whereNotNull('oms_order_creations.assignee_user_id')->orWhereIn('oms_order_creations.process_type_id',[2, 4, 6, 8, 9, 16]);
