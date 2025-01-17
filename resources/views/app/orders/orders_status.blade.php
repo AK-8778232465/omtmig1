@@ -359,23 +359,25 @@
 
                             </select>
                         </div>
-                        <b class ="mt-0 ml-2 mb-1" id="selectedDate"></b>
-                    </div>
-
+                        
+                    <div class="d-flex mb-2">
                     {{-- From to --}}
-                    <div class="col-md-2 mt-4"  id="customfromRange"  style="display: none;">
+                    <div class="col-md-6"  id="customfromRange"  style="display: none;">
+                    <label for="dateFilter">From:</label>
                         <div class="input-group">
-                            <span class="input-group-text">From:</span>
                             <input type="date" class="form-control" id="fromDate_range">
                         </div>
                     </div>
 
-                    <div class="col-md-2 mt-4"  id="customToRange"  style="display: none;">
+                    <div class="col-md-6"  id="customToRange"  style="display: none;">
+                        <label for="dateFilter">To:</label>
                         <div class="input-group">
-                            <span class="input-group-text">To:</span>
                             <input type="date" class="form-control" id="toDate_range">
                         </div>
                     </div>
+                    <b class ="mt-0 ml-2 mb-1" id="selectedDate"></b>
+                    </div>
+                </div>
                     {{--  --}}
                     <div class="col-md-2">
                         <div class="form-group">
@@ -1001,6 +1003,7 @@ $(document).ready(function() {
 
         lastOrderStatus = null;
     }
+    
 });
 
     $(document).on('click', '.status-btn', function () {
@@ -1090,6 +1093,11 @@ $(document).ready(function() {
     $('#order_datatable').on('draw.dt', function () {
         task_status = $('#statusButtons').find('.btn-primary').attr('id');
         let status = task_status.replace("status_", "");
+
+        if(status !== 'tax'){
+            datatable.column(18).visible(false);
+        }
+
         if (status == 6 || status == 7 || status == 5) {
             $('.status-dropdown').prop('disabled', true);
             if (status == 6 || status == 7) {
@@ -1211,6 +1219,7 @@ $(document).ready(function() {
             $('.status-dropdown').prop('disabled', true);
             datatable.column(15).visible(false);
             datatable.column(16).visible(false);
+            datatable.column(18).visible(true);
         }
 
         if(status == 15){
