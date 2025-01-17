@@ -1210,7 +1210,7 @@
                             <div class="row installments-section  " >
                                 <!-- First Installment -->
                                 <div class="col-3 installment  " id ="container1">
-                                    <h6 class="installment-title">First Installment</h6>
+                                    <h5 class="installment-title">Summer</h5>
 
                                     <div class="checkbox-group">
                                         <label class="checkbox-label">
@@ -1329,7 +1329,7 @@
 
                                 <!-- Second Installment -->
                                 <div class="col-3 installment  " id ="container2">
-                                    <h6 class="installment-title">Second Installment</h6>
+                                    <h5 class="installment-title">Winter</h5>
 
                                     <div class="checkbox-group">
                                         <label class="checkbox-label">
@@ -1446,7 +1446,7 @@
 
                                 <!-- Third Installment -->
                                 <div class="col-3 installment  " id ="container3">
-                                    <h6 class="installment-title">Third Installment</h6>
+                                    <h5 class="installment-title">Spring</h5>
 
                                     <div class="checkbox-group">
                                         <label class="checkbox-label">
@@ -1563,7 +1563,7 @@
 
                                 <!-- Fourth Installment -->
                                 <div class="col-3 installment  " id ="container4">
-                                    <h6 class="installment-title">Fourth Installment</h6>
+                                    <h5 class="installment-title">Fall</h5>
 
                                     <div class="checkbox-group">
                                         <label class="checkbox-label">

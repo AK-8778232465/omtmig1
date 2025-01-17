@@ -243,6 +243,14 @@ class HomeController extends Controller
                     $query->where('assignee_user_id', $user->id)
                         ->orWhere('assignee_qa_id', $user->id);
                 });
+            }elseif ($user->user_type_id == 10) {
+                $statusCountsQuery->where(function ($query) use($user){
+                    $query->where('typist_id', $user->id);
+                });
+            }elseif ($user->user_type_id == 11) {
+                $statusCountsQuery->where(function ($query) use($user){
+                    $query->where('typist_qc_id', $user->id);
+                });
             }elseif ($user->user_type_id == 22) {
                 $statusCountsQuery->where(function ($query) use($user){
                     $query->where('typist_id', $user->id)
@@ -375,7 +383,7 @@ class HomeController extends Controller
             $statusCounts[5] = $StatusCompletedCount;
             $statusCounts[6] = $yetToAssignUser;
         } else {
-            if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+            if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
                 if(in_array('All', $project_id) && !in_array('All', $client_id)){
                     if ($user->user_type_id == 6) {
                         $StatusCompletedCount = $statusCountsQuery3->with('process', 'client')
@@ -410,6 +418,40 @@ class HomeController extends Controller
                             ->where(function ($query) use($user){
                             $query->where('assignee_user_id', $user->id)
                                 ->orWhere('assignee_qa_id', $user->id);
+                            })
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->whereDate('order_date', '>=', $from_date)
+                            ->whereDate('order_date', '<=', $to_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->whereHas('process', function ($query) use ($client_id) {
+                                $query->whereIn('client_id', $client_id);
+                            })
+                            ->count();
+
+                    }elseif ($user->user_type_id == 10) {
+                        $StatusCompletedCount = $statusCountsQuery3->with('process', 'client')
+                            ->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id);
+                            })
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->whereDate('order_date', '>=', $from_date)
+                            ->whereDate('order_date', '<=', $to_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->whereHas('process', function ($query) use ($client_id) {
+                                $query->whereIn('client_id', $client_id);
+                            })
+                            ->count();
+
+                    }elseif ($user->user_type_id == 22) {
+                        $StatusCompletedCount = $statusCountsQuery3->with('process', 'client')
+                            ->where(function ($query) use($user){
+                            $query->where('typist_qc_id', $user->id);
                             })
                             ->whereIn('process_id', $processIds)
                             ->whereDate('completion_date', '>=', $from_date)
@@ -473,6 +515,36 @@ class HomeController extends Controller
                             ->where(function ($query) use($user){
                             $query->where('assignee_user_id', $user->id)
                                 ->orWhere('assignee_qa_id', $user->id);
+                                     })
+                            ->whereIn('process_id', $project_id)
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->whereDate('order_date', '>=', $from_date)
+                            ->whereDate('order_date', '<=', $to_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->count();
+
+                    }elseif ($user->user_type_id == 10) {
+                        $StatusCompletedCount = $statusCountsQuery3
+                            ->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id);
+                                     })
+                            ->whereIn('process_id', $project_id)
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->whereDate('order_date', '>=', $from_date)
+                            ->whereDate('order_date', '<=', $to_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->count();
+
+                    }elseif ($user->user_type_id == 11) {
+                        $StatusCompletedCount = $statusCountsQuery3
+                            ->where(function ($query) use($user){
+                            $query->where('typist_qc_id', $user->id);
                                      })
                             ->whereIn('process_id', $project_id)
                             ->whereIn('process_id', $processIds)
@@ -552,6 +624,42 @@ class HomeController extends Controller
                             })
                             ->count();
 
+                    }elseif ($user->user_type_id == 10) {
+                        $StatusCompletedCount = $statusCountsQuery3->with('process', 'client')
+                            ->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id);
+                            })
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->whereDate('order_date', '>=', $from_date)
+                            ->whereDate('order_date', '<=', $to_date)
+                            ->whereIn('process_id', $project_id)
+                            ->whereIn('process_id', $processIds)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->whereHas('process', function ($query) use ($client_id) {
+                                $query->whereIn('client_id', $client_id);
+                            })
+                            ->count();
+
+                    }elseif ($user->user_type_id == 11) {
+                        $StatusCompletedCount = $statusCountsQuery3->with('process', 'client')
+                            ->where(function ($query) use($user){
+                            $query->where('typist_qc_id', $user->id);
+                            })
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->whereDate('order_date', '>=', $from_date)
+                            ->whereDate('order_date', '<=', $to_date)
+                            ->whereIn('process_id', $project_id)
+                            ->whereIn('process_id', $processIds)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->whereHas('process', function ($query) use ($client_id) {
+                                $query->whereIn('client_id', $client_id);
+                            })
+                            ->count();
+
                     }elseif ($user->user_type_id == 22) {
                         $StatusCompletedCount = $statusCountsQuery3->with('process', 'client')
                             ->where(function ($query) use($user){
@@ -601,6 +709,32 @@ class HomeController extends Controller
                         $StatusCompletedCount = $statusCountsQuery3->where(function ($query) use($user){
                             $query->where('assignee_user_id', $user->id)
                                   ->orWhere('assignee_qa_id', $user->id);
+                        })
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->whereDate('order_date', '>=', $from_date)
+                            ->whereDate('order_date', '<=', $to_date)
+                            ->whereIn('process_id', $processIds)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->count();
+
+                    }elseif ($user->user_type_id == 10) {
+                        $StatusCompletedCount = $statusCountsQuery3->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id);
+                        })
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->whereDate('order_date', '>=', $from_date)
+                            ->whereDate('order_date', '<=', $to_date)
+                            ->whereIn('process_id', $processIds)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->count();
+
+                    }elseif ($user->user_type_id == 11) {
+                        $StatusCompletedCount = $statusCountsQuery3->where(function ($query) use($user){
+                            $query->where('typist_qc_id', $user->id);
                         })
                             ->whereDate('completion_date', '>=', $from_date)
                             ->whereDate('completion_date', '<=', $to_date)
@@ -737,6 +871,14 @@ class HomeController extends Controller
                     $query->where('assignee_user_id', $user->id)
                         ->orWhere('assignee_qa_id', $user->id);
                 });
+            }elseif ($user->user_type_id == 10) {
+                $statusCountsQuery->where(function ($query) use($user){
+                    $query->where('typist_id', $user->id);
+                });
+            }elseif ($user->user_type_id == 11) {
+                $statusCountsQuery->where(function ($query) use($user){
+                    $query->where('typist_qc_id', $user->id);
+                });
             }elseif ($user->user_type_id == 22) {
                 $statusCountsQuery->where(function ($query) use($user){
                     $query->where('typist_id', $user->id)
@@ -824,7 +966,7 @@ class HomeController extends Controller
                 }
             }
         } else {
-            if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9])) {
+            if (!in_array($user->user_type_id, [1, 2, 3, 4, 5, 9, 23, 24])) {
                 if ($user->user_type_id == 6) {
                     if(in_array('All', $project_id) && !in_array('All', $client_id)){
                         // Filter for getorderId query
@@ -1047,6 +1189,174 @@ class HomeController extends Controller
                             $carriedOverCompletedCount2 = $statusCountsQuery2->where(function ($query) use($user){
                                 $query->where('assignee_user_id', $user->id)
                                     ->orWhere('assignee_qa_id', $user->id);
+                            })
+                                ->select('id', 'completion_date', 'status_id')
+                                ->whereIn('process_id', $processIds)
+                                ->whereDate('completion_date', '>=', $from_date)
+                                ->whereDate('completion_date', '<=', $to_date)
+                                ->where('status_id', 5)
+                                ->where('is_active', 1)
+                                ->get();
+                        }
+                    }
+                }elseif($user->user_type_id == 10){
+                    if(in_array('All', $project_id) && !in_array('All', $client_id)){
+                        // Filter for getorderId query
+                        $getorderId = $statusCountsQuery2->with('process', 'client')->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id);
+                        })
+                            ->select('id', 'order_date', 'completion_date', 'status_id')
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('order_date', '<', $from_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->whereHas('process', function ($query) use ($client_id) {
+                                $query->whereIn('client_id', $client_id);
+                            })
+                            ->get();
+
+
+
+                        // Filter for carriedOverCompletedCount2 query
+                        $carriedOverCompletedCount2 = $statusCountsQuery2->with('process', 'client')->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id);
+                        })
+                            ->select('id', 'completion_date', 'status_id')
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->whereHas('process', function ($query) use ($client_id) {
+                                $query->whereIn('client_id', $client_id);
+                            })
+                            ->get();
+
+
+                    }else{
+                        if(!in_array('All', $project_id)){
+                            // Filter for getorderId query
+                            $getorderId = $statusCountsQuery2->select('id', 'order_date', 'completion_date', 'status_id')->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id);
+                            })
+                            ->whereIn('process_id', $processIds)
+                            ->whereIn('process_id', $project_id)
+                            ->whereDate('order_date', '<', $from_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->get();
+
+                        // Filter for carriedOverCompletedCount2 query
+                        $carriedOverCompletedCount2 = $statusCountsQuery2->where(function ($query) use($user){
+                            $query->where('typist_id', $user->id);
+                        })
+                            ->select('id', 'completion_date', 'status_id')
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->get();
+
+                        }else{
+                            // Filter for getorderId query
+                            $getorderId = $statusCountsQuery2->where(function ($query) use($user){
+                                $query->where('typist_id', $user->id);
+                            })
+                                ->select('id', 'order_date', 'completion_date', 'status_id')
+                                ->whereIn('process_id', $processIds)
+                                ->whereDate('order_date', '<', $from_date)
+                                ->where('status_id', 5)
+                                ->where('is_active', 1)
+                                ->get();
+
+                            // Filter for carriedOverCompletedCount2 query
+                            $carriedOverCompletedCount2 = $statusCountsQuery2->where(function ($query) use($user){
+                                $query->where('typist_id', $user->id);
+                            })
+                                ->select('id', 'completion_date', 'status_id')
+                                ->whereIn('process_id', $processIds)
+                                ->whereDate('completion_date', '>=', $from_date)
+                                ->whereDate('completion_date', '<=', $to_date)
+                                ->where('status_id', 5)
+                                ->where('is_active', 1)
+                                ->get();
+                        }
+                    }
+                }elseif($user->user_type_id == 11){
+                    if(in_array('All', $project_id) && !in_array('All', $client_id)){
+                        // Filter for getorderId query
+                        $getorderId = $statusCountsQuery2->with('process', 'client')->where(function ($query) use($user){
+                            $query->where('typist_qc_id', $user->id);
+                        })
+                            ->select('id', 'order_date', 'completion_date', 'status_id')
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('order_date', '<', $from_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->whereHas('process', function ($query) use ($client_id) {
+                                $query->whereIn('client_id', $client_id);
+                            })
+                            ->get();
+
+
+
+                        // Filter for carriedOverCompletedCount2 query
+                        $carriedOverCompletedCount2 = $statusCountsQuery2->with('process', 'client')->where(function ($query) use($user){
+                            $query->where('typist_qc_id', $user->id);
+                        })
+                            ->select('id', 'completion_date', 'status_id')
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->whereHas('process', function ($query) use ($client_id) {
+                                $query->whereIn('client_id', $client_id);
+                            })
+                            ->get();
+
+
+                    }else{
+                        if(!in_array('All', $project_id)){
+                            // Filter for getorderId query
+                            $getorderId = $statusCountsQuery2->select('id', 'order_date', 'completion_date', 'status_id')->where(function ($query) use($user){
+                            $query->where('typist_qc_id', $user->id);
+                            })
+                            ->whereIn('process_id', $processIds)
+                            ->whereIn('process_id', $project_id)
+                            ->whereDate('order_date', '<', $from_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->get();
+
+                        // Filter for carriedOverCompletedCount2 query
+                        $carriedOverCompletedCount2 = $statusCountsQuery2->where(function ($query) use($user){
+                            $query->where('typist_qc_id', $user->id);
+                        })
+                            ->select('id', 'completion_date', 'status_id')
+                            ->whereIn('process_id', $processIds)
+                            ->whereDate('completion_date', '>=', $from_date)
+                            ->whereDate('completion_date', '<=', $to_date)
+                            ->where('status_id', 5)
+                            ->where('is_active', 1)
+                            ->get();
+
+                        }else{
+                            // Filter for getorderId query
+                            $getorderId = $statusCountsQuery2->where(function ($query) use($user){
+                                $query->where('typist_qc_id', $user->id);
+                            })
+                                ->select('id', 'order_date', 'completion_date', 'status_id')
+                                ->whereIn('process_id', $processIds)
+                                ->whereDate('order_date', '<', $from_date)
+                                ->where('status_id', 5)
+                                ->where('is_active', 1)
+                                ->get();
+
+                            // Filter for carriedOverCompletedCount2 query
+                            $carriedOverCompletedCount2 = $statusCountsQuery2->where(function ($query) use($user){
+                                $query->where('typist_qc_id', $user->id);
                             })
                                 ->select('id', 'completion_date', 'status_id')
                                 ->whereIn('process_id', $processIds)
