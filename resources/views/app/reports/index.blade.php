@@ -98,6 +98,10 @@
     gap: 10px;
 }
 
+#customToRange label {
+    font-weight: bold;
+    color: #007bff;
+}
 #customToRange {
     display: flex;
     flex-wrap: wrap;
@@ -383,12 +387,12 @@
         </div>
     </div>
 
-
+    <div class="col-md-10">
         <div class="row" id="hidefilter">
-            <div class="col-md-3 mr-2" style="width: 350px!important;" id="selected_date_range">
+            <div class="col-md-3" id="selected_date_range">
                 <div class="form-group">
                     <label for="dateFilter" required>Selected received date range:</label>
-                    <select class="form-control" style=" width: 310px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
+                    <select class="form-control"  id="dateFilter" onchange="selectDateFilter(this.value)">
                         <option value="" >Select Date Range</option>
                         <option value="last_week">Last Week</option>
                         <option value="current_week">current week</option>
@@ -399,16 +403,16 @@
                     </select>
                 </div>
                 <div class="d-flex">
-                        <div class="col-md-6 mt-3 p-0 m-0"  id="customfromRange" >
+                        <div class="col-md-6 mt-1"  id="customfromRange" >
+                            <label>From</label>
                             <div class="input-group">
-                                <span class="input-group-text">From:</span>
                                 <input type="date" class="form-control" id="fromDate_range">
                             </div>
                         </div>
 
-                    <div class="col-md-6 mt-3 " id="customToRange" >
+                    <div class="col-md-6 mt-1 " id="customToRange" >
+                            <label>To</label>
                         <div class="input-group">
-                            <span class="input-group-text">To:</span>
                             <input type="date" class="form-control" id="toDate_range">
                         </div>
                     </div>
@@ -419,7 +423,7 @@
                  <button type="submit" id="filterButton" class="btn btn-primary in-order">Filter</button>
             </div>
             
-            <div class="col-md-2 mr-3" id="client_filter">
+            <div class="col-md-2 " id="client_filter">
                 <div class="form-group">
                     <label for="client">Client</label>
                     <select class="form-control select2-basic-multiple" name="dcf_client_id" id="client_id_dcf">
@@ -432,7 +436,7 @@
                 </div>
             </div>
 
-            <div class="col-md-2 mr-3" id="lob_filter">
+            <div class="col-md-2" id="lob_filter">
                 <div class="form-group">
                     <label for="lob_id">Lob</label>
                     <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id">
@@ -449,6 +453,17 @@
                     </select>
                 </div>
             </div>
+            <div class="col-md-2" id="hidefilter_2">
+            <div class="form-group">
+                <label for="product_id">Product</label>
+                <select class="form-control select2-basic-multiple" style="width:100%" name="product_id" id="product_id" multiple="multiple">
+                    <option selected value="All">All</option>
+                </select>
+            </div>
+            </div>
+            <div class="col-md-1"style="margin-top:25px;" id="hidefilter_3">
+                <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
+            </div>
         </div>
         <div class="mb-4" id="datepicker">
             <div class="col-3 mb-2" >
@@ -463,19 +478,8 @@
                 </div>
             </div>
         </div>
-        <div class= "col-md-7 d-flex row" >
-        <div class="col-md-4 mt-3" id="hidefilter_2">
-            <div class="form-group">
-                <label for="product_id">Product</label>
-                <select class="form-control select2-basic-multiple" style="width:100%" name="product_id" id="product_id" multiple="multiple">
-                    <option selected value="All">All</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-3" style="margin-top:41px;" id="hidefilter_3">
-            <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
-        </div>
-        </div>
+    </div>
+       
         <div class="card col-md-10 mt-5 tabledetails" id="userwise_table" style="font-size: 12px;">
             <h4 class="text-center mt-3">Userwise Details</h4>
                 <div class="card-body">
