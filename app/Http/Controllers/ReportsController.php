@@ -242,7 +242,7 @@ class ReportsController extends Controller
                 'status_15' => $count->status_15,
                 'status_18' => $count->status_18,
                 'status_20' => $count->status_20,
-                'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14 + $count->status_15 + $count->status_18 + $count->status_20,
+                'All' => $count->status_1 + $count->status_2 + $count->status_3 + $count->status_4 + $count->status_5 + $count->status_13 + $count->status_14 + $count->status_15 + $count->status_18 + $count->status_20 + $count->status_16 + $count->status_17,
             ];
         });
 
@@ -1222,7 +1222,11 @@ private function getOrderInflowCounts($processIds, $from_date, $to_date)
     $carry_forward = OrderCreation::whereIn('process_id', $processIds)
         ->where('is_active', 1)
         ->where('status_id', '!=', 3)
-        ->where('status_id', '!=', 5)  // Exclude completed
+    ->where(function ($query) use ($from_date, $to_date) {
+        $query->whereDate('completion_date', '>', $from_date)
+              ->whereDate('completion_date', '<', $to_date)
+              ->orWhereNull('completion_date');  // Include records where completion_date is null
+    })
         ->where('status_id', '!=', 20)  // Exclude completed
         ->whereDate('order_date', '<', $from_date)
         ->get()
@@ -1237,9 +1241,6 @@ private function getOrderInflowCounts($processIds, $from_date, $to_date)
     // Received count for all clients
     $received = OrderCreation::whereIn('process_id', $processIds)
         ->where('is_active', 1)
-        ->where('status_id', '!=', 3)  // Exclude cancelled
-        ->where('status_id', '!=', 5)  // Exclude completed
-        ->where('status_id', '!=', 20)
         ->whereDate('order_date', '>=', $from_date)
         ->whereDate('order_date', '<=', $to_date)
         ->get()
@@ -1361,7 +1362,7 @@ public function orderInflow_data(Request $request)
         $partiallyCancelledCount = $orderCounts['partially_cancelled']->get($clientId, 0);
 
         // Calculate pending count
-        $pendingCount = $carryForwardCount + $receivedCount ;
+        $pendingCount = $carryForwardCount + $receivedCount - $completedCount - $cancelledCount - $partiallyCancelledCount;
 
         $response[] = [
             'client_name' => $clientNames[$clientId] ?? 'N/A',  // Use client_name instead of client_id
@@ -1443,7 +1444,7 @@ public function orderInflow_export(Request $request)
         $partiallyCancelledCount = $orderCounts['partially_cancelled']->get($clientId, 0);
 
         // Pending count should exclude cancelled and partially cancelled orders
-        $pendingCount = $carryForwardCount + $receivedCount;
+        $pendingCount = $carryForwardCount + $receivedCount - $completedCount - $cancelledCount - $partiallyCancelledCount;
 
         $response[] = [
             'client_name' => $clientNames[$clientId] ?? 'N/A',  // Use client_name instead of client_id
