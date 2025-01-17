@@ -261,7 +261,34 @@
  
                             </div>
                         </div>
-                        <div class="row mt-1">
+                       
+                      
+                        <div class="row">
+                     
+                        @if($orderData->client_id == 82 || $orderData->client_id == 84 || $orderData->client_id == 85 || $orderData->client_id == 86 || $orderData->client_id == 87 || $orderData->client_id == 89 || $orderData->client_id == 91|| $orderData->client_id == 16)
+                            <div class="col-md-3 mt-0 mb-2">
+                                <div class="font-weight-bold">User Name</div>
+                                <div>{!! !empty($orderData->assignee_user) ? $orderData->assignee_user : '-' !!}</div>
+                                </div>
+                            <div class="col-md-3 mt-0 mb-2">
+                                <div class="font-weight-bold">Qcer Name</div>
+                                <div>{!! !empty($orderData->assignee_qa) ? $orderData->assignee_qa : '-' !!}</div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="font-weight-bold">Typist Name</div>
+                                <div>{!! !empty($orderData->typist_user) ? $orderData->typist_user : '-' !!}</div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="font-weight-bold">Typist Qcer Name</div>
+                                <div>{!! !empty($orderData->typist_qa) ? $orderData->typist_qa : '-' !!}</div>
+                            </div>
+                        @endif
+                        <!-- // -->
+
+                       
+                    </div>
+                    <div class="row mt-1">
+                        @if(!in_array($orderData->client_id, [16, 82]))
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">Emp Id</div>
                                 <div>{!! isset($orderData->assignee_user) ? trim(explode('(', $orderData->assignee_user)[0]) : '-' !!}</div>
@@ -270,6 +297,8 @@
                                 <div class="font-weight-bold">Emp Name</div>
                                 <div>{!! isset($orderData->assignee_user) ? trim(explode(')', explode('(', $orderData->assignee_user)[1])[0]) : '-' !!}</div>
                             </div>
+
+                            @endif
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">State</div>
                                 <select class="form-control select2dropdown" style="width:100%" name="property_state" id="property_state" aria-hidden="true"
@@ -294,10 +323,8 @@
                                     @endforeach
                                 </select>
                             </div>
-                        </div>
-                      
-                        <div class="row">
-                        @if($orderData->client_id == 16)
+
+                            @if(($orderData->client_id == 16) && (in_array($orderData->stl_process_id, [1, 3, 5])))
                             <div class="col-md-3 mb-2">
                                 <div class="font-weight-bold">Municipality</div>
                                 <select id="city" name="city" class="form-control select2dropdown" data-parsley-required="true" {{ !is_null($getTaxBucket[0]->tax_bucket) ? 'disabled' : '' }}>
@@ -309,27 +336,9 @@
                                 </select>
                             </div>
                         @endif
-                        @if($orderData->client_id == 82 || $orderData->client_id == 84 || $orderData->client_id == 85 || $orderData->client_id == 86 || $orderData->client_id == 87 || $orderData->client_id == 89 || $orderData->client_id == 91)
-                            <div class="col-md-3 mt-0 mb-2">
-                                <div class="font-weight-bold">User Name</div>
-                                <div>{!! !empty($orderData->assignee_user) ? $orderData->assignee_user : '-' !!}</div>
-                                </div>
-                            <div class="col-md-3 mt-0 mb-2">
-                                <div class="font-weight-bold">Qcer Name</div>
-                                <div>{!! !empty($orderData->assignee_qa) ? $orderData->assignee_qa : '-' !!}</div>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <div class="font-weight-bold">Typist Name</div>
-                                <div>{!! !empty($orderData->typist_user) ? $orderData->typist_user : '-' !!}</div>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <div class="font-weight-bold">Typist Qcer Name</div>
-                                <div>{!! !empty($orderData->typist_qa) ? $orderData->typist_qa : '-' !!}</div>
-                            </div>
-                        @endif
-                        <!-- // -->
+                        
                         </div>
-                    </div>
+
                 </div>
                 @if($orderData->client_id == 82)
                 <?php
