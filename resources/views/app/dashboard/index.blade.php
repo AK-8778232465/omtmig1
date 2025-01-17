@@ -147,6 +147,10 @@
     gap: 15px;
 }
 
+#customToRange label {
+    font-weight: bold;
+    color: #007bff;
+}
 
 #customToRange .input-group-text {
     font-weight: bold;
@@ -289,10 +293,10 @@
                 <div class="container-fluid d-flex reports">
                     <div class="col-md-12">
                         <div class="row" id="hidefilter">
-                            <div class="col-md-4" style="width: 350px!important;">
+                            <div class="col-md-3">
                                 <div class="form-group" >
                                     <label for="dateFilter" required>Selected received date range:</label>
-                                    <select class="form-control" style=" width: 250px !important; " id="dateFilter" onchange="selectDateFilter(this.value)">
+                                    <select class="form-control" id="dateFilter" onchange="selectDateFilter(this.value)">
                                         <option value="" >Select Date Range</option>
                                         <option value="last_week">Last Week</option>
                                         <option value="current_week">current week</option>
@@ -302,23 +306,23 @@
                                         <option value="custom">Custom Range</option>
                                     </select>
                                 </div>
-                                <div class="d-flex">
-                                    <div class="col-md-6 mt-3 p-0 m-0"  id="customfromRange" >
+                                <div class="d-flex mb-3">
+                                    <div class="col-md-5 mt-1 p-0 m-0"  id="customfromRange" >
+                                    <label for="dateFilter">From:</label>
                                         <div class="input-group">
-                                            <span class="input-group-text">From:</span>
                                             <input type="date" class="form-control" id="fromDate_range">
                                         </div>
                                     </div>
-                                    <div class="col-md-6 mt-3 " id="customToRange" >
+                                    <div class="col-md-5 mt-1 p-0 ml-3" id="customToRange" >
+                                    <label for="dateFilter">To:</label>
                                         <div class="input-group">
-                                            <span class="input-group-text">To:</span>
                                             <input type="date" class="form-control" id="toDate_range">
                                         </div>
                                     </div>
                                     <b class="mt-0" id="selectedDate"></b>
                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="form-group">
                                     <label for="client">Client</label>
                                     <select class="form-control select2-basic-multiple" name="dcf_client_id" id="client_id_dcf" multiple="multiple">
@@ -346,7 +350,7 @@
                                 @else
                                     style="display: none;"
                                 @endif> --}}
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-2 form-group">
                                     <label for="lob_id">Lob</label>
                                     <select class="form-control select2-basic-multiple" style="width:100%" name="lob_id" id="lob_id" multiple="multiple">
                                         <option selected value="All">All</option>
@@ -375,7 +379,7 @@
                                     </select>
                                 </div>
                             {{-- </div> --}}
-                            <div class="col-md-3" id="hidefilter_2">
+                            <div class="col-md-2" id="hidefilter_2">
                                 <div class="form-group">
                                     <label for="product_id">Product</label>
                                     <select class="form-control select2-basic-multiple" style="width:100%" name="product_id" id="product_id" multiple="multiple">
@@ -383,7 +387,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-2 mt-4 mb-3" style="" id="hidefilter_3">
+                            <div class="col-md-1 mt-4 mb-3" style="" id="hidefilter_3">
                                 <button type="submit" id="filterButton" class="btn btn-primary">Filter</button>
                             </div>
                         </div>
@@ -492,9 +496,9 @@
 
                     <div class="d-flex" style="margin-left: 5%; justify-content: flex-start;">
                         <img src="{{ asset('assets/images/yesterday.png') }}" 
-                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#yesterday_dataModal" class="mr-2">
+                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#yesterday_dataModal" class="mr-2" title="Yesterday">
                         <img src="{{ asset('assets/images/today.png') }} " 
-                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#dataModal" class="mr-2">
+                        style="width: 50%; height: auto; max-width: 50px; max-height: 50px;"  data-toggle="modal" data-target="#dataModal" class="mr-2" title="Today">
                     </div>
                 </div>
 
