@@ -368,6 +368,8 @@
                             <option value="19">California Best Title company</option>
                             <option value="20">Common Bond Title</option>
                             <option value="21">Ferr & Mullin, P.C</option>
+                            <option value="22">JC Title</option>
+                            <option value="23">Crown Title</option>
 
 
 
@@ -1228,6 +1230,10 @@ $(document).ready(function () {
                 downloadLink.attr('href', "{{ asset('/template/Common Bond_sample_template.xlsx') }}");
             }else if (selectedValue == "21") {
                 downloadLink.attr('href', "{{ asset('/template/Ferr.xlsx') }}");
+            }else if (selectedValue == "22") {
+                downloadLink.attr('href', "{{ asset('/template/JC Title_sample_template.xlsx') }}");
+            }else if (selectedValue == "23") {
+                downloadLink.attr('href', "{{ asset('/template/Crown Title_sample_template.xlsx') }}");
             }
             else {
                 downloadLink.attr('href', "#");
