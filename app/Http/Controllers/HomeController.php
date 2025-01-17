@@ -2797,7 +2797,12 @@ public function tat_zone_count(Request $request) {
             ->whereIn('process_id', $processIds)
             ->where('is_active', 1)
             ->where('status_id', '!=', 3)
-            ->where('status_id', '!=', 5)
+            ->where('status_id', '!=', 20)
+            ->where(function ($statusCountsQuery) use ($firstDateOfCurrentMonth) {
+                $statusCountsQuery->whereDate('completion_date', '>', $firstDateOfCurrentMonth)
+                      ->orWhereNull('completion_date');  // Include records where completion_date is null
+            })
+
             ->whereDate('order_date', '<', $firstDateOfCurrentMonth);
 
         $carry_forward = $carry_forward->count();
