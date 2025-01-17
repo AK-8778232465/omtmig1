@@ -76,5 +76,48 @@ class OmsUserProfile extends Model
         return $this->belongsTo(User::class, 'added_by');
     }
 
-    // Optionally, you can define custom getters or setters as needed
+    public static function getAllLowerLevelUserProfile($parentId)
+    {
+        $userIds = collect([$parentId]);
+
+        self::recursiveLowerLevelUserIds($parentId, $userIds);
+
+        return $userIds->toArray();
+    }
+
+    public static function getAllLowerLevelUserIds_all($parentId)
+    {
+        $userIds = collect([$parentId]);
+
+        self::recursiveLowerLevelUserIds_all($parentId, $userIds);
+
+        return $userIds->toArray();
+    }
+
+    protected static function recursiveLowerLevelUserIds($parentId, &$userIds)
+    {
+        $lowerLevelUserIds = self::where('reporting_to', $parentId)
+            // ->where('is_active', 1)
+            ->pluck('oms_user_id')
+            ->toArray();
+
+        foreach ($lowerLevelUserIds as $lowerLevelUserId) {
+            $userIds[] = $lowerLevelUserId;
+            self::recursiveLowerLevelUserIds($lowerLevelUserId, $userIds);
+        }
+    }
+
+
+    protected static function recursiveLowerLevelUserIds_all($parentId, &$userIds)
+    {
+        $lowerLevelUserIds = self::where('reporting_to', $parentId)
+            ->pluck('oms_user_id')
+            ->toArray();
+
+        foreach ($lowerLevelUserIds as $lowerLevelUserId) {
+            $userIds[] = $lowerLevelUserId;
+            self::recursiveLowerLevelUserIds_all($lowerLevelUserId, $userIds);
+        }
+    }
+
 }

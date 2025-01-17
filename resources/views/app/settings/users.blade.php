@@ -349,7 +349,7 @@
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" id="close_modals" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" id="update_colse" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Update</button>
                     </div>
                 </form>
@@ -1180,7 +1180,7 @@ function addNewSubcategory() {
             </div>
             <div class="col-lg-3">
                 <label class="mt-2">LOB & Process:</label>
-                <select id="lob_process_${index}" name="lob_process[]" class="form-control lob-process" data-index="${index}" disabled>
+                <select id="lob_process_${index}" name="lob_process[]" class="form-control lob-process" data-index="${index}" >
                     <option value="">Select LOB & Process</option>
                 </select>
             </div>
@@ -1194,7 +1194,7 @@ function addNewSubcategory() {
                 <div class="col-lg-11 ">                
                     <label class="mt-2">Reporting to:</label>                
                     <select class="form-control reporting-to" name="reporting_to[]" id="reporting_to_${index}">
-                        <option value="" disabled selected>Select User Role first</option>
+                        <option value=""  selected>Select User Role first</option>
                     </select>
                 </div>
                 <div class=" d-flex justify-content-center align-items-center mt-4 col-lg-1" >
@@ -1466,13 +1466,13 @@ function populateEditSubcategories(profiles) {
             // Assuming you have an array `processes` and `lob` is an array of lobs
             lobs.forEach(lob => {
                 processes.forEach(process => {
-                    console.log(lob.id, profile.process_id);
                     lopProcessOption += `<option value="${lob.id},${process.id}" 
                         ${lob.id === profile.lob_id && process.id === profile.process_id ? 'selected' : ''}>
                         ${lob.name} (${process.name})
                     </option>`;
                 });
             });
+            
 
             // Generate user role options
             let userRoleOptions = '<option value="" disabled>Select a User Role</option>';
@@ -1482,9 +1482,15 @@ function populateEditSubcategories(profiles) {
 
             // Generate reporting-to options
             let reportingOptions = '<option value="" disabled selected>Select Reporting User</option>';
-            reportingUsers.forEach(reportingUser => {
-                reportingOptions += `<option value="${reportingUser.id}" ${reportingUser.id === profile.reporting_to ? 'selected' : ''}>${reportingUser.username}</option>`;
-            });
+
+                reportingUsers.forEach(reportingUser => {
+                    if (reportingUser.id === profile.reporting_to) {
+                        reportingOptions += `<option value="${reportingUser.id}" selected>${reportingUser.username}</option>`;
+                    }
+                });
+
+
+
 
             // Append the profile data to the modal
             $('#edit_existing_subcategories').append(`
@@ -1498,7 +1504,7 @@ function populateEditSubcategories(profiles) {
                     </div>
                     <div class="col-lg-3">
                         <label class="mt-2">LOB & Process:</label>
-                        <select id="edit_lob_process_${index}" name="lob_process[]" class="form-control" data-index="${index}" disabled>
+                        <select id="edit_lob_process_${index}" name="lob_process[]" class="form-control" data-index="${index}" >
                             ${lopProcessOption}
                         </select>
                     </div>
@@ -1511,7 +1517,7 @@ function populateEditSubcategories(profiles) {
                     <div class="col-lg-3 row">
                     <div class="col-lg-11">
                         <label class="mt-2">Reporting to:</label>
-                        <select class="form-control" name="reporting_to[]" id="edit_reporting_to_${index}" data-index="${index}"disabled>
+                        <select class="form-control" name="reporting_to[]" id="edit_reporting_to_${index}" data-index="${index}" >
                             ${reportingOptions}
                         </select>
                     </div>
@@ -1537,11 +1543,11 @@ function populateEditSubcategories(profiles) {
         });
 
         let lopProcessOption = '<option value="" >Select a Client</option>';
-        // lobs.forEach(lob => {
-        //     processes.forEach(process => {
-        //         lopProcessOption += `<option value="${process.id},${lob.id}">${lob.name} (${process.name})</option>`;
-        //     });
-        // });
+        lobs.forEach(lob => {
+            processes.forEach(process => {
+                lopProcessOption += `<option value="${process.id},${lob.id}">${lob.name} (${process.name})</option>`;
+            });
+        });
 
         let userRoleOptions = '<option value="">Select a User Role</option>';
         userTypes.forEach(userType => {
@@ -1659,10 +1665,21 @@ function populateEditSubcategories(profiles) {
         }
     });
     document.getElementById('close_modals').addEventListener('click', function(event) {
-  // Prevent the default modal dismissal behavior
-  event.preventDefault();
-  // Reload the page
-  location.reload();
-});
+
+        event.preventDefault();
+      
+        location.reload();
+        });
+        
+        document.getElementById('update_colse').addEventListener('click', function(event) {
+
+            event.preventDefault();
+
+            location.reload();
+            });
+
+            $('#myModal, #userEditModal').on('hidden.bs.modal', function () {
+                location.reload(); 
+            });
 </script>
 @endsection

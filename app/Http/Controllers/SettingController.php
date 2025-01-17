@@ -70,6 +70,7 @@ class SettingController extends Controller
         if($request->is('settings/users') ||$request->is('settings') ){
             if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('PM/TL') || Auth::user()->hasRole('Business Head') || Auth::user()->hasRole('AVP') || Auth::user()->hasRole('SPOC') || Auth::user()->hasRole('Admin') || Auth::user()->hasRole('VP')) {
                 $currentUserId = Auth::id();
+
                 $user = User::find($currentUserId);
 
                 $user_lower_ids = User::getAllLowerLevelUserIds_all($currentUserId);
@@ -78,27 +79,36 @@ class SettingController extends Controller
                     return $id != $currentUserId;
                 });
 
+                
+                $userProfile_lower_ids = OmsUserProfile::getAllLowerLevelUserProfile($currentUserId);
+                $userProfile_lower_ids = array_filter($userProfile_lower_ids, function($oms_user_id) use ($currentUserId) {
+                    return $oms_user_id != $currentUserId;
+                });
                 $usersData = User::select(
                     'oms_users.id', 
                     'oms_users.emp_id', 
                     'oms_users.username', 
                     'oms_users.email', 
-                    DB::raw("DATE_FORMAT(oms_users.created_at, '%m/%d/%Y') as created_date"), // Format the created_at field
-                    'reporting_user.username as reporting_username', 
-                    DB::raw("COALESCE(GROUP_CONCAT(DISTINCT roles_2.name SEPARATOR ', '), GROUP_CONCAT(DISTINCT roles_1.name SEPARATOR ', ')) as roles"), // Show roles from profiles table, else fall back to roles from users table
+                    DB::raw("DATE_FORMAT(oms_users.created_at, '%m/%d/%Y') as created_date"),
+                    DB::raw("COALESCE(GROUP_CONCAT(DISTINCT roles_2.name SEPARATOR ', '), GROUP_CONCAT(DISTINCT roles_1.name SEPARATOR ', ')) as roles"),
                     'oms_users.is_active'
                 )
-                ->leftJoin('oms_user_profiles', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id') // Join oms_user_profiles table
-                ->leftJoin('oms_users as reporting_user', 'oms_user_profiles.reporting_to', '=', 'reporting_user.id') // Use reporting_to to get the reporting user's details
-                ->leftJoin('roles as roles_1', 'oms_users.user_type_id', '=', 'roles_1.id') // Join roles table based on oms_users.user_type_id
-                ->leftJoin('roles as roles_2', 'oms_user_profiles.user_type_id', '=', 'roles_2.id') // Join roles table based on oms_user_profiles.user_type_id
+                ->leftJoin('oms_user_profiles', 'oms_user_profiles.oms_user_id', '=', 'oms_users.id')
+                ->leftJoin('oms_users as reporting_user', 'oms_user_profiles.reporting_to', '=', 'reporting_user.id')
+                ->leftJoin('roles as roles_1', 'oms_users.user_type_id', '=', 'roles_1.id')
+                ->leftJoin('roles as roles_2', 'oms_user_profiles.user_type_id', '=', 'roles_2.id')
                 ->when($user->user_type_id == 23, function ($query) {
                     $query->whereNotIn('oms_users.user_type_id', [1]);
                 })
-                ->groupBy('oms_users.id', 'oms_users.emp_id', 'oms_users.username', 'oms_users.email', 'reporting_user.username', 'oms_users.is_active') // Group by user id to ensure single entry
+                ->when(!in_array($user->user_type_id, [1, 23]), function ($query) use ($user_lower_ids, $userProfile_lower_ids) {
+                    $query->whereIn('oms_users.id', array_merge($user_lower_ids, $userProfile_lower_ids));
+                })
+                ->groupBy('oms_users.id', 'oms_users.emp_id', 'oms_users.username', 'oms_users.email', 'oms_users.is_active', 'oms_users.created_at')
                 ->get();
-    
-                            
+
+
+
+                                        
                 // $usersData = User::with('usertypes:id,usertype')->whereNotIn('user_type_id', [1,4])->get();
                 $loggedInUserTypeId = $user->user_type_id;
 
@@ -226,8 +236,9 @@ class SettingController extends Controller
 
         // Insert user and get the ID
         $userId = User::insertGetId($usersData);
-    
-        if(!empty($request->client_name)) {
+  
+        if($request->is_multirole == 1) {
+
             foreach ($request->client_name as $index => $clientId) {
                 
                 $lobProcess = isset($request->lob_process[$index]) ? $request->lob_process[$index] : null;
